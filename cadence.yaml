@@ -1,0 +1,17 @@
+# Cadence Configuration
+version: 1
+
+win_cycles:
+  current: 2026-H1
+  start: 2026-01-01
+  end: 2026-06-30
+  mid_check: 2026-04-01
+
+defaults:
+  someday_review: monthly       # how often reconciler surfaces someday pursuits
+  marker_stale_days: 7          # markers older than this get flagged
+  waiting_for_grace_days: 2     # days past expected date before flagging
+
+reflect:
+  day: sunday                   # preferred day for weekly Reflect
+  duration_minutes: 30

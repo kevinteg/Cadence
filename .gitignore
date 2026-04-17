@@ -1,0 +1,15 @@
+# SQLite index (derived from markdown, rebuild with cadence rebuild-index)
+.cadence.db
+.cadence.db-journal
+.cadence.db-wal
+
+# Generated manifests (regenerated from markdown)
+_manifest.md
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
