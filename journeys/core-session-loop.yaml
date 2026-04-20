@@ -1,0 +1,49 @@
+name: Core Session Loop
+description: Verify /select → work → /mark → /select resumes correctly
+
+setup:
+  - create_pursuit:
+      id: test-journeys
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-journeys
+      id: test-journey-project
+      title: Test Journey Project
+      dod:
+        - First task complete
+        - Second task complete
+      actions:
+        - Do the first thing
+        - Do the second thing
+
+steps:
+  - command: /select test-journey-project
+    assert:
+      - contains: "new session"
+      - contains: "Test Journey Project"
+      - contains: "First action: Do the first thing"
+
+  - action: Check off "Do the first thing" on the project
+    assert:
+      - file_contains:
+          path: pursuits/test-journeys/projects/test-journey-project.md
+          pattern: "- [x] Do the first thing"
+
+  - command: /mark
+    assert:
+      - file_created:
+          path: pursuits/test-journeys/sessions/*.md
+          frontmatter:
+            project: test-journey-project
+      - contains: "Marker saved"
+
+  - command: /select test-journey-project
+    assert:
+      - contains: "Previously"
+      - not_contains: "new session"
+
+teardown:
+  - delete_files:
+      - pursuits/test-journeys/
+  - assert_clean: pursuits/test-journeys/

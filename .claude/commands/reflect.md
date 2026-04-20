@@ -34,7 +34,8 @@ Reference `workflows/reflect.md` for the full ritual specification.
 
    d. Project relevance check: list all active projects across all pursuits.
       For each, ask "Still relevant?" Mark reviewed projects in the
-      reflection file.
+      reflection file. If the user changes a project's status (drop,
+      on_hold), update the project file's frontmatter accordingly.
 
    e. Update the reflection file: `phase: get_clear`, mark Get Clear
       section as complete. Save after each sub-step so partial progress

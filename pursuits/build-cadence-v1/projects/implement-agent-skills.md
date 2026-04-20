@@ -1,21 +1,21 @@
 ---
 id: implement-agent-skills
 pursuit: build-cadence-v1
-status: active
+status: done
 created: 2026-04-17
 ---
 
 # Implement Agent Skills
 
 ## Definition of Done
-- [ ] CLAUDE.md teaches agent the full Cadence vocabulary and conventions
-- [ ] /recap shows curated session entry with pursuit/project status
-- [ ] /mark writes a well-structured session marker
-- [ ] /reflect walks through the full Get Clear + Get Focused ritual
-- [ ] /thought captures and triages a raw idea
-- [ ] /status shows a system health dashboard
-- [ ] Agent naturally prompts for markers on session exit
-- [ ] All commands work against real seed data in this repo
+- [x] CLAUDE.md teaches agent the full Cadence vocabulary and conventions
+- [x] /recap shows curated session entry with pursuit/project status
+- [x] /mark writes a well-structured session marker
+- [x] /reflect walks through the full Get Clear + Get Focused ritual
+- [x] /thought captures and triages a raw idea
+- [x] /status shows a system health dashboard
+- [x] Agent naturally prompts for markers on session exit
+- [x] All commands work against real seed data in this repo
 
 ## Actions
 - [x] Draft CLAUDE.md with vocabulary, modes, and conventions
@@ -24,12 +24,12 @@ created: 2026-04-17
 - [x] Draft /reflect command
 - [x] Draft /thought command
 - [x] Draft /status command
-- [ ] Test /recap against seed data — does the output make sense?
-- [ ] Test /mark — write a real marker for this session
-- [ ] Test /thought — capture a test thought and verify triage
-- [ ] Test /status — verify dashboard output
-- [ ] Iterate on command prompts based on testing
-- [ ] Test /reflect — run a mock Reflect ritual
+- [x] Test /recap against seed data — does the output make sense?
+- [x] Test /mark — write a real marker for this session
+- [x] Test /thought — capture a test thought and verify triage
+- [x] Test /status — verify dashboard output
+- [x] Iterate on command prompts based on testing
+- [x] Test /reflect — run a mock Reflect ritual
 
 ## Notes
 Starting with pure skills (agent reads/writes markdown directly). No CLI

@@ -1,45 +1,43 @@
 # /recap
 
-Show me where I left off. This activates Steward mode.
+Show the current session state. This is a within-session command that
+previews what the marker would capture if saved right now.
+
+Requires an active session (set by /select). If no session is active,
+suggest running /select first.
 
 ## Steps
 
-1. List all active pursuits by scanning `pursuits/` (skip `_someday/` and
-   `_archived/`). For each, read `pursuit.md` frontmatter.
+1. Confirm there is an active session (a project selected via /select).
+   If not, say: "No active session. Run /select to pick a project."
 
-2. For each active pursuit, find the most recent marker in
-   `pursuits/<pursuit-id>/sessions/` by filename (lexicographic sort,
-   most recent last). Read the marker content.
+2. Review the current session's conversation and extract:
+   - **Where I Am**: What is the user currently working on? What state
+     is the work in?
+   - **What I'm Thinking**: Current decisions, hypotheses, open questions.
+   - **What's Next**: Remaining steps, ordered by priority.
+   - **Loose Threads**: Things noticed but not acted on.
 
-3. For each active pursuit, scan `projects/` for active projects
-   (status: active in frontmatter). Count them and note any with
-   `waiting_for` entries.
+3. Read the active project file to get current DoD and action status.
 
-4. Check `thoughts/unprocessed/` for pending thought count.
-
-5. Check `reflections/` for the most recent reflection and whether
-   its `status` is `complete`.
-
-6. Present a curated summary using this format:
+4. Present the session state:
 
    ```
-   Welcome back. Here's where things stand:
+   Session: **[Project Name]**
 
-   [Leveraged Priority if set — from most recent complete reflection]
+   **Where I Am**
+   [2-3 sentences of current state]
 
-   **[Pursuit Name]** — last session [relative time]
-   > [2-3 sentence recap from most recent marker's "Where I Was" section]
-   > Next: [first item from marker's "What's Next" section]
-   > Active projects: [count] | Waiting on: [names if any]
+   **What I'm Thinking**
+   [Current decisions and open questions]
 
-   [Repeat for other active pursuits, ordered by most recent session]
+   **What's Next**
+   1. [Next step]
+   2. [Follow-up]
 
-   [If pending thoughts > 0]: You have [N] unprocessed thoughts.
-   [If reflection incomplete]: Your Week [N] reflection is unfinished.
-
-   What would you like to work on?
+   DoD: [N/M items complete]
+   Actions: [N completed this session] | [M remaining]
    ```
 
-7. Wait for the user's choice. When they pick a pursuit or project, read
-   the full latest marker and present the detailed recap, then shift to
-   Guide mode for that project.
+5. Stay in Guide mode. This is informational — it does not change
+   session context or write anything to disk.

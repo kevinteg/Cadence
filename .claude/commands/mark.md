@@ -5,21 +5,28 @@ a work session, or when switching between pursuits/projects.
 
 ## Steps
 
-1. Determine the current context:
-   - Which pursuit and project was the user working on?
-   - If unclear, ask.
+1. Determine the current session context:
+   - The active pursuit and project are set by the current Guide mode session.
+     This is established by /select or when the user explicitly says what
+     they're working on.
+   - Use the active project — do NOT infer the project from conversation
+     topics or background context mentioned during the session.
+   - If no project has been explicitly selected this session, ask.
 
 2. Generate a timestamp for the filename: `YYYY-MM-DDTHH-MM` using current time.
 
-3. Review the session's conversation to extract:
-   - **Where I Was**: What was the user working on? What state is the work in?
-   - **What I Was Thinking**: What decisions were being considered? What's
-     the user's current mental model or hypothesis?
-   - **What's Next**: Concrete next steps, ordered by priority.
-   - **Loose Threads**: Anything noticed but not acted on. Side observations.
-     Things to flag for later.
-   - **Actions completed**: Any actions checked off during this session.
-   - **Actions in progress**: Any actions partially done.
+3. Review the session's conversation to extract content **scoped to the
+   active project only**. Do not bleed context from other projects or
+   background topics discussed during the session:
+   - **Where I Was**: What was the user working on within this project?
+     What state is the work in?
+   - **What I Was Thinking**: What decisions were being considered about
+     this project? What's the user's current mental model or hypothesis?
+   - **What's Next**: Concrete next steps for this project, ordered by priority.
+   - **Loose Threads**: Anything noticed but not acted on that relates to
+     this project. Side observations. Things to flag for later.
+   - **Actions completed**: Actions checked off on this project during the session.
+   - **Actions in progress**: Actions on this project partially done.
 
 4. Draft the marker and show it to the user for confirmation:
 
@@ -53,4 +60,4 @@ a work session, or when switching between pursuits/projects.
 
 6. If any actions were completed, update the project file to check them off.
 
-7. Confirm: "Marker saved. You can pick up here next time with /recap."
+7. Confirm: "Marker saved. You can pick up here next time with /select."

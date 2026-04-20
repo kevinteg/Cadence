@@ -1,7 +1,7 @@
 ---
 id: define-data-format
 pursuit: build-cadence-v1
-status: active
+status: done
 created: 2026-04-15
 ---
 
@@ -17,7 +17,7 @@ created: 2026-04-15
 - [x] Persistence model decided (markdown source of truth + SQLite cache)
 - [x] Directory layout designed with lifecycle directories
 - [x] Session levels defined (project, pursuit, orchestrator)
-- [ ] Formats validated by writing real seed data
+- [x] Formats validated by writing real seed data
 
 ## Actions
 - [x] Draft initial state examples (markdown format exploration)
@@ -30,8 +30,8 @@ created: 2026-04-15
 - [x] Design pursuit lifecycle (active / someday / archived)
 - [x] Decide against standby state — someday with cues is sufficient
 - [x] Design session levels (project, pursuit, orchestrator)
-- [ ] Write seed pursuit and project files for build-cadence-v1
-- [ ] Validate formats work with Claude Code slash commands
+- [x] Write seed pursuit and project files for build-cadence-v1
+- [x] Validate formats work with Claude Code slash commands
 
 ## Notes
 Key insight from the architecture session: the reflection file IS the

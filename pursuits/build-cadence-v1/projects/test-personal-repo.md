@@ -1,11 +1,11 @@
 ---
-id: bootstrap-personal-repo
+id: test-personal-repo
 pursuit: build-cadence-v1
 status: on_hold
 created: 2026-04-17
 ---
 
-# Bootstrap Personal Repo
+# Test Personal Repo
 
 ## Definition of Done
 - [ ] Separate repo created for personal Cadence data
@@ -30,3 +30,6 @@ Key question to resolve: does the personal repo copy the slash commands
 and CLAUDE.md, or does it reference them from the cadence repo? Copying
 is simpler but creates drift. Referencing requires a mechanism (symlinks,
 git submodule, or npm package).
+
+Bootstrap will happen out of band — this project focuses on verifying
+that Cadence works correctly in a separate repo.
