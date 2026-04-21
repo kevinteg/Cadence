@@ -1,0 +1,256 @@
+# Cadence Provocation Deck
+#
+# Used by /brainstorm to provoke divergent thinking.
+# The agent deals cards from this deck. It does NOT generate ideas.
+# Users can create a local deck file to extend.
+#
+# Categories:
+#   oblique   — Eno/Schmidt-style lateral thinking prompts
+#   scamper   — Structured creativity (Substitute, Combine, Adapt, Modify, Put to other use, Eliminate, Reverse)
+#   hmw       — "How might we..." reframing prompts
+#   analogy   — Forced analogy and cross-domain prompts
+#   challenge — Push-through-the-cliff prompts for when energy dips
+
+cards:
+
+  # === OBLIQUE ===
+
+  - id: oblique-01
+    category: oblique
+    text: "Honor thy error as a hidden intention."
+
+  - id: oblique-02
+    category: oblique
+    text: "What would your closest friend do?"
+
+  - id: oblique-03
+    category: oblique
+    text: "Use an old idea."
+
+  - id: oblique-04
+    category: oblique
+    text: "What is the reality of the situation?"
+
+  - id: oblique-05
+    category: oblique
+    text: "Do the last thing first."
+
+  - id: oblique-06
+    category: oblique
+    text: "Emphasize the flaws."
+
+  - id: oblique-07
+    category: oblique
+    text: "What would happen if you did the opposite?"
+
+  - id: oblique-08
+    category: oblique
+    text: "Remove ambiguity and convert to specifics."
+
+  - id: oblique-09
+    category: oblique
+    text: "What is it not doing?"
+
+  - id: oblique-10
+    category: oblique
+    text: "Make it more expensive."
+
+  - id: oblique-11
+    category: oblique
+    text: "Abandon normal instruments."
+
+  - id: oblique-12
+    category: oblique
+    text: "Repetition is a form of change."
+
+  - id: oblique-13
+    category: oblique
+    text: "Don't be frightened of clichés."
+
+  - id: oblique-14
+    category: oblique
+    text: "What mistakes did you make last time?"
+
+  - id: oblique-15
+    category: oblique
+    text: "Only one element of each kind."
+
+  - id: oblique-16
+    category: oblique
+    text: "The tape is now the music."
+
+  - id: oblique-17
+    category: oblique
+    text: "Simple subtraction."
+
+  - id: oblique-18
+    category: oblique
+    text: "Go to an extreme, move back to a more comfortable place."
+
+  # === SCAMPER ===
+
+  - id: scamper-01
+    category: scamper
+    text: "Substitute — What component, material, or person could you swap out?"
+
+  - id: scamper-02
+    category: scamper
+    text: "Combine — What ideas, steps, or purposes could you merge?"
+
+  - id: scamper-03
+    category: scamper
+    text: "Adapt — What else is like this? What could you borrow from another domain?"
+
+  - id: scamper-04
+    category: scamper
+    text: "Modify — What if you changed the scale? Made it bigger, smaller, faster, slower?"
+
+  - id: scamper-05
+    category: scamper
+    text: "Put to other use — Who else could use this? What else could this be used for?"
+
+  - id: scamper-06
+    category: scamper
+    text: "Eliminate — What would happen if you removed a step, a role, or a constraint?"
+
+  - id: scamper-07
+    category: scamper
+    text: "Reverse — What if you did it in the opposite order? Turned it inside out?"
+
+  - id: scamper-08
+    category: scamper
+    text: "Substitute — What if a completely different person had to do this?"
+
+  - id: scamper-09
+    category: scamper
+    text: "Combine — What if this had to serve two purposes at once?"
+
+  - id: scamper-10
+    category: scamper
+    text: "Eliminate — What's the simplest version that would still work?"
+
+  # === HOW MIGHT WE ===
+
+  - id: hmw-01
+    category: hmw
+    text: "How might we solve this without any technology?"
+
+  - id: hmw-02
+    category: hmw
+    text: "How might we make this work for someone who's never seen it before?"
+
+  - id: hmw-03
+    category: hmw
+    text: "How might we turn this constraint into an advantage?"
+
+  - id: hmw-04
+    category: hmw
+    text: "How might we make this so simple it explains itself?"
+
+  - id: hmw-05
+    category: hmw
+    text: "How might we solve this if we had unlimited resources? Now — what's the cheapest version of that?"
+
+  - id: hmw-06
+    category: hmw
+    text: "How might we make this delightful instead of just functional?"
+
+  - id: hmw-07
+    category: hmw
+    text: "How might we solve the problem that comes after this problem?"
+
+  - id: hmw-08
+    category: hmw
+    text: "How might we make this work if it had to run for 10 years without maintenance?"
+
+  - id: hmw-09
+    category: hmw
+    text: "How might we approach this if failure had no consequences?"
+
+  - id: hmw-10
+    category: hmw
+    text: "How might we make this useful even if only half of it works?"
+
+  - id: hmw-11
+    category: hmw
+    text: "How might we build this so someone else could extend it without asking us?"
+
+  - id: hmw-12
+    category: hmw
+    text: "How might we solve this for one person perfectly before solving it for everyone?"
+
+  # === FORCED ANALOGY ===
+
+  - id: analogy-01
+    category: analogy
+    text: "If this problem were a restaurant, what would be on the menu?"
+
+  - id: analogy-02
+    category: analogy
+    text: "If this were a children's game, what would the rules be?"
+
+  - id: analogy-03
+    category: analogy
+    text: "What would a gardener do with this problem?"
+
+  - id: analogy-04
+    category: analogy
+    text: "If this were a physical space, what would the floor plan look like?"
+
+  - id: analogy-05
+    category: analogy
+    text: "How would a jazz musician approach this?"
+
+  - id: analogy-06
+    category: analogy
+    text: "If this problem were a season, which would it be and why?"
+
+  - id: analogy-07
+    category: analogy
+    text: "What would this look like if it were a conversation between two people?"
+
+  - id: analogy-08
+    category: analogy
+    text: "If you could only solve this with pen and paper, what would you draw?"
+
+  - id: analogy-09
+    category: analogy
+    text: "What would a librarian do with this problem?"
+
+  - id: analogy-10
+    category: analogy
+    text: "If this were a movie, what genre would it be? What would the plot twist be?"
+
+  # === CHALLENGE (push-through-the-cliff) ===
+
+  - id: challenge-01
+    category: challenge
+    text: "You've got good ones. Now give me a bad one — deliberately terrible."
+
+  - id: challenge-02
+    category: challenge
+    text: "What's the version of this that would embarrass you? Now make it interesting."
+
+  - id: challenge-03
+    category: challenge
+    text: "Combine two of your previous ideas that seem incompatible."
+
+  - id: challenge-04
+    category: challenge
+    text: "What haven't you said yet because it seems too obvious?"
+
+  - id: challenge-05
+    category: challenge
+    text: "What's the version you'd build if you were starting over tomorrow?"
+
+  - id: challenge-06
+    category: challenge
+    text: "What would you do if this had to be done by Friday?"
+
+  - id: challenge-07
+    category: challenge
+    text: "Steal from something you saw this week that has nothing to do with this."
+
+  - id: challenge-08
+    category: challenge
+    text: "What's the version a 10-year-old would come up with?"

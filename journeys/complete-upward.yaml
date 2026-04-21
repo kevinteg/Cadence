@@ -1,0 +1,49 @@
+name: Complete with Upward Completion
+description: Verify /complete marks actions done and triggers upward completion when all DoD items are checked
+
+setup:
+  - create_pursuit:
+      id: test-complete
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-complete
+      id: test-complete-project
+      title: Test Complete Project
+      dod:
+        - Only task done
+      actions:
+        - Do the only thing
+
+steps:
+  - command: /start test-complete-project
+    assert:
+      - contains: "Test Complete Project"
+
+  - command: /complete Do the only thing
+    assert:
+      - file_contains:
+          path: pursuits/test-complete/projects/test-complete-project.md
+          pattern: "- [x] Do the only thing"
+      - contains: "Done"
+
+  - action: Check off DoD item "Only task done"
+    assert:
+      - file_contains:
+          path: pursuits/test-complete/projects/test-complete-project.md
+          pattern: "- [x] Only task done"
+
+  - command: /complete
+    assert:
+      - contains: "Complete this project"
+
+  - action: User says "complete it"
+    assert:
+      - file_contains:
+          path: pursuits/test-complete/projects/test-complete-project.md
+          pattern: "status: done"
+
+teardown:
+  - delete_files:
+      - pursuits/test-complete/
+  - assert_clean: pursuits/test-complete/

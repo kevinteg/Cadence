@@ -1,0 +1,11 @@
+{
+  "name": "cadence",
+  "version": "0.1.0",
+  "description": "Cognitive operating system — manages attention, protects flow state, generates narrative across pursuits",
+  "author": {
+    "name": "Kevin Tegtmeier"
+  },
+  "license": "MIT",
+  "keywords": ["productivity", "attention", "flow-state", "cognitive-os"],
+  "skills": "./skills/"
+}

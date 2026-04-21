@@ -1,0 +1,43 @@
+name: Idea Closure
+description: Verify the closure ritual — /close blocks on unresolved Ideas, succeeds after resolution
+
+setup:
+  - create_pursuit:
+      id: test-closure
+      type: finite
+      status: active
+  - create_idea:
+      pursuit: test-closure
+      id: seed-idea
+      title: Seed Idea
+      stage: seed
+  - create_idea:
+      pursuit: test-closure
+      id: developed-idea
+      title: Developed Idea
+      stage: developed
+
+steps:
+  - command: /close test-closure
+    assert:
+      - contains: "unresolved"
+      - not_contains: "archived"
+
+  - action: Move seed-idea to someday and close developed-idea with reason "out of scope"
+    assert:
+      - file_contains:
+          path: pursuits/test-closure/ideas/seed-idea.md
+          pattern: "resolution:"
+      - file_contains:
+          path: pursuits/test-closure/ideas/developed-idea.md
+          pattern: "resolution:"
+
+  - command: /close test-closure
+    assert:
+      - not_contains: "unresolved"
+      - contains: "closed"
+
+teardown:
+  - delete_files:
+      - pursuits/test-closure/
+  - assert_clean: pursuits/test-closure/

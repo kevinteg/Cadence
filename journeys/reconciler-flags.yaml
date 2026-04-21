@@ -1,0 +1,67 @@
+name: Reconciler Flags
+description: Verify /status detects overdue waiting-for, dormant projects, stale markers, and structural issues
+
+setup:
+  - create_pursuit:
+      id: test-reconciler
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-reconciler
+      id: overdue-waiting
+      title: Overdue Waiting Project
+      dod:
+        - Get response from Alice
+      actions:
+        - Follow up with Alice
+      waiting_for:
+        - person: Alice
+          what: API access credentials
+          expected: 2026-04-10
+          flagged: false
+  - create_project:
+      pursuit: test-reconciler
+      id: dormant-project
+      title: Dormant Project
+      created: 2026-03-01
+      dod:
+        - Ship the feature
+      actions:
+        - Write the code
+  - create_project:
+      pursuit: test-reconciler
+      id: structural-all-done
+      title: All Done Not Closed
+      dod:
+        - item: First thing
+          checked: true
+        - item: Second thing
+          checked: true
+      actions:
+        - item: Do first thing
+          checked: true
+        - item: Do second thing
+          checked: true
+  - create_project:
+      pursuit: test-reconciler
+      id: structural-no-actions
+      title: No Actions Left
+      dod:
+        - Ship the widget
+        - Write docs
+      actions: []
+
+steps:
+  - command: /status
+    assert:
+      - contains: "Alice"
+      - contains: "overdue"
+      - contains: "dormant"
+      - contains: "All Done Not Closed"
+      - contains: "No Actions Left"
+      - not_contains: "No flags"
+
+teardown:
+  - delete_files:
+      - pursuits/test-reconciler/
+  - assert_clean: pursuits/test-reconciler/

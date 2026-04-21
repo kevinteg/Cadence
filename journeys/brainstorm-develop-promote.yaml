@@ -1,0 +1,38 @@
+name: Brainstorm Develop Promote
+description: Verify the divergent pipeline — /brainstorm creates Seed Ideas, /develop evaluates, /promote creates a Project with DoD gate
+
+setup:
+  - create_pursuit:
+      id: test-divergent
+      type: finite
+      status: active
+
+steps:
+  - command: /brainstorm test-divergent
+    assert:
+      - contains: "Seed"
+      - file_created:
+          path: pursuits/test-divergent/ideas/*.md
+          frontmatter:
+            stage: seed
+
+  - command: /develop
+    assert:
+      - contains: "Idea"
+      - file_contains:
+          path: pursuits/test-divergent/ideas/*.md
+          pattern: "stage:"
+
+  - command: /promote
+    assert:
+      - file_created:
+          path: pursuits/test-divergent/projects/*.md
+      - contains: "Definition of Done"
+      - file_contains:
+          path: pursuits/test-divergent/projects/*.md
+          pattern: "## Definition of Done"
+
+teardown:
+  - delete_files:
+      - pursuits/test-divergent/
+  - assert_clean: pursuits/test-divergent/

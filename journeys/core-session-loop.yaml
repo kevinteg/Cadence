@@ -1,5 +1,5 @@
 name: Core Session Loop
-description: Verify /select → work → /mark → /select resumes correctly
+description: Verify /start → work → /pause → /start resumes correctly with auto-recap from marker
 
 setup:
   - create_pursuit:
@@ -18,11 +18,10 @@ setup:
         - Do the second thing
 
 steps:
-  - command: /select test-journey-project
+  - command: /start test-journey-project
     assert:
-      - contains: "new session"
       - contains: "Test Journey Project"
-      - contains: "First action: Do the first thing"
+      - contains: "Do the first thing"
 
   - action: Check off "Do the first thing" on the project
     assert:
@@ -30,18 +29,23 @@ steps:
           path: pursuits/test-journeys/projects/test-journey-project.md
           pattern: "- [x] Do the first thing"
 
-  - command: /mark
+  - command: /pause
     assert:
       - file_created:
           path: pursuits/test-journeys/sessions/*.md
           frontmatter:
             project: test-journey-project
-      - contains: "Marker saved"
+      - file_contains:
+          path: pursuits/test-journeys/sessions/*.md
+          pattern: "Where"
+      - file_contains:
+          path: pursuits/test-journeys/sessions/*.md
+          pattern: "Next"
 
-  - command: /select test-journey-project
+  - command: /start test-journey-project
     assert:
-      - contains: "Previously"
-      - not_contains: "new session"
+      - contains: "Next:"
+      - contains: "Do the second thing"
 
 teardown:
   - delete_files:

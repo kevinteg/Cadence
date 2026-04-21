@@ -1,91 +1,104 @@
-# Cadence Architecture
+# Cadence Architecture (v3)
 
-*Decisions made during the product definition and architecture sessions, April 2026.*
+*Definitive technical reference for the Cadence cognitive operating system.*
 
 ---
 
 ## Core Concepts
 
-**Cadence** is a cognitive operating system that manages attention, protects flow
-state, and generates narrative across all pursuits. It lives inside the terminal,
-powered by an AI agent operating in three modes.
+**Cadence** is a cognitive operating system that manages attention, protects
+flow state, and generates narrative across pursuits. It lives inside the
+terminal as a Claude Code plugin. One agent, one voice, verb-defined behavior.
 
 ### Hierarchy
 
 ```
-Pursuit  →  Project  →  Action
+Idea  →  Pursuit  →  Project  →  Action
 ```
 
+- **Idea**: A captured thought with a lifecycle. States: seed, developed,
+  promoted, moved, closed. Every Idea has a parent (pursuit or project).
 - **Pursuit**: An intentional commitment tied to values or a role/responsibility.
-  Lifecycle: active → someday → archived.
-- **Project**: A scoped effort with a Definition of Done (checklist).
-  Status: active | on_hold | done | dropped.
-- **Action**: An atomic task. A checkbox inside a project file.
+  Lifecycle: active, someday, archived.
+- **Project**: A scoped effort with a Definition of Done checklist.
+  Status: active, on_hold, done, dropped.
+- **Action**: An atomic task. A checkbox inside a project's Actions section.
 
-### Agent Modes
+### Graduation Gates
 
-One agent, three behavioral modes — not separate agents:
+Ideas move through the pipeline via three gates:
 
-| Mode | When | Behavior |
-|------|------|----------|
-| **Steward** | System-level: /recap, /status, /reflect | Read full state, route to work, surface what matters |
-| **Guide** | Session-level: working on a project | Stay in context, protect flow, prompt for markers |
-| **Narrator** | Writing mode: narratives, reflections, blogs | Draw from markers and history, write in user's voice |
+| Gate | From | To | Requirement |
+|------|------|----|-------------|
+| **Why** | seed | developed | Articulate why this matters |
+| **DoD** | developed | promoted (to project) | Define what "done" looks like |
+| **Concreteness** | action candidate | action | Specific enough to start |
 
-### Session Lifecycle
+### Wandering
 
-```
-Enter → Recap ("previously on...") → Flow state (silent, protected)
-    → Breakpoint (nudges, quick wins) → Mark (save point)
-    → Exit or switch → Next session picks up from marker
-```
-
-### Session Levels
-
-Sessions exist at three levels of the hierarchy:
-
-| Level | Session character | Marker captures |
-|-------|------------------|----------------|
-| **Project** | Deep work, single focus, flow state | Technical context — where in the code, what I was thinking, what's next |
-| **Pursuit** | Coordination, multiple projects touched | Strategic context — which projects moved, what's blocked, trajectory |
-| **Orchestrator** | Reflect, triage, cross-pursuit review | Meta context — the reflection artifact IS the marker |
+**Wandering** is a standing pursuit that never closes. It holds unattached
+Ideas — things worth capturing that do not yet belong anywhere. During
+Reflect, Wandering Ideas are reviewed and either graduated, moved to a
+pursuit, or closed.
 
 ---
 
-## Persistence Model
+## Voice Model
 
-### Hybrid: Markdown + SQLite Cache
+One voice, not three modes. The agent's behavior is defined by the active
+**verb**, not a declared mode. Each verb has a contract specifying tone,
+behavior, and guardrails. Contracts live in `workflows/verb-contracts.md`.
 
-- **Markdown is the source of truth** for all human-authored content
-- **SQLite is a derived index** rebuilt from markdown on change
-- Direction is always markdown → SQLite, never bidirectional
-- `cadence rebuild-index` regenerates SQLite from markdown in sub-second
-- SQLite is gitignored — the repo is complete without it
+### Verbs
 
-### Why Hybrid
+| Verb | Purpose |
+|------|---------|
+| **brainstorm** | Provoke thinking using the card deck. The LLM does NOT generate ideas — it deals cards and asks questions. |
+| **develop** | Help the user articulate why an Idea matters. Deepen, challenge, connect. |
+| **promote** | Graduate a developed Idea to a Project with DoD and first actions. |
+| **do** | Session-level focus on a specific project. Protect flow. Keep work moving. |
+| **narrate** | Generate writing from activity data. Draw from markers and history. |
+| **reflect** | Run the weekly ritual. Surface what matters across the whole system. |
+| **capture** | Save a raw thought. Flow-safe — no agent response beyond confirmation. |
+| **mark** | Write a session save point. Mid-session or on exit. |
+| **close** | Walk the closure ritual for a project or pursuit. |
+| **reconcile** | Background scan for stale markers, overdue items, dormant projects, structural issues. |
 
-| Need | Markdown | SQLite |
-|------|----------|--------|
-| Human readability | ✓ | ✗ |
-| Git-friendly diffs | ✓ | ✗ |
-| Cross-cutting queries | ✗ (expensive) | ✓ |
-| Reconciler scanning | ✗ (expensive) | ✓ |
-| Narrative source | ✓ | ✗ |
-| Manual fallback | ✓ | ✗ |
-
-### Agent-Readable Manifests
-
-Generated `_manifest.md` files at repo root and pursuit level provide
-one-shot system state for agents. Agents read manifests for orientation,
-hit SQLite (via CLI or MCP) only for cross-cutting queries.
-
-Manifests are gitignored and regenerated alongside the index.
+Each verb has a **no-argument curated entry path** — invoking the verb
+with no arguments presents a contextual starting point rather than demanding
+the user specify what to work on.
 
 ---
 
-## File Formats
+## The Pipeline
 
-### Pursuit (`pursuit.md`)
+Ideas flow through a defined pipeline from raw capture to completed work.
+
+```
+capture (seed)
+    │
+    ▼
+develop (seed → developed)
+    │
+    ▼
+promote (developed → project with DoD)
+    │
+    ▼
+do (work the project, check off actions)
+    │
+    ▼
+close (project done or pursuit complete)
+```
+
+At any point, Ideas can be **moved** to a different parent or **closed**
+with a reason. The pipeline is not rigid — Ideas can enter at any stage
+if they arrive with enough shape.
+
+---
+
+## Entity Formats
+
+### Pursuit (`pursuits/<pursuit-id>/pursuit.md`)
 
 ```yaml
 ---
@@ -93,12 +106,7 @@ id: slug-name
 type: finite | ongoing | someday
 status: active | someday | archived
 created: YYYY-MM-DD
-target: YYYY-MM-DD          # optional, for finite pursuits
-win_cycle: YYYY-HN          # optional
-cue:                         # optional, for someday pursuits
-  trigger: seasonal | date | review
-  when: spring | YYYY-MM    # optional
-  review: monthly | yearly  # default: monthly
+why: optional free text
 ---
 
 # Pursuit Name
@@ -106,7 +114,7 @@ cue:                         # optional, for someday pursuits
 Description of the pursuit — why it matters, what it represents.
 ```
 
-### Project (`<project-id>.md`)
+### Project (`pursuits/<pursuit-id>/projects/<project-id>.md`)
 
 ```yaml
 ---
@@ -135,166 +143,281 @@ waiting_for:                 # optional
 Free-form notes, context, decisions.
 ```
 
-**Key design decisions:**
-- Definition of Done is a first-class checklist section, managed through conversation
-- Project completion is derived: all DoD items checked → agent confirms → status: done
-- Actions are simple checkboxes — no IDs, no metadata
-- `waiting_for` is structured in frontmatter for indexer/reconciler queries
-- Projects live as files; promoted to directories only when session markers accumulate
+Project completion is derived: all DoD items checked, confirmed by agent,
+status set to done. Actions are simple checkboxes — no IDs, no metadata.
 
-### Marker (session save point)
+### Idea (`pursuits/<pursuit-id>/ideas/<idea-id>.md`)
+
+```yaml
+---
+id: slug-name
+parent: pursuit-id            # or pursuit-id/project-id
+state: seed | developed | promoted | moved | closed
+created: YYYY-MM-DD
+developed_at: YYYY-MM-DD     # optional, set when developed
+promoted_to: project-id      # optional, set when promoted
+closed_reason: text           # optional, set when closed
+---
+
+# Idea Title
+
+Raw content, development notes, connections.
+```
+
+### Marker (`pursuits/<pursuit-id>/sessions/<timestamp>.md`)
 
 ```yaml
 ---
 pursuit: pursuit-id
-project: project-id          # optional — omit for pursuit-level sessions
+project: project-id
 session_start: ISO-8601
 session_end: ISO-8601
-actions_completed: []        # optional
-actions_in_progress: []      # optional
 ---
 
-# Marker: Project or Pursuit Name
+# Marker: Project Name
 
-## Where I Was
-[2-5 sentences of context]
+## Where
+State of the work. What exists, what changed, what's true right now.
 
-## What I Was Thinking
-[Decisions being considered, open questions, gut feelings]
+## Next
+The first thing to do on return. A ready-to-resume plan, not a wish list.
 
-## What's Next
-1. [Concrete next step]
-2. [Follow-up step]
-
-## Loose Threads
-- [Things noticed but not acted on]
+## Open
+What's still running in your head. Unresolved questions, hunches, tensions.
 ```
 
-### Thought (captured idea)
+One marker per session. Written by `/pause`. If paused mid-session and
+then paused again, the same file is updated rather than creating a new one.
+
+### Capture (`thoughts/unprocessed/<timestamp>.md`)
 
 ```yaml
 ---
 captured: ISO-8601
-source: voice | text | agent
+verb_context: seed | concern | note
 ---
 
-Raw input text.
-
-# Triage (pending)
-
-**AI suggestion:**
-1. "action description" → routing suggestion (confidence: high|medium|low)
+Raw input text exactly as provided.
 ```
 
-### Reflection (weekly ritual artifact)
+Flow-safe: no agent response beyond minimal confirmation. Typed by verb
+context. Triaged at breakpoints or during Reflect.
+
+### Reflection (`reflections/<YYYY-MM-DD>.md`)
 
 ```yaml
 ---
-week: YYYY-WNN
+date: YYYY-MM-DD
 status: draft | in_progress | complete
-phase: get_clear | get_focused    # where you stopped if in_progress
-leveraged_priority: "text"        # null until Get Focused completes
-leveraged_priority_achieved: null  # set in next week's reflection
+phase: get_clear | get_focused
+leveraged_priority: "text"
 ---
 
-# Week NN Reflection
+# Reflection — YYYY-MM-DD
 
 ## Get Clear
-<!-- status: complete | in_progress | not_started -->
 [sections as defined in reflect workflow]
 
 ## Get Focused
-<!-- status: complete | in_progress | not_started -->
 [sections as defined in reflect workflow]
 ```
 
-**Key insight:** The reflection file IS the orchestrator's marker. Partial
-completion is visible in the file itself — no separate checkpoint needed.
+---
+
+## Session Lifecycle
+
+Sessions are **internal mechanics** — the user invokes verbs, sessions
+happen underneath. The user never types "session" or "select."
+
+### Flow
+
+```
+User invokes /start (or /start <project>)
+    │
+    ▼
+Agent resolves context (no-arg entry path or specified target)
+    │
+    ▼
+Agent loads latest marker for the project (if applicable)
+    │
+    ▼
+Work happens — agent follows the verb contract
+    │
+    ▼
+User invokes /pause, /complete, or /cancel
+    │
+    ▼
+Next /start picks up from the marker
+```
+
+### Rules
+
+- `/start` opens a session. `/pause` suspends it. `/complete` marks actions
+  done and triggers upward completion. `/cancel` drops a project.
+- The marker's **Next** field is the contract with your future self: what
+  to do first when you come back.
+- Mentioning other projects does not change session context.
+- If context is ambiguous, the agent asks rather than guessing.
 
 ---
 
-## Repo Structure
+## WIP Limits
+
+| Entity | Limit |
+|--------|-------|
+| Pursuits | No limit |
+| Projects | `max_active_projects` (in-progress with markers, default 5) |
+| Ideas | No limit |
+
+The `max_active_projects` threshold is set in `cadence.yaml`. The reconciler
+flags violations but does not block work.
+
+---
+
+## Closure
+
+### Project Closure
+
+When all Definition of Done items are checked, the agent walks the closure
+ritual. If the user wants to close a project with incomplete DoD items,
+an **override with reason** is required — the reason is recorded.
+
+### Pursuit Closure
+
+Pursuit closure is an **absolute block** if unresolved Ideas exist (Ideas
+in seed or developed state under that pursuit). All Ideas must be promoted,
+moved to another parent, or closed with a reason before the pursuit can
+close. This ensures nothing is silently dropped.
+
+Both project and pursuit closure walk a cleaning ritual: review remaining
+items, acknowledge what was done, handle loose ends.
+
+---
+
+## Provocation Deck
+
+A curated YAML file at `cadence-plugin/deck/` containing prompt cards in
+these categories:
+
+- **oblique** — lateral thinking prompts
+- **scamper** — substitute, combine, adapt, modify, put to other use, eliminate, reverse
+- **how-might-we** — reframe problems as opportunities
+- **forced-analogy** — connect unrelated domains
+- **challenge** — question assumptions
+
+Used by `/brainstorm`. The LLM deals cards and provokes — it does **not**
+generate Ideas. Ideas come from the user. The deck is a fixed resource,
+not dynamically generated.
+
+---
+
+## Narratives
+
+Generated from activity data (markers, project completions, reflections).
+Follow McAdams narrative identity structure:
+
+1. **What happened** — events and actions
+2. **What it meant** — interpretation and significance
+3. **What shifted** — changes in understanding or direction
+4. **What's next** — forward trajectory
+
+Narratives are **informational, not evaluative**. No praise, no judgment,
+no performance framing. They help the user see their own story.
+
+---
+
+## Directory Structure
 
 ```
 cadence/
-├── CLAUDE.md                      # Agent entry point
-├── .claude/commands/              # Slash commands for workflows
-├── cadence.yaml                   # Global config
+├── CLAUDE.md                      # Agent instructions
+├── cadence.yaml                   # Global config (max_active_projects, etc.)
 ├── .cadence.db                    # SQLite index (gitignored)
-├── _manifest.md                   # System snapshot (gitignored)
 ├── docs/                          # Reference documentation
 ├── pursuits/
 │   ├── <pursuit-id>/
 │   │   ├── pursuit.md
-│   │   ├── _manifest.md           # Pursuit snapshot (gitignored)
 │   │   ├── projects/
 │   │   │   └── <project-id>.md
+│   │   ├── ideas/
+│   │   │   └── <idea-id>.md
 │   │   └── sessions/
 │   │       └── <timestamp>.md     # Markers
+│   ├── wandering/                 # Standing pursuit for unattached Ideas
+│   │   ├── pursuit.md
+│   │   └── ideas/
 │   ├── _someday/
 │   │   └── <pursuit-id>/pursuit.md
 │   └── _archived/
 │       └── <pursuit-id>/pursuit.md
 ├── thoughts/
-│   ├── unprocessed/
-│   └── processed/
+│   └── unprocessed/               # Raw captures awaiting triage
 ├── reflections/
-├── narratives/drafts/
-├── workflows/                     # Workflow definitions (extensible)
-└── src/                           # Engine code (future)
+├── narratives/
+│   └── drafts/
+├── workflows/                     # Verb contracts, reflect ritual, reconciler
+└── cadence-plugin/                # Claude Code plugin package
+    ├── .claude-plugin/
+    ├── cadence-runtime.md         # Plugin runtime instructions
+    ├── cadence.yaml               # Plugin config
+    ├── skills/                    # Verb implementations as skills
+    ├── deck/                      # Provocation card deck (YAML)
+    └── workflows/                 # Plugin-specific workflow definitions
 ```
 
 ### Path Conventions
 
-- All paths relative to repo root
-- Timestamps in filenames: `YYYY-MM-DDTHH-MM`
-- IDs are slug-case: lowercase, hyphens, no special characters
-- Directories prefixed with `_` are lifecycle states: `_someday/`, `_archived/`
-- Files prefixed with `_` are generated/gitignored: `_manifest.md`
+- All paths relative to repo root.
+- Timestamps in filenames: `YYYY-MM-DDTHH-MM`.
+- IDs are slug-case: lowercase, hyphens, no special characters.
+- Directories prefixed with `_` are lifecycle states: `_someday/`, `_archived/`.
+- Dates use ISO 8601.
 
 ---
 
-## Tooling Architecture
+## Persistence Model
 
-### Evolution Path: Skills → CLI → MCP
+### Hybrid: Markdown + SQLite
 
-**Phase 1 (now):** Pure skills. Agent reads/writes markdown directly, guided
-by CLAUDE.md and slash commands. Zero dependencies.
+- **Markdown is the source of truth** for all content.
+- **SQLite is a derived index** rebuilt from markdown on change.
+- Direction is always markdown to SQLite, never bidirectional.
+- SQLite is gitignored — the repo is complete without it.
 
-**Phase 2 (weeks 2-3):** Extract CLI. Operations that are too slow or
-error-prone as agent skills become `cadence` CLI commands. Skills updated
-to call CLI instead of doing file parsing.
+### Why Hybrid
 
-**Phase 3 (if needed):** MCP server wrapping the CLI for structured data
-exchange and real-time index updates.
+| Need | Markdown | SQLite |
+|------|----------|--------|
+| Human readability | Yes | No |
+| Git-friendly diffs | Yes | No |
+| Cross-cutting queries | No (expensive) | Yes |
+| Reconciler scanning | No (expensive) | Yes |
+| Narrative source | Yes | No |
+| Manual fallback | Yes | No |
 
-### Agent Integration
+### Plugin Model
 
-- **Claude Code**: CLAUDE.md + `.claude/commands/` slash commands
-- **Codex CLI**: AGENTS.md (generated from CLAUDE.md) + bash CLI commands
-- **Other agents**: Read CLAUDE.md conventions, use CLI tooling
+Cadence ships as a **Claude Code plugin**. Skills live in
+`cadence-plugin/skills/`. Runtime instructions in
+`cadence-plugin/cadence-runtime.md`. Install via `--plugin-dir`.
 
-### SQLite Schema (derived index)
-
-| Table | Source | Key queries |
-|-------|--------|-------------|
-| pursuits | pursuit.md frontmatter | Active list, WIP count |
-| projects | project.md frontmatter + DoD | Per-pursuit status, completion %, stale |
-| actions | project.md Actions section | Next actions, velocity |
-| waiting_for | project.md frontmatter | Cross-system waiting, overdue |
-| markers | session file frontmatter | Most recent per project/pursuit, stale |
-| thoughts | thought file frontmatter | Unprocessed count |
-| reflections | reflection frontmatter | Last reflect, leveraged priority |
+The plugin provides verb-based skills that the agent invokes. Each skill
+reads the verb contract, operates on markdown files, and follows the
+guardrails defined in the contract.
 
 ---
 
 ## Design Principles
 
-1. **Local-first** — SQLite + markdown on your machines, no cloud dependencies
-2. **Markdown is the source of truth** — if the index breaks, rebuild it
-3. **The artifact IS the state** — reflection files, markers, project files carry their own status
-4. **Completion is derived** — DoD all checked → project done, confirmed by agent
-5. **Git operations are lifecycle operations** — `git mv` to someday, `git rm` to delete
-6. **Workflows are soft** — defined in markdown, editable, swappable
-7. **Agent-agnostic** — skills + CLI work with any tool that reads files and runs commands
-8. **Flow protection** — nudges batch at breakpoints, never interrupt deep work
+1. **Local-first** — Markdown + SQLite on your machine. No cloud dependencies.
+2. **Markdown is the source of truth** — If the index breaks, rebuild it.
+3. **The artifact IS the state** — Markers, reflections, and project files carry their own status.
+4. **Completion is derived** — DoD all checked, confirmed by agent, status set to done.
+5. **Git operations are lifecycle operations** — `git mv` to someday, archival is a file move.
+6. **Verbs define behavior** — No mode announcements. The verb contract governs tone and guardrails.
+7. **Flow protection** — No mid-flow interruptions. Batch observations for breakpoints.
+8. **No gamification** — No streaks, scores, badges, leaderboards, or evaluative praise.
+9. **No "why did you fail?" prompts** — Reflection is forward-looking, not interrogative.
+10. **Ideas come from the user** — The LLM provokes and develops. It does not generate Ideas in brainstorm.
+11. **Sessions are invisible** — The user invokes verbs. Sessions are internal mechanics.
+12. **Workflows are soft** — Defined in markdown, editable, swappable.

@@ -1,0 +1,50 @@
+name: Cancel Project with Ideas
+description: Verify /cancel requires a reason, handles unresolved Ideas before dropping the project
+
+setup:
+  - create_pursuit:
+      id: test-cancel
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-cancel
+      id: test-cancel-project
+      title: Test Cancel Project
+      dod:
+        - Something that won't happen
+      actions:
+        - Work that won't be done
+  - create_idea:
+      pursuit: test-cancel
+      id: orphan-idea
+      title: Orphan Idea
+      stage: seed
+      parent: test-cancel/test-cancel-project
+
+steps:
+  - command: /start test-cancel-project
+    assert:
+      - contains: "Test Cancel Project"
+
+  - command: /cancel
+    assert:
+      - contains: "reason"
+
+  - action: User provides reason "no longer relevant"
+    assert:
+      - contains: "orphan-idea"
+      - contains: "open"
+
+  - action: User says "close it — learned nothing useful"
+    assert:
+      - file_contains:
+          path: pursuits/test-cancel/projects/test-cancel-project.md
+          pattern: "status: dropped"
+      - file_contains:
+          path: pursuits/test-cancel/projects/test-cancel-project.md
+          pattern: "dropped_reason"
+
+teardown:
+  - delete_files:
+      - pursuits/test-cancel/
+  - assert_clean: pursuits/test-cancel/

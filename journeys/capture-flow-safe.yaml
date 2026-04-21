@@ -1,0 +1,34 @@
+name: Capture Flow Safe
+description: Verify /capture during a session creates a thought file without interrupting flow
+
+setup:
+  - create_pursuit:
+      id: test-capture
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-capture
+      id: test-capture-project
+      title: Test Capture Project
+      dod:
+        - Complete the task
+      actions:
+        - Do the work
+
+steps:
+  - command: /start test-capture-project
+    assert:
+      - contains: "Test Capture Project"
+
+  - command: /capture "test thought"
+    assert:
+      - file_created:
+          path: thoughts/unprocessed/*.md
+          content_contains: "test thought"
+      - max_response_length: 0
+
+teardown:
+  - delete_files:
+      - pursuits/test-capture/
+      - thoughts/unprocessed/test-thought*.md
+  - assert_clean: pursuits/test-capture/

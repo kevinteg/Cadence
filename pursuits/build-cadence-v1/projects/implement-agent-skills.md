@@ -37,3 +37,9 @@ or MCP needed yet. The commands ARE the implementation for Phase 1.
 
 If a command is too slow or error-prone as pure agent instructions, that's
 the signal to extract it into CLI tooling (the build-indexer project).
+
+> **v3 note:** These were the v2 agent skill implementations. In v3, the
+> command surface was redesigned around verbs: /do (replaces /select),
+> /brainstorm, /develop, /promote, /capture (replaces /thought), /close,
+> and /cadence:reflect (replaces /reflect). /mark and /status persist.
+> /recap became internal to the /do auto-resume flow.
