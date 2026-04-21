@@ -11,12 +11,12 @@
 **The core pipeline:**
 
 ```
-  Idea ──► Pursuit ──► Project ──► Action
-   │         │           │            │
-  Why?      DoD?     Concrete?     Do it.
+  Pursuit ──► Project ──► Action
+     │           │            │
+    DoD?     Concrete?     Do it.
 ```
 
-Three graduation gates. Each draws from a different research tradition that fits its level: **Why** at the Pursuit gate (Sinek, Self-Determination Theory), **Definition of Done** at the Project gate (GTD Natural Planning, Theory of Constraints throughput), **Concreteness** at the Action gate (GTD next-action test, Gollwitzer implementation intentions).
+Ideas are an adjacent collection that feeds INTO the hierarchy via three graduation gates (`/promote`): **Idea → Pursuit** (requires a Why), **Idea → Project** (requires a Definition of Done), **Idea → Action** (requires concreteness). Each gate draws from a different research tradition: **Why** (Sinek, Self-Determination Theory), **Definition of Done** (GTD Natural Planning, Theory of Constraints throughput), **Concreteness** (GTD next-action test, Gollwitzer implementation intentions).
 
 **The hierarchy:**
 
@@ -38,8 +38,8 @@ cadence brainstorm <project>         # ideation on a Project → candidate Actio
 cadence develop                      # convergent pass on Ideas ready for evaluation
 cadence develop <idea>               # PPCo, criteria, pre-mortem on a specific Idea
 cadence promote <idea>               # fast-track to Pursuit/Project/Action (enforces the graduation gate)
-cadence do                           # curated selection; Leveraged Priority surfaced
-cadence do <project>                 # protected flow on that Project
+cadence start                        # curated selection; Leveraged Priority surfaced
+cadence start <project>              # protected flow on that Project
 cadence narrate                      # today's activity as redemption-aware narrative
 cadence narrate <pursuit>            # full arc of the Pursuit
 cadence narrate week                 # weekly reflection narrative
@@ -47,12 +47,15 @@ cadence reflect                      # full ritual: Get Clear + Get Focused
 cadence reflect clear                # inbox to zero; process captures
 cadence reflect focus                # leveraged priority; outside-view estimation check
 cadence capture "..."                # Parking Lot thought, no agent response (flow-safe)
-cadence mark "..."                   # save point with ready-to-resume fields
+cadence pause                        # save marker with where/next/open fields
 cadence reconcile                    # quiet report of stale state
+cadence complete <action>            # mark action done; trigger upward completion
+cadence cancel <project>             # drop project with a reason
+cadence status                       # system dashboard or drill into pursuits/projects
 cadence close <pursuit|project>      # triggers the cleaning ritual
 ```
 
-Session is an internal primitive — the unit that ties verb → Markers → Thoughts → Narrative. The user invokes verbs; Sessions happen underneath.
+Session is an internal primitive — the unit that ties lifecycle verbs (`/start`, `/pause`, `/complete`) → Markers → Captures → Narrative. The user invokes verbs; Sessions happen underneath.
 
 **One voice, verb-defined contracts:**
 
@@ -60,16 +63,16 @@ The agent is a single voice; the verb determines its register.
 
 - **brainstorm** — non-judgmental, quantity-seeking, deals provocation cards from an Oblique/SCAMPER deck, refuses evaluation, pushes through the creative cliff ("you're at 12 — the original ones usually come after 15")
 - **develop** — structured-critical, runs PPCo (Praise, Potentials, Concerns, Overcome), criteria matrices, pre-mortems; allowed to kill an Idea respectfully
-- **do** — silent during flow, terse at Breakpoints, only surfaces Thoughts on explicit ask
+- **start** — silent during flow, terse at Breakpoints, only surfaces Thoughts on explicit ask
 - **narrate** — "what" questions not "why"; redemption-aware; informational, not evaluative
 - **reflect** — what moved, what's the Leveraged Priority, Gollwitzer if-then plans
 
 **The core loop:**
 
 ```
-  Enter session → Recap ("previously on...") → Flow state (silent, protected)
-       → Breakpoint (nudges, quick wins, wellbeing) → Mark (save point)
-       → Exit or switch → Next session picks up from the ready-to-resume plan
+  /start → Recap ("previously on...") → Flow state (silent, protected)
+       → Breakpoint (nudges, quick wins, wellbeing) → /pause (save marker)
+       → Exit or switch → Next /start picks up from the ready-to-resume plan
 ```
 
 **The Ideas lifecycle:**
@@ -102,8 +105,8 @@ Anchored to 6-month win cycles with a mid-cycle check-in.
 
 **Key behaviors:**
 
-- **Curated `do` selection** — prioritized suggestions with Leveraged Priority highlighted; agent suggests, user decides (autonomy-supportive)
-- **Flow-safe capture** — single keystroke appends Thoughts to the Parking Lot during `do` with no agent response (half the attention-fragmentation problem is self-interruption; Cadence handles both halves)
+- **Curated `start` selection** — prioritized suggestions with Leveraged Priority highlighted; agent suggests, user decides (autonomy-supportive)
+- **Flow-safe capture** — single keystroke appends Thoughts to the Parking Lot during `start` with no agent response (half the attention-fragmentation problem is self-interruption; Cadence handles both halves)
 - **Ready-to-resume Markers** — every Marker has three fields: *where*, *next*, *open*; the "open" field is the plan-making hook that releases Zeigarnik tension on context switch
 - **The 2-minute rule** — trivial Actions surfaced immediately; cleared first during Reflect
 - **Outside-view estimation** — at Action creation: "what's the closest past Action and how long did it actually take?"; stored actuals surface drift during Reflect

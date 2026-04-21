@@ -42,7 +42,7 @@ Cadence is one voice whose register is set by the activity. You invoke verbs; th
 
 **During `develop`** — structured-critical. It runs PPCo (Praise, Potentials, Concerns, Overcome), criteria matrices, pre-mortems across clusters of Ideas. Allowed to kill an Idea respectfully, with a reason worth remembering. *This is the voice that helps you decide what to commit to.*
 
-**During `do`** — silent during flow. Terse at breakpoints. Surfaces Thoughts only on explicit request. Hands you the ready-to-resume plan when you return. *This is the voice that protects your attention.*
+**During `start`** — silent during flow. Terse at breakpoints. Surfaces captures only at breakpoints. Hands you the ready-to-resume plan when you return. *This is the voice that protects your attention.*
 
 **During `narrate`** — reflective but not evaluative. "What" questions, not "why" questions. Redemption-aware — willing to tell the honest story of a hard session without empty optimism. Informational, not praise-based. *This is the voice that helps you see what you did.*
 
@@ -57,15 +57,17 @@ One voice. Six registers. The register matches what you're doing, so the system 
 ## The Pipeline
 
 ```
-  Idea ──► Pursuit ──► Project ──► Action
-   │         │           │            │
-  Why?      DoD?     Concrete?     Do it.
+  Pursuit ──► Project ──► Action
+
+  Idea ─────────────────► (enters hierarchy via /promote)
+   │
+  Why? / DoD? / Concrete?
 ```
 
-Three graduation gates. Each draws from a different research tradition that fits its level:
+Ideas are adjacent to the work hierarchy, not part of the linear flow. They enter the hierarchy through `/promote`, which enforces graduation gates. Each gate draws from a different research tradition that fits its level:
 
-- **Idea → Pursuit** is gated by articulating a **Why** (Sinek's Golden Circle as framing; Self-Determination Theory as motivation anchor). A Pursuit without a Why will not survive the first hard week.
-- **Idea → Project** is gated by a **Definition of Done** (GTD Natural Planning; Theory of Constraints throughput logic). A Project without a DoD is a Pursuit wearing the wrong hat.
+- **Idea → Pursuit** is gated by articulating a **Why** (Sinek's Golden Circle as framing; Self-Determination Theory as motivation anchor). An Idea without a Why cannot become a Pursuit.
+- **Idea → Project** is gated by a **Definition of Done** (GTD Natural Planning; Theory of Constraints throughput logic). An Idea without a DoD cannot become a Project.
 - **Idea → Action** is gated by **concreteness** (GTD next-action test; Gollwitzer implementation intentions). If you can't visualize yourself doing it, it is not yet an Action.
 
 Brainstorming scope matches the verb's context: top-level produces candidate Pursuits, Pursuit-level produces candidate Projects, Project-level produces candidate Actions. Brainstorming on an Action is rejected with a structural suggestion that the Action is probably a Project.
@@ -94,7 +96,7 @@ A **Project** is a scoped effort with a clear **Definition of Done**. It's the f
 
 **Projects are WIP-limited.** Three to five active in Development or Execution is the default ceiling. A Project that won't end is a structural signal — either it needs to be split, or it's actually a Pursuit. The Reconciler surfaces this without punishing.
 
-The Guide coaches Project scoping. It suggests verb + outcome names, flags Projects that are too vague, and proposes splits when a Project grows unwieldy.
+The agent coaches Project scoping. It suggests verb + outcome names, flags Projects that are too vague, and proposes splits when a Project grows unwieldy.
 
 An **Action** is the atomic unit of doing. Concrete, GTD-native, no implied sequence.
 
@@ -145,7 +147,7 @@ When a Thought is captured or an Action is identified that could be completed in
 
 ### Sessions and Markers
 
-A **Session** is a focused work block. It is an internal primitive — the user invokes verbs (`do`, `brainstorm`, `develop`, `narrate`, `reflect`), and the Session wraps them underneath. Sessions have a beginning (recap from Marker), a middle (verb-specific activity, flow-protected during `do`), and an end (Marker written).
+A **Session** is a focused work block. It is an internal primitive — the user invokes verbs (`start`, `brainstorm`, `develop`, `narrate`, `reflect`), and the Session wraps them underneath. Sessions have a beginning (recap from Marker), a middle (verb-specific activity, flow-protected during `start`), and an end (Marker written).
 
 A **Marker** is the save point you leave behind. Every Marker has three fields:
 
@@ -163,9 +165,9 @@ A **Recap** is the "previously on..." context restoration when re-entering a Ses
 
 A **Thought** is raw input captured on the go — a voice note while walking, an idea in the shower, a task that occurs to you during dinner. Thoughts are undifferentiated at capture time. The system's AI triage routes them to the right place.
 
-During `do` flow state, Thoughts are **flow-safe**: a single keystroke appends a typed Thought to the Parking Lot with no agent response. No prompt, no acknowledgment, no elaboration request. The Thought is reconciled at the next Breakpoint or during Reflect. This is essential — Gloria Mark's research shows self-interruption matches external-interruption in frequency; flow-safe capture addresses the internal half.
+During `start` flow state, Thoughts are **flow-safe**: a single keystroke appends a typed Thought to the Parking Lot with no agent response. No prompt, no acknowledgment, no elaboration request. The Thought is reconciled at the next Breakpoint or during Reflect. This is essential — Gloria Mark's research shows self-interruption matches external-interruption in frequency; flow-safe capture addresses the internal half.
 
-Thoughts are typed by the verb context in which they're captured: a Thought from `brainstorm` is a **seed**; from `develop`, a **concern** or **criterion**; from `do`, a **note** or **blocker**. The Reconciler respects type and never silently promotes a Seed to an Action without going through Development.
+Thoughts are typed by the verb context in which they're captured: a Thought from `brainstorm` is a **seed**; from `develop`, a **concern** or **criterion**; from `start`, a **note** or **blocker**. The Reconciler respects type and never silently promotes a Seed to an Action without going through Development.
 
 **Capture transparency** is a design principle. The user can always see where Thoughts were routed. Uncertain triage decisions are flagged for human review. During Reflect, the user reviews recent triage to maintain trust in the system. The goal is GTD's "capture everything" completeness combined with AI's ability to organize — but with the human always able to verify.
 
@@ -231,7 +233,7 @@ Categories:
 
 ### Narratives
 
-**Narratives** are the written output of the system — generated, not manually authored. Narrator output follows the McAdams-compatible structure: *what happened / what it meant / what shifted / what's next*.
+**Narratives** are the written output of the system — generated, not manually authored. Narrative output follows the McAdams-compatible structure: *what happened / what it meant / what shifted / what's next*.
 
 They serve multiple audiences at multiple time horizons:
 
@@ -258,8 +260,12 @@ cadence brainstorm <project>         # ideation on a Project → candidate Actio
 cadence develop                      # convergent pass on Ideas ready for evaluation
 cadence develop <idea>               # PPCo, criteria, pre-mortem on a specific Idea
 cadence promote <idea>               # fast-track to Pursuit/Project/Action (enforces gate)
-cadence do                           # curated selection; Leveraged Priority surfaced
-cadence do <project>                 # protected flow on that Project
+cadence start                        # curated selection; Leveraged Priority surfaced
+cadence start <project>              # protected flow on that Project
+cadence pause                        # save point with where/next/open
+cadence complete                     # mark an action done; trigger upward completion
+cadence complete <action>            # mark a specific action done
+cadence cancel <project>             # drop a project with a reason
 cadence narrate                      # today's activity, redemption-aware
 cadence narrate <pursuit>            # full arc of the Pursuit
 cadence narrate week                 # weekly reflection narrative
@@ -267,12 +273,13 @@ cadence reflect                      # full ritual: Get Clear + Get Focused
 cadence reflect clear                # just Get Clear
 cadence reflect focus                # just Get Focused
 cadence capture "..."                # Parking Lot thought, no agent response (flow-safe)
-cadence mark "..."                   # save point with where/next/open
+cadence status                       # system dashboard — pursuits, WIP, flags
+cadence status <pursuit|project>     # drill into a specific pursuit or project
 cadence reconcile                    # quiet report of stale state
 cadence close <pursuit|project>      # triggers the cleaning ritual
 ```
 
-Inside Claude Code these exist as slash-commands. From a shell, `cad` is the suggested alias.
+Inside Claude Code these are invoked as /cadence:<verb> via the Cadence plugin.
 
 ---
 

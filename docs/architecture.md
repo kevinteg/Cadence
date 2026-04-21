@@ -10,29 +10,31 @@
 flow state, and generates narrative across pursuits. It lives inside the
 terminal as a Claude Code plugin. One agent, one voice, verb-defined behavior.
 
-### Hierarchy
+### Work Hierarchy
 
 ```
-Idea  →  Pursuit  →  Project  →  Action
+Pursuit  →  Project  →  Action
 ```
 
-- **Idea**: A captured thought with a lifecycle. States: seed, developed,
-  promoted, moved, closed. Every Idea has a parent (pursuit or project).
 - **Pursuit**: An intentional commitment tied to values or a role/responsibility.
   Lifecycle: active, someday, archived.
 - **Project**: A scoped effort with a Definition of Done checklist.
   Status: active, on_hold, done, dropped.
 - **Action**: An atomic task. A checkbox inside a project's Actions section.
 
-### Graduation Gates
+### Ideas (Adjacent Collection)
 
-Ideas move through the pipeline via three gates:
+Ideas are a first-class collection that lives alongside the work hierarchy,
+not inside it. Every Idea has a parent (pursuit or project) and flows
+through its own lifecycle: seed, developed, promoted, moved, closed.
 
-| Gate | From | To | Requirement |
-|------|------|----|-------------|
-| **Why** | seed | developed | Articulate why this matters |
-| **DoD** | developed | promoted (to project) | Define what "done" looks like |
-| **Concreteness** | action candidate | action | Specific enough to start |
+Ideas enter the hierarchy through graduation gates enforced by `/promote`:
+
+| Gate | Requirement | Enters Hierarchy As |
+|------|-------------|---------------------|
+| **Why** | Articulate why this matters | Pursuit |
+| **DoD** | Define what "done" looks like | Project |
+| **Concreteness** | Specific enough to start | Action |
 
 ### Wandering
 
@@ -56,13 +58,16 @@ behavior, and guardrails. Contracts live in `workflows/verb-contracts.md`.
 | **brainstorm** | Provoke thinking using the card deck. The LLM does NOT generate ideas — it deals cards and asks questions. |
 | **develop** | Help the user articulate why an Idea matters. Deepen, challenge, connect. |
 | **promote** | Graduate a developed Idea to a Project with DoD and first actions. |
-| **do** | Session-level focus on a specific project. Protect flow. Keep work moving. |
+| **start** | Session-level focus on a specific project. Protect flow. Keep work moving. |
+| **pause** | Save a marker and suspend the session. |
+| **complete** | Mark an action done. Trigger upward completion when all DoD items are checked. |
+| **cancel** | Drop a project with a reason. Walk the cleaning ritual for Ideas. |
 | **narrate** | Generate writing from activity data. Draw from markers and history. |
 | **reflect** | Run the weekly ritual. Surface what matters across the whole system. |
 | **capture** | Save a raw thought. Flow-safe — no agent response beyond confirmation. |
-| **mark** | Write a session save point. Mid-session or on exit. |
 | **close** | Walk the closure ritual for a project or pursuit. |
 | **reconcile** | Background scan for stale markers, overdue items, dormant projects, structural issues. |
+| **status** | Show system dashboard or drill into pursuits, projects, and actions. |
 
 Each verb has a **no-argument curated entry path** — invoking the verb
 with no arguments presents a contextual starting point rather than demanding
@@ -70,29 +75,39 @@ the user specify what to work on.
 
 ---
 
-## The Pipeline
+## Two Processes
 
-Ideas flow through a defined pipeline from raw capture to completed work.
+Work flows through two distinct processes: divergent thinking feeds into
+convergent execution.
+
+### Diverge (Ideas → Hierarchy)
 
 ```
-capture (seed)
-    │
-    ▼
-develop (seed → developed)
-    │
-    ▼
-promote (developed → project with DoD)
-    │
-    ▼
-do (work the project, check off actions)
-    │
-    ▼
-close (project done or pursuit complete)
+capture → brainstorm → develop → promote
+  seed       seed      developed   ──┐
+                                     ├─► Pursuit (with Why)
+                                     ├─► Project (with DoD)
+                                     └─► Action  (concrete)
 ```
 
-At any point, Ideas can be **moved** to a different parent or **closed**
-with a reason. The pipeline is not rigid — Ideas can enter at any stage
-if they arrive with enough shape.
+Ideas can be **moved** to a different parent or **closed** with a reason
+at any point. Ideas can also enter at any stage if they arrive with
+enough shape.
+
+### Converge (Execution)
+
+```
+start → work → complete / pause
+  │                │        │
+  │                │        └─► marker saved, session suspended
+  │                └─► action done, upward completion check
+  └─► session opened, marker loaded, flow protected
+```
+
+When all DoD items are checked, the system triggers upward completion:
+project closes, then pursuit closure is prompted if all projects are
+done or dropped. `/cancel` drops a project with a reason and walks the
+cleaning ritual for remaining Ideas.
 
 ---
 

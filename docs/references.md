@@ -6,7 +6,7 @@
 
 ## 1. One voice, verb-defined registers
 
-**Pattern:** A single agent with behavioral modes (Steward, Guide, Narrator) rather than separate agents. Sessions carry an explicit mode attribute (Ideation, Development, Execution, Reflect) that changes the agent's register. Mode is always visible to the user.
+**Pattern:** A single agent whose register shifts with each verb (brainstorm, develop, start, reflect, etc.) rather than named personas or separate agents. The active verb determines the agent's tone, behavior, and guardrails. The verb is always visible to the user.
 
 | Research | Key finding |
 |----------|-------------|
@@ -16,13 +16,13 @@
 | UK Design Council (2005), Double Diamond | Four-phase pipeline: Discover (diverge) -> Define (converge) -> Develop (diverge) -> Deliver (converge). Mode boundaries must be explicit and ritually enforced. |
 | De Bono (1985), Six Thinking Hats | One thinking mode at a time, facilitator-enforced, short durations. Green (creative), Yellow (benefits), Black (critique) run serially, never in parallel. |
 
-**Application in Cadence:** The agent never runs divergent and convergent processes simultaneously. Ideation sessions suppress evaluation language and hold concerns on a Parking Lot. Execution sessions suppress divergent tangents. The mode attribute on each session determines which register the agent speaks in, matching the user's cognitive mode to the tool's behavior. This is the DMN/ECN switching principle made operational.
+**Application in Cadence:** The agent never runs divergent and convergent processes simultaneously. During brainstorm, evaluation language is suppressed and concerns are held on a Parking Lot. During start, divergent tangents are suppressed. The active verb determines which register the agent speaks in, matching the user's cognitive mode to the tool's behavior. This is the DMN/ECN switching principle made operational.
 
 ---
 
 ## 2. Brainstorm with provocation deck (no LLM generation)
 
-**Pattern:** During Ideation sessions, the agent draws from a curated deck of tangential prompts (SCAMPER frames, Oblique Strategies, forced analogies, "How might we..." reframes) rather than generating candidate ideas directly.
+**Pattern:** During brainstorm sessions, the agent draws from a curated deck of tangential prompts (SCAMPER frames, Oblique Strategies, forced analogies, "How might we..." reframes) rather than generating candidate ideas directly.
 
 | Research | Key finding |
 |----------|-------------|
@@ -33,7 +33,7 @@
 | Eberle (1971) / Osborn (1953), SCAMPER | Structured idea-spurring checklist: Substitute, Combine, Adapt, Modify, Put to other uses, Eliminate, Reverse. Direct provocations versus Oblique Strategies' indirect ones. |
 | Lucas & Nordgren (2020), *PNAS* | Creative cliff illusion: people believe ideation productivity is collapsing when later ideas are typically more original. They quit early. Interventions that push past the perceived cliff unlock better ideas. |
 
-**Application in Cadence:** The provocation deck perturbs the user's own associative search rather than generating ideas for them. This avoids the Doshi-Hauser homogenization trap. Prompts are timed to inject roughly every 8-12 minutes when fluency slows, pushing past the creative cliff. The LLM is reserved for convergent refinement in Development sessions (PPCo, criteria analysis, pre-mortem) where its convergent bias is an asset. Divergent work happens independently first; convergent work with LLM assistance second.
+**Application in Cadence:** The provocation deck perturbs the user's own associative search rather than generating ideas for them. This avoids the Doshi-Hauser homogenization trap. Prompts are timed to inject roughly every 8-12 minutes when fluency slows, pushing past the creative cliff. The LLM is reserved for convergent refinement during develop (PPCo, criteria analysis, pre-mortem) where its convergent bias is an asset. Divergent work happens independently first; convergent work with LLM assistance second.
 
 ---
 
@@ -53,9 +53,9 @@
 
 ---
 
-## 4. Flow protection during /do
+## 4. Flow protection during /start
 
-**Pattern:** During active flow state within a session: no nudges, no Narrator commentary, no Reconciler prompts, no notifications of any kind until a Breakpoint. The tool goes silent and protects the user's unbroken attention.
+**Pattern:** During active flow state within a session: no nudges, no narrative commentary, no Reconciler prompts, no notifications of any kind until a Breakpoint. The tool goes silent and protects the user's unbroken attention.
 
 | Research | Key finding |
 |----------|-------------|
@@ -83,7 +83,7 @@
 
 ## 6. Narrative generation (McAdams structure)
 
-**Pattern:** Narrator output follows a four-part structure: *what happened* (factual trace), *what it meant* (reflective layer, invited not forced), *what shifted* (agency -- what the user caused or chose), and *what's next* (continuity). Framing is redemption-aware, not artificially positive.
+**Pattern:** Narrative generation follows a four-part structure: *what happened* (factual trace), *what it meant* (reflective layer, invited not forced), *what shifted* (agency -- what the user caused or chose), and *what's next* (continuity). Framing is redemption-aware, not artificially positive.
 
 | Research | Key finding |
 |----------|-------------|
@@ -91,7 +91,7 @@
 | Pennebaker & Beall (1986); Pennebaker (2017) | Expressive writing about difficult experiences produces small but consistent health benefits (d = 0.16 across 100+ studies). Effects depend on engagement and emotion-acceptance. Four 15-minute sessions is the canonical protocol. |
 | Deci, Koestner & Ryan (1999) meta-analysis | Evaluative praise undermines intrinsic motivation. Positive verbal feedback enhances it (d = +0.33). The difference is informational vs. controlling. "Great work!" backfires; "you unblocked the issue you identified Tuesday" does not. |
 
-**Application in Cadence:** The Narrator describes what happened in specific, informative terms rather than evaluative ones. It frames hard sessions honestly ("you fought the test harness for four hours -- what did you learn that unblocks tomorrow?") rather than offering empty encouragement. The four-part structure mirrors McAdams' narrative-identity prompts and instantiates Pennebaker's engagement-plus-acceptance recipe. Redemption-aware means the Narrator helps the user find meaning in setbacks without manufacturing false positivity.
+**Application in Cadence:** Narrative generation describes what happened in specific, informative terms rather than evaluative ones. It frames hard sessions honestly ("you fought the test harness for four hours -- what did you learn that unblocks tomorrow?") rather than offering empty encouragement. The four-part structure mirrors McAdams' narrative-identity prompts and instantiates Pennebaker's engagement-plus-acceptance recipe. Redemption-aware means the agent during narrate helps the user find meaning in setbacks without manufacturing false positivity.
 
 ---
 
@@ -104,7 +104,7 @@
 | Trapnell & Campbell (1999), *JPSP* | Reflection and rumination are independent factors, not a single dimension. Reflection (openness-linked, philosophical self-exploration) correlates with empathy and growth. Rumination (neuroticism-linked, repetitive maladaptive self-focus) correlates with depression, anxiety, and shame. |
 | Eurich (2017), *Insight* | "Why?" questions trigger post-hoc storytelling and often spiral into rumination. "What?" questions generate observable data and action steps. Replacing "Why did this go poorly?" with "What happened?" changes the cognitive process from self-flagellation to analysis. (Based on Eurich's survey data; underlying Trapnell-Campbell distinction is peer-reviewed.) |
 
-**Application in Cadence:** The Reflect ritual is structurally protected against becoming a rumination loop. The Reconciler and Guide never ask "why did you fail?" during reflection. "Why" appears only during Pursuit creation (Sinek's Golden Circle as framing device, minus the debunked neuroscience claims) where it serves a purpose-articulation function distinct from self-evaluation.
+**Application in Cadence:** The Reflect ritual is structurally protected against becoming a rumination loop. The Reconciler and the agent never ask "why did you fail?" during reflection. "Why" appears only during Pursuit creation (Sinek's Golden Circle as framing device, minus the debunked neuroscience claims) where it serves a purpose-articulation function distinct from self-evaluation.
 
 ---
 
@@ -125,20 +125,20 @@
 
 ## 9. Informational feedback, not evaluative praise
 
-**Pattern:** The Narrator and Guide provide specific, descriptive feedback ("you advanced three projects this week; the pursuit is one project from completion") rather than evaluative judgment ("great job!" or letter grades).
+**Pattern:** The agent provides specific, descriptive feedback ("you advanced three projects this week; the pursuit is one project from completion") rather than evaluative judgment ("great job!" or letter grades).
 
 | Research | Key finding |
 |----------|-------------|
 | Deci, Koestner & Ryan (1999) | Positive verbal feedback enhances free-choice intrinsic motivation (d = +0.33) and interest (d = +0.31). But the feedback must be informational (conveys competence) not controlling (conveys evaluation). The distinction matters: same words, different framing, opposite effects. |
 | Amabile & Kramer (2011), *The Progress Principle* | In a 12,000-entry diary study, progress in meaningful work was the single strongest positive predictor of inner work life. When managers were surveyed on what motivates people, progress ranked last. People systematically underweight the thing that matters most. |
 
-**Application in Cadence:** The system surfaces visible forward motion: projects advanced, pursuits closed, thoughts resolved. This is the highest-yield motivational feedback per Amabile, and it does not trigger overjustification because it measures what the user actually cares about. The Narrator describes what happened in specific terms; it does not grade or praise. This is the SDT-compatible mode that enhances rather than undermines intrinsic motivation.
+**Application in Cadence:** The system surfaces visible forward motion: projects advanced, pursuits closed, thoughts resolved. This is the highest-yield motivational feedback per Amabile, and it does not trigger overjustification because it measures what the user actually cares about. The agent describes what happened in specific terms; it does not grade or praise. This is the SDT-compatible mode that enhances rather than undermines intrinsic motivation.
 
 ---
 
 ## 10. WIP limits on projects, not pursuits or ideas
 
-**Pattern:** Cadence enforces a small WIP limit (3-5) on active Projects in Development or Execution. Pursuits can number many more. Ideation sessions and Thoughts accumulate freely without WIP pressure.
+**Pattern:** Cadence enforces a small WIP limit (3-5) on active Projects in execution flow. Pursuits can number many more. Brainstorm sessions and Thoughts accumulate freely without WIP pressure.
 
 | Research | Key finding |
 |----------|-------------|
@@ -147,7 +147,7 @@
 | Benson & Barry (2011), *Personal Kanban* | Two rules: visualize work and limit WIP. Applied to individual knowledge work, not just manufacturing or software teams. |
 | Sio & Ormerod (2009), meta-analysis on incubation | Setting problems aside is often productive for creative work. Low-demand interpolated activity during incubation produces the largest effects. Strict WIP limits on ideation would cut off the biological substrate of creative cognition. |
 
-**Application in Cadence:** The resolution is mode-differentiated WIP. A half-finished Ideation session with 40 seeds is not waste; the seeds are incubating (Sio-Ormerod). A half-finished Execution session with three parallel code tasks is a WIP problem in the strict Kanban sense. Pursuits in Clarification or Ideation can sit for weeks without the Reconciler nagging. Only when convergent work (Development, Execution) exceeds the WIP limit does the system intervene. This combines TOC discipline with the neuroscience of creative incubation.
+**Application in Cadence:** The resolution is verb-differentiated WIP. A half-finished brainstorm session with 40 seeds is not waste; the seeds are incubating (Sio-Ormerod). A half-finished execution session with three parallel code tasks is a WIP problem in the strict Kanban sense. Pursuits with undeveloped ideas can sit for weeks without the Reconciler nagging. Only when convergent work (during develop, during start) exceeds the WIP limit does the system intervene. This combines TOC discipline with the neuroscience of creative incubation.
 
 ---
 
@@ -182,7 +182,7 @@
 
 ## 13. 2-minute rule
 
-**Pattern:** When a session opens on a project the user has been avoiding, the Steward offers a minimum-viable-action entry: the smallest possible first move. "Open the file. Read the last function. That's the session if you want it to be."
+**Pattern:** When a session opens on a project the user has been avoiding, the agent offers a minimum-viable-action entry: the smallest possible first move. "Open the file. Read the last function. That's the session if you want it to be."
 
 | Research | Key finding |
 |----------|-------------|
@@ -190,7 +190,7 @@
 | Behavioral activation (Dimidjian et al. 2006) | Action precedes motivation, not the reverse. BA was comparable to antidepressant medication for severely depressed patients. Starting -- even minimally -- changes the motivational state. |
 | Fogg (2019), *Tiny Habits* | Minimum-viable-action: make the behavior so small it requires almost no motivation. "After I [anchor], I will [tiny behavior]." Scales up naturally once started. |
 
-**Application in Cadence:** The 2-minute entry is a behavioral activation technique. The research says the unlock for avoidance is not more motivation but a smaller first action. When the Steward detects a dormant project, it offers entry at the lowest possible threshold. This is not about efficiency (GTD's original framing); it is about overcoming the activation energy barrier that prevents sessions from starting at all.
+**Application in Cadence:** The 2-minute entry is a behavioral activation technique. The research says the unlock for avoidance is not more motivation but a smaller first action. When the agent detects a dormant project during start, it offers entry at the lowest possible threshold. This is not about efficiency (GTD's original framing); it is about overcoming the activation energy barrier that prevents sessions from starting at all.
 
 ---
 
@@ -223,14 +223,14 @@
 
 ## 16. PPCo in /develop
 
-**Pattern:** Development sessions use the Pluses-Potentials-Concerns-Overcome (PPCo) framework: what is good about this idea, what potential does it have, what concerns exist, how might we overcome each concern. The LLM assists with structured critique.
+**Pattern:** Develop sessions use the Pluses-Potentials-Concerns-Overcome (PPCo) framework: what is good about this idea, what potential does it have, what concerns exist, how might we overcome each concern. The LLM assists with structured critique.
 
 | Research | Key finding |
 |----------|-------------|
 | Puccio (2014), Creative Problem Solving | PPCo is the CPS convergent-evaluation tool. It replaces binary yes/no judgment with a structured progression: acknowledge strengths before identifying concerns, then actively problem-solve each concern rather than using it as a kill reason. Prevents premature idea death. |
 | Klein (2007), pre-mortem technique | "Imagine the project has failed. What went wrong?" Prospective hindsight generates 30% more reasons for failure than standard risk assessment (Mitchell, Russo & Pennington 1989). Complements PPCo's "Concerns" phase. |
 
-**Application in Cadence:** The LLM's convergent bias becomes an asset during Development. It is strong at structured critique, criteria analysis, and stakeholder mapping -- exactly what PPCo requires. The pre-mortem ("imagine this failed") catches risks that optimistic planning misses. Development sessions are where the LLM earns its keep, precisely because convergent elaboration is what the task demands and what LLMs do well.
+**Application in Cadence:** The LLM's convergent bias becomes an asset during develop. It is strong at structured critique, criteria analysis, and stakeholder mapping -- exactly what PPCo requires. The pre-mortem ("imagine this failed") catches risks that optimistic planning misses. Develop sessions are where the LLM earns its keep, precisely because convergent elaboration is what the task demands and what LLMs do well.
 
 ---
 
@@ -269,7 +269,7 @@ Five findings appeared across multiple patterns above. These are the highest-con
 | Signal | Frameworks that converge | Cadence features it grounds |
 |--------|--------------------------|----------------------------|
 | Externalization releases cognitive load | Allen, Forte, Ahrens, Masicampo-Baumeister, Gollwitzer, Leroy | Markers, Thoughts, /capture, Parking Lot, ready-to-resume plans |
-| Mode separation between generation and evaluation | Guilford, Beaty et al., Puccio CPS, Double Diamond, De Bono, Osborn, Ellamil et al. | Verb-defined registers, Ideation vs. Execution sessions, provocation deck |
-| Small visible progress is the motivational backbone | Amabile-Kramer, Clear, Fogg, behavioral activation, SDT competence | Informational feedback, no gamification, Narrator structure |
+| Mode separation between generation and evaluation | Guilford, Beaty et al., Puccio CPS, Double Diamond, De Bono, Osborn, Ellamil et al. | Verb-defined registers, brainstorm vs. execution flow, provocation deck |
+| Small visible progress is the motivational backbone | Amabile-Kramer, Clear, Fogg, behavioral activation, SDT competence | Informational feedback, no gamification, narrative structure |
 | Specific plans outperform vague intentions | Gollwitzer, WOOP/MCII, Leroy, GTD next actions, OKR key results | If-then nudges, DoD checklists, marker three-field format |
 | Ritualized reflection beats ad-hoc introspection (if it avoids rumination) | GTD weekly review, Win the Week, Trapnell-Campbell, Eurich | Reflect with "what" questions, rotating prompts, rumination guardrails |

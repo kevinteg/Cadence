@@ -16,21 +16,21 @@ git commit -m "Bootstrap Cadence repo"
 claude
 ```
 
-Then paste the prompt from `docs/bootstrap-prompt.md`, or just type `/recap`.
+Then run `/cadence:start` to begin.
 
 ## What's Here
 
 ```
-CLAUDE.md                    Agent entry point (vocabulary, modes, conventions)
+CLAUDE.md                    Agent entry point
 cadence.yaml                 Global configuration
-.claude/commands/            Slash commands (/recap, /mark, /reflect, /thought, /status)
-pursuits/                    Active pursuits with projects and session markers
-thoughts/                    Captured ideas awaiting triage
+cadence-plugin/              Claude Code plugin (skills, runtime, workflows, deck)
+pursuits/                    Pursuits with projects, ideas, and session markers
+thoughts/                    Captured thoughts awaiting triage
 reflections/                 Weekly reflection artifacts
 narratives/                  Generated writing
-workflows/                   Workflow definitions (Reflect ritual, etc.)
-docs/                        Reference documentation (architecture, vision, etc.)
-src/                         Engine code (future — CLI, indexer, MCP server)
+workflows/                   Workflow definitions
+journeys/                    User journey tests
+docs/                        Reference documentation
 ```
 
 ## This Repo is Its Own First User
@@ -44,5 +44,5 @@ as test fixtures for validating the format.
 - `docs/architecture.md` — All design decisions and rationale
 - `docs/product-vision.md` — Full product vision
 - `docs/one-pager.md` — Elevator pitch
-- `docs/state-examples.md` — Example data formats with tradeoffs analysis
-- `docs/gtd-critique.md` — GTD-informed critique (addressed in current design)
+- `docs/references.md` — Reference materials
+- `docs/research.md` — Research notes
