@@ -41,7 +41,9 @@ your first session.
 
 ## Verbs
 
-The core command surface. One voice, verb-defined register.
+The core command surface. One voice, verb-defined register. Per-verb
+tone, behavior, and guardrails are specified in
+[`workflows/verb-contracts.md`](workflows/verb-contracts.md).
 
 ### Divergent (find what to build)
 

@@ -82,7 +82,7 @@ returned data.
    - **What shifted:** New ideas, changed plans, things dropped
    - **What's next:** Leveraged Priority for the coming week
 
-4. Save to `narratives/drafts/week-<YYYY-WNN>.md`.
+3. Save to `narratives/drafts/week-<YYYY-WNN>.md`.
 
 ## Guardrails
 

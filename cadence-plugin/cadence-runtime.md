@@ -88,7 +88,7 @@ Completion flows upward from actions to projects to pursuits:
 
 ```
   Idea ──► Pursuit ──► Project ──► Action
-   ��         │           │            │
+   │         │           │            │
   Why?      DoD?     Concrete?   /complete
 ```
 
