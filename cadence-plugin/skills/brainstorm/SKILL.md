@@ -49,17 +49,14 @@ Arguments resolve via fuzzy match, partial match, or natural language.
    Every time the user hits enter with text, treat it as raw idea material.
    Your job is to keep them generating. For each response:
 
-   - **Save the seed.** Create an Idea file in `pursuits/<target>/ideas/<id>.md`:
-     ```yaml
-     ---
-     id: <slug from idea>
-     parent: <target pursuit or project>
-     state: seed
-     created: <ISO-8601>
-     ---
-
-     [Raw idea text from user]
+   - **Save the seed via the CLI:**
+     ```bash
+     node "$CADENCE_BIN" create-idea <slug-from-idea> \
+       --parent <target-pursuit-or-pursuit/project> \
+       --body "<raw idea text>"
      ```
+     `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. State
+     defaults to `seed`. The CLI handles frontmatter and file location.
    - **Keep momentum.** Respond briefly (1-3 sentences max) using
      whichever facilitator move fits the moment:
 

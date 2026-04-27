@@ -18,13 +18,13 @@ setup:
       pursuit: test-cancel
       id: orphan-idea
       title: Orphan Idea
-      stage: seed
+      state: seed
       parent: test-cancel/test-cancel-project
 
 steps:
   - command: /start test-cancel-project
     assert:
-      - contains: "Test Cancel Project"
+      - contains: "test-cancel-project"
 
   - command: /cancel
     assert:

@@ -18,7 +18,7 @@ setup:
 steps:
   - command: /start test-capture-project
     assert:
-      - contains: "Test Capture Project"
+      - contains: "test-capture-project"
 
   - command: /capture "test thought"
     assert:
@@ -30,5 +30,6 @@ steps:
 teardown:
   - delete_files:
       - pursuits/test-capture/
-      - thoughts/unprocessed/test-thought*.md
+      - thoughts/unprocessed/*.md
   - assert_clean: pursuits/test-capture/
+  - assert_clean: thoughts/unprocessed/

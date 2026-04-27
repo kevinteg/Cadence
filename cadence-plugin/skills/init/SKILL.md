@@ -12,34 +12,24 @@ Set up a new repo for Cadence. Only needs to run once per repo.
    root. If it exists, say: "This repo is already set up for Cadence.
    Run /cadence:start to get started."
 
-2. **Create directory structure**:
+2. **Create the Wandering pursuit via the CLI:**
+   ```bash
+   node "$CADENCE_BIN" create-pursuit wandering \
+     --type ongoing \
+     --description "The default home for unattached ideas. Seeds captured here don't yet belong to any pursuit — they're waiting to be developed, promoted, or closed. Wandering never closes."
    ```
-   pursuits/
+   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. The CLI
+   creates the pursuit directory plus `projects/`, `sessions/`, and
+   `ideas/` subdirectories.
+
+3. **Create remaining directories** (the CLI doesn't create these
+   yet — they're per-repo, not per-pursuit):
+   ```
    pursuits/_someday/
    pursuits/_archived/
-   pursuits/wandering/
-   pursuits/wandering/ideas/
-   pursuits/wandering/sessions/
-   pursuits/wandering/projects/
    thoughts/unprocessed/
    reflections/
    narratives/drafts/
-   ```
-
-3. **Create Wandering pursuit** at `pursuits/wandering/pursuit.md`:
-   ```yaml
-   ---
-   id: wandering
-   type: ongoing
-   status: active
-   created: <today>
-   ---
-
-   # Wandering
-
-   The default home for unattached ideas. Seeds captured here don't yet
-   belong to any pursuit — they're waiting to be developed, promoted, or
-   closed. Wandering never closes.
    ```
 
 4. **Create cadence.yaml** from defaults:
@@ -60,6 +50,7 @@ Set up a new repo for Cadence. Only needs to run once per repo.
      someday_review: monthly
      marker_stale_days: 7
      waiting_for_grace_days: 2
+     dormant_days: 14
 
    reflect:
      day: sunday

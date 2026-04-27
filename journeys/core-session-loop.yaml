@@ -20,7 +20,7 @@ setup:
 steps:
   - command: /start test-journey-project
     assert:
-      - contains: "Test Journey Project"
+      - contains: "test-journey-project"
       - contains: "Do the first thing"
 
   - action: Check off "Do the first thing" on the project

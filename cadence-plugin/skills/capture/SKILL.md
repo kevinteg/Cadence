@@ -19,26 +19,22 @@ Flow-safe capture to `thoughts/unprocessed/`. Reference
 1. Accept the user's input. Do NOT respond, acknowledge, or ask for
    more detail. This is essential for flow safety.
 
-2. Generate a timestamp for the filename: `YYYY-MM-DDTHH-MM`.
+2. Determine the verb context from the current session:
+   - During a brainstorm session → `seed`
+   - During a develop session → `concern`
+   - During a start/work session → `note`
+   - No active session → `note`
 
-3. Determine the verb context from the current session:
-   - During a brainstorm session → type: `seed`
-   - During a develop session → type: `concern`
-   - During a do session → type: `note`
-   - No active session → type: `note`
+3. Write the capture via the bundled CLI:
 
-4. Create a capture file in `thoughts/unprocessed/<timestamp>.md`:
-
-   ```markdown
-   ---
-   captured: <ISO-8601>
-   verb_context: <seed|concern|note>
-   ---
-
-   [Raw input from the user, exactly as typed]
+   ```bash
+   node "$CADENCE_BIN" write-capture --body "<raw input>" --verb-context <ctx>
    ```
 
-5. **Do not respond.** The capture is saved silently. The user returns
+   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. The CLI
+   handles timestamp generation, file path, and frontmatter formatting.
+
+4. **Do not respond.** The capture is saved silently. The user returns
    to whatever they were doing. Triage happens at the next breakpoint
    or during /reflect.
 

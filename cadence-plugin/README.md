@@ -100,10 +100,46 @@ defaults:
   someday_review: monthly
   marker_stale_days: 7
   waiting_for_grace_days: 2
+  dormant_days: 14           # active projects with no marker in this many days
 
 reflect:
   day: sunday
   duration_minutes: 30
+```
+
+## Bundled CLI
+
+The plugin ships a self-contained CLI at `bin/cadence.js`. Skills shell out
+to it for deterministic scanning, reporting, and mutations. The CLI also
+runs standalone — useful when you want a status dashboard or a quick
+mutation without an agent in the loop.
+
+```bash
+# Read commands
+node /path/to/cadence-plugin/bin/cadence.js status
+node /path/to/cadence-plugin/bin/cadence.js report --json
+node /path/to/cadence-plugin/bin/cadence.js flags
+node /path/to/cadence-plugin/bin/cadence.js project <id> --json
+
+# Write commands
+node /path/to/cadence-plugin/bin/cadence.js create-pursuit my-thing --type finite
+node /path/to/cadence-plugin/bin/cadence.js create-project ship-it --pursuit my-thing \
+  --dod "It works" --dod "Tests pass" --action "Write code"
+node /path/to/cadence-plugin/bin/cadence.js check ship-it --section action --match "Write code"
+node /path/to/cadence-plugin/bin/cadence.js write-marker --pursuit my-thing --project ship-it \
+  --where "..." --next "..." --open "..."
+node /path/to/cadence-plugin/bin/cadence.js write-capture --body "stray thought"
+```
+
+Set `$CADENCE_BIN` to override the path skills use to invoke it. The
+bundle requires Node 20+ and has no `node_modules` runtime dependency.
+
+To rebuild from source after changing TypeScript files (developers only):
+
+```bash
+npm install         # one-time, at repo root
+npm test            # run the unit suite
+npm run bundle      # rebuilds cadence-plugin/bin/cadence.js
 ```
 
 ## Getting Started

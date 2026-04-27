@@ -10,12 +10,12 @@ setup:
       pursuit: test-closure
       id: seed-idea
       title: Seed Idea
-      stage: seed
+      state: seed
   - create_idea:
       pursuit: test-closure
       id: developed-idea
       title: Developed Idea
-      stage: developed
+      state: developed
 
 steps:
   - command: /close test-closure
@@ -23,19 +23,25 @@ steps:
       - contains: "unresolved"
       - not_contains: "archived"
 
-  - action: Move seed-idea to someday and close developed-idea with reason "out of scope"
+  - action: Close seed-idea with reason "not relevant" and developed-idea with reason "out of scope"
     assert:
       - file_contains:
           path: pursuits/test-closure/ideas/seed-idea.md
-          pattern: "resolution:"
+          pattern: "state: closed"
+      - file_contains:
+          path: pursuits/test-closure/ideas/seed-idea.md
+          pattern: "closed_reason"
       - file_contains:
           path: pursuits/test-closure/ideas/developed-idea.md
-          pattern: "resolution:"
+          pattern: "state: closed"
+      - file_contains:
+          path: pursuits/test-closure/ideas/developed-idea.md
+          pattern: "closed_reason"
 
   - command: /close test-closure
     assert:
       - not_contains: "unresolved"
-      - contains: "closed"
+      - contains: "archived"
 
 teardown:
   - delete_files:

@@ -7,6 +7,9 @@ description: Show system dashboard or drill into pursuits, projects, and actions
 Show a system-level overview, or drill down into pursuits, projects, and
 actions. Accepts an optional argument to navigate the hierarchy.
 
+The bundled CLI does the scanning. Skill responsibility is fuzzy
+argument resolution and number-shortcut tracking.
+
 ## Usage
 
 - `/status` — system dashboard with counts and flags
@@ -19,143 +22,71 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 `/status build` matches `build-cadence-v1`. `/status the plugin project`
 matches `package-as-plugin`.
 
-## Argument Routing
+## CLI binding
 
-If an argument is provided, resolve it and route:
+Throughout this skill, `$CADENCE_BIN` refers to the path to the bundled
+CLI. Default: `./cadence-plugin/bin/cadence.js` relative to the repo
+root. Invoke as `node "$CADENCE_BIN" <subcommand>`.
 
-### `/status pursuits`
+The CLI auto-detects repo root from cwd and emits human-readable output
+by default; `--json` switches to structured output for further reasoning.
 
-List all pursuits grouped by lifecycle state. Hide archived.
+## Routing
 
-```
-Pursuits
+If no argument is provided → run **Dashboard** below.
 
-Active:
-1. [pursuit-id] — [N active] | [N on_hold] | [N done] projects
+If the argument is exactly `pursuits` → run `node "$CADENCE_BIN"
+pursuits` and present its output verbatim. Remember the displayed
+ordering for number shortcuts.
 
-Someday:
-2. [pursuit-id] — "[first line of description]"
+If the argument is a number that matches the most recent numbered list
+shown in this conversation, resolve it to the corresponding pursuit or
+project and re-route accordingly.
 
-[N archived hidden]
-```
+Otherwise → resolve the argument:
+1. Try as a pursuit ID (run `node "$CADENCE_BIN" pursuits --json`,
+   match against `id` field; fuzzy/partial OK). If matched, run
+   `node "$CADENCE_BIN" pursuit <id>` and present output verbatim.
+2. Try as a project ID (run `node "$CADENCE_BIN" scan --json` and
+   match against project IDs; fuzzy/partial OK). If matched, run
+   `node "$CADENCE_BIN" project <id>` (use `--pursuit <id>` to
+   disambiguate if multiple match) and present output verbatim.
+3. If no match: "No pursuit or project matches '[arg]'. Try
+   `/cadence:status pursuits` to see options."
 
-Number each entry for drill-down shortcuts.
+When presenting any numbered list, remember the mapping in conversation
+context so future `/status N` calls resolve correctly.
 
-### `/status <pursuit-id>`
+## Dashboard
 
-List projects in the pursuit. Show active and on_hold. Hide done
-(show count). Mark projects with no markers as `[not started]`.
-Include a brief description for each project (from the `# Title` or
-first sentence of Notes section).
+When no argument is provided:
 
-```
-[pursuit-id] — [N/M] projects done
+1. Run `node "$CADENCE_BIN" status`. The CLI produces the entire
+   dashboard:
+   - Leveraged Priority (extracted from latest reflection)
+   - Last Reflect (date + status)
+   - Last Session (relative time on pursuit/project, done|WIP)
+   - Pursuits / Projects / Actions / Thoughts counts
+   - Reconciler flags
 
-Active:
-1. [project-id]: [brief description] — [N/M DoD] [not started]
-2. [project-id]: [brief description] — [N/M DoD]
+2. Present the CLI output verbatim. Do not paraphrase or annotate.
 
-On hold:
-3. [project-id]: [brief description] — [N/M DoD]
+3. If the CLI output indicates an active session in this conversation
+   that supersedes the "Last Session" line (the user invoked `/start`
+   on a different project earlier in the conversation), replace the
+   Last Session line with `Active session: <pursuit/project>`. This is
+   the only field the agent overrides — everything else is CLI-authored.
 
-[N done projects hidden]
-```
+## Fallback
 
-Number each entry for drill-down shortcuts.
+If the CLI is unavailable (missing binary, Node not installed), fall
+back to manual scanning:
+- Glob `pursuits/*/pursuit.md` for active pursuits
+- Glob `pursuits/*/projects/*.md` for projects, parse status from
+  frontmatter, count DoD/Actions checkboxes
+- Glob `pursuits/**/sessions/*.md` for the most recent marker
+- Read `cadence.yaml` for thresholds
+- Apply `workflows/reconciler.md` checks for flags
 
-### `/status <project-id>`
-
-Show full DoD checklist and Actions for the project. Works in or out
-of a session.
-
-```
-[project-id] — [N/M DoD] [not started | active | on_hold | done]
-
-Definition of Done:
-- [ ] [item]
-- [x] [item]
-
-Actions:
-- [ ] [action]
-- [x] [action]
-
-[If waiting_for items exist, show them]
-```
-
-### Numbered shortcuts
-
-After presenting any numbered list, remember the mapping in conversation
-context. If the user runs `/status 2`, resolve to the second item from
-the most recent list.
-
----
-
-## Dashboard (no argument)
-
-When no argument is provided, show the system dashboard:
-
-### Steps
-
-1. Scan all active pursuits and count them.
-
-2. For each active pursuit, count active projects, done projects,
-   and on_hold projects.
-
-3. Count total unchecked actions across all active projects.
-
-4. Count all `waiting_for` items across all projects.
-
-5. Count unprocessed thoughts.
-
-6. Find the most recent reflection and check if it's complete.
-   Extract the leveraged priority if set.
-
-7. Determine session state:
-   - If there is a current active session (established by a verb invocation
-     in this conversation), show it as "[pursuit/project]"
-   - If no active session, find the most recent marker across all pursuits.
-     Calculate age. Check the status of the project referenced in that
-     marker — if the project is done, show "done"; otherwise show "WIP".
-
-8. **Run reconciler checks** (the reconciler workflow is included in the
-   cadence plugin under workflows/reconciler.md — reference it for full
-   detection logic):
-
-   a. **Overdue waiting-for:** Scan all project frontmatter for `waiting_for`
-      items. Flag if today > `expected` + `waiting_for_grace_days` from
-      cadence.yaml.
-   b. **Dormant projects:** For each active project with unchecked actions,
-      find the most recent marker referencing it. Flag if no marker within
-      14 days.
-   c. **Stale markers:** For each active project, flag if most recent marker
-      is older than `marker_stale_days` from cadence.yaml. Suppress if
-      already flagged as dormant.
-   d. **Structural issues:** Flag active projects with empty DoD, all DoD
-      items checked but status not `done`, or open DoD but no unchecked
-      actions.
-
-   e. **WIP limits:** Check `wip_limits` in cadence.yaml. Count in-progress
-      projects (active projects with at least one marker — unstarted projects
-      are backlog, not WIP). Flag if in-progress projects > `max_active_projects`.
-
-   Note: Someday cue surfacing is /reflect-only, not shown in /status.
-
-9. Present a dashboard:
-
-   ```
-   Cadence Status
-
-   Leveraged Priority: [priority or "not set"]
-   Last Reflect: [date] ([complete/incomplete])
-   [pursuit/project] or Last Session: [relative time] on [pursuit/project] ([done|WIP])
-
-   Pursuits: [N active] | [N someday]
-   Projects: [N active] | [N on_hold] | [N done]
-   Actions:  [N pending] | [N waiting]
-   Thoughts: [N unprocessed]
-
-   Flags:
-   - [reconciler flags, one per line]
-
-   [If no flags]: No flags. System is healthy.
-   ```
+The CLI is preferred — it's deterministic and faster. Only fall back
+when the bin is verifiably absent.

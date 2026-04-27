@@ -4,8 +4,8 @@ description: Quiet report of system health — stale state, aging Ideas, dormant
 
 # /reconcile
 
-Standalone quiet report of system health. Reference
-`workflows/reconciler.md` for full detection logic.
+Standalone quiet report of system health. The full detection logic lives
+in `workflows/reconciler.md`.
 
 This is the on-demand version of the reconciler. The loud version lives
 inside /reflect (Get Clear phase). This produces a report without
@@ -17,33 +17,34 @@ prompting for action.
 
 ## Steps
 
-1. Run all reconciler checks from `workflows/reconciler.md`:
-   - Overdue waiting-for items
-   - Dormant projects (no marker in 14+ days)
-   - Stale markers (older than threshold)
-   - Structural issues (empty DoD, all-done-not-closed, no actions)
-   - Aging Seeds (seed state > 14 days)
-   - Unpromoted Developed Ideas (developed > 7 days)
-   - Growing backlog ratio (Ideas generated > 2x resolved)
-   - Long-running projects (30+ days, <50% DoD)
-   - Pursuit completion proximity (1-2 projects remaining)
-   - Someday cues (triggers due)
+1. Run the bundled CLI to get current flags. The command auto-detects the
+   repo root from cwd:
 
-2. Present as a quiet report — informational, not interactive:
+   ```bash
+   node "$CADENCE_BIN" flags
    ```
-   Reconciler Report
 
-   [If flags found]:
-   - [type] [entity]: [suggestion]
-   - [type] [entity]: [suggestion]
+   Where `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`
+   relative to the repo root. (If unset, use that relative path.)
 
-   [N] flags across [M] pursuits.
-
-   [If no flags]: System is clean. No flags.
-   ```
+2. The CLI emits flags one per line in the form `- [type] [entity]:
+   [details]`. Present the output verbatim under a "Reconciler Report"
+   heading. If the CLI prints "No flags. System is healthy.", report
+   "System is clean. No flags."
 
 3. Do not prompt for action. The user reads the report and acts on
    their own, or addresses flags during /reflect.
+
+## Notes
+
+The CLI implements checks 1-5 from `workflows/reconciler.md` (overdue
+waiting-for, dormant projects, stale markers, structural issues, WIP over
+limit). Idea-specific checks (aging seeds, unpromoted developed,
+backlog ratio) and someday-cue surfacing are still agent-implemented and
+appear in /reflect, not /reconcile.
+
+If the CLI is unavailable, fall back to scanning the file tree manually
+following `workflows/reconciler.md`.
 
 ## Guardrails
 

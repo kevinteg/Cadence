@@ -42,19 +42,31 @@ Arguments resolve via fuzzy match, partial match, or natural language.
    - Resolve each Idea before proceeding. Moving to Wandering or closing
      with a reason counts as resolution.
 
-4. **Update the project:**
-   - Set `status: dropped` in frontmatter.
-   - Add `dropped_reason: <reason>` to frontmatter.
-   - Add `dropped_at: <ISO-8601>` to frontmatter.
+4. **Update the project via the CLI:**
+   ```bash
+   node "$CADENCE_BIN" set-status <project-id> \
+     --pursuit <pursuit-id> --status dropped --reason "<user's reason>"
+   ```
+   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. The CLI
+   sets `status: dropped`, `dropped_reason: <reason>`, and stamps
+   `dropped_at: <ISO timestamp>` in frontmatter.
 
 5. **If an active session was on this project,** close the session (no
    marker needed — cancellation closed it).
 
-6. **Confirm with pursuit context:**
+6. **Resolve any unresolved Ideas** the user identified in step 3 by
+   using the appropriate CLI commands:
+   - Move to Wandering: `cadence set-idea-state <id> --state moved
+     --new-parent wandering`
+   - Close with reason: `cadence set-idea-state <id> --state closed
+     --reason "<reason>"`
+
+7. **Confirm with pursuit context:**
    ```
    Cancelled: [project] — "[reason]"
    [pursuit] — [N/M] projects done, [K] dropped
    ```
+   Read counts via `cadence pursuit <id> --json`.
 
 ## Guardrails
 

@@ -21,11 +21,21 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 1. Resolve the pursuit. Confirm intent: "Close [pursuit]?"
 
-2. Check for unresolved Ideas in `pursuits/<pursuit>/ideas/` — any Idea
-   with state `seed` or `developed`. Ideas in `promoted`, `moved`, or
-   `closed` state are considered resolved. For `moved` Ideas, the move
-   only counts as resolution if the target pursuit/project is active (not
-   archived or someday) — otherwise the Idea is still unresolved.
+2. Check for unresolved Ideas via the bundled CLI:
+   ```bash
+   node "$CADENCE_BIN" ideas --parent <pursuit-id> --state seed,developed --json
+   ```
+   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. Ideas in
+   `promoted`, `moved`, or `closed` state are considered resolved. For
+   `moved` Ideas, the move only counts as resolution if the target
+   pursuit/project is active (not archived or someday) — verify by
+   reading the Idea's `promoted_to` field and cross-checking against the
+   list from `node "$CADENCE_BIN" pursuits --json`.
+
+   The `--parent` filter only matches the pursuit itself; for ideas
+   whose parent is `<pursuit-id>/<project-id>`, run a second query per
+   project (or scan with no `--parent` and filter by prefix in the
+   agent).
 
 3. **If unresolved Ideas exist — absolute block.**
    Cannot close until every Idea is resolved:
@@ -41,9 +51,18 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 5. Once all Ideas are resolved, check that all Projects are done or dropped.
    If active/on_hold projects remain, ask: "These projects are still open.
-   Drop them, or complete them first?"
+   Drop them, or complete them first?" For dropping:
+   ```bash
+   node "$CADENCE_BIN" set-status <project-id> --pursuit <pursuit-id> \
+     --status dropped --reason "<reason>"
+   ```
 
-6. Update pursuit frontmatter: `status: archived`. Move to `pursuits/_archived/`.
+6. **Archive the pursuit via the CLI:**
+   ```bash
+   node "$CADENCE_BIN" move-pursuit <pursuit-id> --to archived
+   ```
+   The CLI moves the directory to `pursuits/_archived/` and updates the
+   pursuit's `status` frontmatter to `archived`.
 
 7. Generate closure narrative — summarize the Pursuit's arc:
    "Generated [N] Ideas — [X] became Projects, [Y] became their own
@@ -53,25 +72,33 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 ### Project Closure (override-with-reason)
 
-1. Resolve the project. Check DoD status.
+1. Resolve the project. Check DoD status via
+   `node "$CADENCE_BIN" project <id> --pursuit <pursuit-id> --json`.
 
 2. If all DoD items are checked → standard completion:
    - Confirm: "[project] has all DoD items complete. Mark as done?"
-   - Update `status: done` in frontmatter
+   - Run `node "$CADENCE_BIN" set-status <project-id> --pursuit <pursuit-id>
+     --status done`
    - Run pursuit checkpoint (see Completing a Project in runtime)
 
 3. If DoD items remain (cancellation/drop):
    - Ask: "Not all DoD items are done. Drop this project?"
    - Require a reason: "What's the reason for dropping?"
 
-4. Check for unresolved Ideas in `pursuits/<pursuit>/ideas/` that
-   reference this project as parent. If any exist:
+4. Check for unresolved Ideas via the bundled CLI:
+   ```bash
+   node "$CADENCE_BIN" ideas --parent <pursuit-id>/<project-id> --state seed,developed --json
+   ```
+   If any are returned:
    - **Override-with-reason** (not absolute block): "This project has
      [N] unresolved Ideas. You can close anyway, but let's walk them."
    - Walk each: move, close-with-reason, promote, or develop-first.
    - If the user wants to skip: accept with reason logged.
 
-5. Update project frontmatter: `status: done` or `status: dropped`.
+5. Update project status via the CLI:
+   - For drop: `cadence set-status <id> --pursuit <pursuit-id>
+     --status dropped --reason "<reason>"`
+   - For done: `cadence set-status <id> --pursuit <pursuit-id> --status done`
 
 6. Run pursuit checkpoint.
 

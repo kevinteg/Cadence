@@ -57,8 +57,8 @@ steps:
       - contains: "Alice"
       - contains: "overdue"
       - contains: "dormant"
-      - contains: "All Done Not Closed"
-      - contains: "No Actions Left"
+      - contains: "structural-all-done"
+      - contains: "structural-no-actions"
       - not_contains: "No flags"
 
 teardown:

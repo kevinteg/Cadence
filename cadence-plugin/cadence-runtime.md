@@ -115,6 +115,48 @@ in `seed` or `developed` state. Ideas in `promoted`, `moved`, or `closed`
 state are resolved. Moving an idea counts as resolution only if the target
 is an active pursuit or project.
 
+## Bundled CLI
+
+Many skills shell out to a deterministic CLI for read-only state
+inspection (scanning the repo, computing reconciler flags, fetching
+project state). The CLI ships inside the plugin at
+`bin/cadence.js`. Skills invoke it as:
+
+```bash
+node "$CADENCE_BIN" <subcommand> [--json]
+```
+
+`$CADENCE_BIN` should be set to the absolute path of the bundled file
+(set it in your shell profile or a per-repo `.envrc`). If unset,
+skills default to `./cadence-plugin/bin/cadence.js` relative to the
+repo root — which works when the plugin lives inside the repo (this
+project's setup) but not when consumed externally. External users:
+export `CADENCE_BIN` to the absolute path of the file shipped with
+your plugin install.
+
+### Read subcommands
+
+`scan`, `report`, `status`, `flags`, `pursuits`, `pursuit <id>`,
+`project <id>`, `ideas`, `markers`, `captures`. All accept `--json` for
+structured output. Skills consume `--json` and reason over the typed
+result; the human-readable default is for the user invoking the CLI
+directly during an AI outage.
+
+### Write subcommands
+
+`create-pursuit <id>`, `create-project <id>`, `create-idea <id>`,
+`write-marker`, `write-capture`, `write-reflection`,
+`set-status <project-id>`, `set-idea-state <idea-id>`,
+`check <project-id>`, `add-item <project-id>`,
+`add-waiting-for <project-id>`, `flag-waiting-for <project-id>`,
+`move-pursuit <id>`. Each performs one well-formed mutation and emits
+JSON describing what was written. Use these in preference to direct
+Edit/Write — they enforce schema, generate timestamps, and keep
+frontmatter formatting consistent.
+
+If the bin is missing, skills fall back to manual file scanning and
+direct Write per their internal fallback notes.
+
 ## Conventions
 
 ### File Operations
@@ -130,14 +172,20 @@ When I describe new work, ask:
 2. What does "done" look like? (translate my answer into checklist items)
 3. What's the first action?
 
-**WIP check before creating:** Count in-progress projects (active with at
-least one marker). If at or above `max_active_projects` from cadence.yaml,
-warn: "You have [N] in-progress projects (limit: [max]). Consider finishing
-or pausing one before adding more." The user can override — this is a
-guardrail, not a gate.
+**WIP check before creating:** Read `snapshot.projects` and
+`snapshot.config` from `node "$CADENCE_BIN" scan --json`. Count
+in-progress projects (`status: active` AND `hasMarker: true`). If at
+or above `config.max_active_projects`, warn: "You have [N] in-progress
+projects (limit: [max]). Consider finishing or pausing one before
+adding more." The user can override — this is a guardrail, not a gate.
 
-Create the project file with frontmatter, Definition of Done checklist,
-and initial action(s).
+Create the project file via the CLI:
+```bash
+node "$CADENCE_BIN" create-project <slug> --pursuit <pursuit-id> \
+  --description "<one-paragraph framing>" \
+  --dod "<criterion 1>" --dod "<criterion 2>" \
+  --action "<first action>"
+```
 
 ### Completing a Project
 Triggered by `/complete` when the last action/DoD item is checked:

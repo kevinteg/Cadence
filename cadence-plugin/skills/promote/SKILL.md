@@ -44,13 +44,21 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 3. **Enforce the graduation gate:**
 
+   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js` for all
+   the CLI calls below.
+
    **Idea → Pursuit (Why gate):**
    - Ask: "What's the Why behind this? Why does this matter to you?"
    - The Why must connect to values, identity, or responsibility.
    - If the Why is vague: "That's a start — can you make it more specific?
      A Pursuit without a clear Why won't survive the first hard week."
-   - Once accepted, create the pursuit file with the Why in the body and
-     frontmatter.
+   - Once accepted:
+     ```bash
+     node "$CADENCE_BIN" create-pursuit <slug> \
+       --type finite \
+       --why "<the user's why>" \
+       --description "<the user's framing>"
+     ```
 
    **Idea → Project (DoD gate):**
    - Ask: "What does done look like? When you finish this, what's true
@@ -58,20 +66,32 @@ Arguments resolve via fuzzy match, partial match, or natural language.
    - Translate the answer into a Definition of Done checklist.
    - If the DoD is vague or has only one item: "This might be an Action,
      not a Project. A Project needs multiple steps. Is this really a Project?"
-   - Once accepted, create the project file with DoD and initial actions.
+   - Once accepted:
+     ```bash
+     node "$CADENCE_BIN" create-project <slug> --pursuit <pursuit-id> \
+       --description "<one-paragraph framing>" \
+       --dod "<item 1>" --dod "<item 2>" \
+       --action "<first action>" --action "<second action>"
+     ```
 
    **Idea → Action (Concreteness gate):**
    - Ask: "Can you visualize doing this? What's the specific next physical
      or digital action?"
    - If abstract: "That's still abstract — what would you actually do first?
      Where would you start?"
-   - Once accepted, add the action as a checkbox to the target project.
+   - Once accepted:
+     ```bash
+     node "$CADENCE_BIN" add-item <project-id> --pursuit <pursuit-id> \
+       --section action --text "<concrete action>"
+     ```
 
-4. **Update the Idea:**
-   - Set `state: promoted`
-   - Set `promoted_to: <type>:<id>` (e.g., `project:build-indexer`)
-   - The Idea file persists as an origin link — the Narrative can reference
-     where this Pursuit/Project/Action came from.
+4. **Update the Idea via the CLI:**
+   ```bash
+   node "$CADENCE_BIN" set-idea-state <idea-id> --state promoted \
+     --promoted-to <type>:<id>    # e.g., project:build-indexer
+   ```
+   The Idea file persists as an origin link — the Narrative can
+   reference where this Pursuit/Project/Action came from.
 
 5. **Confirm:**
    ```

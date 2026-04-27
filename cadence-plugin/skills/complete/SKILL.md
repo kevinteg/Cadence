@@ -17,56 +17,87 @@ the project. Same for pursuits.
 Arguments resolve via fuzzy match against unchecked actions in the active
 project. If no active session, resolve against all active projects.
 
+## CLI binding
+
+`$CADENCE_BIN` refers to the bundled CLI. Default:
+`./cadence-plugin/bin/cadence.js`. Use it for all read-only state
+inspection (current DoD/action progress, project status). Writes
+(checking off items, updating frontmatter) still use Edit.
+
 ## Steps
 
 1. **Resolve the action:**
    - If in an active session with no argument: complete the action currently
      being worked on (the most recently discussed unchecked action).
-   - If an argument is given: fuzzy match against unchecked actions in the
-     active project, or across all active projects if no session.
+   - If an argument is given and there's an active session, fetch the
+     project state with `node "$CADENCE_BIN" project <project-id>
+     --pursuit <pursuit-id> --json` and fuzzy-match the argument against
+     unchecked actions.
+   - If no active session, fetch all active projects via
+     `node "$CADENCE_BIN" scan --json` and fuzzy-match across their
+     unchecked actions.
    - If the match is ambiguous, present options and ask.
 
-2. **Mark the action done:**
-   - Check off the action in the project file.
-   - If a note was provided (after `--`), append it to the action line
-     or as a sub-bullet. This note feeds the narrative.
+2. **Mark the action done via the CLI:**
+   ```bash
+   node "$CADENCE_BIN" check <project-id> \
+     --pursuit <pursuit-id> \
+     --section action \
+     --match "<action text or 0-based index>" \
+     --note "<optional narrative note>"
+   ```
+   The CLI returns the matched action's text. If the user added new
+   DoD items mid-session, run `cadence add-item <id> --section dod
+   --text "..."` to append.
 
 3. **Check for upward completion:**
 
-   **Project level:** After checking off the action, count remaining
-   unchecked DoD items and actions in the project.
-   - If all DoD items are checked:
+   **Project level:** Re-fetch the project after the edit:
+   `node "$CADENCE_BIN" project <id> --pursuit <pursuit-id> --json`.
+   Read `dodProgress` and `actionProgress` from the response.
+   - If `dodProgress.done === dodProgress.total` and all `actions` are
+     checked:
      ```
      All DoD items checked for [project]. Complete this project, or add
      more items?
      ```
-     - If the user completes: set `status: done`, follow the Completing a
-       Project workflow from the Cadence runtime (pursuit checkpoint,
-       suggest next project).
-     - If the user adds items: they provide new DoD/action items, project
+     - If the user completes:
+       ```bash
+       node "$CADENCE_BIN" set-status <project-id> \
+         --pursuit <pursuit-id> --status done
+       ```
+       Then follow the Completing a Project workflow from the Cadence
+       runtime (pursuit checkpoint, suggest next project).
+     - If the user adds items: use `cadence add-item` for each. Project
        stays active.
      - **No third option.** An active project with no open items is
        inconsistent state.
 
-   **Pursuit level:** If the project was just completed, check the pursuit.
-   - If all projects in the pursuit are done or dropped:
-     ```
-     All projects in [pursuit] are resolved. Complete this pursuit, or
-     add more projects?
-     ```
-     - Same rules: complete or extend, no third option.
+   **Pursuit level:** If the project was just completed, check the
+   pursuit via `node "$CADENCE_BIN" pursuit <pursuit-id> --json`. Inspect
+   the `projects` array — if every project's `status` is `done` or
+   `dropped`:
+   ```
+   All projects in [pursuit] are resolved. Complete this pursuit, or
+   add more projects?
+   ```
+   - If the user completes: `node "$CADENCE_BIN" move-pursuit
+     <pursuit-id> --to archived`. Same rules: complete or extend, no
+     third option.
 
 4. **Confirm:**
    ```
    Done: [action text]
    [project] — [N/M DoD]
    ```
+   Read N/M from the post-edit `dodProgress` field.
 
 ## For physical/standalone tasks
 
 `/complete` can be called without a prior `/start` for quick physical
 tasks. In this case:
-- Resolve the action across all active projects.
+- Fetch state with `node "$CADENCE_BIN" scan --json` and resolve the
+  action across all active projects.
 - Mark it done with optional note.
 - No session is opened or closed — it's a point-in-time completion.
 

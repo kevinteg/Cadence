@@ -18,14 +18,31 @@ Redemption-aware. Informational, not praise-based.
 
 Arguments resolve via fuzzy match, partial match, or natural language.
 
+## CLI binding
+
+`$CADENCE_BIN` refers to the bundled CLI. Default:
+`./cadence-plugin/bin/cadence.js`. Use it to gather time-windowed
+markers and ideas — the agent generates narrative prose from the
+returned data.
+
 ## Steps
 
 ### Today's Narrative (no argument)
 
-1. Scan today's markers across all pursuits.
-2. Scan actions completed today (from marker frontmatter).
-3. Scan Ideas created, developed, promoted, or closed today.
-4. Generate narrative following McAdams structure:
+1. Today's markers and actions completed:
+   ```bash
+   node "$CADENCE_BIN" markers --since <YYYY-MM-DD-today> --json
+   ```
+   Each marker's `actions_completed` field lists what was finished.
+2. Today's Idea movements:
+   ```bash
+   node "$CADENCE_BIN" ideas --since <YYYY-MM-DD-today> --json
+   ```
+   For Ideas that *changed state* today (developed/promoted/closed but
+   `created` is older), read the `developed_at` field and per-idea
+   metadata from `node "$CADENCE_BIN" ideas --json` and filter by
+   timestamp.
+3. Generate narrative following McAdams structure:
    - **What happened:** Activity summary — sessions, actions, Ideas moved
    - **What it meant:** Progress on pursuits, milestones reached
    - **What shifted:** Decisions made, direction changes, new priorities
@@ -33,7 +50,14 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 ### Pursuit Narrative (with pursuit argument)
 
-1. Read all markers, project files, and Ideas for the pursuit.
+1. Gather everything for the pursuit:
+   ```bash
+   node "$CADENCE_BIN" pursuit <pursuit-id> --json     # pursuit + projects
+   node "$CADENCE_BIN" markers --pursuit <id> --json   # all markers, sorted desc
+   node "$CADENCE_BIN" ideas --parent <id> --json      # parent-level ideas
+   ```
+   For project-scoped Ideas, run `ideas --json` and filter parents that
+   start with `<id>/` agent-side.
 2. Generate the full arc:
    - **What happened:** Timeline of projects, milestones, key sessions
    - **The Idea story:** How many Ideas generated, promoted to projects,
@@ -44,9 +68,16 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 ### Weekly Narrative (`week` argument)
 
-1. Scan all markers from this ISO week.
-2. Scan all actions completed, Ideas moved, projects completed.
-3. Generate weekly summary:
+1. Compute the ISO week's start date (Monday). Then:
+   ```bash
+   node "$CADENCE_BIN" markers --since <monday-YYYY-MM-DD> --json
+   node "$CADENCE_BIN" ideas --since <monday-YYYY-MM-DD> --json
+   ```
+   For projects completed this week, filter `node "$CADENCE_BIN" scan
+   --json | .projects[]` for `status: done` (the agent already knows
+   which were not-done at week start by reading the previous week's
+   reflection or markers).
+2. Generate weekly summary:
    - **What happened:** Pursuits touched, projects advanced, actions done
    - **What it meant:** Progress toward Leveraged Priority
    - **What shifted:** New ideas, changed plans, things dropped

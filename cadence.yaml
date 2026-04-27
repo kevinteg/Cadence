@@ -11,6 +11,7 @@ defaults:
   someday_review: monthly       # how often reconciler surfaces someday pursuits
   marker_stale_days: 7          # markers older than this get flagged
   waiting_for_grace_days: 2     # days past expected date before flagging
+  dormant_days: 14              # active projects with no marker in this many days are dormant
 
 wip_limits:
   max_active_projects: 5        # in-progress projects (with markers) before warning

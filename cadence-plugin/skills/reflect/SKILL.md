@@ -16,12 +16,18 @@ Start or resume the weekly Reflect ritual. Reference
 1. Determine the current week number (ISO week).
 
 2. Check if a reflection file exists for this week in `reflections/`.
-   - If yes, read it. Check `status` and `phase` fields.
-   - If `status: complete`, say "Your Week [N] reflection is already done.
-     Want to review it or start something else?"
-   - If `status: in_progress`, say "You started your Week [N] reflection
-     and stopped during [phase]. Want to pick up where you left off?"
-   - If no file exists, create a new one with `status: draft`.
+   Use `node "$CADENCE_BIN" scan --json` and inspect `reflections` to
+   find one for this week's date range.
+   - If `status: complete`, say "Your Week [N] reflection is already
+     done. Want to review it or start something else?"
+   - If `status: in_progress`, say "You started your Week [N]
+     reflection and stopped during [phase]. Want to pick up where you
+     left off?"
+   - If no file exists, create one:
+     ```bash
+     node "$CADENCE_BIN" write-reflection \
+       --date <YYYY-MM-DD-this-week> --status draft
+     ```
 
 3. Show context before starting:
    ```
@@ -29,36 +35,59 @@ Start or resume the weekly Reflect ritual. Reference
    ```
    Update when transitioning to Phase 2.
 
+## CLI binding
+
+`$CADENCE_BIN` refers to the bundled CLI. Default:
+`./cadence-plugin/bin/cadence.js`. Gather state for Get Clear with:
+
+```bash
+node "$CADENCE_BIN" report --json
+```
+
+This single call yields snapshot + reconciler flags — captures count,
+projects with action lists, waiting-for items, and the structural/
+dormant/stale/WIP flag set covered by checks 1-5 in
+`workflows/reconciler.md`. Idea-specific checks (aging seeds,
+unpromoted developed, growing backlog) and someday cues are agent-
+implemented; for those, query
+`node "$CADENCE_BIN" ideas --json` and apply the threshold logic from
+`workflows/reconciler.md`.
+
 4. **Phase 1 — Get Clear**
 
-   a. Process captures: count unprocessed items in the parking lot.
-      If any, triage one by one: route to Idea (Seed), Action, or discard.
-      Confirm with the user.
+   a. Process captures: read `snapshot.captures` from the report. If
+      non-empty, triage one by one: route to Idea (Seed), Action, or
+      discard. Confirm with the user.
 
-   b. Scan all active projects for 2-minute actions (trivial items the user
-      can knock out right now). Surface them: "These look quick — want to
-      clear any of them now?"
+   b. 2-minute actions: scan unchecked items in `snapshot.projects[].actions`
+      for active projects in active pursuits; surface trivial items
+      ("These look quick — want to clear any of them now?").
 
-   c. Run reconciler checks (reference `workflows/reconciler.md` for full
-      detection logic):
-      - **Overdue waiting-for:** flag items past expected + grace days
-      - **Dormant projects:** active projects with no marker in 14+ days
-      - **Stale markers:** most recent marker older than threshold
-      - **Aging Seeds:** Ideas in seed state past review threshold
-      - **Unpromoted Developed Ideas:** Ideas through develop but not promoted
-      - **Growing backlog:** Pursuits with Idea generation outpacing resolution
-      - **Structural issues:** empty DoD, all-done-but-not-closed, long-running
-        projects (propose split-or-promote)
-      - **Someday cues:** pursuits in _someday/ with triggers due
-      - Present each flag interactively. For each, ask: act on it, defer,
-        or dismiss.
+   c. Walk reconciler flags interactively. For each entry in `flags`,
+      present and ask: act on it, defer, or dismiss. The flag kinds the
+      CLI emits are: `overdue_waiting_for`, `dormant_project`,
+      `stale_marker`, `structural_*`, `wip_over_limit`. Then run the
+      idea-specific checks (aging seeds > 14d, unpromoted developed
+      > 7d, growing backlog ratio) by reading
+      `node "$CADENCE_BIN" ideas --json` and applying the thresholds
+      from `workflows/reconciler.md`. Finally check someday cues by
+      iterating `snapshot.pursuits` filtered to `lifecycle: someday` —
+      evaluate each `cue.trigger` against the current date.
 
-   d. Project relevance check: list all active projects across all pursuits.
-      For each, ask "Still relevant?" If the user changes a project's status,
-      update the project file's frontmatter.
+   d. Project relevance check: iterate active projects from
+      `snapshot.projects`. For each, ask "Still relevant?" If the user
+      wants to change a project's status, use the CLI:
+      ```bash
+      node "$CADENCE_BIN" set-status <project-id> --pursuit <pursuit-id> \
+        --status <on_hold|dropped|done> [--reason "..." for dropped]
+      ```
 
-   e. Update the reflection file: `phase: get_clear`, mark Get Clear
-      section as complete. Save after each sub-step.
+   e. Update the reflection file via the CLI (re-running
+      `write-reflection` with the same date is an upsert):
+      ```bash
+      node "$CADENCE_BIN" write-reflection \
+        --date <YYYY-MM-DD> --status in_progress --phase get_clear
+      ```
 
 5. **Phase 2 — Get Focused**
 
@@ -67,10 +96,13 @@ Start or resume the weekly Reflect ritual. Reference
 
    b. Ask "What worked well this week?" Record the answer.
 
-   c. WIP check: Read `max_active_projects` from cadence.yaml. Count
-      in-progress projects (active with at least one marker). If over limit,
-      suggest specific projects to pause or drop — pick the ones with the
-      least recent activity or lowest alignment with the leveraged priority.
+   c. WIP check: the `wip_over_limit` flag from step 4c already covers
+      this if it fired. Otherwise count `snapshot.projects` filtered to
+      `status: active` AND `hasMarker: true` AND active pursuits. If
+      over `snapshot.config.max_active_projects`, suggest specific
+      projects to pause or drop — pick the ones with the oldest
+      `mostRecentMarker` or lowest alignment with the leveraged
+      priority.
 
    d. Review waiting-for items: who owes you what, and what's your plan
       if they don't deliver?
@@ -81,8 +113,12 @@ Start or resume the weekly Reflect ritual. Reference
    f. Ask: "What's the ONE thing that would make next week a win?"
       Record as the leveraged priority.
 
-   g. Update the reflection file: `status: complete`,
-      `leveraged_priority: "<their answer>"`.
+   g. Finalize the reflection file via the CLI:
+      ```bash
+      node "$CADENCE_BIN" write-reflection \
+        --date <YYYY-MM-DD> --status complete --phase get_focused \
+        --leveraged-priority "<their answer>"
+      ```
 
 6. Close with: "Reflection complete. Your leveraged priority for next week
    is: [priority]."

@@ -17,17 +17,40 @@ protects your attention — it does not compete for it.
 
 Arguments resolve via fuzzy match, partial match, or natural language.
 
+## CLI binding
+
+`$CADENCE_BIN` refers to the bundled CLI. Default:
+`./cadence-plugin/bin/cadence.js`. Gather all curation data with one
+call:
+
+```bash
+node "$CADENCE_BIN" report --json
+```
+
+The response includes `snapshot.config`, `snapshot.pursuits`,
+`snapshot.projects` (with `dodProgress`, `actionProgress`, `hasMarker`,
+`mostRecentMarker`), `snapshot.captures`, `snapshot.reflections`, and
+`flags`. The agent reads from this single payload — no separate Read or
+Glob calls needed for state.
+
 ## Steps
 
 ### No-argument entry (curated selection)
 
-1. Read the most recent reflection to extract the Leveraged Priority.
-2. Find the most recent marker across all pursuits.
-3. Count unprocessed captures in the parking lot.
-4. Scan active projects for 2-minute quick wins.
-5. Run reconciler checks (reference `workflows/reconciler.md`) for a
-   flag summary.
-6. Present the curated entry:
+1. Run `node "$CADENCE_BIN" report --json` and parse it. From the
+   payload extract:
+   - **Leveraged Priority:** sort `snapshot.reflections` by date desc,
+     take the first non-null `leveraged_priority`.
+   - **Most recent marker:** run
+     `node "$CADENCE_BIN" markers --json` (sorted desc by timestamp,
+     first entry is most recent across all pursuits).
+   - **Unprocessed captures count:** `snapshot.captures.length`.
+   - **2-minute quick wins:** scan unchecked `actions` across active
+     projects in active pursuits; heuristic — actions whose text is
+     short (<= ~6 words) or matches imperative verbs ("verify", "send",
+     "ping", "rename"). Surface 1-3.
+   - **Reconciler flag summary:** `flags.length`.
+2. Present the curated entry:
 
    ```
    [pursuit] — [N/M] projects done | LP: "[leveraged priority]"
@@ -45,11 +68,13 @@ Arguments resolve via fuzzy match, partial match, or natural language.
    [If reconciler flags > 0]: [N] flags — run /cadence:reconcile for details
    ```
 
-7. Wait for the user to choose. Resolve their choice to a project.
+3. Wait for the user to choose. Resolve their choice to a project.
 
 ### With-argument entry (direct session)
 
-1. Resolve the argument to an active project. If done or dropped:
+1. Resolve the argument to an active project (fuzzy/partial match
+   against the `snapshot.projects` array from
+   `node "$CADENCE_BIN" scan --json`). If status is `done` or `dropped`:
    "[Project] is already [status]. Want to create a follow-up project?"
 
 2. If there is already an active session in this conversation, prompt:
@@ -59,8 +84,12 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 ### Session start
 
-1. Read the most recent marker for this project (filter by `project`
-   field in session frontmatter).
+1. Read the most recent marker for this project:
+   ```bash
+   node "$CADENCE_BIN" markers --pursuit <pursuit-id> --project <project-id> --json
+   ```
+   The list is sorted desc by timestamp; the first entry is the most
+   recent.
 2. If a marker exists, present the ready-to-resume recap:
    ```
    [pursuit] / [project] — [N/M DoD]
@@ -68,7 +97,9 @@ Arguments resolve via fuzzy match, partial match, or natural language.
    Next: [*next* field from marker, verbatim]
    Where: [brief summary of *where* field]
    ```
-3. If no marker exists:
+3. If no marker exists, fetch the project state with
+   `node "$CADENCE_BIN" project <id> --pursuit <pursuit-id> --json` and
+   present:
    ```
    [pursuit] / [project] — [N/M DoD]
 

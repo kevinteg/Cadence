@@ -14,14 +14,14 @@ steps:
       - file_created:
           path: pursuits/test-divergent/ideas/*.md
           frontmatter:
-            stage: seed
+            state: seed
 
   - command: /develop
     assert:
       - contains: "Idea"
       - file_contains:
           path: pursuits/test-divergent/ideas/*.md
-          pattern: "stage:"
+          pattern: "state:"
 
   - command: /promote
     assert:

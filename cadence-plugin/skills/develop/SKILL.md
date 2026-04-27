@@ -20,22 +20,28 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 ## Steps
 
 1. **Resolve target:**
-   - No argument → scan all pursuits (including Wandering) for Ideas with
-     `state: seed`. Present them grouped by parent:
+   - No argument → list undeveloped Seeds via the bundled CLI:
+     ```bash
+     node "$CADENCE_BIN" ideas --state seed --json
+     ```
+     `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. Group
+     the returned ideas by `parent` (Wandering first, then other
+     pursuits) and present:
      ```
      Develop — Ideas ready for evaluation
 
      **Wandering** (unattached)
-     1. [idea-id]: [first line of idea text]
-     2. [idea-id]: [first line of idea text]
+     1. [idea-id]: [first line of body]
 
-     **[Pursuit Name]**
-     3. [idea-id]: [first line of idea text]
+     **[Parent Pursuit ID]**
+     2. [idea-id]: [first line of body]
 
      Which Ideas do you want to develop? (number, name, or "all")
      ```
-   - Idea specified → resolve to that Idea file.
-   - Also check `_seeds/` for unparented seeds.
+     If the JSON list is empty, say "No undeveloped Seeds. Run
+     `/cadence:brainstorm` to generate some."
+   - Idea specified → resolve to that Idea file (use
+     `node "$CADENCE_BIN" ideas --json` and fuzzy-match against `id`).
 
 2. **Run PPCo on each selected Idea:**
 
@@ -64,13 +70,21 @@ Arguments resolve via fuzzy match, partial match, or natural language.
    alignment with Leveraged Priority, time-to-value). Score each Idea
    against criteria. Present as a matrix.
 
-5. **Update Idea state:**
-   - If the user wants to keep developing: leave as seed, add PPCo notes
-     to the Idea file.
-   - If developed: update `state: developed`, add `developed_at: <date>`.
-     Append PPCo notes and any pre-mortem results to the Idea file.
-   - If killed: update `state: closed`, add `closed_reason: <reason>`.
-     The reason matters — "what did this Idea teach us?"
+5. **Update Idea state via the CLI:**
+   - If the user wants to keep developing: leave as seed; append PPCo
+     notes to the Idea file body (use Edit on the markdown body).
+   - If developed:
+     ```bash
+     node "$CADENCE_BIN" set-idea-state <idea-id> --state developed
+     ```
+     The CLI stamps `developed_at` automatically. Then append PPCo
+     notes and pre-mortem results to the body via Edit.
+   - If killed:
+     ```bash
+     node "$CADENCE_BIN" set-idea-state <idea-id> --state closed \
+       --reason "<what did this Idea teach us?>"
+     ```
+     The reason matters — it enters the narrative as meaning-making material.
 
 6. **Close:**
    - Auto-mark with where/next/open.

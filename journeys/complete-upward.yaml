@@ -18,7 +18,7 @@ setup:
 steps:
   - command: /start test-complete-project
     assert:
-      - contains: "Test Complete Project"
+      - contains: "test-complete-project"
 
   - command: /complete Do the only thing
     assert:

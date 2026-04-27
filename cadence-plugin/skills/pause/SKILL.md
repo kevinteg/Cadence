@@ -24,47 +24,40 @@ resumed later with `/start`.
      do not write a marker. Instead, follow the "Completing a Project"
      workflow in the Cadence runtime.
 
-3. **Generate timestamp** for the filename: `YYYY-MM-DDTHH-MM` using
-   current time.
-
-4. **Extract marker content** scoped to the active project only:
+3. **Extract marker content** scoped to the active project only:
    - **Where**: What state is the work in? What was accomplished?
    - **Next**: The first concrete thing to do when returning. Specific
      enough to start immediately.
    - **Open**: Unresolved questions, parked concerns, loose threads.
    - **Actions completed**: Actions checked off during the session.
 
-5. **Write the marker directly** (no confirmation draft):
+4. **Write the marker via the bundled CLI:**
 
-   ```markdown
-   ---
-   pursuit: <pursuit-id>
-   project: <project-id>
-   session_start: <ISO-8601>
-   session_end: <ISO-8601>
-   actions_completed: []
-   ---
-
-   # Marker: <Project Name>
-
-   ## Where
-   [2-5 sentences on current state]
-
-   ## Next
-   [The first thing to do on return — specific and actionable]
-
-   ## Open
-   [Unresolved questions, parked concerns, loose threads]
+   ```bash
+   node "$CADENCE_BIN" write-marker \
+     --pursuit <pursuit-id> --project <project-id> \
+     --where "<2-5 sentences on current state>" \
+     --next "<first thing to do on return>" \
+     --open "<unresolved questions / loose threads>" \
+     --action-completed "<text>" \  # repeatable
+     --action-completed "<text>"
    ```
 
-6. Write to `pursuits/<pursuit-id>/sessions/<timestamp>.md`.
+   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. The CLI
+   handles timestamp generation, filename, and frontmatter formatting.
+   Session start/end default to 30 minutes ago and now.
 
-7. If any actions were completed, update the project file to check them off.
+5. If any actions were completed during the session and aren't yet
+   checked in the project file, run `cadence check <project-id>
+   --section action --match "<text>"` for each. The marker's
+   `actions_completed` list is provenance; the project file's checkboxes
+   are the source of truth for completion.
 
-8. Confirm with pursuit-level context:
+6. Confirm with pursuit-level context:
    ```
    Paused. [pursuit] — [N/M] projects done
    ```
+   Use `node "$CADENCE_BIN" pursuit <id> --json` to read counts.
 
 ## Guardrails
 
