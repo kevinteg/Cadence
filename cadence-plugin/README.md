@@ -109,37 +109,38 @@ reflect:
 
 ## Bundled CLI
 
-The plugin ships a self-contained CLI at `bin/cadence.js`. Skills shell out
-to it for deterministic scanning, reporting, and mutations. The CLI also
-runs standalone — useful when you want a status dashboard or a quick
-mutation without an agent in the loop.
+The plugin ships a self-contained CLI at `bin/cadence`. Claude Code
+adds the plugin's `bin/` to `PATH` automatically, so skills (and you)
+invoke it directly as `cadence <subcommand>`. The CLI also runs
+standalone — useful for a status dashboard or a quick mutation without
+an agent in the loop.
 
 ```bash
-# Read commands
-node /path/to/cadence-plugin/bin/cadence.js status
-node /path/to/cadence-plugin/bin/cadence.js report --json
-node /path/to/cadence-plugin/bin/cadence.js flags
-node /path/to/cadence-plugin/bin/cadence.js project <id> --json
+# Read commands (tabular by default; --json for structured output)
+cadence status
+cadence report
+cadence flags
+cadence project <id>
 
 # Write commands
-node /path/to/cadence-plugin/bin/cadence.js create-pursuit my-thing --type finite
-node /path/to/cadence-plugin/bin/cadence.js create-project ship-it --pursuit my-thing \
+cadence create-pursuit my-thing --type finite
+cadence create-project ship-it --pursuit my-thing \
   --dod "It works" --dod "Tests pass" --action "Write code"
-node /path/to/cadence-plugin/bin/cadence.js check ship-it --section action --match "Write code"
-node /path/to/cadence-plugin/bin/cadence.js write-marker --pursuit my-thing --project ship-it \
+cadence check ship-it --section action --match "Write code"
+cadence write-marker --pursuit my-thing --project ship-it \
   --where "..." --next "..." --open "..."
-node /path/to/cadence-plugin/bin/cadence.js write-capture --body "stray thought"
+cadence write-capture --body "stray thought"
 ```
 
-Set `$CADENCE_BIN` to override the path skills use to invoke it. The
-bundle requires Node 20+ and has no `node_modules` runtime dependency.
+The bundle requires Node 20+ and has no `node_modules` runtime
+dependency.
 
 To rebuild from source after changing TypeScript files (developers only):
 
 ```bash
 npm install         # one-time, at repo root
 npm test            # run the unit suite
-npm run bundle      # rebuilds cadence-plugin/bin/cadence.js
+npm run bundle      # rebuilds cadence-plugin/bin/cadence
 ```
 
 ## Getting Started

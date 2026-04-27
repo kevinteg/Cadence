@@ -23,14 +23,14 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 2. Check for unresolved Ideas via the bundled CLI:
    ```bash
-   node "$CADENCE_BIN" ideas --parent <pursuit-id> --state seed,developed --json
+   cadence ideas --parent <pursuit-id> --state seed,developed --json
    ```
-   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. Ideas in
+   Ideas in
    `promoted`, `moved`, or `closed` state are considered resolved. For
    `moved` Ideas, the move only counts as resolution if the target
    pursuit/project is active (not archived or someday) — verify by
    reading the Idea's `promoted_to` field and cross-checking against the
-   list from `node "$CADENCE_BIN" pursuits --json`.
+   list from `cadence pursuits --json`.
 
    The `--parent` filter only matches the pursuit itself; for ideas
    whose parent is `<pursuit-id>/<project-id>`, run a second query per
@@ -53,13 +53,13 @@ Arguments resolve via fuzzy match, partial match, or natural language.
    If active/on_hold projects remain, ask: "These projects are still open.
    Drop them, or complete them first?" For dropping:
    ```bash
-   node "$CADENCE_BIN" set-status <project-id> --pursuit <pursuit-id> \
+   cadence set-status <project-id> --pursuit <pursuit-id> \
      --status dropped --reason "<reason>"
    ```
 
 6. **Archive the pursuit via the CLI:**
    ```bash
-   node "$CADENCE_BIN" move-pursuit <pursuit-id> --to archived
+   cadence move-pursuit <pursuit-id> --to archived
    ```
    The CLI moves the directory to `pursuits/_archived/` and updates the
    pursuit's `status` frontmatter to `archived`.
@@ -73,11 +73,11 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 ### Project Closure (override-with-reason)
 
 1. Resolve the project. Check DoD status via
-   `node "$CADENCE_BIN" project <id> --pursuit <pursuit-id> --json`.
+   `cadence project <id> --pursuit <pursuit-id> --json`.
 
 2. If all DoD items are checked → standard completion:
    - Confirm: "[project] has all DoD items complete. Mark as done?"
-   - Run `node "$CADENCE_BIN" set-status <project-id> --pursuit <pursuit-id>
+   - Run `cadence set-status <project-id> --pursuit <pursuit-id>
      --status done`
    - Run pursuit checkpoint (see Completing a Project in runtime)
 
@@ -87,7 +87,7 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 4. Check for unresolved Ideas via the bundled CLI:
    ```bash
-   node "$CADENCE_BIN" ideas --parent <pursuit-id>/<project-id> --state seed,developed --json
+   cadence ideas --parent <pursuit-id>/<project-id> --state seed,developed --json
    ```
    If any are returned:
    - **Override-with-reason** (not absolute block): "This project has

@@ -21,12 +21,8 @@ prompting for action.
    repo root from cwd:
 
    ```bash
-   node "$CADENCE_BIN" flags
+   cadence flags
    ```
-
-   Where `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`
-   relative to the repo root. (If unset, use that relative path.)
-
 2. The CLI emits flags one per line in the form `- [type] [entity]:
    [details]`. Present the output verbatim under a "Reconciler Report"
    heading. If the CLI prints "No flags. System is healthy.", report

@@ -29,5 +29,5 @@ created: 2026-04-21
 - [ ] Test do → work → mark → do cycle with marker resume
 
 ## Notes
-Testing deferred — requires user interaction. The v2-to-v3 cutover is
-complete: old commands removed, new verbs in place.
+Testing deferred — requires user interaction. Old commands removed,
+new verbs in place.

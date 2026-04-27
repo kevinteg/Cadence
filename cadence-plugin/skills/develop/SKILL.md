@@ -22,9 +22,9 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 1. **Resolve target:**
    - No argument → list undeveloped Seeds via the bundled CLI:
      ```bash
-     node "$CADENCE_BIN" ideas --state seed --json
+     cadence ideas --state seed --json
      ```
-     `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. Group
+     Group
      the returned ideas by `parent` (Wandering first, then other
      pursuits) and present:
      ```
@@ -41,7 +41,7 @@ Arguments resolve via fuzzy match, partial match, or natural language.
      If the JSON list is empty, say "No undeveloped Seeds. Run
      `/cadence:brainstorm` to generate some."
    - Idea specified → resolve to that Idea file (use
-     `node "$CADENCE_BIN" ideas --json` and fuzzy-match against `id`).
+     `cadence ideas --json` and fuzzy-match against `id`).
 
 2. **Run PPCo on each selected Idea:**
 
@@ -75,13 +75,13 @@ Arguments resolve via fuzzy match, partial match, or natural language.
      notes to the Idea file body (use Edit on the markdown body).
    - If developed:
      ```bash
-     node "$CADENCE_BIN" set-idea-state <idea-id> --state developed
+     cadence set-idea-state <idea-id> --state developed
      ```
      The CLI stamps `developed_at` automatically. Then append PPCo
      notes and pre-mortem results to the body via Edit.
    - If killed:
      ```bash
-     node "$CADENCE_BIN" set-idea-state <idea-id> --state closed \
+     cadence set-idea-state <idea-id> --state closed \
        --reason "<what did this Idea teach us?>"
      ```
      The reason matters — it enters the narrative as meaning-making material.

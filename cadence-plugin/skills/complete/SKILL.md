@@ -19,8 +19,7 @@ project. If no active session, resolve against all active projects.
 
 ## CLI binding
 
-`$CADENCE_BIN` refers to the bundled CLI. Default:
-`./cadence-plugin/bin/cadence.js`. Use it for all read-only state
+Use it for all read-only state
 inspection (current DoD/action progress, project status). Writes
 (checking off items, updating frontmatter) still use Edit.
 
@@ -30,17 +29,17 @@ inspection (current DoD/action progress, project status). Writes
    - If in an active session with no argument: complete the action currently
      being worked on (the most recently discussed unchecked action).
    - If an argument is given and there's an active session, fetch the
-     project state with `node "$CADENCE_BIN" project <project-id>
+     project state with `cadence project <project-id>
      --pursuit <pursuit-id> --json` and fuzzy-match the argument against
      unchecked actions.
    - If no active session, fetch all active projects via
-     `node "$CADENCE_BIN" scan --json` and fuzzy-match across their
+     `cadence scan --json` and fuzzy-match across their
      unchecked actions.
    - If the match is ambiguous, present options and ask.
 
 2. **Mark the action done via the CLI:**
    ```bash
-   node "$CADENCE_BIN" check <project-id> \
+   cadence check <project-id> \
      --pursuit <pursuit-id> \
      --section action \
      --match "<action text or 0-based index>" \
@@ -53,7 +52,7 @@ inspection (current DoD/action progress, project status). Writes
 3. **Check for upward completion:**
 
    **Project level:** Re-fetch the project after the edit:
-   `node "$CADENCE_BIN" project <id> --pursuit <pursuit-id> --json`.
+   `cadence project <id> --pursuit <pursuit-id> --json`.
    Read `dodProgress` and `actionProgress` from the response.
    - If `dodProgress.done === dodProgress.total` and all `actions` are
      checked:
@@ -63,7 +62,7 @@ inspection (current DoD/action progress, project status). Writes
      ```
      - If the user completes:
        ```bash
-       node "$CADENCE_BIN" set-status <project-id> \
+       cadence set-status <project-id> \
          --pursuit <pursuit-id> --status done
        ```
        Then follow the Completing a Project workflow from the Cadence
@@ -74,14 +73,14 @@ inspection (current DoD/action progress, project status). Writes
        inconsistent state.
 
    **Pursuit level:** If the project was just completed, check the
-   pursuit via `node "$CADENCE_BIN" pursuit <pursuit-id> --json`. Inspect
+   pursuit via `cadence pursuit <pursuit-id> --json`. Inspect
    the `projects` array — if every project's `status` is `done` or
    `dropped`:
    ```
    All projects in [pursuit] are resolved. Complete this pursuit, or
    add more projects?
    ```
-   - If the user completes: `node "$CADENCE_BIN" move-pursuit
+   - If the user completes: `cadence move-pursuit
      <pursuit-id> --to archived`. Same rules: complete or extend, no
      third option.
 
@@ -96,7 +95,7 @@ inspection (current DoD/action progress, project status). Writes
 
 `/complete` can be called without a prior `/start` for quick physical
 tasks. In this case:
-- Fetch state with `node "$CADENCE_BIN" scan --json` and resolve the
+- Fetch state with `cadence scan --json` and resolve the
   action across all active projects.
 - Mark it done with optional note.
 - No session is opened or closed — it's a point-in-time completion.

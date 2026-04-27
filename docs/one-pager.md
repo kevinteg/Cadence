@@ -1,4 +1,4 @@
-# Cadence — One Pager (v3)
+# Cadence — One Pager
 
 *The rhythm you return to.*
 

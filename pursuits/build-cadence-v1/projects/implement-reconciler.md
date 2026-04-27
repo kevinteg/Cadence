@@ -43,6 +43,6 @@ Thresholds from cadence.yaml:
 - `waiting_for_grace_days: 2`
 - `someday_review: monthly`
 
-> **v3 note:** /status and /reflect are now namespaced as /cadence:status
-> and /cadence:reflect in the v3 verb-based command surface. The reconciler
+> **Note:** /status and /reflect are namespaced as /cadence:status and
+> /cadence:reflect under the verb-based command surface. The reconciler
 > logic itself is unchanged.

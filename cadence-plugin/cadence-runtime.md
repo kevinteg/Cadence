@@ -47,8 +47,8 @@ tone, behavior, and guardrails change to match the cognitive mode required.
 Read `workflows/verb-contracts.md` for the full contract of each verb.
 
 The verbs are: **brainstorm**, **develop**, **promote**, **start**,
-**pause**, **complete**, **cancel**, **narrate**, **reflect**, **capture**,
-**close**, **reconcile**.
+**pause**, **complete**, **cancel**, **waiting**, **narrate**, **reflect**,
+**capture**, **close**, **reconcile**.
 
 Each verb has a no-argument path that presents a curated entry relevant
 to that verb's purpose. The user never types "select" or "session" —
@@ -118,21 +118,18 @@ is an active pursuit or project.
 ## Bundled CLI
 
 Many skills shell out to a deterministic CLI for read-only state
-inspection (scanning the repo, computing reconciler flags, fetching
-project state). The CLI ships inside the plugin at
-`bin/cadence.js`. Skills invoke it as:
+inspection and well-formed mutations. The CLI ships inside the plugin
+at `bin/cadence` and is exposed on `PATH` automatically by Claude
+Code's plugin loader. Skills invoke it directly as:
 
 ```bash
-node "$CADENCE_BIN" <subcommand> [--json]
+cadence <subcommand> [--json]
 ```
 
-`$CADENCE_BIN` should be set to the absolute path of the bundled file
-(set it in your shell profile or a per-repo `.envrc`). If unset,
-skills default to `./cadence-plugin/bin/cadence.js` relative to the
-repo root — which works when the plugin lives inside the repo (this
-project's setup) but not when consumed externally. External users:
-export `CADENCE_BIN` to the absolute path of the file shipped with
-your plugin install.
+No environment variables, no path resolution — `cadence` is a
+first-class command whenever the plugin is enabled. Without `--json`,
+each subcommand emits a tabular summary for humans; with `--json`, it
+emits structured data for skills to reason over.
 
 ### Read subcommands
 
@@ -173,7 +170,7 @@ When I describe new work, ask:
 3. What's the first action?
 
 **WIP check before creating:** Read `snapshot.projects` and
-`snapshot.config` from `node "$CADENCE_BIN" scan --json`. Count
+`snapshot.config` from `cadence scan --json`. Count
 in-progress projects (`status: active` AND `hasMarker: true`). If at
 or above `config.max_active_projects`, warn: "You have [N] in-progress
 projects (limit: [max]). Consider finishing or pausing one before
@@ -181,7 +178,7 @@ adding more." The user can override — this is a guardrail, not a gate.
 
 Create the project file via the CLI:
 ```bash
-node "$CADENCE_BIN" create-project <slug> --pursuit <pursuit-id> \
+cadence create-project <slug> --pursuit <pursuit-id> \
   --description "<one-paragraph framing>" \
   --dod "<criterion 1>" --dod "<criterion 2>" \
   --action "<first action>"
@@ -201,7 +198,7 @@ Triggered by `/complete` when the last action/DoD item is checked:
    - Ask: "Want to pick up [suggested project], or /pause for now?"
 
 ### Waiting For
-Track in project frontmatter as structured data:
+Track external blockers in project frontmatter as structured data:
 ```yaml
 waiting_for:
   - person: name
@@ -209,7 +206,8 @@ waiting_for:
     expected: YYYY-MM-DD
     flagged: false
 ```
-The reconciler sets `flagged: true` when items are overdue.
+Add items via `/waiting`. The reconciler sets `flagged: true` when an
+item passes its expected date by `waiting_for_grace_days`.
 
 ### Captures
 When I dump a raw thought mid-flow, save it to `thoughts/unprocessed/`

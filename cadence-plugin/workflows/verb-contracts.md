@@ -266,6 +266,33 @@ if in-progress, start fresh if none, confirm if already complete.
 
 ---
 
+## Waiting
+
+**Purpose:** Record an external blocker so it's tracked, not forgotten.
+
+**Tone:** Terse. Three quick questions, write, confirm. Returns the user
+to whatever they were doing.
+
+**Behavior:**
+- Resolves to a project (active session, argument, or asks)
+- Gathers three fields: person, what, expected date
+- Skips any field the user supplied in their opening message
+- Resolves relative dates ("Friday", "next week") to YYYY-MM-DD
+- Writes via `cadence add-waiting-for`; the reconciler later flips
+  `flagged: true` once the expected date passes the grace window
+
+**No-argument entry:** If in an active session, attach to that project.
+Otherwise show a short list of active projects: "Which project is this for?"
+
+**Guardrails:**
+- Three fields only — no notes, no priority, no follow-up cadence
+- Don't re-ask if the user already supplied a field
+- Don't surface mid-flow — write it, confirm, return to the session
+
+**Exit:** "Waiting: [person] re: [what] (expected [date])."
+
+---
+
 ## Capture
 
 **Purpose:** Flow-safe parking lot. Get it out of your head. Zero friction.

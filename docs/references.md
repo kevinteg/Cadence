@@ -1,4 +1,4 @@
-# Cadence v3 Design References
+# Cadence Design References
 
 *Research foundations mapped to design patterns. Each entry answers: what does Cadence do, what research supports it, and how the research shaped the design.*
 

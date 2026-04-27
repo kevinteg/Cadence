@@ -19,12 +19,11 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 ## CLI binding
 
-`$CADENCE_BIN` refers to the bundled CLI. Default:
-`./cadence-plugin/bin/cadence.js`. Gather all curation data with one
+Gather all curation data with one
 call:
 
 ```bash
-node "$CADENCE_BIN" report --json
+cadence report --json
 ```
 
 The response includes `snapshot.config`, `snapshot.pursuits`,
@@ -37,12 +36,12 @@ Glob calls needed for state.
 
 ### No-argument entry (curated selection)
 
-1. Run `node "$CADENCE_BIN" report --json` and parse it. From the
+1. Run `cadence report --json` and parse it. From the
    payload extract:
    - **Leveraged Priority:** sort `snapshot.reflections` by date desc,
      take the first non-null `leveraged_priority`.
    - **Most recent marker:** run
-     `node "$CADENCE_BIN" markers --json` (sorted desc by timestamp,
+     `cadence markers --json` (sorted desc by timestamp,
      first entry is most recent across all pursuits).
    - **Unprocessed captures count:** `snapshot.captures.length`.
    - **2-minute quick wins:** scan unchecked `actions` across active
@@ -74,7 +73,7 @@ Glob calls needed for state.
 
 1. Resolve the argument to an active project (fuzzy/partial match
    against the `snapshot.projects` array from
-   `node "$CADENCE_BIN" scan --json`). If status is `done` or `dropped`:
+   `cadence scan --json`). If status is `done` or `dropped`:
    "[Project] is already [status]. Want to create a follow-up project?"
 
 2. If there is already an active session in this conversation, prompt:
@@ -86,7 +85,7 @@ Glob calls needed for state.
 
 1. Read the most recent marker for this project:
    ```bash
-   node "$CADENCE_BIN" markers --pursuit <pursuit-id> --project <project-id> --json
+   cadence markers --pursuit <pursuit-id> --project <project-id> --json
    ```
    The list is sorted desc by timestamp; the first entry is the most
    recent.
@@ -98,7 +97,7 @@ Glob calls needed for state.
    Where: [brief summary of *where* field]
    ```
 3. If no marker exists, fetch the project state with
-   `node "$CADENCE_BIN" project <id> --pursuit <pursuit-id> --json` and
+   `cadence project <id> --pursuit <pursuit-id> --json` and
    present:
    ```
    [pursuit] / [project] — [N/M DoD]

@@ -51,11 +51,11 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
    - **Save the seed via the CLI:**
      ```bash
-     node "$CADENCE_BIN" create-idea <slug-from-idea> \
+     cadence create-idea <slug-from-idea> \
        --parent <target-pursuit-or-pursuit/project> \
        --body "<raw idea text>"
      ```
-     `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. State
+     State
      defaults to `seed`. The CLI handles frontmatter and file location.
    - **Keep momentum.** Respond briefly (1-3 sentences max) using
      whichever facilitator move fits the moment:

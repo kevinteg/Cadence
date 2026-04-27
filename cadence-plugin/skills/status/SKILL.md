@@ -24,18 +24,15 @@ matches `package-as-plugin`.
 
 ## CLI binding
 
-Throughout this skill, `$CADENCE_BIN` refers to the path to the bundled
-CLI. Default: `./cadence-plugin/bin/cadence.js` relative to the repo
-root. Invoke as `node "$CADENCE_BIN" <subcommand>`.
-
-The CLI auto-detects repo root from cwd and emits human-readable output
-by default; `--json` switches to structured output for further reasoning.
+Skills invoke `cadence <subcommand>` directly — the plugin's `bin/`
+is on PATH. The CLI auto-detects repo root from cwd; default output
+is tabular for humans, `--json` switches to structured output.
 
 ## Routing
 
 If no argument is provided → run **Dashboard** below.
 
-If the argument is exactly `pursuits` → run `node "$CADENCE_BIN"
+If the argument is exactly `pursuits` → run `cadence
 pursuits` and present its output verbatim. Remember the displayed
 ordering for number shortcuts.
 
@@ -44,12 +41,12 @@ shown in this conversation, resolve it to the corresponding pursuit or
 project and re-route accordingly.
 
 Otherwise → resolve the argument:
-1. Try as a pursuit ID (run `node "$CADENCE_BIN" pursuits --json`,
+1. Try as a pursuit ID (run `cadence pursuits --json`,
    match against `id` field; fuzzy/partial OK). If matched, run
-   `node "$CADENCE_BIN" pursuit <id>` and present output verbatim.
-2. Try as a project ID (run `node "$CADENCE_BIN" scan --json` and
+   `cadence pursuit <id>` and present output verbatim.
+2. Try as a project ID (run `cadence scan --json` and
    match against project IDs; fuzzy/partial OK). If matched, run
-   `node "$CADENCE_BIN" project <id>` (use `--pursuit <id>` to
+   `cadence project <id>` (use `--pursuit <id>` to
    disambiguate if multiple match) and present output verbatim.
 3. If no match: "No pursuit or project matches '[arg]'. Try
    `/cadence:status pursuits` to see options."
@@ -61,7 +58,7 @@ context so future `/status N` calls resolve correctly.
 
 When no argument is provided:
 
-1. Run `node "$CADENCE_BIN" status`. The CLI produces the entire
+1. Run `cadence status`. The CLI produces the entire
    dashboard:
    - Leveraged Priority (extracted from latest reflection)
    - Last Reflect (date + status)

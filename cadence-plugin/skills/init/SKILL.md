@@ -14,11 +14,11 @@ Set up a new repo for Cadence. Only needs to run once per repo.
 
 2. **Create the Wandering pursuit via the CLI:**
    ```bash
-   node "$CADENCE_BIN" create-pursuit wandering \
+   cadence create-pursuit wandering \
      --type ongoing \
      --description "The default home for unattached ideas. Seeds captured here don't yet belong to any pursuit — they're waiting to be developed, promoted, or closed. Wandering never closes."
    ```
-   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. The CLI
+   The CLI
    creates the pursuit directory plus `projects/`, `sessions/`, and
    `ideas/` subdirectories.
 

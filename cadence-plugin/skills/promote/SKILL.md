@@ -44,9 +44,6 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 3. **Enforce the graduation gate:**
 
-   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js` for all
-   the CLI calls below.
-
    **Idea → Pursuit (Why gate):**
    - Ask: "What's the Why behind this? Why does this matter to you?"
    - The Why must connect to values, identity, or responsibility.
@@ -54,7 +51,7 @@ Arguments resolve via fuzzy match, partial match, or natural language.
      A Pursuit without a clear Why won't survive the first hard week."
    - Once accepted:
      ```bash
-     node "$CADENCE_BIN" create-pursuit <slug> \
+     cadence create-pursuit <slug> \
        --type finite \
        --why "<the user's why>" \
        --description "<the user's framing>"
@@ -68,7 +65,7 @@ Arguments resolve via fuzzy match, partial match, or natural language.
      not a Project. A Project needs multiple steps. Is this really a Project?"
    - Once accepted:
      ```bash
-     node "$CADENCE_BIN" create-project <slug> --pursuit <pursuit-id> \
+     cadence create-project <slug> --pursuit <pursuit-id> \
        --description "<one-paragraph framing>" \
        --dod "<item 1>" --dod "<item 2>" \
        --action "<first action>" --action "<second action>"
@@ -81,13 +78,13 @@ Arguments resolve via fuzzy match, partial match, or natural language.
      Where would you start?"
    - Once accepted:
      ```bash
-     node "$CADENCE_BIN" add-item <project-id> --pursuit <pursuit-id> \
+     cadence add-item <project-id> --pursuit <pursuit-id> \
        --section action --text "<concrete action>"
      ```
 
 4. **Update the Idea via the CLI:**
    ```bash
-   node "$CADENCE_BIN" set-idea-state <idea-id> --state promoted \
+   cadence set-idea-state <idea-id> --state promoted \
      --promoted-to <type>:<id>    # e.g., project:build-indexer
    ```
    The Idea file persists as an origin link — the Narrative can

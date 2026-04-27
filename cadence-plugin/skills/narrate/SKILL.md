@@ -20,8 +20,7 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 ## CLI binding
 
-`$CADENCE_BIN` refers to the bundled CLI. Default:
-`./cadence-plugin/bin/cadence.js`. Use it to gather time-windowed
+Use it to gather time-windowed
 markers and ideas — the agent generates narrative prose from the
 returned data.
 
@@ -31,16 +30,16 @@ returned data.
 
 1. Today's markers and actions completed:
    ```bash
-   node "$CADENCE_BIN" markers --since <YYYY-MM-DD-today> --json
+   cadence markers --since <YYYY-MM-DD-today> --json
    ```
    Each marker's `actions_completed` field lists what was finished.
 2. Today's Idea movements:
    ```bash
-   node "$CADENCE_BIN" ideas --since <YYYY-MM-DD-today> --json
+   cadence ideas --since <YYYY-MM-DD-today> --json
    ```
    For Ideas that *changed state* today (developed/promoted/closed but
    `created` is older), read the `developed_at` field and per-idea
-   metadata from `node "$CADENCE_BIN" ideas --json` and filter by
+   metadata from `cadence ideas --json` and filter by
    timestamp.
 3. Generate narrative following McAdams structure:
    - **What happened:** Activity summary — sessions, actions, Ideas moved
@@ -52,9 +51,9 @@ returned data.
 
 1. Gather everything for the pursuit:
    ```bash
-   node "$CADENCE_BIN" pursuit <pursuit-id> --json     # pursuit + projects
-   node "$CADENCE_BIN" markers --pursuit <id> --json   # all markers, sorted desc
-   node "$CADENCE_BIN" ideas --parent <id> --json      # parent-level ideas
+   cadence pursuit <pursuit-id> --json     # pursuit + projects
+   cadence markers --pursuit <id> --json   # all markers, sorted desc
+   cadence ideas --parent <id> --json      # parent-level ideas
    ```
    For project-scoped Ideas, run `ideas --json` and filter parents that
    start with `<id>/` agent-side.
@@ -70,10 +69,10 @@ returned data.
 
 1. Compute the ISO week's start date (Monday). Then:
    ```bash
-   node "$CADENCE_BIN" markers --since <monday-YYYY-MM-DD> --json
-   node "$CADENCE_BIN" ideas --since <monday-YYYY-MM-DD> --json
+   cadence markers --since <monday-YYYY-MM-DD> --json
+   cadence ideas --since <monday-YYYY-MM-DD> --json
    ```
-   For projects completed this week, filter `node "$CADENCE_BIN" scan
+   For projects completed this week, filter `cadence scan
    --json | .projects[]` for `status: done` (the agent already knows
    which were not-done at week start by reading the previous week's
    reflection or markers).

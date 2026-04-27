@@ -34,7 +34,7 @@ resumed later with `/start`.
 4. **Write the marker via the bundled CLI:**
 
    ```bash
-   node "$CADENCE_BIN" write-marker \
+   cadence write-marker \
      --pursuit <pursuit-id> --project <project-id> \
      --where "<2-5 sentences on current state>" \
      --next "<first thing to do on return>" \
@@ -43,7 +43,7 @@ resumed later with `/start`.
      --action-completed "<text>"
    ```
 
-   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. The CLI
+   The CLI
    handles timestamp generation, filename, and frontmatter formatting.
    Session start/end default to 30 minutes ago and now.
 
@@ -57,7 +57,7 @@ resumed later with `/start`.
    ```
    Paused. [pursuit] — [N/M] projects done
    ```
-   Use `node "$CADENCE_BIN" pursuit <id> --json` to read counts.
+   Use `cadence pursuit <id> --json` to read counts.
 
 ## Guardrails
 

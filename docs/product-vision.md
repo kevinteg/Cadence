@@ -1,4 +1,4 @@
-# Cadence — Product Vision (v3)
+# Cadence — Product Vision
 
 *The rhythm you return to.*
 

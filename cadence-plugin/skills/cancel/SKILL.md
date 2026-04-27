@@ -44,10 +44,10 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 4. **Update the project via the CLI:**
    ```bash
-   node "$CADENCE_BIN" set-status <project-id> \
+   cadence set-status <project-id> \
      --pursuit <pursuit-id> --status dropped --reason "<user's reason>"
    ```
-   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. The CLI
+   The CLI
    sets `status: dropped`, `dropped_reason: <reason>`, and stamps
    `dropped_at: <ISO timestamp>` in frontmatter.
 

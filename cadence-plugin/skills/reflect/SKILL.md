@@ -16,7 +16,7 @@ Start or resume the weekly Reflect ritual. Reference
 1. Determine the current week number (ISO week).
 
 2. Check if a reflection file exists for this week in `reflections/`.
-   Use `node "$CADENCE_BIN" scan --json` and inspect `reflections` to
+   Use `cadence scan --json` and inspect `reflections` to
    find one for this week's date range.
    - If `status: complete`, say "Your Week [N] reflection is already
      done. Want to review it or start something else?"
@@ -25,7 +25,7 @@ Start or resume the weekly Reflect ritual. Reference
      left off?"
    - If no file exists, create one:
      ```bash
-     node "$CADENCE_BIN" write-reflection \
+     cadence write-reflection \
        --date <YYYY-MM-DD-this-week> --status draft
      ```
 
@@ -37,11 +37,10 @@ Start or resume the weekly Reflect ritual. Reference
 
 ## CLI binding
 
-`$CADENCE_BIN` refers to the bundled CLI. Default:
-`./cadence-plugin/bin/cadence.js`. Gather state for Get Clear with:
+Gather state for Get Clear with:
 
 ```bash
-node "$CADENCE_BIN" report --json
+cadence report --json
 ```
 
 This single call yields snapshot + reconciler flags — captures count,
@@ -50,7 +49,7 @@ dormant/stale/WIP flag set covered by checks 1-5 in
 `workflows/reconciler.md`. Idea-specific checks (aging seeds,
 unpromoted developed, growing backlog) and someday cues are agent-
 implemented; for those, query
-`node "$CADENCE_BIN" ideas --json` and apply the threshold logic from
+`cadence ideas --json` and apply the threshold logic from
 `workflows/reconciler.md`.
 
 4. **Phase 1 — Get Clear**
@@ -69,7 +68,7 @@ implemented; for those, query
       `stale_marker`, `structural_*`, `wip_over_limit`. Then run the
       idea-specific checks (aging seeds > 14d, unpromoted developed
       > 7d, growing backlog ratio) by reading
-      `node "$CADENCE_BIN" ideas --json` and applying the thresholds
+      `cadence ideas --json` and applying the thresholds
       from `workflows/reconciler.md`. Finally check someday cues by
       iterating `snapshot.pursuits` filtered to `lifecycle: someday` —
       evaluate each `cue.trigger` against the current date.
@@ -78,14 +77,14 @@ implemented; for those, query
       `snapshot.projects`. For each, ask "Still relevant?" If the user
       wants to change a project's status, use the CLI:
       ```bash
-      node "$CADENCE_BIN" set-status <project-id> --pursuit <pursuit-id> \
+      cadence set-status <project-id> --pursuit <pursuit-id> \
         --status <on_hold|dropped|done> [--reason "..." for dropped]
       ```
 
    e. Update the reflection file via the CLI (re-running
       `write-reflection` with the same date is an upsert):
       ```bash
-      node "$CADENCE_BIN" write-reflection \
+      cadence write-reflection \
         --date <YYYY-MM-DD> --status in_progress --phase get_clear
       ```
 
@@ -115,7 +114,7 @@ implemented; for those, query
 
    g. Finalize the reflection file via the CLI:
       ```bash
-      node "$CADENCE_BIN" write-reflection \
+      cadence write-reflection \
         --date <YYYY-MM-DD> --status complete --phase get_focused \
         --leveraged-priority "<their answer>"
       ```

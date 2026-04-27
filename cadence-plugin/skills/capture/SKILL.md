@@ -28,10 +28,10 @@ Flow-safe capture to `thoughts/unprocessed/`. Reference
 3. Write the capture via the bundled CLI:
 
    ```bash
-   node "$CADENCE_BIN" write-capture --body "<raw input>" --verb-context <ctx>
+   cadence write-capture --body "<raw input>" --verb-context <ctx>
    ```
 
-   `$CADENCE_BIN` defaults to `./cadence-plugin/bin/cadence.js`. The CLI
+   The CLI
    handles timestamp generation, file path, and frontmatter formatting.
 
 4. **Do not respond.** The capture is saved silently. The user returns

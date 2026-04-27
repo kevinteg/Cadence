@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "bundle": "esbuild src/cli.ts --bundle --platform=node --format=esm --target=node20 --outfile=cadence-plugin/bin/cadence.js --banner:js=\"#!/usr/bin/env node\nimport { createRequire } from 'module'; const require = createRequire(import.meta.url);\"",
+    "bundle": "esbuild src/cli.ts --bundle --platform=node --format=esm --target=node20 --outfile=cadence-plugin/bin/cadence --banner:js=\"#!/usr/bin/env node\nimport { createRequire } from 'module'; const require = createRequire(import.meta.url);\" && chmod +x cadence-plugin/bin/cadence",
     "test": "node --test --import tsx test/*.test.ts",
     "clean": "rm -rf dist"
   },

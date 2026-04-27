@@ -1,4 +1,4 @@
-# Cadence Architecture (v3)
+# Cadence Architecture
 
 *Definitive technical reference for the Cadence cognitive operating system.*
 
