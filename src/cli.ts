@@ -64,28 +64,56 @@ cli
   .command('status', 'Show the system dashboard (human-readable)')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--json', 'Emit dashboard data as JSON instead of text')
-  .action(async (opts: { root?: string; json?: boolean }) => {
-    const repoRoot = await resolveRepoRoot(opts.root)
-    if (!isCadenceRepo(repoRoot)) {
-      if (opts.json) {
-        process.stdout.write(
-          JSON.stringify({ initialized: false, repoRoot }, null, 2) + '\n',
-        )
-      } else {
-        process.stdout.write(
-          `Cadence isn't initialized in ${repoRoot}.\nRun /cadence:init to set up.\n`,
-        )
+  .option(
+    '--hook-output',
+    'Emit a SessionStart-hook JSON envelope (systemMessage for the user, additionalContext for the model)',
+  )
+  .action(
+    async (opts: { root?: string; json?: boolean; hookOutput?: boolean }) => {
+      const repoRoot = await resolveRepoRoot(opts.root)
+      if (!isCadenceRepo(repoRoot)) {
+        const text = `Cadence isn't initialized in ${repoRoot}.\nRun /cadence:init to set up.`
+        if (opts.hookOutput) {
+          process.stdout.write(
+            JSON.stringify({
+              systemMessage: text,
+              hookSpecificOutput: {
+                hookEventName: 'SessionStart',
+                additionalContext: text,
+              },
+            }) + '\n',
+          )
+        } else if (opts.json) {
+          process.stdout.write(
+            JSON.stringify({ initialized: false, repoRoot }, null, 2) + '\n',
+          )
+        } else {
+          process.stdout.write(text + '\n')
+        }
+        return
       }
-      return
-    }
-    const snapshot = await scan(repoRoot)
-    const result = report(snapshot)
-    if (opts.json) {
-      process.stdout.write(JSON.stringify(result, null, 2) + '\n')
-    } else {
-      process.stdout.write(renderStatus(result) + '\n')
-    }
-  })
+      const snapshot = await scan(repoRoot)
+      const result = report(snapshot)
+      if (opts.hookOutput) {
+        const text =
+          renderStatus(result) +
+          '\n\nNext: /cadence:start to begin a session, /cadence:capture to save a thought, /cadence:status <id> to drill in.'
+        process.stdout.write(
+          JSON.stringify({
+            systemMessage: text,
+            hookSpecificOutput: {
+              hookEventName: 'SessionStart',
+              additionalContext: text,
+            },
+          }) + '\n',
+        )
+      } else if (opts.json) {
+        process.stdout.write(JSON.stringify(result, null, 2) + '\n')
+      } else {
+        process.stdout.write(renderStatus(result) + '\n')
+      }
+    },
+  )
 
 cli
   .command('flags', 'Print reconciler flags only')

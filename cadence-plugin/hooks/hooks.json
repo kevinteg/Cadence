@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/bin/cadence status && printf '\\nNext: /cadence:start to begin a session, /cadence:capture to save a thought, /cadence:status <id> to drill in.\\n'"
+            "command": "${CLAUDE_PLUGIN_ROOT}/bin/cadence status --hook-output"
           }
         ]
       }

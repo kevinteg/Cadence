@@ -14,7 +14,7 @@ Ship the SessionStart cadence-status hook via the plugin itself (hooks/hooks.jso
 - [ ] Plugin ships hooks/hooks.json with a SessionStart/startup hook that invokes ${CLAUDE_PLUGIN_ROOT}/bin/cadence status plus the interaction hint
 - [ ] cadence status (and any other CLI read invoked from the hook) exits cleanly with a clear 'run /cadence:init' message when run outside a Cadence repo — no stack trace, no non-zero exit
 - [ ] Repo-level .claude/settings.json SessionStart hook removed — plugin layer is now the single source
-- [ ] User story (init'd repo): reload /hooks in this repo and start a fresh session; the cadence-status dashboard plus interaction hint appears via the plugin hook
+- [x] User story (init'd repo): reload /hooks in this repo and start a fresh session; the cadence-status dashboard plus interaction hint appears via the plugin hook
 - [ ] User story (un-init'd repo): in a fresh directory with the plugin enabled but no Cadence config, start a session; the hook fires, prints the 'run /cadence:init' guidance, and does not error
 
 ## Actions
@@ -23,5 +23,6 @@ Ship the SessionStart cadence-status hook via the plugin itself (hooks/hooks.jso
 - [x] Add cadence-plugin/hooks/hooks.json with the SessionStart hook using ${CLAUDE_PLUGIN_ROOT}
 - [x] Update the CLI so read commands exit cleanly with the 'run /cadence:init' message when no Cadence config is present
 - [x] Remove the redundant SessionStart hook from this repo's .claude/settings.json
-- [ ] User-story test: reload /hooks, start a fresh session in this repo, confirm dashboard appears via the plugin hook
+- [x] User-story test: reload /hooks, start a fresh session in this repo, confirm dashboard appears via the plugin hook
 - [ ] User-story test: in a fresh tmp directory with the plugin enabled, start a session, confirm graceful 'run /cadence:init' message
+- [x] Wrap status output in JSON systemMessage so the dashboard is user-visible at session start (raw stdout from SessionStart hooks goes to model context, not the UI)
