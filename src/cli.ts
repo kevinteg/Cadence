@@ -4,6 +4,7 @@ import path from 'node:path'
 import { scan } from './scan/repo.js'
 import { report } from './report/reconciler.js'
 import { renderStatus, renderFlags } from './render/status.js'
+import { renderSnapshot, renderReport } from './render/snapshot.js'
 import {
   renderIdeas,
   renderMarkers,
@@ -31,22 +32,32 @@ import { movePursuit } from './write/move.js'
 const cli = cac('cadence')
 
 cli
-  .command('scan', 'Emit a full Snapshot of the repo as JSON')
+  .command('scan', 'Show a tabular summary of the repo snapshot')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .action(async (opts: { root?: string }) => {
+  .option('--json', 'Emit the full Snapshot as JSON')
+  .action(async (opts: { root?: string; json?: boolean }) => {
     const repoRoot = await resolveRepoRoot(opts.root)
     const snapshot = await scan(repoRoot)
-    process.stdout.write(JSON.stringify(snapshot, null, 2) + '\n')
+    if (opts.json) {
+      process.stdout.write(JSON.stringify(snapshot, null, 2) + '\n')
+    } else {
+      process.stdout.write(renderSnapshot(snapshot) + '\n')
+    }
   })
 
 cli
-  .command('report', 'Emit Snapshot + reconciler flags as JSON')
+  .command('report', 'Show a tabular summary of the snapshot + reconciler flags')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .action(async (opts: { root?: string }) => {
+  .option('--json', 'Emit the full Report as JSON')
+  .action(async (opts: { root?: string; json?: boolean }) => {
     const repoRoot = await resolveRepoRoot(opts.root)
     const snapshot = await scan(repoRoot)
     const result = report(snapshot)
-    process.stdout.write(JSON.stringify(result, null, 2) + '\n')
+    if (opts.json) {
+      process.stdout.write(JSON.stringify(result, null, 2) + '\n')
+    } else {
+      process.stdout.write(renderReport(result) + '\n')
+    }
   })
 
 cli
@@ -55,6 +66,18 @@ cli
   .option('--json', 'Emit dashboard data as JSON instead of text')
   .action(async (opts: { root?: string; json?: boolean }) => {
     const repoRoot = await resolveRepoRoot(opts.root)
+    if (!isCadenceRepo(repoRoot)) {
+      if (opts.json) {
+        process.stdout.write(
+          JSON.stringify({ initialized: false, repoRoot }, null, 2) + '\n',
+        )
+      } else {
+        process.stdout.write(
+          `Cadence isn't initialized in ${repoRoot}.\nRun /cadence:init to set up.\n`,
+        )
+      }
+      return
+    }
     const snapshot = await scan(repoRoot)
     const result = report(snapshot)
     if (opts.json) {
@@ -720,6 +743,13 @@ function findRepoRoot(start: string): string {
     dir = parent
   }
   return path.resolve(start)
+}
+
+function isCadenceRepo(root: string): boolean {
+  return (
+    existsSync(path.join(root, 'cadence.yaml')) ||
+    existsSync(path.join(root, 'pursuits'))
+  )
 }
 
 /**

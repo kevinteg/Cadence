@@ -25,10 +25,39 @@ iteration) rather than treating the output as real workflow state.
 When **using** and **building** interleave (common), maintain session
 context: the active project doesn't change because we edited a skill.
 
+## Feature Work Goes Through Cadence
+
+When a Building request implies **substantial feature work or structural
+changes** to this product (a new verb, a new format, a new architectural
+piece, a non-trivial refactor), do not jump to implementation. Route the
+work through the Cadence lifecycle first — this product earns its keep
+by being used to build itself.
+
+1. Identify the appropriate pursuit (usually `build-cadence-v1`).
+2. Create a project via `cadence create-project` with a Definition of
+   Done. The DoD must include a **user-story validation step** —
+   how we'll exercise the feature end-to-end from the user's perspective
+   (e.g., "Run `/cadence:foo bar` and confirm X happens"). This is the
+   feature's acceptance test.
+3. Work the project's actions in order, checking off DoD items via
+   `/cadence:complete` as each is satisfied.
+4. The user-story step runs last and proves the feature works as a user
+   would experience it.
+5. Complete the project via `/cadence:complete` once all DoD items pass.
+
+This does **NOT** apply to:
+- Small fixes (typos, single-line bugs, copy edits, broken links)
+- Local adjustments to existing skills or docs
+- Trivial config tweaks
+- Settings/permission changes
+
+When the size is ambiguous, ask: "Is this a project, or just a fix?"
+before proceeding.
+
 ## Product-Specific References
 
 Read `docs/architecture.md` for full design decisions and rationale.
-Read `docs/product-vision-v3.md` and `docs/one-pager-v3.md` for the
+Read `docs/product-vision.md` and `docs/one-pager.md` for the
 current product direction.
 
 ## Plugin Development
