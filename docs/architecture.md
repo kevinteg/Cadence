@@ -18,8 +18,8 @@ Pursuit  →  Project  →  Action
 
 - **Pursuit**: An intentional commitment tied to values or a role/responsibility.
   Lifecycle: active, someday, archived.
-- **Project**: A scoped effort with a Definition of Done checklist.
-  Status: active, on_hold, done, dropped.
+- **Project**: A scoped effort framed by an Intent narrative and an
+  Actions list. Status: active, on_hold, done, dropped.
 - **Action**: An atomic task. A checkbox inside a project's Actions section.
 
 ### Ideas (Adjacent Collection)
@@ -33,7 +33,7 @@ Ideas enter the hierarchy through graduation gates enforced by `/promote`:
 | Gate | Requirement | Enters Hierarchy As |
 |------|-------------|---------------------|
 | **Why** | Articulate why this matters | Pursuit |
-| **DoD** | Define what "done" looks like | Project |
+| **Intent** | Articulate motivation and felt-sense of done | Project |
 | **Concreteness** | Specific enough to start | Action |
 
 ### Wandering
@@ -57,10 +57,10 @@ behavior, and guardrails. Contracts live in `workflows/verb-contracts.md`.
 |------|---------|
 | **brainstorm** | Provoke thinking using the card deck. The LLM does NOT generate ideas — it deals cards and asks questions. |
 | **develop** | Help the user articulate why an Idea matters. Deepen, challenge, connect. |
-| **promote** | Graduate a developed Idea to a Project with DoD and first actions. |
+| **promote** | Graduate a developed Idea to a Project with Intent and first actions. |
 | **start** | Session-level focus on a specific project. Protect flow. Keep work moving. |
 | **pause** | Save a marker and suspend the session. |
-| **complete** | Mark an action done. Trigger upward completion when all DoD items are checked. |
+| **complete** | Mark an action done. Trigger upward completion when all actions are checked. |
 | **cancel** | Drop a project with a reason. Walk the cleaning ritual for Ideas. |
 | **narrate** | Generate writing from activity data. Draw from markers and history. |
 | **reflect** | Run the weekly ritual. Surface what matters across the whole system. |
@@ -86,7 +86,7 @@ convergent execution.
 capture → brainstorm → develop → promote
   seed       seed      developed   ──┐
                                      ├─► Pursuit (with Why)
-                                     ├─► Project (with DoD)
+                                     ├─► Project (with Intent)
                                      └─► Action  (concrete)
 ```
 
@@ -104,9 +104,9 @@ start → work → complete / pause
   └─► session opened, marker loaded, flow protected
 ```
 
-When all DoD items are checked, the system triggers upward completion:
-project closes, then pursuit closure is prompted if all projects are
-done or dropped. `/cancel` drops a project with a reason and walks the
+When all actions are checked, the system prompts the user against the
+project's Intent — does it feel achieved? If yes, the project closes;
+pursuit closure is then prompted if all projects are done or dropped. `/cancel` drops a project with a reason and walks the
 cleaning ritual for remaining Ideas.
 
 ---
@@ -146,9 +146,10 @@ waiting_for:                 # optional
 
 # Project Name
 
-## Definition of Done
-- [ ] Concrete criterion 1
-- [ ] Concrete criterion 2
+## Intent
+
+Free-form narrative: motivation, scope, what "done" would feel like.
+Co-edited with the agent as actions land and the work focuses.
 
 ## Actions
 - [x] Completed action
@@ -158,8 +159,10 @@ waiting_for:                 # optional
 Free-form notes, context, decisions.
 ```
 
-Project completion is derived: all DoD items checked, confirmed by agent,
-status set to done. Actions are simple checkboxes — no IDs, no metadata.
+Project completion is derived: all actions checked, Intent confirmed
+through dialogue, status set to done. Actions are simple checkboxes —
+no IDs, no metadata. Older project files carry a `## Definition of Done`
+section instead of `## Intent`; the scan path tolerates both shapes.
 
 ### Idea (`pursuits/<pursuit-id>/ideas/<idea-id>.md`)
 
@@ -293,9 +296,10 @@ flags violations but does not block work.
 
 ### Project Closure
 
-When all Definition of Done items are checked, the agent walks the closure
-ritual. If the user wants to close a project with incomplete DoD items,
-an **override with reason** is required — the reason is recorded.
+When all actions are checked and the project's Intent feels achieved,
+the agent walks the closure ritual. If the user wants to close a project
+with incomplete actions, an **override with reason** is required — the
+reason is recorded.
 
 ### Pursuit Closure
 
@@ -427,7 +431,7 @@ guardrails defined in the contract.
 1. **Local-first** — Markdown + SQLite on your machine. No cloud dependencies.
 2. **Markdown is the source of truth** — If the index breaks, rebuild it.
 3. **The artifact IS the state** — Markers, reflections, and project files carry their own status.
-4. **Completion is derived** — DoD all checked, confirmed by agent, status set to done.
+4. **Completion is derived** — all actions checked, Intent confirmed through dialogue, status set to done.
 5. **Git operations are lifecycle operations** — `git mv` to someday, archival is a file move.
 6. **Verbs define behavior** — No mode announcements. The verb contract governs tone and guardrails.
 7. **Flow protection** — No mid-flow interruptions. Batch observations for breakpoints.

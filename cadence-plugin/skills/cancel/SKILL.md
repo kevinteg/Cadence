@@ -1,5 +1,5 @@
 ---
-description: Cancel a project — drop it with a reason
+description: Cancel a project — drop it with a reason. TRIGGER ONLY when the user explicitly invokes /cadence:cancel or /cancel. SKIP all natural-language equivalents — never auto-fire from "drop this", "kill this project", "I'm giving up on X", "this isn't worth it", or abandonment language.
 ---
 
 # /cancel

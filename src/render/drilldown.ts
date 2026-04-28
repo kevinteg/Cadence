@@ -96,12 +96,19 @@ export function renderProject(
   const out: string[] = []
   const startedTag = project.hasMarker ? '' : ' [not started]'
   out.push(
-    `${project.id} — ${project.dodProgress.done}/${project.dodProgress.total} DoD [${project.status}]${startedTag}`,
+    `${project.id} — ${project.actionProgress.done}/${project.actionProgress.total} actions [${project.status}]${startedTag}`,
   )
   out.push('')
 
+  if (project.intent && project.intent.length > 0) {
+    out.push('Intent:')
+    for (const line of project.intent.split('\n')) {
+      out.push(`  ${line}`)
+    }
+    out.push('')
+  }
   if (project.dod.length > 0) {
-    out.push('Definition of Done:')
+    out.push('Definition of Done (legacy):')
     for (const item of project.dod) {
       out.push(`  - [${item.checked ? 'x' : ' '}] ${item.text}`)
     }
@@ -158,10 +165,10 @@ function projectCounts(snapshot: Snapshot, pursuitId: string) {
 }
 
 function formatProjectLine(idx: number, p: Project): string {
-  const desc = firstLine(p.description)
+  const desc = firstLine(p.intent || p.description)
   const not_started = p.hasMarker ? '' : ' [not started]'
   const tail = desc ? `: ${desc}` : ''
-  return `  ${idx}. ${p.id}${tail} — ${p.dodProgress.done}/${p.dodProgress.total} DoD${not_started}`
+  return `  ${idx}. ${p.id}${tail} — ${p.actionProgress.done}/${p.actionProgress.total} actions${not_started}`
 }
 
 function firstLine(text: string): string {

@@ -1,15 +1,11 @@
 ---
-description: Divergent ideation — facilitate free-flowing ideas around a challenge
+description: Divergent ideation — facilitate free-flowing ideas around a challenge. TRIGGER on explicit /cadence:brainstorm invocation, OR when the user requests divergent ideation by name (e.g., "let's brainstorm onboarding", "I want to brainstorm ideas for X", "help me generate ideas about Y"). SKIP for conversation that merely touches a topic without requesting an ideation session.
 ---
 
 # /brainstorm
 
 Divergent ideation. Reference `workflows/verb-contracts.md` for the
 brainstorm register.
-
-**Register:** Non-judgmental, curious, energy-sustaining. Never evaluative.
-You are a facilitator — your job is to keep ideas flowing. You do NOT
-generate Ideas. You reflect meaning, spot patterns, and provoke expansion.
 
 ## Usage
 

@@ -34,16 +34,25 @@ work through the Cadence lifecycle first — this product earns its keep
 by being used to build itself.
 
 1. Identify the appropriate pursuit (usually `build-cadence-v1`).
-2. Create a project via `cadence create-project` with a Definition of
-   Done. The DoD must include a **user-story validation step** —
-   how we'll exercise the feature end-to-end from the user's perspective
-   (e.g., "Run `/cadence:foo bar` and confirm X happens"). This is the
+2. Create a project via `cadence create-project` with an **Intent**
+   narrative and at least one **Action**. The Intent captures
+   motivation, scope, and the felt-sense of what "done" would look
+   like — a brain dump that gets co-edited as the work focuses.
+   Actions are atomic, concrete moves you can visualize doing. Include
+   a **user-story validation action** in the list (typically last)
+   that exercises the feature end-to-end from the user's perspective
+   (e.g., "Run `/cadence:foo bar` and confirm X happens"). That's the
    feature's acceptance test.
-3. Work the project's actions in order, checking off DoD items via
-   `/cadence:complete` as each is satisfied.
-4. The user-story step runs last and proves the feature works as a user
-   would experience it.
-5. Complete the project via `/cadence:complete` once all DoD items pass.
+3. New projects start as `on_hold` and promote to `active` when
+   `/cadence:start` opens a session OR when the first action is
+   checked off. Work the project's actions in order; check each off
+   via `/cadence:complete` (or `cadence check`) as it lands.
+4. The user-story action runs last and proves the feature works as a
+   user would experience it.
+5. When all actions are checked, `/cadence:complete` prompts: "Does
+   the intent feel achieved? Complete this project, add more actions,
+   or split?" Done-ness is judged through dialogue against the Intent —
+   not by sweeping a checklist.
 
 This does **NOT** apply to:
 - Small fixes (typos, single-line bugs, copy edits, broken links)
@@ -66,8 +75,10 @@ The `cadence-plugin/` directory IS the distributable plugin. This repo
 uses its own plugin via `claude --plugin-dir ./cadence-plugin`.
 
 All user-facing skills live in `cadence-plugin/skills/`. The runtime
-is at `cadence-plugin/cadence-runtime.md`. Workflows are at
-`cadence-plugin/workflows/`. The provocation deck is at
+is at `cadence-plugin/cadence-runtime.md` (always loaded via @-import);
+on-demand reference content (file formats, full CLI catalog, lifecycle
+mechanics, operational recipes) is at `cadence-plugin/cadence-reference.md`.
+Workflows are at `cadence-plugin/workflows/`. The provocation deck is at
 `cadence-plugin/deck/provocations.yaml`.
 
 When editing skills or workflows, edit the plugin files directly —

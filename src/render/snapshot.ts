@@ -81,12 +81,11 @@ function pursuitTable(snapshot: Snapshot): Table {
 
 function projectTable(snapshot: Snapshot): Table {
   return {
-    headers: ['ID', 'PURSUIT', 'STATUS', 'DOD', 'ACTIONS', 'STARTED'],
+    headers: ['ID', 'PURSUIT', 'STATUS', 'ACTIONS', 'STARTED'],
     rows: snapshot.projects.map((p) => [
       p.id,
       p.pursuit,
       p.status,
-      `${p.dodProgress.done}/${p.dodProgress.total}`,
       `${p.actionProgress.done}/${p.actionProgress.total}`,
       p.hasMarker ? 'yes' : 'no',
     ]),
@@ -169,12 +168,8 @@ function flagDetail(flag: Flag): string {
         : 'no markers'
     case 'stale_marker':
       return `${flag.daysSinceMarker}d old`
-    case 'structural_empty_dod':
-      return 'no DoD items'
-    case 'structural_done_unchecked':
-      return 'all DoD checked but status not done'
-    case 'structural_open_no_actions':
-      return 'open DoD but no unchecked actions'
+    case 'structural_active_no_open_actions':
+      return 'all actions checked — does the intent feel achieved?'
     case 'wip_over_limit':
       return `${flag.count} in-progress (limit ${flag.limit}): ${flag.projectIds.join(', ')}`
   }

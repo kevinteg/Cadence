@@ -1,13 +1,11 @@
 ---
-description: Flow-safe capture — save a thought to thoughts/unprocessed/ with no agent response
+description: Flow-safe capture — save a thought to thoughts/unprocessed/ with no agent response. TRIGGER ONLY when the user explicitly invokes /cadence:capture or /capture. SKIP all natural-language equivalents — never auto-fire from "remember this", "note that", "save this thought", "don't let me forget", or any stray-thought dump mid-conversation.
 ---
 
 # /capture
 
 Flow-safe capture to `thoughts/unprocessed/`. Reference
 `workflows/verb-contracts.md` for the capture register.
-
-**Register:** Silent. No response. No acknowledgment. No elaboration request.
 
 ## Usage
 

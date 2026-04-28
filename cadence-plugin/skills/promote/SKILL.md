@@ -1,5 +1,5 @@
 ---
-description: Promote an Idea to Pursuit, Project, or Action — enforces graduation gates
+description: Promote an Idea to Pursuit, Project, or Action — enforces graduation gates. TRIGGER ONLY when the user explicitly invokes /cadence:promote or /promote. SKIP all natural-language equivalents — never auto-fire from "turn this into a project", "let's make X a pursuit", "this idea is ready", or graduation talk.
 ---
 
 # /promote
@@ -57,18 +57,23 @@ Arguments resolve via fuzzy match, partial match, or natural language.
        --description "<the user's framing>"
      ```
 
-   **Idea → Project (DoD gate):**
-   - Ask: "What does done look like? When you finish this, what's true
-     that isn't true now?"
-   - Translate the answer into a Definition of Done checklist.
-   - If the DoD is vague or has only one item: "This might be an Action,
-     not a Project. A Project needs multiple steps. Is this really a Project?"
+   **Idea → Project (Intent gate):**
+   - Ask: "What's the Intent? Take a brain dump — motivation, scope,
+     what success would feel like. The narrative will get tightened as
+     actions land."
+   - Capture the user's prose as the Intent. Lightly expand if the
+     picture is unclear; don't generate it for them.
+   - If the Intent reads like a single tweetable goal with no shape to
+     it: "This might be an Action, not a Project. A Project usually
+     covers more than one move. Is this really a Project?"
+   - Ask for a first action; if the user doesn't have one ready, the
+     CLI defaults to `Brainstorm and add concrete actions for this
+     project`.
    - Once accepted:
      ```bash
      cadence create-project <slug> --pursuit <pursuit-id> \
-       --description "<one-paragraph framing>" \
-       --dod "<item 1>" --dod "<item 2>" \
-       --action "<first action>" --action "<second action>"
+       --intent "<the Intent narrative>" \
+       --action "<first action>"
      ```
 
    **Idea → Action (Concreteness gate):**
@@ -98,10 +103,12 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 ## Guardrails
 
-- **Enforce the gate.** Don't let vague Whys, missing DoDs, or abstract
-  Actions through without pushback. The gate exists to protect the user
-  from premature commitment.
+- **Enforce the gate.** Don't let vague Whys, missing Intents, or
+  abstract Actions through without pushback. The gate exists to
+  protect the user from premature commitment.
 - **Respect the user's override.** If they insist after pushback, accept.
   The gate is friction, not a block.
-- **Don't generate the Why/DoD/Action for the user.** Ask questions to
-  help them articulate it, but the content comes from them.
+- **Don't generate the Why/Intent/Action for the user.** Ask questions
+  to help them articulate it, but the content comes from them. (Light
+  agent expansion of an Intent brain dump is fine — that's
+  co-editing — but the kernel comes from the user.)

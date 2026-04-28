@@ -1,14 +1,11 @@
 ---
-description: Generate narrative from activity data — today, weekly, or pursuit arc
+description: Generate narrative from activity data — today, weekly, or pursuit arc. TRIGGER on explicit /cadence:narrate invocation, OR when the user asks for a generated narrative by name (e.g., "narrate today", "narrate this week", "tell the story of pursuit X"). SKIP for general "what did I do" questions that don't request a saved narrative.
 ---
 
 # /narrate
 
 Generate narrative from activity data. Reference
 `workflows/verb-contracts.md` for the narrate register.
-
-**Register:** Reflective but not evaluative. "What" not "why."
-Redemption-aware. Informational, not praise-based.
 
 ## Usage
 

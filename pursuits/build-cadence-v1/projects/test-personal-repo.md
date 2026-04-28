@@ -1,8 +1,10 @@
 ---
 id: test-personal-repo
 pursuit: build-cadence-v1
-status: on_hold
+status: dropped
 created: 2026-04-17
+dropped_reason: Out of scope for this repo. The 'use Cadence for personal data' work belongs in its own pursuit (or in a separate repo entirely), not as a test project under build-cadence-v1. Plugin validation has been happening directly in this repo via per-project user-story checks.
+dropped_at: 2026-04-27T19:18:33
 ---
 
 # Test Personal Repo

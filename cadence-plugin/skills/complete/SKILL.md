@@ -1,12 +1,13 @@
 ---
-description: Complete an action — mark it done, trigger upward completion prompts
+description: Complete an action — mark it done, trigger upward completion prompts. TRIGGER ONLY when the user explicitly invokes /cadence:complete or /complete. SKIP all natural-language equivalents — never auto-fire from "I finished X", "that's done", "check that off", or task-completion announcements.
 ---
 
 # /complete
 
-Mark an action as done. Completion flows upward: when all actions/DoD
-items in a project are checked, the system prompts to complete or extend
-the project. Same for pursuits.
+Mark an action as done. Completion flows upward: when all actions in a
+project are checked, the system prompts the user against the Intent —
+does it feel achieved? — to complete, extend, or split. Same for
+pursuits.
 
 ## Usage
 
@@ -19,9 +20,9 @@ project. If no active session, resolve against all active projects.
 
 ## CLI binding
 
-Use it for all read-only state
-inspection (current DoD/action progress, project status). Writes
-(checking off items, updating frontmatter) still use Edit.
+Use it for all read-only state inspection (current action progress,
+Intent text, project status). Writes (checking off items, updating
+frontmatter) still use Edit.
 
 ## Steps
 
@@ -45,32 +46,35 @@ inspection (current DoD/action progress, project status). Writes
      --match "<action text or 0-based index>" \
      --note "<optional narrative note>"
    ```
-   The CLI returns the matched action's text. If the user added new
-   DoD items mid-session, run `cadence add-item <id> --section dod
-   --text "..."` to append.
+   The CLI returns the matched action's text. If the user wants to add
+   more actions mid-session, run `cadence add-item <id> --section
+   action --text "..."` for each.
 
 3. **Check for upward completion:**
 
    **Project level:** Re-fetch the project after the edit:
    `cadence project <id> --pursuit <pursuit-id> --json`.
-   Read `dodProgress` and `actionProgress` from the response.
-   - If `dodProgress.done === dodProgress.total` and all `actions` are
-     checked:
+   Read `actionProgress` and `intent` from the response.
+   - If `actionProgress.done === actionProgress.total` (every action
+     checked):
      ```
-     All DoD items checked for [project]. Complete this project, or add
-     more items?
+     All actions checked for [project]. Does the intent feel achieved?
+     Complete this project, add more actions, or split?
      ```
      - If the user completes:
        ```bash
        cadence set-status <project-id> \
          --pursuit <pursuit-id> --status done
        ```
-       Then follow the Completing a Project workflow from the Cadence
-       runtime (pursuit checkpoint, suggest next project).
-     - If the user adds items: use `cadence add-item` for each. Project
-       stays active.
-     - **No third option.** An active project with no open items is
-       inconsistent state.
+       Then follow the Completing a Project workflow from
+       `cadence-reference.md` (pursuit checkpoint, suggest next project).
+     - If the user adds actions: use `cadence add-item --section action`
+       for each. Project stays active.
+     - If the user splits: drop or complete the existing project, then
+       create new project(s) via `cadence create-project` for the
+       remaining work, each carrying its own Intent.
+     - An active project with no open actions is inconsistent state —
+       resolve via one of these three paths.
 
    **Pursuit level:** If the project was just completed, check the
    pursuit via `cadence pursuit <pursuit-id> --json`. Inspect
@@ -87,9 +91,9 @@ inspection (current DoD/action progress, project status). Writes
 4. **Confirm:**
    ```
    Done: [action text]
-   [project] — [N/M DoD]
+   [project] — [N/M actions]
    ```
-   Read N/M from the post-edit `dodProgress` field.
+   Read N/M from the post-edit `actionProgress` field.
 
 ## For physical/standalone tasks
 

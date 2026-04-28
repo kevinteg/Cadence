@@ -1,5 +1,5 @@
 ---
-description: Start or resume the weekly Reflect ritual for review and prioritization
+description: Start or resume the weekly Reflect ritual for review and prioritization. TRIGGER on explicit /cadence:reflect invocation, OR when the user asks for the weekly review by name (e.g., "let's reflect on the week", "time for my weekly reflection", "do my Reflect ritual"). SKIP for conversation that merely revisits past work without requesting the ritual.
 ---
 
 # /reflect
@@ -7,9 +7,6 @@ description: Start or resume the weekly Reflect ritual for review and prioritiza
 Start or resume the weekly Reflect ritual. Reference
 `workflows/verb-contracts.md` for the reflect register and
 `workflows/reflect.md` for the full ritual specification.
-
-**Register:** Structured, honest, forward-looking. Prefer "what" over
-"why" throughout. No evaluative praise. Informational feedback only.
 
 ## Steps
 

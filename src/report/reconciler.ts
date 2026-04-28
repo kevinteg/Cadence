@@ -94,27 +94,10 @@ function flagStaleMarkers(
 
 function flagStructural(flags: Flag[], activeProjects: Project[]): void {
   for (const project of activeProjects) {
-    const dodTotal = project.dod.length
-    const dodDone = project.dodProgress.done
     const hasUncheckedActions = project.actions.some((a) => !a.checked)
-
-    if (dodTotal === 0) {
+    if (!hasUncheckedActions) {
       flags.push({
-        kind: 'structural_empty_dod',
-        pursuitId: project.pursuit,
-        projectId: project.id,
-      })
-      continue
-    }
-    if (dodDone === dodTotal) {
-      flags.push({
-        kind: 'structural_done_unchecked',
-        pursuitId: project.pursuit,
-        projectId: project.id,
-      })
-    } else if (!hasUncheckedActions) {
-      flags.push({
-        kind: 'structural_open_no_actions',
+        kind: 'structural_active_no_open_actions',
         pursuitId: project.pursuit,
         projectId: project.id,
       })

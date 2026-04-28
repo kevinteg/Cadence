@@ -20,6 +20,63 @@ types "select" — the verb's no-argument path handles it.
 
 ---
 
+## Skill Description Convention
+
+Cadence skill descriptions (the `description:` line in each `SKILL.md`
+frontmatter) drive Claude's auto-invocation decision. Cadence's
+explicit-verb contract requires that state-modifying verbs only fire
+when the user names them — not when natural language merely sounds
+related. Every Cadence skill description must use the **TRIGGER / SKIP**
+format so the description encodes invocation discipline, not just a
+capability summary.
+
+### Format
+
+```yaml
+description: <one-line capability summary>. TRIGGER <when to invoke>. SKIP <when not to invoke, with examples>.
+```
+
+The capability summary stays first so the verb is discoverable in
+listings. The TRIGGER and SKIP clauses are what Claude reads when
+deciding whether to auto-invoke the skill from non-explicit input.
+
+### State-modifying verbs
+
+`capture`, `pause`, `complete`, `cancel`, `waiting`, `promote`, `close`,
+`init` write to disk and change Cadence state. They MUST require
+explicit invocation. Their descriptions take the form:
+
+> TRIGGER ONLY when the user explicitly invokes `/cadence:<verb>` (or
+> `/<verb>`). SKIP all natural-language equivalents — never auto-fire
+> from "remember this", "save my progress", "I'm done", "drop this",
+> "I'm waiting on…", "promote that idea", or similar phrasings.
+
+This protects the explicit-verb contract: the user names what they
+want done; the system does not infer it.
+
+### Conversational verbs
+
+`brainstorm`, `develop`, `reflect`, `start`, `narrate`, `status`,
+`reconcile` facilitate cognitive modes and may auto-invoke when the
+user clearly asks for that mode by name. Their descriptions take the
+form:
+
+> TRIGGER on explicit `/cadence:<verb>` invocation, OR when the user
+> requests this mode by name (e.g., "let's brainstorm onboarding",
+> "what's my status", "let's reflect on the week"). SKIP for
+> conversation that merely touches the topic without requesting the
+> mode.
+
+### Why this matters
+
+Without TRIGGER/SKIP, generic "what the skill does" descriptions like
+*"Save a thought to thoughts/unprocessed/"* cause Claude to fire
+`/cadence:capture` whenever a user dumps a stray thought — which is
+exactly what the flow-safe contract is meant to prevent. Encoding
+intent in the description itself turns the system prompt into a guard.
+
+---
+
 ## Brainstorm
 
 **Purpose:** Divergent ideation. Generate quantity. Find what the Pursuit is.
@@ -154,11 +211,13 @@ active session. Use /start to begin one."
 **Behavior:**
 - Resolves to an action (in active session or across all projects)
 - Checks off the action, accepts optional note for narrative
-- After checking: if all DoD/actions in the project are done, prompts:
-  "Everything's checked off. Complete this project, or add more items?"
-- If project completes and all pursuit projects are resolved, prompts
-  the same for the pursuit
-- No third option — active entities with no open items must be resolved
+- After checking: if all actions in the project are done, prompts:
+  "All actions checked. Does the intent feel achieved? Complete this
+  project, add more actions, or split?"
+- If project completes and all pursuit projects are resolved, prompts:
+  "All projects resolved. Complete this pursuit, or add more projects?"
+- Active entities with no open actions are inconsistent state — resolve
+  by completing, adding an action, or moving on_hold
 
 **No-argument entry:** Completes the most recently discussed action in
 the active session. If ambiguous, asks.

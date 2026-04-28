@@ -1,8 +1,10 @@
 ---
 id: hook-handles-uninit-repos
 pursuit: build-cadence-v1
-status: on_hold
+status: dropped
 created: 2026-04-27
+dropped_reason: 'Made redundant by plugin-session-start-hook — that project already shipped clean un-init''d-repo handling at the CLI layer (verified: cadence status and --hook-output both exit 0 with the ''run /cadence:init'' nudge in fresh dirs).'
+dropped_at: 2026-04-27T17:55:03
 ---
 
 # Hook Handles Uninit Repos

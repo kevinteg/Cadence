@@ -3,8 +3,11 @@
   "version": "0.1.0",
   "description": "Cognitive operating system — manages attention, protects flow state, generates narrative across pursuits",
   "author": {
-    "name": "Kevin Tegtmeier"
+    "name": "Kevin Tegtmeier",
+    "url": "https://github.com/kevinteg"
   },
+  "homepage": "https://github.com/kevinteg/Cadence",
+  "repository": "https://github.com/kevinteg/Cadence",
   "license": "MIT",
   "keywords": ["productivity", "attention", "flow-state", "cognitive-os"],
   "skills": "./skills/"

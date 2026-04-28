@@ -61,13 +61,13 @@ One voice. Six registers. The register matches what you're doing, so the system 
 
   Idea ─────────────────► (enters hierarchy via /promote)
    │
-  Why? / DoD? / Concrete?
+  Why? / Intent? / Concrete?
 ```
 
 Ideas are adjacent to the work hierarchy, not part of the linear flow. They enter the hierarchy through `/promote`, which enforces graduation gates. Each gate draws from a different research tradition that fits its level:
 
 - **Idea → Pursuit** is gated by articulating a **Why** (Sinek's Golden Circle as framing; Self-Determination Theory as motivation anchor). An Idea without a Why cannot become a Pursuit.
-- **Idea → Project** is gated by a **Definition of Done** (GTD Natural Planning; Theory of Constraints throughput logic). An Idea without a DoD cannot become a Project.
+- **Idea → Project** is gated by an **Intent** narrative — motivation, scope, and the felt-sense of what "done" would look like (GTD Natural Planning's outcome-thinking and "envision wild success"; Theory of Constraints throughput logic — what does this Project unlock?). An Idea without an Intent cannot become a Project.
 - **Idea → Action** is gated by **concreteness** (GTD next-action test; Gollwitzer implementation intentions). If you can't visualize yourself doing it, it is not yet an Action.
 
 Brainstorming scope matches the verb's context: top-level produces candidate Pursuits, Pursuit-level produces candidate Projects, Project-level produces candidate Actions. Brainstorming on an Action is rejected with a structural suggestion that the Action is probably a Project.
@@ -92,7 +92,7 @@ Pursuits come in three flavors (same data model):
 
 **Pursuits are unlimited.** They can incubate without guilt. The Reconciler does not nag a Pursuit for not finishing — Pursuits carry the long-running nature of your commitments.
 
-A **Project** is a scoped effort with a clear **Definition of Done**. It's the familiar GTD concept — anything requiring more than one action to complete. Projects live inside Pursuits and range from substantial to small. Every Project has an explicit DoD — a concrete statement of what "finished" looks like. When a DoD is met, that's a **milestone** — a moment of measurable progress worth noting in the Narrative.
+A **Project** is a scoped effort framed by an **Intent** narrative. It's the familiar GTD concept — anything requiring more than one action to complete. Projects live inside Pursuits and range from substantial to small. The Intent absorbs both the "why" (motivation, scope) and the felt-sense of what "finished" would look like — co-edited with the agent as actions land and the picture sharpens. When the Intent feels achieved and the actions have shipped, that's a **milestone** — a moment of measurable progress worth noting in the Narrative.
 
 **Projects are WIP-limited.** Three to five active in Development or Execution is the default ceiling. A Project that won't end is a structural signal — either it needs to be split, or it's actually a Pursuit. The Reconciler surfaces this without punishing.
 

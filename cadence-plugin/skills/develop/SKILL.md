@@ -1,14 +1,11 @@
 ---
-description: Convergent evaluation of Ideas — PPCo, criteria, pre-mortem
+description: Convergent evaluation of Ideas — PPCo, criteria, pre-mortem. TRIGGER on explicit /cadence:develop invocation, OR when the user asks to evaluate Ideas by name (e.g., "let's develop these ideas", "run a develop pass on X", "PPCo this idea"). SKIP for conversation that merely critiques or compares ideas without requesting the formal evaluation.
 ---
 
 # /develop
 
 Convergent evaluation pass on Ideas. Reference `workflows/verb-contracts.md`
 for the develop register.
-
-**Register:** Structured-critical. Respectful but honest. Allowed to kill
-an Idea — with a reason worth remembering.
 
 ## Usage
 

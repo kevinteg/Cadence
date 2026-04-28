@@ -1,5 +1,5 @@
 ---
-description: Pause the current session — save a marker with where/next/open
+description: Pause the current session — save a marker with where/next/open. TRIGGER ONLY when the user explicitly invokes /cadence:pause or /pause. SKIP all natural-language equivalents — never auto-fire from "wrap up", "I'm done for now", "save my progress", "stopping here", or session-exit signals.
 ---
 
 # /pause
@@ -20,9 +20,9 @@ resumed later with `/start`.
    - The active pursuit and project are set by the current session.
    - Use the active project — do NOT infer the project from conversation
      topics or background context.
-   - **If the active project is done** (status: done, all DoD checked):
-     do not write a marker. Instead, follow the "Completing a Project"
-     workflow in the Cadence runtime.
+   - **If the active project is done** (status: done, all actions
+     checked): do not write a marker. Instead, follow the "Completing
+     a Project" workflow in `cadence-reference.md`.
 
 3. **Extract marker content** scoped to the active project only:
    - **Where**: What state is the work in? What was accomplished?

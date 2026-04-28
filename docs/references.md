@@ -153,16 +153,16 @@
 
 ## 11. Closure as Zeigarnik-release event
 
-**Pattern:** Project completion follows a deliberate protocol: all Definition of Done items checked, agent confirms with the user, status updated, milestone acknowledged. Completion is derived from the checklist, not declared arbitrarily.
+**Pattern:** Project completion follows a deliberate protocol: all actions checked, agent confirms intent achievement through dialogue, status updated, milestone acknowledged. Completion is derived from the action list against the Intent narrative, not declared arbitrarily.
 
 | Research | Key finding |
 |----------|-------------|
 | Zeigarnik (1927) | Uncompleted tasks produce ongoing cognitive tension and are remembered (rehearsed) more than completed ones. Completion releases the tension. |
 | Masicampo & Baumeister (2011) | A specific plan releases the same tension as actual completion. But actual completion is the clean release. Incomplete projects with no plan are the worst case: maximum cognitive drag. |
-| Gollwitzer (1999), implementation intentions | Specificity is the active ingredient. A concrete definition of "done" (the checklist) makes completion unambiguous, preventing the "is this really done?" loop that would sustain Zeigarnik tension. |
+| Gollwitzer (1999), implementation intentions | Specificity is the active ingredient. A concrete Intent narrative paired with atomic actions makes completion unambiguous, preventing the "is this really done?" loop that would sustain Zeigarnik tension. |
 | Gawande (2009), *The Checklist Manifesto* | Checklists work when they are 5-9 items, one page, precise language, with defined pause points. Read-Do vs. Do-Confirm formats. The WHO Surgical Safety Checklist reduced mortality by 47%. Checklists fail when they become bureaucratic or grow past nine items. |
 
-**Application in Cadence:** The Definition of Done is a first-class Gawande-style checklist. Completion is derived (all items checked), not self-reported. The agent confirms completion as a ritual pause point. This creates an unambiguous Zeigarnik-release event: the open loop closes cleanly. The user's mind can let go of the project because the system confirms it is genuinely done. The acknowledgment matters because it marks the transition from "in progress" to "resolved" at the cognitive level.
+**Application in Cadence:** The Actions list is the Gawande-style checklist; the Intent narrative is the felt-sense criterion the actions are pursuing. Completion is derived (all actions checked, plus dialogue against the Intent), not self-reported. The agent confirms completion as a ritual pause point — "Does the intent feel achieved?" This creates an unambiguous Zeigarnik-release event: the open loop closes cleanly. The user's mind can let go of the project because the system has confirmed it is genuinely done. The acknowledgment matters because it marks the transition from "in progress" to "resolved" at the cognitive level.
 
 ---
 
@@ -207,17 +207,17 @@
 
 ---
 
-## 15. Graduation gates (Why / DoD / Concreteness)
+## 15. Graduation gates (Why / Intent / Concreteness)
 
-**Pattern:** Project creation walks through a structured sequence: Which pursuit? (routing) What does done look like? (Definition of Done checklist) What's the first action? (concreteness). Pursuits optionally specify Why / How / What fields.
+**Pattern:** Project creation walks through a structured sequence: Which pursuit? (routing) What's the Intent? (motivation, scope, felt-sense of done — narrative, not checklist) What's the first action? (concreteness). Pursuits optionally specify Why / How / What fields.
 
 | Research | Key finding |
 |----------|-------------|
 | Sinek (2009), Golden Circle (as framing tool) | Why -> How -> What as a communication and motivation structure. The neuroscience claims (limbic/neocortex mapping) are rejected; the framing heuristic for purpose-articulation is useful. Explicit "why" at the Pursuit level provides a stable motivational anchor. |
 | Allen (2001/2015), GTD Natural Planning Model | Purpose -> principles -> vision -> brainstorm -> organize -> next actions. Projects that skip purpose and vision produce vague actions. The natural planning sequence front-loads clarity. |
-| Gollwitzer (1999), implementation intentions | Specificity is the active ingredient. A vague project ("improve the API") fails where a concrete one ("API returns paginated results with cursor tokens; integration test passes") succeeds. The Definition of Done forces Gollwitzer-grade specificity. |
+| Gollwitzer (1999), implementation intentions | Specificity is the active ingredient. A vague project ("improve the API") fails where a concrete one ("Intent: API serves paginated results with cursor tokens; first action: design the cursor schema") succeeds. The Intent narrative plus first action force Gollwitzer-grade specificity at promotion time. |
 
-**Application in Cadence:** The graduation gates prevent under-incubated projects from entering the execution pipeline. The Why question (Sinek, minus neuroscience) anchors motivation. The DoD question (Gollwitzer) forces specificity. The first-action question (Allen) creates an immediate entry point. Lightweight projects can move quickly through these gates; strategic ones get the full treatment. The gates exist because the research shows vague intentions do not produce the cognitive effects (plan-release, implementation-intention follow-through) that specific ones do.
+**Application in Cadence:** The graduation gates prevent under-incubated projects from entering the execution pipeline. The Why question (Sinek, minus neuroscience) anchors motivation. The Intent question (Allen Natural Planning + Gollwitzer specificity) forces a narrative articulation of what success would feel like. The first-action question (Allen next-action) creates an immediate entry point. Lightweight projects can move quickly through these gates; strategic ones get the full treatment. The gates exist because the research shows vague intentions do not produce the cognitive effects (plan-release, implementation-intention follow-through) that specific ones do.
 
 ---
 
@@ -271,5 +271,5 @@ Five findings appeared across multiple patterns above. These are the highest-con
 | Externalization releases cognitive load | Allen, Forte, Ahrens, Masicampo-Baumeister, Gollwitzer, Leroy | Markers, Thoughts, /capture, Parking Lot, ready-to-resume plans |
 | Mode separation between generation and evaluation | Guilford, Beaty et al., Puccio CPS, Double Diamond, De Bono, Osborn, Ellamil et al. | Verb-defined registers, brainstorm vs. execution flow, provocation deck |
 | Small visible progress is the motivational backbone | Amabile-Kramer, Clear, Fogg, behavioral activation, SDT competence | Informational feedback, no gamification, narrative structure |
-| Specific plans outperform vague intentions | Gollwitzer, WOOP/MCII, Leroy, GTD next actions, OKR key results | If-then nudges, DoD checklists, marker three-field format |
+| Specific plans outperform vague intentions | Gollwitzer, WOOP/MCII, Leroy, GTD next actions, OKR key results | If-then nudges, Intent narrative + atomic actions, marker three-field format |
 | Ritualized reflection beats ad-hoc introspection (if it avoids rumination) | GTD weekly review, Win the Week, Trapnell-Campbell, Eurich | Reflect with "what" questions, rotating prompts, rumination guardrails |

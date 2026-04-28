@@ -30,11 +30,12 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     status: 'active',
     created: '2026-01-01',
     waiting_for: [],
-    dod: [{ text: 'do thing', checked: false }],
+    intent: '',
+    dod: [],
     actions: [{ text: 'action', checked: false }],
     description: '',
     path: 'pursuits/p/projects/proj.md',
-    dodProgress: { done: 0, total: 1 },
+    dodProgress: { done: 0, total: 0 },
     actionProgress: { done: 0, total: 1 },
     hasMarker: false,
     ...overrides,
@@ -172,44 +173,36 @@ test('stale marker fires past marker_stale_days but suppressed when dormant', ()
   )
 })
 
-test('structural empty DoD fires for active project with no DoD items', () => {
+test('structural_active_no_open_actions fires when active project has no unchecked actions', () => {
   const snapshot = makeSnapshot({
     projects: [
       makeProject({
-        dod: [],
-        dodProgress: { done: 0, total: 0 },
-      }),
-    ],
-  })
-  const { flags } = report(snapshot)
-  assert.ok(flags.some((f) => f.kind === 'structural_empty_dod'))
-})
-
-test('structural done_unchecked fires when all DoD done but status active', () => {
-  const snapshot = makeSnapshot({
-    projects: [
-      makeProject({
-        dod: [{ text: 'd', checked: true }],
-        dodProgress: { done: 1, total: 1 },
-      }),
-    ],
-  })
-  const { flags } = report(snapshot)
-  assert.ok(flags.some((f) => f.kind === 'structural_done_unchecked'))
-})
-
-test('structural open_no_actions fires when DoD has open items but actions all checked', () => {
-  const snapshot = makeSnapshot({
-    projects: [
-      makeProject({
-        dod: [{ text: 'd', checked: false }],
         actions: [{ text: 'a', checked: true }],
         actionProgress: { done: 1, total: 1 },
       }),
     ],
   })
   const { flags } = report(snapshot)
-  assert.ok(flags.some((f) => f.kind === 'structural_open_no_actions'))
+  assert.ok(flags.some((f) => f.kind === 'structural_active_no_open_actions'))
+})
+
+test('structural_active_no_open_actions does not fire when an unchecked action remains', () => {
+  const snapshot = makeSnapshot({
+    projects: [
+      makeProject({
+        actions: [
+          { text: 'a', checked: true },
+          { text: 'b', checked: false },
+        ],
+        actionProgress: { done: 1, total: 2 },
+      }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  assert.equal(
+    flags.filter((f) => f.kind === 'structural_active_no_open_actions').length,
+    0,
+  )
 })
 
 test('WIP over limit fires when in-progress projects exceed max', () => {
@@ -239,12 +232,10 @@ test('on_hold and done projects do not get active-only flags', () => {
       makeProject({
         id: 'on-hold',
         status: 'on_hold',
-        dod: [],
       }),
       makeProject({
         id: 'done',
         status: 'done',
-        dod: [],
       }),
     ],
   })
@@ -258,7 +249,6 @@ test('projects in non-active pursuits are excluded from active-only flags', () =
     projects: [
       makeProject({
         pursuit: 'someday-p',
-        dod: [],
       }),
     ],
   })

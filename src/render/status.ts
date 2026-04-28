@@ -124,12 +124,8 @@ function describeFlag(flag: Flag, _snapshot: Snapshot): string {
         : `dormant: ${flag.pursuitId}/${flag.projectId} (no markers; project created earlier)`
     case 'stale_marker':
       return `stale marker: ${flag.pursuitId}/${flag.projectId} (${flag.daysSinceMarker}d old)`
-    case 'structural_empty_dod':
-      return `structural: ${flag.pursuitId}/${flag.projectId} has no DoD items`
-    case 'structural_done_unchecked':
-      return `structural: ${flag.pursuitId}/${flag.projectId} all DoD checked but status is not done`
-    case 'structural_open_no_actions':
-      return `structural: ${flag.pursuitId}/${flag.projectId} has open DoD items but no unchecked actions`
+    case 'structural_active_no_open_actions':
+      return `structural: ${flag.pursuitId}/${flag.projectId} all actions checked — does the intent feel achieved?`
     case 'wip_over_limit':
       return `WIP over limit: ${flag.count} in-progress projects (limit: ${flag.limit})`
   }

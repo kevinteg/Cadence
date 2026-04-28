@@ -13,17 +13,17 @@
 ```
   Pursuit ──► Project ──► Action
      │           │            │
-    DoD?     Concrete?     Do it.
+  Intent?    Concrete?     Do it.
 ```
 
-Ideas are an adjacent collection that feeds INTO the hierarchy via three graduation gates (`/promote`): **Idea → Pursuit** (requires a Why), **Idea → Project** (requires a Definition of Done), **Idea → Action** (requires concreteness). Each gate draws from a different research tradition: **Why** (Sinek, Self-Determination Theory), **Definition of Done** (GTD Natural Planning, Theory of Constraints throughput), **Concreteness** (GTD next-action test, Gollwitzer implementation intentions).
+Ideas are an adjacent collection that feeds INTO the hierarchy via three graduation gates (`/promote`): **Idea → Pursuit** (requires a Why), **Idea → Project** (requires an Intent narrative), **Idea → Action** (requires concreteness). Each gate draws from a different research tradition: **Why** (Sinek, Self-Determination Theory), **Intent** (GTD Natural Planning's outcome-thinking, Theory of Constraints throughput), **Concreteness** (GTD next-action test, Gollwitzer implementation intentions).
 
 **The hierarchy:**
 
 | Level | What it is | Limit | Example |
 |-------|-----------|-------|---------|
 | **Pursuit** | An intentional commitment tied to your values; has a Why | No limit | "Establish AI Test Framework at Nexthop" |
-| **Project** | A scoped effort with a Definition of Done | WIP-limited (3–5 active in Development or Execution) | "Stand up the golden-path test harness" |
+| **Project** | A scoped effort framed by an Intent narrative | WIP-limited (3–5 active in Development or Execution) | "Stand up the golden-path test harness" |
 | **Action** | The atomic thing you do | Bounded by Project WIP | "Configure GitHub Actions workflow" |
 | **Idea** | A captured seed, possibly developed, not yet promoted | Unlimited; visibility high | "Record real traffic from staging and replay" |
 

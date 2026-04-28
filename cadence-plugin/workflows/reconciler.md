@@ -77,7 +77,7 @@ set `flagged: true` on the item, or remove it if resolved.
 
 **Suggestion format:** "No activity on [project] in [N days] — still active, or move to on_hold?"
 
-**Note:** Projects with all DoD items checked are not dormant — they need
+**Note:** Projects with all actions checked are not dormant — they need
 completion, which is a structural flag instead.
 
 ### 3. Stale Markers
@@ -102,14 +102,18 @@ for the same project (avoid noise).
 **Severity:** `info`
 
 **Logic — check each of these:**
-- **Empty DoD:** Active project with no items in Definition of Done section.
-  Suggestion: "Define what done looks like for [project]"
-- **All done, not closed:** Active project where all DoD items are checked
-  but status is not `done`.
-  Suggestion: "[project] has all DoD items complete — mark as done?"
-- **No actions:** Active project with unchecked DoD items but no unchecked
-  actions in the Actions section.
-  Suggestion: "[project] has open DoD items but no actions — break down next steps"
+- **All actions checked, not closed:** Active project where every action
+  is checked off but `status` is not `done`. The project either needs
+  completion or another round of actions.
+  Suggestion: "[project] has all actions checked — does the intent
+  feel achieved? Mark done, add more actions, or split."
+
+The older model carried two additional structural flags ("empty DoD",
+"open DoD but no actions"). Both are obsolete under the narrative-first
+model: a project's body is Intent prose (no checklist to be empty), and
+the Actions list is the single checklist. Existing project files with
+legacy `## Definition of Done` sections do not produce these flags;
+the section is parsed-but-ignored.
 
 ### 5. Someday Cue Surfacing
 
@@ -173,9 +177,9 @@ for the same project (avoid noise).
 
 **Logic:**
 1. For each active project, find the oldest marker referencing it
-2. Flag if the project has been active for 30+ days with less than 50% DoD complete
+2. Flag if the project has been active for 30+ days with less than 50% of actions checked
 
-**Suggestion format:** "[project] has been active for [N days] with [X/Y] DoD done — split into smaller projects, or promote to its own Pursuit?"
+**Suggestion format:** "[project] has been active for [N days] with [X/Y] actions done — split into smaller projects, or promote to its own Pursuit?"
 
 ### 10. Pursuit Completion Proximity
 
@@ -205,4 +209,4 @@ All thresholds come from `cadence.yaml` under `defaults`:
 
 Dormant project threshold is fixed at 14 days. Aging seed threshold is
 14 days. Unpromoted idea threshold is 7 days. Long-running project
-threshold is 30 days with <50% DoD.
+threshold is 30 days with <50% of actions checked.

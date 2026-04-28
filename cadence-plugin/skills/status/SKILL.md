@@ -1,5 +1,5 @@
 ---
-description: Show system dashboard or drill into pursuits, projects, and actions
+description: Show system dashboard or drill into pursuits, projects, and actions. TRIGGER on explicit /cadence:status invocation, OR when the user asks for the dashboard by name (e.g., "what's my status", "show the dashboard", "how is X going"). SKIP for unrelated questions that mention a project or pursuit in passing.
 ---
 
 # /status
@@ -15,7 +15,7 @@ argument resolution and number-shortcut tracking.
 - `/status` — system dashboard with counts and flags
 - `/status pursuits` — list all pursuits grouped by lifecycle
 - `/status <pursuit>` — list projects in a pursuit
-- `/status <project>` — show DoD and actions for a project
+- `/status <project>` — show Intent and actions for a project
 - `/status 1`, `/status 2` — numbered shortcut from the last list shown
 
 Arguments resolve via fuzzy match, partial match, or natural language.
@@ -80,7 +80,7 @@ If the CLI is unavailable (missing binary, Node not installed), fall
 back to manual scanning:
 - Glob `pursuits/*/pursuit.md` for active pursuits
 - Glob `pursuits/*/projects/*.md` for projects, parse status from
-  frontmatter, count DoD/Actions checkboxes
+  frontmatter, count Action checkboxes
 - Glob `pursuits/**/sessions/*.md` for the most recent marker
 - Read `cadence.yaml` for thresholds
 - Apply `workflows/reconciler.md` checks for flags

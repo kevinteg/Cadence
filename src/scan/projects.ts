@@ -25,10 +25,12 @@ export async function scanProjects(repoRoot: string): Promise<Project[]> {
     const { data, content } = parseFrontmatter(raw)
     const fm = ProjectFrontmatterSchema.parse(data)
     const sections = extractSections(content)
+    const intent = (sections.get('intent') ?? '').trim()
     const dod = parseChecklist(sections.get('definition of done') ?? '')
     const actions = parseChecklist(sections.get('actions') ?? '')
     results.push({
       ...fm,
+      intent,
       dod,
       actions,
       description: extractDescription(content),

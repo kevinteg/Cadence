@@ -9,6 +9,7 @@ export type CreateProjectOpts = {
   status?: 'active' | 'on_hold' | 'done' | 'dropped'
   title?: string
   description?: string
+  intent?: string
   dod?: string[]
   dod_checked?: string[]
   actions?: string[]
@@ -22,6 +23,9 @@ export type CreateProjectOpts = {
   created?: string
   now?: Date
 }
+
+export const DEFAULT_FIRST_ACTION =
+  'Brainstorm and add concrete actions for this project'
 
 export async function createProject(
   repoRoot: string,
@@ -37,10 +41,23 @@ export async function createProject(
     throw new Error(`project already exists: ${opts.pursuit}/${opts.id}`)
   }
 
+  const cleanList = (xs: unknown): string[] =>
+    Array.isArray(xs)
+      ? xs.filter((x): x is string => typeof x === 'string' && x.length > 0)
+      : []
+  const dod = cleanList(opts.dod)
+  const dodChecked = cleanList(opts.dod_checked)
+  let actions = cleanList(opts.actions)
+  const actionsChecked = cleanList(opts.actions_checked)
+
+  if (actions.length + actionsChecked.length === 0) {
+    actions = [DEFAULT_FIRST_ACTION]
+  }
+
   const data: Record<string, unknown> = {
     id: opts.id,
     pursuit: opts.pursuit,
-    status: opts.status ?? 'active',
+    status: opts.status ?? 'on_hold',
     created: opts.created ?? dateString(now),
   }
   if (opts.waiting_for && opts.waiting_for.length > 0) {
@@ -52,24 +69,21 @@ export async function createProject(
     }))
   }
 
-  const cleanList = (xs: unknown): string[] =>
-    Array.isArray(xs)
-      ? xs.filter((x): x is string => typeof x === 'string' && x.length > 0)
-      : []
-  const dod = cleanList(opts.dod)
-  const dodChecked = cleanList(opts.dod_checked)
-  const actions = cleanList(opts.actions)
-  const actionsChecked = cleanList(opts.actions_checked)
-
   const title = opts.title ?? toTitleCase(opts.id)
   const sections: string[] = [`# ${title}`]
   if (opts.description) sections.push(opts.description)
-  sections.push('## Definition of Done')
+  if (opts.intent && opts.intent.trim().length > 0) {
+    sections.push('## Intent')
+    sections.push(opts.intent.trim())
+  }
   const dodLines = [
     ...dodChecked.map((d) => `- [x] ${d}`),
     ...dod.map((d) => `- [ ] ${d}`),
   ]
-  if (dodLines.length > 0) sections.push(dodLines.join('\n'))
+  if (dodLines.length > 0) {
+    sections.push('## Definition of Done')
+    sections.push(dodLines.join('\n'))
+  }
   sections.push('## Actions')
   const actionLines = [
     ...actionsChecked.map((a) => `- [x] ${a}`),

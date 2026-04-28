@@ -34,11 +34,12 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     status: 'active',
     created: '2026-01-01',
     waiting_for: [],
-    dod: [{ text: 'do', checked: false }],
+    intent: '',
+    dod: [],
     actions: [{ text: 'act', checked: false }],
     description: '',
     path: 'pursuits/p/projects/proj.md',
-    dodProgress: { done: 0, total: 1 },
+    dodProgress: { done: 0, total: 0 },
     actionProgress: { done: 0, total: 1 },
     hasMarker: false,
     ...overrides,
@@ -101,20 +102,18 @@ test('renderSnapshot pursuit table shows id, type, lifecycle, status, created', 
   assert.match(out, /beta\s+someday\s+someday/)
 })
 
-test('renderSnapshot project table shows DoD and actions progress + STARTED flag', () => {
+test('renderSnapshot project table shows actions progress + STARTED flag', () => {
   const out = renderSnapshot(
     makeSnapshot({
       pursuits: [makePursuit()],
       projects: [
         makeProject({
           id: 'started',
-          dodProgress: { done: 2, total: 3 },
           actionProgress: { done: 1, total: 4 },
           hasMarker: true,
         }),
         makeProject({
           id: 'cold',
-          dodProgress: { done: 0, total: 5 },
           actionProgress: { done: 0, total: 0 },
           hasMarker: false,
         }),
@@ -122,8 +121,8 @@ test('renderSnapshot project table shows DoD and actions progress + STARTED flag
     }),
   )
   assert.match(out, /Projects \(2\)/)
-  assert.match(out, /started\s+p\s+active\s+2\/3\s+1\/4\s+yes/)
-  assert.match(out, /cold\s+p\s+active\s+0\/5\s+0\/0\s+no/)
+  assert.match(out, /started\s+p\s+active\s+1\/4\s+yes/)
+  assert.match(out, /cold\s+p\s+active\s+0\/0\s+no/)
 })
 
 test('renderSnapshot markers sort newest first and truncate next field', () => {

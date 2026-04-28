@@ -1,14 +1,11 @@
 ---
-description: Start a session — curated selection or direct project entry with flow protection
+description: Start a session — curated selection or direct project entry with flow protection. TRIGGER on explicit /cadence:start invocation, OR when the user asks to begin a tracked work session by name (e.g., "let's start a session", "start working on X", "open a session on Y"). SKIP for conversation that merely picks a topic to think about without requesting a tracked session.
 ---
 
 # /start
 
 Begin a work session. Reference `workflows/verb-contracts.md` for the
 start register.
-
-**Register:** Silent during flow. Terse at breakpoints. The voice
-protects your attention — it does not compete for it.
 
 ## Usage
 
@@ -57,8 +54,8 @@ Glob calls needed for state.
    What do you want to work on?
 
    **[Pursuit Name]**
-   - [project-id]: [brief description] — [N/M DoD] [not started]
-   - [project-id]: [brief description] — [N/M DoD]
+   - [project-id]: [first sentence of Intent] — [N/M actions] [not started]
+   - [project-id]: [first sentence of Intent] — [N/M actions]
 
    [Repeat for other active pursuits. Hide done. Show on_hold dimmed.]
 
@@ -71,8 +68,8 @@ Glob calls needed for state.
 
 ### With-argument entry (direct session)
 
-1. Resolve the argument to an active project (fuzzy/partial match
-   against the `snapshot.projects` array from
+1. Resolve the argument to an `active` or `on_hold` project (fuzzy/partial
+   match against the `snapshot.projects` array from
    `cadence scan --json`). If status is `done` or `dropped`:
    "[Project] is already [status]. Want to create a follow-up project?"
 
@@ -80,6 +77,18 @@ Glob calls needed for state.
    "You have an active session on [project]. /pause first, or switch?"
    If the user switches, auto-pause the current session before starting
    the new one.
+
+### Promote on_hold projects
+
+If the resolved project's `status` is `on_hold`, promote it to `active`
+before opening the session — starting the project IS the act of pulling
+it off the backlog:
+
+```bash
+cadence set-status <project-id> --pursuit <pursuit-id> --status active
+```
+
+This applies to both no-argument (curated) and with-argument entry paths.
 
 ### Session start
 
@@ -91,7 +100,7 @@ Glob calls needed for state.
    recent.
 2. If a marker exists, present the ready-to-resume recap:
    ```
-   [pursuit] / [project] — [N/M DoD]
+   [pursuit] / [project] — [N/M actions]
 
    Next: [*next* field from marker, verbatim]
    Where: [brief summary of *where* field]
@@ -100,7 +109,7 @@ Glob calls needed for state.
    `cadence project <id> --pursuit <pursuit-id> --json` and
    present:
    ```
-   [pursuit] / [project] — [N/M DoD]
+   [pursuit] / [project] — [N/M actions]
 
    New session. First action: [first unchecked action]
    ```

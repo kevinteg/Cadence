@@ -1,5 +1,5 @@
 ---
-description: Close a pursuit or project — triggers the cleaning ritual for unresolved Ideas
+description: Close a pursuit or project — triggers the cleaning ritual for unresolved Ideas. TRIGGER ONLY when the user explicitly invokes /cadence:close or /close. SKIP all natural-language equivalents — never auto-fire from "we're done with this pursuit", "wrap up X", "shut down Y", or closure signals.
 ---
 
 # /close
@@ -72,17 +72,18 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 ### Project Closure (override-with-reason)
 
-1. Resolve the project. Check DoD status via
+1. Resolve the project. Check action progress via
    `cadence project <id> --pursuit <pursuit-id> --json`.
 
-2. If all DoD items are checked → standard completion:
-   - Confirm: "[project] has all DoD items complete. Mark as done?"
+2. If all actions are checked → standard completion:
+   - Confirm against the Intent: "[project] has all actions checked.
+     Does the intent feel achieved? Mark as done?"
    - Run `cadence set-status <project-id> --pursuit <pursuit-id>
      --status done`
-   - Run pursuit checkpoint (see Completing a Project in runtime)
+   - Run pursuit checkpoint (see Completing a Project in `cadence-reference.md`)
 
-3. If DoD items remain (cancellation/drop):
-   - Ask: "Not all DoD items are done. Drop this project?"
+3. If actions remain unchecked (cancellation/drop):
+   - Ask: "Not all actions are done. Drop this project?"
    - Require a reason: "What's the reason for dropping?"
 
 4. Check for unresolved Ideas via the bundled CLI:

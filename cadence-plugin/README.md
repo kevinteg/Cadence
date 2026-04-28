@@ -6,31 +6,45 @@ across pursuits.
 
 ## Installation
 
-### 1. Create your repo and install the plugin
+**Prerequisites:** Node 20+ (the bundled CLI is a self-contained Node
+bundle). The plugin ships with `bin/cadence` already built — no `npm
+install` or build step needed for end-users.
+
+### Quick start
+
+Clone the repo and launch Claude Code with the plugin:
 
 ```bash
-mkdir my-cadence && cd my-cadence
+git clone https://github.com/kevinteg/Cadence.git
+cd Cadence
+claude --plugin-dir ./cadence-plugin
+```
+
+The repo's `CLAUDE.md` already imports the runtime via a relative path,
+so the SessionStart dashboard appears immediately. You're inside the
+Cadence repo — poke around the existing `build-cadence-v1` pursuit, or
+`cd` into a fresh subdirectory and run `/cadence:init` to start clean.
+
+### Use Cadence in your own repo
+
+Clone the plugin to a stable location once, then point your own
+Cadence-tracked repo at it:
+
+```bash
+git clone https://github.com/kevinteg/Cadence.git ~/code/cadence
+mkdir my-work && cd my-work
 git init
+cat > CLAUDE.md <<'EOF'
+@~/code/cadence/cadence-plugin/cadence-runtime.md
+EOF
+claude --plugin-dir ~/code/cadence/cadence-plugin
 ```
 
-Start Claude Code with the plugin:
-```bash
-claude --plugin-dir /path/to/cadence-plugin
-```
+(Adjust `~/code/cadence` to wherever you want the plugin to live.)
 
-### 2. Set up CLAUDE.md
+### Bootstrap with /cadence:init
 
-Create a `CLAUDE.md` in your repo root that imports the runtime:
-
-```markdown
-@/path/to/cadence-plugin/cadence-runtime.md
-```
-
-Replace `/path/to/` with the absolute path to the plugin directory.
-
-### 3. Bootstrap with /cadence:init
-
-Run `/cadence:init` in Claude Code. This will:
+Inside Claude Code, run `/cadence:init`. It will:
 - Create the directory structure (pursuits/, ideas, Wandering, etc.)
 - Generate cadence.yaml with default configuration
 - Walk you through creating your first pursuit and project
@@ -84,7 +98,7 @@ tone, behavior, and guardrails are specified in
 ```
   Idea ──► Pursuit ──► Project ──► Action
    │         │           │            │
-  Why?      DoD?     Concrete?   /complete
+  Why?    Intent?    Concrete?   /complete
 ```
 
 Three graduation gates. `brainstorm` generates Seeds. `develop` evaluates

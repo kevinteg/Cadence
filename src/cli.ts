@@ -167,7 +167,7 @@ cli
   })
 
 cli
-  .command('project <id>', 'Show DoD, Actions, and waiting_for for a project')
+  .command('project <id>', 'Show Intent, Actions, and waiting_for for a project')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--pursuit <id>', 'Disambiguate when project IDs collide')
   .option('--json', 'Emit as JSON')
@@ -337,15 +337,16 @@ cli
   .option('--pursuit <id>', 'Pursuit id (required)')
   .option('--status <status>', 'active | on_hold | done | dropped')
   .option('--title <text>', 'H1 title')
-  .option('--description <text>', 'Body description')
-  .option('--dod <item>', 'DoD item (unchecked, repeatable)', { type: [String] })
-  .option('--dod-checked <item>', 'DoD item already complete (repeatable)', {
-    type: [String],
-  })
+  .option('--description <text>', 'Intro paragraph (no header)')
+  .option('--intent <text>', 'Intent narrative — motivation, scope, felt-sense of done')
   .option('--action <item>', 'Action item (unchecked, repeatable)', {
     type: [String],
   })
   .option('--action-checked <item>', 'Action item already complete (repeatable)', {
+    type: [String],
+  })
+  .option('--dod <item>', '[legacy] DoD item (unchecked, repeatable). Prefer --intent for new projects.', { type: [String] })
+  .option('--dod-checked <item>', '[legacy] DoD item already complete (repeatable). Prefer --intent for new projects.', {
     type: [String],
   })
   .option('--created <YYYY-MM-DD>', 'Override created date (default: today)')
@@ -358,6 +359,7 @@ cli
         status?: 'active' | 'on_hold' | 'done' | 'dropped'
         title?: string
         description?: string
+        intent?: string
         dod?: string[]
         dodChecked?: string[]
         action?: string[]
@@ -379,6 +381,7 @@ cli
         ...(opts.status ? { status: opts.status } : {}),
         ...(opts.title ? { title: opts.title } : {}),
         ...(opts.description ? { description: opts.description } : {}),
+        ...(opts.intent ? { intent: opts.intent } : {}),
         ...(dod ? { dod } : {}),
         ...(dodChecked ? { dod_checked: dodChecked } : {}),
         ...(actions ? { actions } : {}),
@@ -589,7 +592,7 @@ cli
   )
 
 cli
-  .command('check <project-id>', 'Toggle a DoD or Action item in a project')
+  .command('check <project-id>', 'Toggle an Action item (or legacy DoD item) in a project')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--pursuit <id>', 'Disambiguate when project IDs collide')
   .option('--section <section>', 'dod | action (required)')
@@ -626,7 +629,7 @@ cli
   )
 
 cli
-  .command('add-item <project-id>', 'Append a DoD or Action item')
+  .command('add-item <project-id>', 'Append an Action item (or legacy DoD item)')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--pursuit <id>', 'Disambiguate when project IDs collide')
   .option('--section <section>', 'dod | action (required)')

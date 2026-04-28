@@ -1,5 +1,5 @@
 ---
-description: Quiet report of system health — stale state, aging Ideas, dormant projects
+description: Quiet report of system health — stale state, aging Ideas, dormant projects. TRIGGER on explicit /cadence:reconcile invocation, OR when the user asks for a system health check by name (e.g., "reconcile the system", "show flags", "what's gone stale"). SKIP for general state questions that don't request the health report.
 ---
 
 # /reconcile

@@ -1,5 +1,5 @@
 ---
-description: Bootstrap a new Cadence repo — create directory structure, config, Wandering pursuit, and .gitignore
+description: Bootstrap a new Cadence repo — create directory structure, config, Wandering pursuit, and .gitignore. TRIGGER ONLY when the user explicitly invokes /cadence:init or /init. SKIP all natural-language equivalents — never auto-fire from "set up Cadence", "initialize this repo", or onboarding requests; surface the command instead.
 ---
 
 # /init
@@ -32,16 +32,31 @@ Set up a new repo for Cadence. Only needs to run once per repo.
    narratives/drafts/
    ```
 
-4. **Create cadence.yaml** from defaults:
+4. **Create cadence.yaml** from defaults. Compute `win_cycles` from
+   today's date — never hardcode a half:
+
+   - Determine current year `YYYY` and half (`H1` if month is 1–6, else `H2`)
+   - `current`: `{YYYY}-H{1|2}` (e.g., `2026-H2`)
+   - `start`: `{YYYY}-01-01` for H1, `{YYYY}-07-01` for H2
+   - `end`: `{YYYY}-06-30` for H1, `{YYYY}-12-31` for H2
+   - `mid_check`: `{YYYY}-04-01` for H1, `{YYYY}-10-01` for H2 (start + 3 months)
+
+   **Past mid_check check:** If today's date is on or after the computed
+   `mid_check`, surface this and offer to start the next half instead:
+   "Today is past the mid-check for {current}. Start the next half
+   ({next}) instead?" Roll over: H2 → next year's H1. If the user
+   accepts, recompute using the next half.
+
+   Write the result, substituting the computed values:
    ```yaml
    # Cadence Configuration
    version: 1
 
    win_cycles:
-     current: 2026-H1
-     start: 2026-01-01
-     end: 2026-06-30
-     mid_check: 2026-04-01
+     current: <YYYY-Hn>           # e.g., 2026-H2
+     start: <YYYY-MM-DD>          # first day of the half
+     end: <YYYY-MM-DD>            # last day of the half
+     mid_check: <YYYY-MM-DD>      # start + 3 months
 
    wip_limits:
      max_active_projects: 5

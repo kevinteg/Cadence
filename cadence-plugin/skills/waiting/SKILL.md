@@ -1,13 +1,12 @@
 ---
-description: Record an external blocker — capture a waiting_for item with person, what, and expected date
+description: Record an external blocker — capture a waiting_for item with person, what, and expected date. TRIGGER ONLY when the user explicitly invokes /cadence:waiting or /waiting. SKIP all natural-language equivalents — never auto-fire from "I'm waiting on X", "blocked by Y", "Z owes me a reply", or status mentions of pending external items.
 ---
 
 # /waiting
 
 Track an external dependency. The reconciler flags items that go past
-their expected date so blockers don't silently rot.
-
-**Register:** Terse. Three quick questions, write, confirm.
+their expected date so blockers don't silently rot. Reference
+`workflows/verb-contracts.md` for the waiting register.
 
 ## Usage
 

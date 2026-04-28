@@ -63,7 +63,37 @@ test('createPursuit refuses to overwrite an existing pursuit', async () => {
   }
 })
 
-test('createProject populates DoD and Actions', async () => {
+test('createProject populates Intent and Actions for new projects', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'proj',
+      title: 'Project Title',
+      intent: 'A short narrative about motivation, scope, and success.',
+      actions: ['First action', 'Second action'],
+      now: NOW,
+    })
+    const snapshot = await scan(dir, NOW)
+    assert.equal(snapshot.projects.length, 1)
+    const proj = snapshot.projects[0]!
+    assert.match(proj.intent, /motivation, scope/)
+    assert.equal(proj.dod.length, 0)
+    assert.equal(proj.actionProgress.total, 2)
+    assert.equal(proj.actions[1]?.text, 'Second action')
+    const text = await readFile(
+      path.join(dir, 'pursuits/p/projects/proj.md'),
+      'utf8',
+    )
+    assert.match(text, /## Intent/)
+    assert.doesNotMatch(text, /## Definition of Done/)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('createProject still emits legacy DoD section when --dod opts provided', async () => {
   const dir = await tempRepo()
   try {
     await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
@@ -77,7 +107,6 @@ test('createProject populates DoD and Actions', async () => {
       now: NOW,
     })
     const snapshot = await scan(dir, NOW)
-    assert.equal(snapshot.projects.length, 1)
     const proj = snapshot.projects[0]!
     assert.equal(proj.dodProgress.total, 2)
     assert.equal(proj.actionProgress.total, 2)
@@ -292,7 +321,7 @@ test('addItem appends to DoD; addWaitingFor + flagWaitingFor round-trip', async 
       pursuit: 'p',
       id: 'proj',
       dod: ['First'],
-      actions: [],
+      actions: ['kickoff'],
       now: NOW,
     })
     await addItem(dir, {
@@ -321,20 +350,130 @@ test('addItem appends to DoD; addWaitingFor + flagWaitingFor round-trip', async 
   }
 })
 
-test('createProject with no dod/actions writes empty sections (no undefined items)', async () => {
+test('createProject with empty DoD but one action writes clean sections (no undefined items)', async () => {
   const dir = await tempRepo()
   try {
     await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
-    await createProject(dir, { pursuit: 'p', id: 'bare', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'bare',
+      actions: ['kickoff'],
+      now: NOW,
+    })
     const text = await readFile(
       path.join(dir, 'pursuits/p/projects/bare.md'),
       'utf8',
     )
     assert.doesNotMatch(text, /undefined/)
-    assert.doesNotMatch(text, /\[ \]\s*$/m) // no orphan empty checkbox lines
+    assert.doesNotMatch(text, /\[ \]\s*$/m)
     const snapshot = await scan(dir, NOW)
     assert.equal(snapshot.projects[0]?.dod.length, 0)
-    assert.equal(snapshot.projects[0]?.actions.length, 0)
+    assert.equal(snapshot.projects[0]?.actions.length, 1)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('createProject applies a default first action when no --action provided', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'bare',
+      intent: 'just a narrative',
+      now: NOW,
+    })
+    const snapshot = await scan(dir, NOW)
+    const proj = snapshot.projects[0]!
+    assert.equal(proj.actions.length, 1)
+    assert.match(proj.actions[0]!.text, /Brainstorm and add concrete actions/)
+    assert.equal(proj.actions[0]!.checked, false)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('createProject defaults status to on_hold; explicit status wins', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'default-hold',
+      actions: ['kickoff'],
+      now: NOW,
+    })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'explicit-active',
+      status: 'active',
+      actions: ['kickoff'],
+      now: NOW,
+    })
+    const snapshot = await scan(dir, NOW)
+    const onHold = snapshot.projects.find((p) => p.id === 'default-hold')!
+    const active = snapshot.projects.find((p) => p.id === 'explicit-active')!
+    assert.equal(onHold.status, 'on_hold')
+    assert.equal(active.status, 'active')
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('checkItem promotes on_hold → active when first action is checked; not on uncheck or DoD', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'proj',
+      dod: ['Ship'],
+      actions: ['First action', 'Second action'],
+      now: NOW,
+    })
+    let snap = await scan(dir, NOW)
+    assert.equal(snap.projects[0]?.status, 'on_hold')
+
+    // DoD check on on_hold: status stays on_hold
+    const dodResult = await checkItem(dir, {
+      project: 'proj',
+      section: 'dod',
+      match: 0,
+    })
+    assert.equal(dodResult.promoted, undefined)
+    snap = await scan(dir, NOW)
+    assert.equal(snap.projects[0]?.status, 'on_hold')
+
+    // First action check: promotes to active
+    const r1 = await checkItem(dir, {
+      project: 'proj',
+      section: 'action',
+      match: 'First',
+    })
+    assert.equal(r1.promoted, true)
+    snap = await scan(dir, NOW)
+    assert.equal(snap.projects[0]?.status, 'active')
+
+    // Subsequent action check on already-active: no further promotion flag
+    const r2 = await checkItem(dir, {
+      project: 'proj',
+      section: 'action',
+      match: 'Second',
+    })
+    assert.equal(r2.promoted, undefined)
+
+    // Set back to on_hold and try unchecking — must not promote
+    await setProjectStatus(dir, { id: 'proj', status: 'on_hold' })
+    const r3 = await checkItem(dir, {
+      project: 'proj',
+      section: 'action',
+      match: 'First',
+      checked: false,
+    })
+    assert.equal(r3.promoted, undefined)
+    snap = await scan(dir, NOW)
+    assert.equal(snap.projects[0]?.status, 'on_hold')
   } finally {
     await rm(dir, { recursive: true, force: true })
   }

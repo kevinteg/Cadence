@@ -64,6 +64,7 @@ export type ProjectFrontmatter = z.infer<typeof ProjectFrontmatterSchema>
 export type Progress = { done: number; total: number }
 
 export type Project = ProjectFrontmatter & {
+  intent: string
   dod: ChecklistItem[]
   actions: ChecklistItem[]
   description: string
@@ -229,14 +230,8 @@ export type Flag =
       projectId: string
       daysSinceMarker: number
     }
-  | { kind: 'structural_empty_dod'; pursuitId: string; projectId: string }
   | {
-      kind: 'structural_done_unchecked'
-      pursuitId: string
-      projectId: string
-    }
-  | {
-      kind: 'structural_open_no_actions'
+      kind: 'structural_active_no_open_actions'
       pursuitId: string
       projectId: string
     }

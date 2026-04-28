@@ -57,6 +57,10 @@ waiting_for:
 
 This is project A.
 
+## Intent
+
+The intent narrative — what we're aiming at and why.
+
 ## Definition of Done
 - [x] one
 - [ ] two
@@ -151,6 +155,7 @@ test('scan returns a populated Snapshot for a synthetic repo', async () => {
     assert.equal(snapshot.projects.length, 1)
     const proj = snapshot.projects[0]!
     assert.equal(proj.id, 'proj-a')
+    assert.match(proj.intent, /intent narrative/)
     assert.equal(proj.dodProgress.done, 1)
     assert.equal(proj.dodProgress.total, 2)
     assert.equal(proj.actionProgress.done, 1)

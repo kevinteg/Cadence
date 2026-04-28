@@ -95,12 +95,13 @@ export type CheckItemOpts = {
 export async function checkItem(
   repoRoot: string,
   opts: CheckItemOpts,
-): Promise<{ path: string; matched: string }> {
+): Promise<{ path: string; matched: string; promoted?: boolean }> {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit)
   const checked = opts.checked ?? true
   const sectionName =
     opts.section === 'dod' ? 'Definition of Done' : 'Actions'
   let matched = ''
+  let promoted = false
   await mutateFrontmatter(filePath, (data, body) => {
     const result = toggleChecklistItem(body, sectionName, opts.match, checked)
     matched = result.matched
@@ -108,9 +109,21 @@ export async function checkItem(
     if (opts.note && checked) {
       nextBody = appendNote(nextBody, sectionName, matched, opts.note)
     }
+    if (
+      opts.section === 'action' &&
+      checked &&
+      data['status'] === 'on_hold'
+    ) {
+      data['status'] = 'active'
+      promoted = true
+    }
     return { data, body: nextBody }
   })
-  return { path: path.relative(repoRoot, filePath), matched }
+  return {
+    path: path.relative(repoRoot, filePath),
+    matched,
+    ...(promoted ? { promoted: true } : {}),
+  }
 }
 
 export type AddItemOpts = {
