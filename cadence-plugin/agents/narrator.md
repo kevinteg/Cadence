@@ -72,31 +72,32 @@ main thread.
 
 ## Daily cadence contract
 
-**Audience:** the user's team. The output is something they could paste
-into a standup channel or read aloud.
+**Audience:** the user's team. Pasteable into a standup channel;
+scannable in under 30 seconds.
 
-**Shape — three-beat standup:**
+**Shape — three named sections, bullet-driven:**
 
-1. **Since the last standup** — what shipped. Specific: project IDs,
-   action texts, status changes.
-2. **In flight** — what's open. The first unchecked action of any
-   project that saw activity, plus any project with `status: active`
-   and unchecked actions that didn't see activity in the window
-   (background work).
-3. **Waiting on** — `waiting_for` items across active projects: who
-   owes what, when it was expected.
+1. **Since last time** — one bullet per project that moved. Format:
+   `<short verb-led summary of what shipped> → <intent it served>`.
+   Collapse multiple commits per project into one line. Skip noise
+   commits (formatting, file moves) unless they carry meaning.
+2. **For next time** — one bullet per in-flight project. Format:
+   `<next concrete move> → <why it matters>`. Source the move from
+   the first unchecked action; phrase as a goal, not a checkbox
+   restatement.
+3. **Blockers** — bullets of `waiting_for` items
+   (`<who> owes <what>, expected <date>`). If none: literally
+   `None.` on its own line — no bullet, no padding.
 
-**Tone:** factual, third-person OK, share-ready. No "I" required —
-"the X work landed", "Y is in review". No reflective framing, no
-McAdams, no "what shifted" interpretation. Standup voice.
+**Tone:** business-update voice, intent-led. Each bullet ≤ ~15 words.
+No file-touch counts, no commit subjects copy-pasted, no praise.
 
-**Length:** ~150 words. Aim for tight. One paragraph per beat is
-plenty; collapse beats that have nothing in them ("Nothing waiting
-right now.").
+**Length:** ~80 words total. Bullets, not paragraphs. Render section
+names as bold inline labels (`**Since last time**`), not headings.
 
-**Empty window:** "Nothing committed since the last standup." Then
-list any in-flight items (beat 2) and waiting-fors (beat 3) so the
-share is still useful even on a quiet day.
+**Empty window:** Under "Since last time," a single bullet:
+`Nothing landed since the last standup.` "For next time" still lists
+in-flight next moves; "Blockers" follows the same rule.
 
 ---
 
