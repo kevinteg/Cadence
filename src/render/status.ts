@@ -1,5 +1,10 @@
 import type { Flag, Pursuit, Report, Snapshot } from '../types.js'
 import { daysBetween } from '../util/dates.js'
+import {
+  computeSuggestionSignals,
+  NO_SIGNALS,
+  type SuggestionSignals,
+} from './signals.js'
 
 export function renderStatus(result: Report): string {
   const { snapshot, flags } = result
@@ -27,7 +32,8 @@ export function renderStatus(result: Report): string {
   }
   out.push('')
 
-  const next = nextSteps(snapshot, flags)
+  const signals = computeSuggestionSignals(snapshot, snapshot.repoRoot)
+  const next = nextSteps(snapshot, flags, signals)
   out.push('Next:')
   for (const step of next) out.push('  - ' + step)
 
@@ -41,11 +47,21 @@ export function renderFlags(flags: Flag[], snapshot: Snapshot): string {
 
 /**
  * Compute up to 3 contextual next-step suggestions based on snapshot
- * state and reconciler flags. Heuristic, deterministic — no model
- * involvement. Used by both the bare-CLI dashboard and the
- * SessionStart hook output so the suggestions stay consistent.
+ * state, reconciler flags, and a few derived signals (filesystem
+ * checks, date math) the pure Snapshot can't carry. Heuristic and
+ * deterministic — no model involvement. Used by both the bare-CLI
+ * dashboard and the SessionStart hook so the suggestions stay
+ * consistent across surfaces.
+ *
+ * Signals are optional — callers that don't have them (older tests,
+ * future programmatic uses) get the empty default and the new
+ * narrate/weekly rules silently stay quiet.
  */
-export function nextSteps(snapshot: Snapshot, flags: Flag[]): string[] {
+export function nextSteps(
+  snapshot: Snapshot,
+  flags: Flag[],
+  signals: SuggestionSignals = NO_SIGNALS,
+): string[] {
   const suggestions: string[] = []
 
   const activePursuitIds = new Set(
@@ -89,9 +105,25 @@ export function nextSteps(snapshot: Snapshot, flags: Flag[]): string[] {
   }
 
   // Priority 2 — medium signal.
+  // Weekly preview ranks above flags and the generic reflect-overdue
+  // reminder: it's the time-sensitive prep step for the Reflect ritual,
+  // surfaces only Thu-Sun when no reflection has run this ISO week, and
+  // missing the window means missing the window.
+  if (signals.weeklyPreviewDue && suggestions.length < 3) {
+    suggestions.push(
+      `Week is closing — /cadence:narrate week to preview before /cadence:reflect.`,
+    )
+  }
   if (flags.length > 0 && suggestions.length < 3) {
     suggestions.push(
       `Review ${flags.length} flag${flags.length === 1 ? '' : 's'} — /cadence:reconcile.`,
+    )
+  }
+  // Narrate-today is a gentle recap nudge; ranks below urgent flags
+  // but above the staler reflect-overdue reminder.
+  if (signals.narrateTodayStale && suggestions.length < 3) {
+    suggestions.push(
+      `Activity landed today with no daily narrative — /cadence:narrate today.`,
     )
   }
   // Suggesting /reflect only makes sense if there's something to reflect on.

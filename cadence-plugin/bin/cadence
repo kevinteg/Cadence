@@ -9850,7 +9850,7 @@ var CAC = class extends EventEmitter {
 var cac = (name = "") => new CAC(name);
 
 // src/cli.ts
-import { existsSync as existsSync8 } from "node:fs";
+import { existsSync as existsSync9 } from "node:fs";
 import path17 from "node:path";
 
 // src/scan/repo.ts
@@ -17181,6 +17181,60 @@ function flagWipOverLimit(flags, activeProjects, config) {
   }
 }
 
+// src/render/signals.ts
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+var NO_SIGNALS = {
+  narrateTodayStale: false,
+  weeklyPreviewDue: false
+};
+function computeSuggestionSignals(snapshot, repoRoot) {
+  const now = new Date(snapshot.generatedAt);
+  return {
+    narrateTodayStale: detectNarrateTodayStale(snapshot, repoRoot, now),
+    weeklyPreviewDue: detectWeeklyPreviewDue(snapshot.reflections, now)
+  };
+}
+function detectNarrateTodayStale(snapshot, repoRoot, now) {
+  const todayKey = isoDateLocal(now);
+  const activityToday = snapshot.projects.some(
+    (p) => p.last_activity_at && isoDateLocal(new Date(p.last_activity_at)) === todayKey
+  );
+  if (!activityToday) return false;
+  const draftPath = join(repoRoot, "narratives", "drafts", `daily-${todayKey}.md`);
+  return !existsSync(draftPath);
+}
+function detectWeeklyPreviewDue(reflections, now) {
+  const dow = mondayBasedDowLocal(now);
+  if (dow < 4) return false;
+  const currentWeek = isoWeekKeyLocal(now);
+  const hasReflectionThisWeek = reflections.some(
+    (r) => isoWeekKeyLocal(localMidnight(r.date)) === currentWeek
+  );
+  return !hasReflectionThisWeek;
+}
+function isoDateLocal(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+function mondayBasedDowLocal(d) {
+  return (d.getDay() + 6) % 7 + 1;
+}
+function isoWeekKeyLocal(d) {
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  target.setDate(target.getDate() + 3 - (target.getDay() + 6) % 7);
+  const firstThursday = new Date(target.getFullYear(), 0, 4);
+  firstThursday.setDate(firstThursday.getDate() + 3 - (firstThursday.getDay() + 6) % 7);
+  const week = 1 + Math.round((target.getTime() - firstThursday.getTime()) / (7 * 24 * 3600 * 1e3));
+  return `${target.getFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+function localMidnight(yyyyMmDd) {
+  const [y, m, d] = yyyyMmDd.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
+}
+
 // src/render/status.ts
 function renderStatus(result) {
   const { snapshot, flags } = result;
@@ -17204,7 +17258,8 @@ function renderStatus(result) {
     for (const flag of flags) out.push("  - " + describeFlag(flag, snapshot));
   }
   out.push("");
-  const next = nextSteps(snapshot, flags);
+  const signals = computeSuggestionSignals(snapshot, snapshot.repoRoot);
+  const next = nextSteps(snapshot, flags, signals);
   out.push("Next:");
   for (const step of next) out.push("  - " + step);
   return out.join("\n");
@@ -17213,7 +17268,7 @@ function renderFlags(flags, snapshot) {
   if (flags.length === 0) return "No flags. System is healthy.";
   return flags.map((f) => "- " + describeFlag(f, snapshot)).join("\n");
 }
-function nextSteps(snapshot, flags) {
+function nextSteps(snapshot, flags, signals = NO_SIGNALS) {
   const suggestions = [];
   const activePursuitIds = new Set(
     snapshot.pursuits.filter((p) => p.lifecycle === "active").map((p) => p.id)
@@ -17244,9 +17299,19 @@ function nextSteps(snapshot, flags) {
       `Resume in-progress work \u2014 /cadence:start ${first.id}${tail}.`
     );
   }
+  if (signals.weeklyPreviewDue && suggestions.length < 3) {
+    suggestions.push(
+      `Week is closing \u2014 /cadence:narrate week to preview before /cadence:reflect.`
+    );
+  }
   if (flags.length > 0 && suggestions.length < 3) {
     suggestions.push(
       `Review ${flags.length} flag${flags.length === 1 ? "" : "s"} \u2014 /cadence:reconcile.`
+    );
+  }
+  if (signals.narrateTodayStale && suggestions.length < 3) {
+    suggestions.push(
+      `Activity landed today with no daily narrative \u2014 /cadence:narrate today.`
     );
   }
   if (daysSinceReflect > 7 && suggestions.length < 3 && projectsInActivePursuits.length > 0) {
@@ -17885,7 +17950,7 @@ function projectMenu(_projectId, status) {
 
 // src/write/pursuit.ts
 import path9 from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync as existsSync2 } from "node:fs";
 
 // src/write/util.ts
 import { mkdir, readFile as readFile7, rename, writeFile } from "node:fs/promises";
@@ -17951,7 +18016,7 @@ async function createPursuit(repoRoot, opts) {
   const status = opts.status ?? (opts.type === "someday" ? "someday" : "active");
   const lifecycleDir = status === "someday" ? "pursuits/_someday" : status === "archived" ? "pursuits/_archived" : "pursuits";
   const pursuitDir = path9.join(repoRoot, lifecycleDir, opts.id);
-  if (existsSync(pursuitDir)) {
+  if (existsSync2(pursuitDir)) {
     throw new Error(`pursuit already exists: ${opts.id}`);
   }
   await ensureDir(path9.join(pursuitDir, "projects"));
@@ -17979,10 +18044,10 @@ function toTitleCase(id) {
 
 // src/write/project.ts
 import path11 from "node:path";
-import { existsSync as existsSync3 } from "node:fs";
+import { existsSync as existsSync4 } from "node:fs";
 
 // src/write/paths.ts
-import { existsSync as existsSync2 } from "node:fs";
+import { existsSync as existsSync3 } from "node:fs";
 import path10 from "node:path";
 function resolvePursuitDir(repoRoot, pursuitId) {
   const candidates = [
@@ -17991,7 +18056,7 @@ function resolvePursuitDir(repoRoot, pursuitId) {
     path10.join(repoRoot, "pursuits/_archived", pursuitId)
   ];
   for (const c of candidates) {
-    if (existsSync2(path10.join(c, "pursuit.md"))) return c;
+    if (existsSync3(path10.join(c, "pursuit.md"))) return c;
   }
   return null;
 }
@@ -17999,7 +18064,7 @@ function resolveProjectFile(repoRoot, pursuitId, projectId) {
   const dir = resolvePursuitDir(repoRoot, pursuitId);
   if (!dir) return null;
   const file = path10.join(dir, "projects", `${projectId}.md`);
-  if (!existsSync2(file)) return null;
+  if (!existsSync3(file)) return null;
   return file;
 }
 function resolveIdeaFile(repoRoot, parent, ideaId) {
@@ -18007,7 +18072,7 @@ function resolveIdeaFile(repoRoot, parent, ideaId) {
   const dir = resolvePursuitDir(repoRoot, pursuitId);
   if (!dir) return null;
   const file = path10.join(dir, "ideas", `${ideaId}.md`);
-  if (!existsSync2(file)) return null;
+  if (!existsSync3(file)) return null;
   return file;
 }
 
@@ -18020,7 +18085,7 @@ async function createProject(repoRoot, opts) {
     throw new Error(`pursuit not found: ${opts.pursuit}`);
   }
   const filePath = path11.join(pursuitDir, "projects", `${opts.id}.md`);
-  if (existsSync3(filePath)) {
+  if (existsSync4(filePath)) {
     throw new Error(`project already exists: ${opts.pursuit}/${opts.id}`);
   }
   const cleanList = (xs) => Array.isArray(xs) ? xs.filter((x) => typeof x === "string" && x.length > 0) : [];
@@ -18076,7 +18141,7 @@ function toTitleCase2(id) {
 
 // src/write/idea.ts
 import path12 from "node:path";
-import { existsSync as existsSync4 } from "node:fs";
+import { existsSync as existsSync5 } from "node:fs";
 async function createIdea(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const pursuitId = opts.parent.split("/")[0] ?? opts.parent;
@@ -18085,7 +18150,7 @@ async function createIdea(repoRoot, opts) {
     throw new Error(`pursuit not found for idea parent: ${opts.parent}`);
   }
   const filePath = path12.join(pursuitDir, "ideas", `${opts.id}.md`);
-  if (existsSync4(filePath)) {
+  if (existsSync5(filePath)) {
     throw new Error(`idea already exists: ${opts.parent}/${opts.id}`);
   }
   const state = opts.state ?? "seed";
@@ -18119,14 +18184,14 @@ async function writeCapture(repoRoot, opts) {
 
 // src/write/reflection.ts
 import path14 from "node:path";
-import { existsSync as existsSync5 } from "node:fs";
+import { existsSync as existsSync6 } from "node:fs";
 async function writeReflection(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const date = opts.date ?? dateString(now);
   const dir = path14.join(repoRoot, "reflections");
   await ensureDir(dir);
   const filePath = path14.join(dir, `${date}.md`);
-  const existing = existsSync5(filePath) ? await loadFrontmatterFile(filePath) : null;
+  const existing = existsSync6(filePath) ? await loadFrontmatterFile(filePath) : null;
   const data = existing ? { ...existing.data } : {};
   data["date"] = date;
   data["status"] = opts.status;
@@ -18142,7 +18207,7 @@ async function writeReflection(repoRoot, opts) {
 // src/write/edits.ts
 import path15 from "node:path";
 import { readdir, readFile as readFile8 } from "node:fs/promises";
-import { existsSync as existsSync6 } from "node:fs";
+import { existsSync as existsSync7 } from "node:fs";
 
 // src/write/checklist.ts
 var ITEM_RE2 = /^(\s*-\s+\[)([ xX])(\]\s+)(.+?)(\s*)$/;
@@ -18315,7 +18380,7 @@ async function summarizePursuit(repoRoot, projectFilePath) {
   const pursuitDir = path15.dirname(projectsDir);
   const pursuitId = path15.basename(pursuitDir);
   const projects = [];
-  if (existsSync6(projectsDir)) {
+  if (existsSync7(projectsDir)) {
     for (const entry of await readdir(projectsDir, { withFileTypes: true })) {
       if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
       const file = path15.join(projectsDir, entry.name);
@@ -18517,7 +18582,7 @@ async function locateProject(repoRoot, projectId, pursuitHint) {
   const roots = ["pursuits", "pursuits/_someday", "pursuits/_archived"];
   for (const root of roots) {
     const absRoot = path15.join(repoRoot, root);
-    if (!existsSync6(absRoot)) continue;
+    if (!existsSync7(absRoot)) continue;
     for (const pursuit of await readdir(absRoot, { withFileTypes: true })) {
       if (!pursuit.isDirectory()) continue;
       const candidate = path15.join(
@@ -18526,7 +18591,7 @@ async function locateProject(repoRoot, projectId, pursuitHint) {
         "projects",
         `${projectId}.md`
       );
-      if (existsSync6(candidate)) return candidate;
+      if (existsSync7(candidate)) return candidate;
     }
   }
   throw new Error(
@@ -18542,7 +18607,7 @@ async function locateIdea(repoRoot, ideaId, parentHint) {
   const roots = ["pursuits", "pursuits/_someday", "pursuits/_archived"];
   for (const root of roots) {
     const absRoot = path15.join(repoRoot, root);
-    if (!existsSync6(absRoot)) continue;
+    if (!existsSync7(absRoot)) continue;
     for (const pursuit of await readdir(absRoot, { withFileTypes: true })) {
       if (!pursuit.isDirectory()) continue;
       const candidate = path15.join(
@@ -18551,7 +18616,7 @@ async function locateIdea(repoRoot, ideaId, parentHint) {
         "ideas",
         `${ideaId}.md`
       );
-      if (existsSync6(candidate)) return candidate;
+      if (existsSync7(candidate)) return candidate;
     }
   }
   throw new Error(
@@ -18584,7 +18649,7 @@ function escapeRe(s) {
 
 // src/write/move.ts
 import path16 from "node:path";
-import { existsSync as existsSync7 } from "node:fs";
+import { existsSync as existsSync8 } from "node:fs";
 async function movePursuit(repoRoot, opts) {
   const from = resolvePursuitDir(repoRoot, opts.id);
   if (!from) throw new Error(`pursuit not found: ${opts.id}`);
@@ -18596,7 +18661,7 @@ async function movePursuit(repoRoot, opts) {
       to: path16.relative(repoRoot, to)
     };
   }
-  if (existsSync7(to)) {
+  if (existsSync8(to)) {
     throw new Error(`destination already exists: ${path16.relative(repoRoot, to)}`);
   }
   await moveDir(from, to);
@@ -19084,8 +19149,8 @@ async function resolveRepoRoot(explicit) {
 function findRepoRoot(start) {
   let dir = path17.resolve(start);
   for (; ; ) {
-    if (existsSync8(path17.join(dir, "cadence.yaml"))) return dir;
-    if (existsSync8(path17.join(dir, "pursuits"))) return dir;
+    if (existsSync9(path17.join(dir, "cadence.yaml"))) return dir;
+    if (existsSync9(path17.join(dir, "pursuits"))) return dir;
     const parent = path17.dirname(dir);
     if (parent === dir) break;
     dir = parent;
@@ -19093,7 +19158,7 @@ function findRepoRoot(start) {
   return path17.resolve(start);
 }
 function isCadenceRepo(root) {
-  return existsSync8(path17.join(root, "cadence.yaml")) || existsSync8(path17.join(root, "pursuits"));
+  return existsSync9(path17.join(root, "cadence.yaml")) || existsSync9(path17.join(root, "pursuits"));
 }
 function multistring(v) {
   if (!Array.isArray(v)) return void 0;

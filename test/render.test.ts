@@ -257,6 +257,70 @@ test('nextSteps caps suggestions at 3 and always points at /cadence:help when ro
   assert.ok(steps.some((s) => s.includes('/cadence:help')))
 })
 
+test('nextSteps surfaces narrate-today when the narrateTodayStale signal is set', () => {
+  const steps = nextSteps(
+    makeSnapshot({ pursuits: [makePursuit()] }),
+    [],
+    { narrateTodayStale: true, weeklyPreviewDue: false },
+  )
+  assert.ok(
+    steps.some(
+      (s) => s.includes('/cadence:narrate today') && s.includes('Activity landed today'),
+    ),
+  )
+})
+
+test('nextSteps stays quiet about narrate-today when the signal is false', () => {
+  const steps = nextSteps(
+    makeSnapshot({ pursuits: [makePursuit()] }),
+    [],
+    { narrateTodayStale: false, weeklyPreviewDue: false },
+  )
+  assert.ok(!steps.some((s) => s.includes('/cadence:narrate today')))
+})
+
+test('nextSteps surfaces weekly-preview when the weeklyPreviewDue signal is set', () => {
+  const steps = nextSteps(
+    makeSnapshot({ pursuits: [makePursuit()] }),
+    [],
+    { narrateTodayStale: false, weeklyPreviewDue: true },
+  )
+  assert.ok(
+    steps.some(
+      (s) =>
+        s.includes('/cadence:narrate week') && s.includes('Week is closing'),
+    ),
+  )
+})
+
+test('nextSteps stays quiet about weekly-preview when the signal is false', () => {
+  const steps = nextSteps(
+    makeSnapshot({ pursuits: [makePursuit()] }),
+    [],
+    { narrateTodayStale: false, weeklyPreviewDue: false },
+  )
+  assert.ok(!steps.some((s) => s.includes('Week is closing')))
+})
+
+test('nextSteps with both new signals on ranks weekly-preview above narrate-today', () => {
+  const steps = nextSteps(
+    makeSnapshot({ pursuits: [makePursuit()] }),
+    [],
+    { narrateTodayStale: true, weeklyPreviewDue: true },
+  )
+  const weeklyIdx = steps.findIndex((s) => s.includes('Week is closing'))
+  const narrateIdx = steps.findIndex((s) => s.includes('Activity landed today'))
+  assert.notStrictEqual(weeklyIdx, -1)
+  assert.notStrictEqual(narrateIdx, -1)
+  assert.ok(weeklyIdx < narrateIdx)
+})
+
+test('nextSteps default signals keep the new rules silent (back-compat)', () => {
+  const steps = nextSteps(makeSnapshot({ pursuits: [makePursuit()] }), [])
+  assert.ok(!steps.some((s) => s.includes('Week is closing')))
+  assert.ok(!steps.some((s) => s.includes('Activity landed today')))
+})
+
 test('renderStatus appends a Next: block computed by nextSteps', () => {
   const out = renderStatus({
     snapshot: makeSnapshot({ pursuits: [makePursuit()] }),
