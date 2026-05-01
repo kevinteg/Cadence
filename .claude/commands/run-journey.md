@@ -28,6 +28,11 @@ evaluates assertions, and reports pass/fail.
        sections based on which flags are passed.
      - `create_idea`: `cadence create-idea <id> --parent <p> --body <text>`
        and optionally `--state seed|developed`.
+     - `write_reflection`: `cadence write-reflection --date <YYYY-MM-DD>
+       --status <status> --phase <phase> --leveraged-priority <text>
+       --body <text>` (use whichever fields the YAML provides).
+   - Assertions also support `file_not_contains` (path + pattern that
+     must NOT appear), useful for verifying a section was suppressed.
    - If `cadence` is unavailable, fall back to writing files directly.
      Whether the journey YAML uses `intent:` or `dod:` for a project
      determines which section gets emitted in the body.

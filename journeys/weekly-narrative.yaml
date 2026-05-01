@@ -1,0 +1,55 @@
+name: Weekly Narrative
+description: Verify /cadence:narrate week produces an LP-anchored narrative — open with whether the Leveraged Priority held, end with a next-week framing
+
+setup:
+  - create_pursuit:
+      id: test-weekly
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-weekly
+      id: test-weekly-project
+      title: Test Weekly Project
+      intent: |
+        Fixture aligned with the leveraged priority below. Two actions,
+        first checked, second open — gives the LP-check section
+        something to cite and the next-week framing something to point at.
+      actions:
+        - item: Land the first part of the LP
+          checked: true
+        - item: Carry the rest into next week
+          checked: false
+  - write_reflection:
+      date: 2026-04-26
+      status: complete
+      phase: get_focused
+      leveraged_priority: "Land the test-weekly-project work"
+
+steps:
+  - command: /cadence:narrate week
+    assert:
+      - file_created:
+          path: narratives/drafts/weekly-*.md
+          frontmatter:
+            cadence: weekly
+      - file_contains:
+          path: narratives/drafts/weekly-*.md
+          pattern: "consumed_through_commit:"
+
+  - action: Verify the LP appears in the body and a next-week framing line is present
+    assert:
+      - file_contains:
+          path: narratives/drafts/weekly-*.md
+          pattern: "Land the test-weekly-project work"
+      - file_contains:
+          path: narratives/drafts/weekly-*.md
+          pattern: "(?i)next week|leveraged priority"
+
+teardown:
+  - delete_files:
+      - pursuits/test-weekly/
+      - reflections/2026-04-26.md
+      - narratives/drafts/weekly-*.md
+  - assert_clean: pursuits/test-weekly/
+  - assert_clean: reflections/
+  - assert_clean: narratives/drafts/

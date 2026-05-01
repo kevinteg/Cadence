@@ -1,0 +1,48 @@
+name: Daily Narrative
+description: Verify /cadence:narrate today produces a standup-shaped narrative file with the daily watermark frontmatter
+
+setup:
+  - create_pursuit:
+      id: test-daily
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-daily
+      id: test-daily-project
+      title: Test Daily Project
+      intent: |
+        Fixture for the daily-narrative journey. Has one checked
+        action and one open action so the standup three-beat has
+        something to say in both the "shipped" and "in flight" beats.
+      actions:
+        - item: First action shipped today
+          checked: true
+        - item: Second action still in flight
+          checked: false
+
+steps:
+  - command: /cadence:narrate today
+    assert:
+      - file_created:
+          path: narratives/drafts/daily-*.md
+          frontmatter:
+            cadence: daily
+      - file_contains:
+          path: narratives/drafts/daily-*.md
+          pattern: "consumed_through_commit:"
+
+  - action: Verify the body opens with the standup three-beat (since-last-standup / in-flight / waiting), not McAdams
+    assert:
+      - file_contains:
+          path: narratives/drafts/daily-*.md
+          pattern: "(?i)standup|in flight|waiting"
+      - file_not_contains:
+          path: narratives/drafts/daily-*.md
+          pattern: "What it meant"
+
+teardown:
+  - delete_files:
+      - pursuits/test-daily/
+      - narratives/drafts/daily-*.md
+  - assert_clean: pursuits/test-daily/
+  - assert_clean: narratives/drafts/
