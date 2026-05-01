@@ -1,7 +1,7 @@
 ---
 id: remove-session-concept
 pursuit: build-cadence-v1
-status: active
+status: done
 created: 2026-04-30
 ---
 
@@ -21,7 +21,7 @@ The Session/Marker concept layers ceremony on top of what pursuit/project/action
 - [x] Delete the /pause skill directory; remove pause/marker references across /start, /complete, /cancel, /capture, /reflect, /brainstorm, /develop, runtime, and reference
 - [x] Rewrite /start to read project state directly (no marker read, no session-open); recap shows '[pursuit]/[project] — N/M actions' and 'Next: [first unchecked action]' from the project file alone
 - [x] Update all 7 user-journey YAMLs that exercise /pause, /start with marker recap, marker assertions, or session-open/close
-- [ ] User-story validation in a fresh Claude conversation: /cadence:start <project>, check actions, /cadence:complete fires intent-feel-achieved, verify no markers were written and no .cadence/active-session.json exists; then /cadence:narrate today produces a narrative with the new watermark frontmatter, and a second /cadence:narrate today consumes only the new slice
+- [x] User-story validation in a fresh Claude conversation: /cadence:start <project>, check actions, /cadence:complete fires intent-feel-achieved, verify no markers were written and no .cadence/active-session.json exists; then /cadence:narrate today produces a narrative with the new watermark frontmatter, and a second /cadence:narrate today consumes only the new slice
 
 ## Notes
 

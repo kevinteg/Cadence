@@ -1,7 +1,7 @@
 ---
 id: define-narrate-cadence-contracts
 pursuit: build-cadence-v1
-status: active
+status: done
 created: 2026-04-30
 ---
 
@@ -18,4 +18,4 @@ The /narrate verb supports daily, weekly, monthly, and annual cadences mechanica
 - [x] Update cadence-plugin/agents/narrator.md so 'daily' and 'weekly' scopes invoke their cadence-specific contracts; monthly/annual/pursuit fall through to the generic McAdams default.
 - [x] Write journeys/daily-narrative.yaml: fixture pursuit with two checked actions in the daily window; run /cadence:narrate today; assert the saved file's body lists the checked actions, mentions any waiting_for items, and stays under ~250 words.
 - [x] Write journeys/weekly-narrative.yaml: fixture pursuit with a reflection containing a Leveraged Priority and project activity that demonstrates progress toward (or away from) it; run /cadence:narrate week; assert the saved file mentions the LP text and contains a next-week framing line.
-- [ ] User-story validation: in a fresh Claude conversation on this real repo, run /cadence:narrate today and confirm the output reads as something you'd plausibly drop into a team standup channel. Then run /cadence:narrate week and confirm it makes the LP visible and prompts a next-week focus question.
+- [x] User-story validation: in a fresh Claude conversation on this real repo, run /cadence:narrate today and confirm the output reads as something you'd plausibly drop into a team standup channel. Then run /cadence:narrate week and confirm it makes the LP visible and prompts a next-week focus question.

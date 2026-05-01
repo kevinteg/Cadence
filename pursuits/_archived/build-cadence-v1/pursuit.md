@@ -1,7 +1,7 @@
 ---
 id: build-cadence-v1
 type: finite
-status: active
+status: archived
 created: 2026-04-15
 target: 2026-05-15
 win_cycle: 2026-H1

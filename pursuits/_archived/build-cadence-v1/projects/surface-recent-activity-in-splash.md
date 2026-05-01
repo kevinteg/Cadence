@@ -1,7 +1,7 @@
 ---
 id: surface-recent-activity-in-splash
 pursuit: build-cadence-v1
-status: active
+status: done
 created: 2026-04-30
 ---
 
@@ -17,4 +17,4 @@ The SessionStart splash already has a "Next:" block with heuristic verb suggesti
 - [x] Add the "late-week weekly preview" rule to nextSteps(): fires when day-of-week is Thursday or later AND no reflection has run within the current ISO week.
 - [x] Re-examine priority ordering — slot the new rules sensibly relative to existing rules (captures, in-progress, flags, reflect); keep the cap at 3.
 - [x] Add unit tests covering both new rules: each in isolation, both combined, neither firing, and interaction with the cap-at-3 limit.
-- [ ] User-story validation: open a fresh Claude conversation in this repo and confirm the Next: section shows each new suggestion when its conditions are met.
+- [x] User-story validation: open a fresh Claude conversation in this repo and confirm the Next: section shows each new suggestion when its conditions are met.
