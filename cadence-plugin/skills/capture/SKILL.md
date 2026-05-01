@@ -17,11 +17,10 @@ Flow-safe capture to `thoughts/unprocessed/`. Reference
 1. Accept the user's input. Do NOT respond, acknowledge, or ask for
    more detail. This is essential for flow safety.
 
-2. Determine the verb context from the current session:
-   - During a brainstorm session → `seed`
-   - During a develop session → `concern`
-   - During a start/work session → `note`
-   - No active session → `note`
+2. Determine the verb context from the conversation:
+   - Mid /brainstorm → `seed`
+   - Mid /develop → `concern`
+   - Otherwise → `note`
 
 3. Write the capture via the bundled CLI:
 

@@ -10,7 +10,7 @@ export function renderStatus(result: Report): string {
   const lp = leveragedPriority(snapshot)
   out.push(`Leveraged Priority: ${lp ?? 'not set'}`)
   out.push(lastReflectLine(snapshot))
-  out.push(lastSessionLine(snapshot))
+  out.push(lastActivityLine(snapshot))
   out.push('')
 
   out.push(pursuitsLine(snapshot))
@@ -25,12 +25,107 @@ export function renderStatus(result: Report): string {
   } else {
     for (const flag of flags) out.push('  - ' + describeFlag(flag, snapshot))
   }
+  out.push('')
+
+  const next = nextSteps(snapshot, flags)
+  out.push('Next:')
+  for (const step of next) out.push('  - ' + step)
+
   return out.join('\n')
 }
 
 export function renderFlags(flags: Flag[], snapshot: Snapshot): string {
   if (flags.length === 0) return 'No flags. System is healthy.'
   return flags.map((f) => '- ' + describeFlag(f, snapshot)).join('\n')
+}
+
+/**
+ * Compute up to 3 contextual next-step suggestions based on snapshot
+ * state and reconciler flags. Heuristic, deterministic — no model
+ * involvement. Used by both the bare-CLI dashboard and the
+ * SessionStart hook output so the suggestions stay consistent.
+ */
+export function nextSteps(snapshot: Snapshot, flags: Flag[]): string[] {
+  const suggestions: string[] = []
+
+  const activePursuitIds = new Set(
+    snapshot.pursuits.filter((p) => p.lifecycle === 'active').map((p) => p.id),
+  )
+  const projectsInActivePursuits = snapshot.projects.filter((p) =>
+    activePursuitIds.has(p.pursuit),
+  )
+  const inProgress = projectsInActivePursuits.filter(
+    (p) =>
+      p.status === 'active' && p.actions.some((a) => !a.checked),
+  )
+  const onHold = projectsInActivePursuits.filter((p) => p.status === 'on_hold')
+  const capturesCount = snapshot.captures.length
+
+  // Days since most recent reflection.
+  const sortedReflections = [...snapshot.reflections].sort((a, b) =>
+    a.date < b.date ? 1 : -1,
+  )
+  const lastReflect = sortedReflections[0]
+  const today = new Date(snapshot.generatedAt)
+  const daysSinceReflect = lastReflect
+    ? daysBetween(lastReflect.date, today)
+    : Number.POSITIVE_INFINITY
+
+  // Priority 1 — high signal, do this first.
+  if (capturesCount > 0) {
+    suggestions.push(
+      `Triage ${capturesCount} unprocessed capture${capturesCount === 1 ? '' : 's'} — /cadence:reflect (Get Clear).`,
+    )
+  }
+  if (inProgress.length > 0) {
+    const first = inProgress[0]!
+    const tail =
+      inProgress.length > 1
+        ? ` (or one of ${inProgress.length - 1} other in-progress project${inProgress.length - 1 === 1 ? '' : 's'})`
+        : ''
+    suggestions.push(
+      `Resume in-progress work — /cadence:start ${first.id}${tail}.`,
+    )
+  }
+
+  // Priority 2 — medium signal.
+  if (flags.length > 0 && suggestions.length < 3) {
+    suggestions.push(
+      `Review ${flags.length} flag${flags.length === 1 ? '' : 's'} — /cadence:reconcile.`,
+    )
+  }
+  // Suggesting /reflect only makes sense if there's something to reflect on.
+  if (
+    daysSinceReflect > 7 &&
+    suggestions.length < 3 &&
+    projectsInActivePursuits.length > 0
+  ) {
+    suggestions.push(
+      lastReflect
+        ? `Last reflect was ${daysSinceReflect}d ago — time for /cadence:reflect.`
+        : `No reflection yet — /cadence:reflect to set a Leveraged Priority.`,
+    )
+  }
+
+  // Priority 3 — fallbacks when nothing higher fired.
+  if (suggestions.length < 2 && onHold.length > 0) {
+    suggestions.push(
+      `${onHold.length} project${onHold.length === 1 ? '' : 's'} on hold — /cadence:start to pick one up.`,
+    )
+  }
+  if (suggestions.length === 0) {
+    suggestions.push(
+      `Get started — /cadence:brainstorm to generate ideas, or /cadence:init for a fresh repo.`,
+    )
+  }
+
+  // Always suggest help if we have spare room and nothing about it
+  // already.
+  if (suggestions.length < 3) {
+    suggestions.push(`Browse the full verb surface — /cadence:help.`)
+  }
+
+  return suggestions.slice(0, 3)
 }
 
 function leveragedPriority(snapshot: Snapshot): string | undefined {
@@ -52,19 +147,19 @@ function lastReflectLine(snapshot: Snapshot): string {
   return `Last Reflect: ${r.date} (${r.status})`
 }
 
-function lastSessionLine(snapshot: Snapshot): string {
-  if (snapshot.markers.length === 0) return 'Last Session: none'
-  const sorted = [...snapshot.markers].sort((a, b) =>
-    a.timestamp < b.timestamp ? 1 : -1,
+function lastActivityLine(snapshot: Snapshot): string {
+  const candidates = snapshot.projects.filter(
+    (p) => p.last_activity_at && p.status !== 'done' && p.status !== 'dropped',
   )
-  const m = sorted[0]!
-  const project = snapshot.projects.find(
-    (p) => p.id === m.project && p.pursuit === m.pursuit,
+  if (candidates.length === 0) return 'Last Activity: none'
+  const sorted = [...candidates].sort((a, b) =>
+    (a.last_activity_at ?? '') < (b.last_activity_at ?? '') ? 1 : -1,
   )
-  const stateLabel = project?.status === 'done' ? 'done' : 'WIP'
-  const days = daysBetween(m.timestamp, new Date(snapshot.generatedAt))
+  const p = sorted[0]!
+  const stateLabel = p.status === 'on_hold' ? 'on hold' : 'WIP'
+  const days = daysBetween(p.last_activity_at!, new Date(snapshot.generatedAt))
   const ago = relativeDays(days)
-  return `Last Session: ${ago} on ${m.pursuit}/${m.project} (${stateLabel})`
+  return `Last Activity: ${ago} on ${p.pursuit}/${p.id} (${stateLabel})`
 }
 
 function relativeDays(days: number): string {
@@ -119,11 +214,9 @@ function describeFlag(flag: Flag, _snapshot: Snapshot): string {
     case 'overdue_waiting_for':
       return `overdue: ${flag.pursuitId}/${flag.projectId} — ${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`
     case 'dormant_project':
-      return flag.daysSinceMarker !== null
-        ? `dormant: ${flag.pursuitId}/${flag.projectId} (${flag.daysSinceMarker}d since marker)`
-        : `dormant: ${flag.pursuitId}/${flag.projectId} (no markers; project created earlier)`
-    case 'stale_marker':
-      return `stale marker: ${flag.pursuitId}/${flag.projectId} (${flag.daysSinceMarker}d old)`
+      return flag.daysSinceActivity !== null
+        ? `dormant: ${flag.pursuitId}/${flag.projectId} (${flag.daysSinceActivity}d since last activity)`
+        : `dormant: ${flag.pursuitId}/${flag.projectId} (no activity recorded; project created earlier)`
     case 'structural_active_no_open_actions':
       return `structural: ${flag.pursuitId}/${flag.projectId} all actions checked — does the intent feel achieved?`
     case 'wip_over_limit':

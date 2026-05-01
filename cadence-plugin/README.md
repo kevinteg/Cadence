@@ -91,7 +91,55 @@ tone, behavior, and guardrails are specified in
 | Verb | Description |
 |------|-------------|
 | `/cadence:status` | System dashboard, or drill into pursuits/projects/actions |
+| `/cadence:find` | Search projects, ideas, markers, captures, and pursuits by substring |
+| `/cadence:help` | Browse the verb surface — catalogue, group, or single verb |
 | `/cadence:init` | Bootstrap a new repo |
+
+## Quick Navigation
+
+Cadence is designed to be navigated from the dashboard alone — you
+shouldn't need to memorize 15 verbs to get started.
+
+**At session start**, the SessionStart hook prints the dashboard with
+up to 3 contextual `Next:` suggestions ranked by your current state
+(in-progress sessions, unprocessed captures, reconciler flags, reflect
+cadence, on-hold pickup candidates). Follow whichever fits.
+
+**Drill in** with `/cadence:status pursuits` (list) → `/cadence:status
+<pursuit>` (its projects) → `/cadence:status <project>` (Intent +
+actions). Every drill-down ends with an **Available actions** block
+listing the verbs that apply to the viewed entity, so you always know
+what's possible without leaving the dashboard.
+
+**Search by substring** with `/cadence:find <text>` — searches project
+IDs, intent prose, action texts, idea bodies, marker where/next/open,
+capture bodies, and pursuit metadata. Results group by kind with
+per-group verb hints (e.g., Projects show `/cadence:start <id>`;
+Ideas show `/cadence:promote <id>`).
+
+**Browse the verb surface** with `/cadence:help`. The catalogue is
+organized by cognitive mode:
+
+- **Diverge** — `brainstorm`, `develop`, `promote`
+- **Execute** — `start`, `pause`, `complete`, `cancel`, `capture`, `waiting`
+- **Reflect** — `reflect`, `narrate`, `close`, `reconcile`
+- **Setup** — `init`
+- **Browse** — `status`, `find`, `help`
+
+`/cadence:help <verb>` shows a single verb's full contract;
+`/cadence:help <group>` lists every verb in that group.
+
+**Typical first session:**
+
+```
+[session start: dashboard appears]
+/cadence:status build-cadence-v1   # see projects in your active pursuit
+/cadence:status <project>          # see Intent and actions
+/cadence:start <project>           # open a session
+... do work ...
+/cadence:complete <action>         # mark progress
+/cadence:pause                     # save a marker, end the session
+```
 
 ## The Pipeline
 
@@ -122,6 +170,30 @@ reflect:
   day: sunday
   duration_minutes: 30
 ```
+
+## Hooks
+
+The plugin ships its own SessionStart and PreCompact hook config in
+`hooks/hooks.json`. No per-repo setup required — installing the plugin
+turns these on automatically.
+
+| Event / matcher | Command | Purpose |
+|---|---|---|
+| `SessionStart / startup` | `cadence status --hook-output` | Show the dashboard when Claude Code launches |
+| `SessionStart / resume` | `cadence status --hook-output` | Re-show the dashboard when a session resumes |
+| `SessionStart / clear` | `cadence status --hook-output` | Re-show the dashboard after `/clear` |
+| `PreCompact` | `cadence pre-compact` | If a Cadence session is active, urge `/cadence:pause` before context is discarded |
+
+The `--hook-output` flag wraps the human-readable status in a JSON
+envelope (`systemMessage` for the user, `hookSpecificOutput` for the
+model) — Claude Code consumes that shape; bare `cadence status`
+prints the plain text for terminal use.
+
+`cadence pre-compact` reads `.cadence/active-session.json` (written
+by `/cadence:start`, cleared by `/pause`/`/complete`/`/cancel`). If
+absent: silent no-op. If present: emits a systemMessage naming the
+active pursuit/project and urging `/cadence:pause` so a marker
+captures where/next/open before compaction discards the context.
 
 ## Bundled CLI
 

@@ -13,7 +13,6 @@ export function renderSnapshot(snapshot: Snapshot): string {
 
   out.push(...renderSection('Pursuits', pursuitTable(snapshot)))
   out.push(...renderSection('Projects', projectTable(snapshot)))
-  out.push(...renderSection('Markers', markerTable(snapshot)))
   out.push(...renderSection('Ideas', ideaTable(snapshot)))
   out.push(...renderSection('Captures', captureTable(snapshot)))
   out.push(...renderSection('Reflections', reflectionTable(snapshot)))
@@ -81,28 +80,15 @@ function pursuitTable(snapshot: Snapshot): Table {
 
 function projectTable(snapshot: Snapshot): Table {
   return {
-    headers: ['ID', 'PURSUIT', 'STATUS', 'ACTIONS', 'STARTED'],
+    headers: ['ID', 'PURSUIT', 'STATUS', 'ACTIONS', 'LAST ACTIVITY'],
     rows: snapshot.projects.map((p) => [
       p.id,
       p.pursuit,
       p.status,
       `${p.actionProgress.done}/${p.actionProgress.total}`,
-      p.hasMarker ? 'yes' : 'no',
-    ]),
-  }
-}
-
-function markerTable(snapshot: Snapshot): Table {
-  const sorted = [...snapshot.markers].sort((a, b) =>
-    a.timestamp < b.timestamp ? 1 : -1,
-  )
-  return {
-    headers: ['TIMESTAMP', 'PURSUIT', 'PROJECT', 'NEXT'],
-    rows: sorted.map((m) => [
-      m.timestamp,
-      m.pursuit,
-      m.project,
-      truncate(firstLine(m.next), 60),
+      p.last_activity_at
+        ? p.last_activity_at.slice(0, 10)
+        : '—',
     ]),
   }
 }
@@ -163,11 +149,9 @@ function flagDetail(flag: Flag): string {
     case 'overdue_waiting_for':
       return `${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`
     case 'dormant_project':
-      return flag.daysSinceMarker !== null
-        ? `${flag.daysSinceMarker}d since marker`
-        : 'no markers'
-    case 'stale_marker':
-      return `${flag.daysSinceMarker}d old`
+      return flag.daysSinceActivity !== null
+        ? `${flag.daysSinceActivity}d since activity`
+        : 'no activity'
     case 'structural_active_no_open_actions':
       return 'all actions checked — does the intent feel achieved?'
     case 'wip_over_limit':

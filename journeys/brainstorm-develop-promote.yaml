@@ -1,5 +1,5 @@
 name: Brainstorm Develop Promote
-description: Verify the divergent pipeline — /brainstorm creates Seed Ideas, /develop evaluates, /promote creates a Project with DoD gate
+description: Verify the divergent pipeline — /brainstorm creates Seed Ideas, /develop evaluates, /promote creates a Project with the Intent gate (narrative-first model)
 
 setup:
   - create_pursuit:
@@ -27,10 +27,10 @@ steps:
     assert:
       - file_created:
           path: pursuits/test-divergent/projects/*.md
-      - contains: "Definition of Done"
+      - contains: "Intent"
       - file_contains:
           path: pursuits/test-divergent/projects/*.md
-          pattern: "## Definition of Done"
+          pattern: "## Intent"
 
 teardown:
   - delete_files:

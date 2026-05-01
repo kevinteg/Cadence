@@ -14,8 +14,7 @@ export function report(snapshot: Snapshot): { snapshot: Snapshot; flags: Flag[] 
   )
 
   flagOverdueWaitingFor(flags, snapshot, now)
-  const dormantSet = flagDormantProjects(flags, activeProjects, now, config)
-  flagStaleMarkers(flags, activeProjects, dormantSet, now, config)
+  flagDormantProjects(flags, activeProjects, now, config)
   flagStructural(flags, activeProjects)
   flagWipOverLimit(flags, activeProjects, config)
 
@@ -50,43 +49,18 @@ function flagDormantProjects(
   activeProjects: Project[],
   now: Date,
   config: { dormant_days: number },
-): Set<string> {
-  const dormantSet = new Set<string>()
+): void {
   for (const project of activeProjects) {
     const hasUnchecked = project.actions.some((a) => !a.checked)
     if (!hasUnchecked) continue
-    const reference = project.mostRecentMarker ?? project.created
+    const reference = project.last_activity_at ?? project.created
     const days = daysBetween(reference, now)
     if (days >= config.dormant_days) {
-      dormantSet.add(projectKey(project))
       flags.push({
         kind: 'dormant_project',
         pursuitId: project.pursuit,
         projectId: project.id,
-        daysSinceMarker: project.mostRecentMarker ? days : null,
-      })
-    }
-  }
-  return dormantSet
-}
-
-function flagStaleMarkers(
-  flags: Flag[],
-  activeProjects: Project[],
-  dormantSet: Set<string>,
-  now: Date,
-  config: { marker_stale_days: number },
-): void {
-  for (const project of activeProjects) {
-    if (dormantSet.has(projectKey(project))) continue
-    if (!project.mostRecentMarker) continue
-    const days = daysBetween(project.mostRecentMarker, now)
-    if (days > config.marker_stale_days) {
-      flags.push({
-        kind: 'stale_marker',
-        pursuitId: project.pursuit,
-        projectId: project.id,
-        daysSinceMarker: days,
+        daysSinceActivity: project.last_activity_at ? days : null,
       })
     }
   }
@@ -110,7 +84,9 @@ function flagWipOverLimit(
   activeProjects: Project[],
   config: { max_active_projects: number },
 ): void {
-  const inProgress = activeProjects.filter((p) => p.hasMarker)
+  const inProgress = activeProjects.filter((p) =>
+    p.actions.some((a) => !a.checked),
+  )
   if (inProgress.length > config.max_active_projects) {
     flags.push({
       kind: 'wip_over_limit',
@@ -119,8 +95,4 @@ function flagWipOverLimit(
       projectIds: inProgress.map((p) => p.id),
     })
   }
-}
-
-function projectKey(project: Project): string {
-  return `${project.pursuit}/${project.id}`
 }

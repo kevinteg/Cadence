@@ -18,8 +18,7 @@ Set up a new repo for Cadence. Only needs to run once per repo.
      --type ongoing \
      --description "The default home for unattached ideas. Seeds captured here don't yet belong to any pursuit — they're waiting to be developed, promoted, or closed. Wandering never closes."
    ```
-   The CLI
-   creates the pursuit directory plus `projects/`, `sessions/`, and
+   The CLI creates the pursuit directory plus `projects/` and
    `ideas/` subdirectories.
 
 3. **Create remaining directories** (the CLI doesn't create these
@@ -63,7 +62,6 @@ Set up a new repo for Cadence. Only needs to run once per repo.
 
    defaults:
      someday_review: monthly
-     marker_stale_days: 7
      waiting_for_grace_days: 2
      dormant_days: 14
 

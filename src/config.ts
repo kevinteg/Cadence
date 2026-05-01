@@ -31,8 +31,6 @@ function mergeDefaults(raw: RawConfig): Config {
   const reflect = raw.reflect ?? {}
   const wc = raw.win_cycles ?? {}
   return {
-    marker_stale_days:
-      d.marker_stale_days ?? CONFIG_DEFAULTS.marker_stale_days,
     waiting_for_grace_days:
       d.waiting_for_grace_days ?? CONFIG_DEFAULTS.waiting_for_grace_days,
     dormant_days: d.dormant_days ?? CONFIG_DEFAULTS.dormant_days,

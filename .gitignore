@@ -3,6 +3,9 @@
 .cadence.db-journal
 .cadence.db-wal
 
+# Cadence runtime state (active-session pointer, etc.)
+.cadence/
+
 # Generated manifests (regenerated from markdown)
 _manifest.md
 

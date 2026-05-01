@@ -58,21 +58,36 @@ context so future `/status N` calls resolve correctly.
 
 When no argument is provided:
 
-1. Run `cadence status`. The CLI produces the entire
-   dashboard:
+1. Run `cadence status`. The CLI produces the entire dashboard:
    - Leveraged Priority (extracted from latest reflection)
    - Last Reflect (date + status)
-   - Last Session (relative time on pursuit/project, done|WIP)
+   - Last Activity (most recent commit/edit on a non-done project)
    - Pursuits / Projects / Actions / Thoughts counts
    - Reconciler flags
+   - **Next:** up to 3 contextual next-step suggestions ranked by
+     state (in-progress projects, unprocessed captures, flags,
+     reflect cadence, on-hold pickup candidates, and a
+     `/cadence:help` pointer in any spare slot)
 
 2. Present the CLI output verbatim. Do not paraphrase or annotate.
+   The "Next:" block is computed deterministically by `nextSteps()`
+   in the CLI — same heuristic in both the bare-CLI dashboard and
+   the SessionStart hook output, so suggestions stay consistent.
 
-3. If the CLI output indicates an active session in this conversation
-   that supersedes the "Last Session" line (the user invoked `/start`
-   on a different project earlier in the conversation), replace the
-   Last Session line with `Active session: <pursuit/project>`. This is
-   the only field the agent overrides — everything else is CLI-authored.
+## Drill-down action menus
+
+Every drill-down view (`cadence pursuits`, `cadence pursuit <id>`,
+`cadence project <id>`) ends with an inline **Available actions**
+block listing the verbs applicable to the viewed entity, with a
+one-line hint each. The CLI renders these — present them verbatim
+along with the rest of the drill output. Do not strip or rewrite.
+
+The menus are status-aware: a `done` or `dropped` project shows a
+narrower menu (narrate / back to dashboard) instead of the full
+work surface (start / complete / cancel / etc.).
+
+If the user wants to see the full verb surface across all groups,
+`/cadence:help` renders the catalogue inline.
 
 ## Fallback
 
@@ -81,7 +96,7 @@ back to manual scanning:
 - Glob `pursuits/*/pursuit.md` for active pursuits
 - Glob `pursuits/*/projects/*.md` for projects, parse status from
   frontmatter, count Action checkboxes
-- Glob `pursuits/**/sessions/*.md` for the most recent marker
+- For activity recency, fall back to fs.stat mtime on each project file
 - Read `cadence.yaml` for thresholds
 - Apply `workflows/reconciler.md` checks for flags
 

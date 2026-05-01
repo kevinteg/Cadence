@@ -11,7 +11,6 @@ async function makeTempRepo(): Promise<string> {
     path.join(dir, 'cadence.yaml'),
     `version: 1
 defaults:
-  marker_stale_days: 7
   waiting_for_grace_days: 2
   dormant_days: 14
 wip_limits:
@@ -162,11 +161,6 @@ test('scan returns a populated Snapshot for a synthetic repo', async () => {
     assert.equal(proj.actionProgress.total, 2)
     assert.equal(proj.waiting_for.length, 1)
     assert.equal(proj.waiting_for[0]?.person, 'bob')
-    assert.equal(proj.hasMarker, true)
-    assert.equal(proj.mostRecentMarker, '2026-04-20T10:00:00Z')
-
-    assert.equal(snapshot.markers.length, 1)
-    assert.equal(snapshot.markers[0]?.next, 'do thing')
 
     assert.equal(snapshot.ideas.length, 1)
     assert.equal(snapshot.ideas[0]?.state, 'seed')
@@ -189,9 +183,9 @@ test('scan returns a populated Snapshot for a synthetic repo', async () => {
 test('scan against this repo matches expected counts', async () => {
   const repoRoot = path.resolve(import.meta.dirname, '..')
   const snapshot = await scan(repoRoot, new Date('2026-04-27T12:00:00Z'))
-  // Active pursuits: build-cadence-v1, wandering
+  // Active pursuits: build-cadence-v1, cadence-performance-and-indexing, wandering
   const active = snapshot.pursuits.filter((p) => p.lifecycle === 'active')
-  assert.equal(active.length, 2, 'expected 2 active pursuits')
+  assert.equal(active.length, 3, 'expected 3 active pursuits')
   // Someday: make-cadence-public
   const someday = snapshot.pursuits.filter((p) => p.lifecycle === 'someday')
   assert.equal(someday.length, 1, 'expected 1 someday pursuit')

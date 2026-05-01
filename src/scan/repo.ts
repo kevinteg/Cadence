@@ -1,8 +1,10 @@
+import { stat } from 'node:fs/promises'
+import path from 'node:path'
 import { loadConfig } from '../config.js'
-import type { Marker, Project, Snapshot } from '../types.js'
+import type { Project, Snapshot } from '../types.js'
 import { scanCaptures } from './captures.js'
+import { lastActivityMap } from './git-activity.js'
 import { scanIdeas } from './ideas.js'
-import { scanMarkers } from './markers.js'
 import { scanProjects } from './projects.js'
 import { scanPursuits } from './pursuits.js'
 import { scanReflections } from './reflections.js'
@@ -11,27 +13,26 @@ export async function scan(
   repoRoot: string,
   now: Date = new Date(),
 ): Promise<Snapshot> {
-  const [config, pursuits, projects, ideas, markers, captures, reflections] =
+  const [config, pursuits, projects, ideas, captures, reflections] =
     await Promise.all([
       loadConfig(repoRoot),
       scanPursuits(repoRoot),
       scanProjects(repoRoot),
       scanIdeas(repoRoot, now),
-      scanMarkers(repoRoot),
       scanCaptures(repoRoot),
       scanReflections(repoRoot),
     ])
 
-  for (const project of projects) {
-    annotateProjectMarker(project, markers)
-  }
+  const activityMap = await lastActivityMap(repoRoot)
+  await Promise.all(
+    projects.map((p) => annotateLastActivity(p, repoRoot, activityMap)),
+  )
 
   return {
     config,
     pursuits,
     projects,
     ideas,
-    markers,
     captures,
     reflections,
     generatedAt: now.toISOString(),
@@ -39,13 +40,22 @@ export async function scan(
   }
 }
 
-function annotateProjectMarker(project: Project, markers: Marker[]): void {
-  let mostRecent: string | undefined
-  for (const m of markers) {
-    if (m.pursuit !== project.pursuit) continue
-    if (m.project !== project.id) continue
-    if (!mostRecent || m.timestamp > mostRecent) mostRecent = m.timestamp
+async function annotateLastActivity(
+  project: Project,
+  repoRoot: string,
+  activityMap: Map<string, string>,
+): Promise<void> {
+  const gitTs = activityMap.get(project.path)
+  let fsTs: string | undefined
+  try {
+    const s = await stat(path.join(repoRoot, project.path))
+    fsTs = s.mtime.toISOString()
+  } catch {
+    fsTs = undefined
   }
-  project.hasMarker = mostRecent !== undefined
-  if (mostRecent) project.mostRecentMarker = mostRecent
+  if (gitTs && fsTs) {
+    project.last_activity_at = gitTs > fsTs ? gitTs : fsTs
+  } else {
+    project.last_activity_at = gitTs ?? fsTs
+  }
 }

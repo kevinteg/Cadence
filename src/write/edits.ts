@@ -3,8 +3,11 @@ import { readdir, readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import {
   appendChecklistItem,
+  appendParagraphToSection,
+  computeProjectProgress,
   toggleChecklistItem,
 } from './checklist.js'
+import type { Progress } from '../types.js'
 import {
   dateString,
   isoTimestamp,
@@ -22,13 +25,30 @@ export type SetProjectStatusOpts = {
   id: string
   status: 'active' | 'on_hold' | 'done' | 'dropped'
   reason?: string
+  include_pursuit?: boolean
   now?: Date
+}
+
+export type PursuitSummary = {
+  id: string
+  projects: Array<{
+    id: string
+    status: 'active' | 'on_hold' | 'done' | 'dropped'
+  }>
+  done: number
+  total: number
+  allResolved: boolean
+}
+
+export type SetProjectStatusResult = {
+  path: string
+  pursuit?: PursuitSummary
 }
 
 export async function setProjectStatus(
   repoRoot: string,
   opts: SetProjectStatusOpts,
-): Promise<{ path: string }> {
+): Promise<SetProjectStatusResult> {
   const filePath = await locateProject(repoRoot, opts.id, opts.pursuit)
   const now = opts.now ?? new Date()
   await mutateFrontmatter(filePath, (data, body) => {
@@ -42,7 +62,51 @@ export async function setProjectStatus(
     }
     return { data, body }
   })
-  return { path: path.relative(repoRoot, filePath) }
+  const result: SetProjectStatusResult = {
+    path: path.relative(repoRoot, filePath),
+  }
+  if (opts.include_pursuit) {
+    result.pursuit = await summarizePursuit(repoRoot, filePath)
+  }
+  return result
+}
+
+async function summarizePursuit(
+  repoRoot: string,
+  projectFilePath: string,
+): Promise<PursuitSummary> {
+  // The pursuit dir is two levels up from the project file: pursuits/<id>/projects/<file>.md
+  const projectsDir = path.dirname(projectFilePath)
+  const pursuitDir = path.dirname(projectsDir)
+  const pursuitId = path.basename(pursuitDir)
+  const projects: PursuitSummary['projects'] = []
+  if (existsSync(projectsDir)) {
+    for (const entry of await readdir(projectsDir, { withFileTypes: true })) {
+      if (!entry.isFile() || !entry.name.endsWith('.md')) continue
+      const file = path.join(projectsDir, entry.name)
+      const text = await readFile(file, 'utf8')
+      const { data } = parseFrontmatter(text)
+      const id = String(data['id'] ?? entry.name.replace(/\.md$/, ''))
+      const status = String(data['status'] ?? 'active') as
+        | 'active'
+        | 'on_hold'
+        | 'done'
+        | 'dropped'
+      projects.push({ id, status })
+    }
+  }
+  const done = projects.filter(
+    (p) => p.status === 'done' || p.status === 'dropped',
+  ).length
+  const total = projects.length
+  void repoRoot
+  return {
+    id: pursuitId,
+    projects,
+    done,
+    total,
+    allResolved: total > 0 && done === total,
+  }
 }
 
 export type SetIdeaStateOpts = {
@@ -92,16 +156,25 @@ export type CheckItemOpts = {
   note?: string
 }
 
+export type CheckItemResult = {
+  path: string
+  matched: string
+  promoted?: boolean
+  dodProgress: Progress
+  actionProgress: Progress
+}
+
 export async function checkItem(
   repoRoot: string,
   opts: CheckItemOpts,
-): Promise<{ path: string; matched: string; promoted?: boolean }> {
+): Promise<CheckItemResult> {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit)
   const checked = opts.checked ?? true
   const sectionName =
     opts.section === 'dod' ? 'Definition of Done' : 'Actions'
   let matched = ''
   let promoted = false
+  let finalBody = ''
   await mutateFrontmatter(filePath, (data, body) => {
     const result = toggleChecklistItem(body, sectionName, opts.match, checked)
     matched = result.matched
@@ -117,35 +190,159 @@ export async function checkItem(
       data['status'] = 'active'
       promoted = true
     }
+    finalBody = nextBody
     return { data, body: nextBody }
   })
+  const progress = computeProjectProgress(finalBody)
   return {
     path: path.relative(repoRoot, filePath),
     matched,
     ...(promoted ? { promoted: true } : {}),
+    ...progress,
+  }
+}
+
+export type CheckItemsOpts = {
+  pursuit?: string
+  project: string
+  section: 'dod' | 'action'
+  matches: Array<string | number>
+  checked?: boolean
+}
+
+export type CheckItemsResult = {
+  path: string
+  matched: string[]
+  promoted?: boolean
+  dodProgress: Progress
+  actionProgress: Progress
+}
+
+export async function checkItems(
+  repoRoot: string,
+  opts: CheckItemsOpts,
+): Promise<CheckItemsResult> {
+  const filePath = await locateProject(repoRoot, opts.project, opts.pursuit)
+  const checked = opts.checked ?? true
+  const sectionName =
+    opts.section === 'dod' ? 'Definition of Done' : 'Actions'
+  const matched: string[] = []
+  let promoted = false
+  let finalBody = ''
+  await mutateFrontmatter(filePath, (data, body) => {
+    let nextBody = body
+    for (const match of opts.matches) {
+      const result = toggleChecklistItem(nextBody, sectionName, match, checked)
+      matched.push(result.matched)
+      nextBody = result.body
+    }
+    if (
+      opts.section === 'action' &&
+      checked &&
+      data['status'] === 'on_hold' &&
+      opts.matches.length > 0
+    ) {
+      data['status'] = 'active'
+      promoted = true
+    }
+    finalBody = nextBody
+    return { data, body: nextBody }
+  })
+  const progress = computeProjectProgress(finalBody)
+  return {
+    path: path.relative(repoRoot, filePath),
+    matched,
+    ...(promoted ? { promoted: true } : {}),
+    ...progress,
   }
 }
 
 export type AddItemOpts = {
   pursuit?: string
   project: string
-  section: 'dod' | 'action'
+  section: 'dod' | 'action' | 'notes'
   text: string
   checked?: boolean
+}
+
+export type AddItemResult = {
+  path: string
+  dodProgress: Progress
+  actionProgress: Progress
 }
 
 export async function addItem(
   repoRoot: string,
   opts: AddItemOpts,
-): Promise<{ path: string }> {
+): Promise<AddItemResult> {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit)
   const sectionName =
-    opts.section === 'dod' ? 'Definition of Done' : 'Actions'
-  await mutateFrontmatter(filePath, (data, body) => ({
-    data,
-    body: appendChecklistItem(body, sectionName, opts.text, opts.checked ?? false),
-  }))
-  return { path: path.relative(repoRoot, filePath) }
+    opts.section === 'dod' ? 'Definition of Done'
+    : opts.section === 'action' ? 'Actions'
+    : 'Notes'
+  let finalBody = ''
+  await mutateFrontmatter(filePath, (data, body) => {
+    const nextBody =
+      opts.section === 'notes'
+        ? appendParagraphToSection(body, sectionName, opts.text)
+        : appendChecklistItem(body, sectionName, opts.text, opts.checked ?? false)
+    finalBody = nextBody
+    return { data, body: nextBody }
+  })
+  const progress = computeProjectProgress(finalBody)
+  return {
+    path: path.relative(repoRoot, filePath),
+    ...progress,
+  }
+}
+
+export type AddItemsOpts = {
+  pursuit?: string
+  project: string
+  section: 'dod' | 'action' | 'notes'
+  texts: string[]
+  checked?: boolean
+}
+
+export type AddItemsResult = {
+  path: string
+  added: number
+  dodProgress: Progress
+  actionProgress: Progress
+}
+
+export async function addItems(
+  repoRoot: string,
+  opts: AddItemsOpts,
+): Promise<AddItemsResult> {
+  const filePath = await locateProject(repoRoot, opts.project, opts.pursuit)
+  const sectionName =
+    opts.section === 'dod' ? 'Definition of Done'
+    : opts.section === 'action' ? 'Actions'
+    : 'Notes'
+  let finalBody = ''
+  await mutateFrontmatter(filePath, (data, body) => {
+    let nextBody = body
+    for (const text of opts.texts) {
+      nextBody =
+        opts.section === 'notes'
+          ? appendParagraphToSection(nextBody, sectionName, text)
+          : appendChecklistItem(
+              nextBody,
+              sectionName,
+              text,
+              opts.checked ?? false,
+            )
+    }
+    finalBody = nextBody
+    return { data, body: nextBody }
+  })
+  const progress = computeProjectProgress(finalBody)
+  return {
+    path: path.relative(repoRoot, filePath),
+    added: opts.texts.length,
+    ...progress,
+  }
 }
 
 export type AddWaitingForOpts = {

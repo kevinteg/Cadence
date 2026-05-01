@@ -17,30 +17,47 @@ prompting for action.
 
 ## Steps
 
-1. Run the bundled CLI to get current flags. The command auto-detects the
-   repo root from cwd:
+1. **Delegate to the reconciler subagent.** Avoid pulling the full
+   `cadence flags --json` and `cadence ideas --json` payloads into this
+   thread; the agent runs the scans in isolation and returns a tight
+   flag list.
 
-   ```bash
-   cadence flags
-   ```
-2. The CLI emits flags one per line in the form `- [type] [entity]:
-   [details]`. Present the output verbatim under a "Reconciler Report"
-   heading. If the CLI prints "No flags. System is healthy.", report
-   "System is clean. No flags."
+   Invoke via the Agent tool:
+   - `subagent_type: cadence:reconciler`
+   - `prompt: scan` (the agent doesn't take parameters; it does its
+     standard pass)
 
-3. Do not prompt for action. The user reads the report and acts on
+   The agent returns either `No flags. System is healthy.` or one flag
+   per line in the form:
+   `[severity] [kind] [pursuit/project or pursuit] — [one-line context]`,
+   grouped by severity (`action_needed`, `warning`, `info`).
+
+2. **Present verbatim** under a `Reconciler Report` heading. Do not
+   reformat, summarize, or annotate the agent's output — the format is
+   the contract.
+
+3. **Do not prompt for action.** The user reads the report and acts on
    their own, or addresses flags during /reflect.
 
-## Notes
+## Fallback (in-thread)
 
-The CLI implements checks 1-5 from `workflows/reconciler.md` (overdue
-waiting-for, dormant projects, stale markers, structural issues, WIP over
-limit). Idea-specific checks (aging seeds, unpromoted developed,
-backlog ratio) and someday-cue surfacing are still agent-implemented and
-appear in /reflect, not /reconcile.
+If the reconciler subagent invocation fails (unrecognized
+`subagent_type`, agent error, plugin loader issue), run the scans
+inline:
 
-If the CLI is unavailable, fall back to scanning the file tree manually
-following `workflows/reconciler.md`.
+```bash
+cadence flags
+```
+
+Present the CLI output verbatim. For the idea-specific checks the CLI
+doesn't yet implement (`aging_seed`, `unpromoted_idea`,
+`growing_backlog`), additionally query `cadence ideas --json` and
+`cadence pursuits --json`, apply the thresholds from
+`workflows/reconciler.md`, and append any matches to the report.
+
+The fallback keeps /reconcile functional during plugin issues but
+pulls bulk JSON into the main context — the agent path is preferred
+whenever it works.
 
 ## Guardrails
 

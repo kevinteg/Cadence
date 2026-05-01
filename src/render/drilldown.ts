@@ -1,6 +1,5 @@
 import type {
   Idea,
-  Marker,
   Project,
   Pursuit,
   Snapshot,
@@ -41,6 +40,9 @@ export function renderPursuits(snapshot: Snapshot): string {
   if (archivedCount > 0) {
     out.push(`[${archivedCount} archived hidden]`)
   }
+  out.push('')
+  out.push('Available actions:')
+  for (const line of pursuitsListMenu()) out.push('  ' + line)
   return out.join('\n')
 }
 
@@ -77,6 +79,9 @@ export function renderPursuit(snapshot: Snapshot, pursuitId: string): string {
   if (done.length > 0) {
     out.push(`[${done.length} done projects hidden]`)
   }
+  out.push('')
+  out.push('Available actions:')
+  for (const line of pursuitMenu(pursuit.id)) out.push('  ' + line)
   return out.join('\n')
 }
 
@@ -94,7 +99,7 @@ export function renderProject(
   if (!project) return `project not found: ${projectId}`
 
   const out: string[] = []
-  const startedTag = project.hasMarker ? '' : ' [not started]'
+  const startedTag = project.status === 'on_hold' ? ' [not started]' : ''
   out.push(
     `${project.id} — ${project.actionProgress.done}/${project.actionProgress.total} actions [${project.status}]${startedTag}`,
   )
@@ -127,6 +132,11 @@ export function renderProject(
       const flag = w.flagged ? ' [flagged]' : ''
       out.push(`  - ${w.person} re: ${w.what} (expected ${w.expected})${flag}`)
     }
+    out.push('')
+  }
+  out.push('Available actions:')
+  for (const line of projectMenu(project.id, project.status)) {
+    out.push('  ' + line)
   }
   return out.join('\n').trimEnd()
 }
@@ -143,18 +153,6 @@ export function renderIdeas(ideas: Idea[]): string {
   return out.join('\n')
 }
 
-export function renderMarkers(markers: Marker[]): string {
-  if (markers.length === 0) return 'No markers match.'
-  const out: string[] = []
-  for (const m of markers) {
-    out.push(
-      `- ${m.timestamp} ${m.pursuit}/${m.project}` +
-        (m.next ? `\n    next: ${firstLine(m.next)}` : ''),
-    )
-  }
-  return out.join('\n')
-}
-
 function projectCounts(snapshot: Snapshot, pursuitId: string) {
   const projects = snapshot.projects.filter((p) => p.pursuit === pursuitId)
   return {
@@ -166,7 +164,7 @@ function projectCounts(snapshot: Snapshot, pursuitId: string) {
 
 function formatProjectLine(idx: number, p: Project): string {
   const desc = firstLine(p.intent || p.description)
-  const not_started = p.hasMarker ? '' : ' [not started]'
+  const not_started = p.status === 'on_hold' ? ' [not started]' : ''
   const tail = desc ? `: ${desc}` : ''
   return `  ${idx}. ${p.id}${tail} — ${p.actionProgress.done}/${p.actionProgress.total} actions${not_started}`
 }
@@ -178,3 +176,55 @@ function firstLine(text: string): string {
 
 // keep Pursuit referenced for future drill-downs that need pursuit-level fields
 void ((_: Pursuit) => null)
+
+// Inline action menus per drill-down view. Wording uses two-column
+// layout (verb + one-line hint). Always-on for v1 — discoverability
+// over noise. A quieter mode is a follow-up consideration.
+
+const MENU_PAD = 36
+
+function pad(verb: string): string {
+  return verb.length >= MENU_PAD ? verb + '  ' : verb.padEnd(MENU_PAD)
+}
+
+function pursuitsListMenu(): string[] {
+  return [
+    `${pad('/cadence:status <id|N>')}Drill into a pursuit`,
+    `${pad('/cadence:start')}Pick a project to work on`,
+    `${pad('/cadence:reflect')}Weekly review`,
+    `${pad('/cadence:help')}Browse the full verb surface`,
+  ]
+}
+
+function pursuitMenu(_pursuitId: string): string[] {
+  return [
+    `${pad('/cadence:start')}Pick a project to work on`,
+    `${pad('/cadence:status <project|N>')}Drill into a project`,
+    `${pad('/cadence:narrate <pursuit>')}Tell the pursuit's full arc`,
+    `${pad('/cadence:reconcile')}Show flags across the system`,
+    `${pad('/cadence:close <pursuit>')}Run the closure ritual`,
+    `${pad('/cadence:help')}Browse the full verb surface`,
+  ]
+}
+
+function projectMenu(
+  _projectId: string,
+  status: 'active' | 'on_hold' | 'done' | 'dropped',
+): string[] {
+  if (status === 'done' || status === 'dropped') {
+    return [
+      `${pad('/cadence:narrate <project>')}Tell this project's story`,
+      `${pad('/cadence:status')}Back to dashboard`,
+      `${pad('/cadence:help')}Browse the full verb surface`,
+    ]
+  }
+  return [
+    `${pad('/cadence:start <project>')}Open a session on this project`,
+    `${pad('/cadence:complete <action>')}Mark an action done`,
+    `${pad('/cadence:pause')}Save a marker and suspend`,
+    `${pad('/cadence:waiting <project>')}Track an external blocker`,
+    `${pad('/cadence:cancel <project>')}Drop with a reason`,
+    `${pad('/cadence:narrate <project>')}Tell this project's story`,
+    `${pad('/cadence:help')}Browse the full verb surface`,
+  ]
+}

@@ -9,7 +9,7 @@ relevant. The reason is recorded for the narrative.
 
 ## Usage
 
-- `/cancel` — cancel the active session's project
+- `/cancel` — cancel the project under current discussion
 - `/cancel <project>` — cancel a specific project
 
 Arguments resolve via fuzzy match, partial match, or natural language.
@@ -17,8 +17,10 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 ## Steps
 
 1. **Resolve the project:**
-   - If in an active session with no argument: target the active project.
-   - If an argument is given: resolve to a project by fuzzy match.
+   - With no argument: target the project most recently in focus
+     (e.g., the most recent /start with-arg, or the project mentioned
+     earlier in the conversation). If unclear, ask.
+   - With an argument: resolve via fuzzy match against active projects.
    - If the project is already done or dropped:
      "[Project] is already [status]."
 
@@ -45,28 +47,30 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 4. **Update the project via the CLI:**
    ```bash
    cadence set-status <project-id> \
-     --pursuit <pursuit-id> --status dropped --reason "<user's reason>"
+     --pursuit <pursuit-id> --status dropped --reason "<user's reason>" \
+     --include-pursuit
    ```
-   The CLI
-   sets `status: dropped`, `dropped_reason: <reason>`, and stamps
-   `dropped_at: <ISO timestamp>` in frontmatter.
+   The CLI sets `status: dropped`, `dropped_reason: <reason>`, and
+   stamps `dropped_at: <ISO timestamp>` in frontmatter.
+   `--include-pursuit` returns the pursuit summary in the same
+   response — read `result.pursuit.allResolved` for step 6's pursuit
+   context without a separate fetch.
 
-5. **If an active session was on this project,** close the session (no
-   marker needed — cancellation closed it).
-
-6. **Resolve any unresolved Ideas** the user identified in step 3 by
+5. **Resolve any unresolved Ideas** the user identified in step 3 by
    using the appropriate CLI commands:
    - Move to Wandering: `cadence set-idea-state <id> --state moved
      --new-parent wandering`
    - Close with reason: `cadence set-idea-state <id> --state closed
      --reason "<reason>"`
 
-7. **Confirm with pursuit context:**
+6. **Confirm with pursuit context:**
    ```
    Cancelled: [project] — "[reason]"
    [pursuit] — [N/M] projects done, [K] dropped
    ```
-   Read counts via `cadence pursuit <id> --json`.
+   Read counts from `result.pursuit` returned by step 4's
+   `set-status --include-pursuit` call. Only fall back to a separate
+   `cadence pursuit <id> --json` if `--include-pursuit` was omitted.
 
 ## Guardrails
 

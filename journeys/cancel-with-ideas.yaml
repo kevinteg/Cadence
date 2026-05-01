@@ -10,8 +10,10 @@ setup:
       pursuit: test-cancel
       id: test-cancel-project
       title: Test Cancel Project
-      dod:
-        - Something that won't happen
+      intent: |
+        Test the cancel ritual: dropping a project with attached
+        unresolved Ideas. Verify the skill demands a reason and walks
+        the Idea-resolution step before writing status: dropped.
       actions:
         - Work that won't be done
   - create_idea:

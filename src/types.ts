@@ -71,8 +71,13 @@ export type Project = ProjectFrontmatter & {
   path: string
   dodProgress: Progress
   actionProgress: Progress
-  hasMarker: boolean
-  mostRecentMarker?: string
+  /**
+   * Most recent activity timestamp on the project file:
+   * `max(git log committer-date, fs.mtime)`. Used for dormancy
+   * and recency heuristics. Undefined for tests and non-git
+   * directories.
+   */
+  last_activity_at?: string
 }
 
 export const IdeaStateSchema = z.enum([
@@ -99,23 +104,6 @@ export type Idea = IdeaFrontmatter & {
   body: string
   path: string
   ageDays: number
-}
-
-export const MarkerFrontmatterSchema = z.object({
-  pursuit: z.string(),
-  project: z.string(),
-  session_start: z.string(),
-  session_end: z.string().optional(),
-  actions_completed: z.array(z.string()).optional().default([]),
-})
-export type MarkerFrontmatter = z.infer<typeof MarkerFrontmatterSchema>
-
-export type Marker = MarkerFrontmatter & {
-  where: string
-  next: string
-  open: string
-  path: string
-  timestamp: string
 }
 
 export const CaptureFrontmatterSchema = z.object({
@@ -155,7 +143,6 @@ export const ConfigSchema = z.object({
   defaults: z
     .object({
       someday_review: z.string().optional(),
-      marker_stale_days: z.number().optional(),
       waiting_for_grace_days: z.number().optional(),
       dormant_days: z.number().optional(),
     })
@@ -175,7 +162,6 @@ export const ConfigSchema = z.object({
 export type RawConfig = z.infer<typeof ConfigSchema>
 
 export type Config = {
-  marker_stale_days: number
   waiting_for_grace_days: number
   dormant_days: number
   max_active_projects: number
@@ -189,7 +175,6 @@ export type Config = {
 }
 
 export const CONFIG_DEFAULTS: Config = {
-  marker_stale_days: 7,
   waiting_for_grace_days: 2,
   dormant_days: 14,
   max_active_projects: 5,
@@ -203,7 +188,6 @@ export type Snapshot = {
   pursuits: Pursuit[]
   projects: Project[]
   ideas: Idea[]
-  markers: Marker[]
   captures: Capture[]
   reflections: Reflection[]
   generatedAt: string
@@ -222,13 +206,7 @@ export type Flag =
       kind: 'dormant_project'
       pursuitId: string
       projectId: string
-      daysSinceMarker: number | null
-    }
-  | {
-      kind: 'stale_marker'
-      pursuitId: string
-      projectId: string
-      daysSinceMarker: number
+      daysSinceActivity: number | null
     }
   | {
       kind: 'structural_active_no_open_actions'

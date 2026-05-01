@@ -1,5 +1,5 @@
 name: Capture Flow Safe
-description: Verify /capture during a session creates a thought file without interrupting flow
+description: Verify /capture creates a thought file without interrupting flow
 
 setup:
   - create_pursuit:
@@ -10,8 +10,9 @@ setup:
       pursuit: test-capture
       id: test-capture-project
       title: Test Capture Project
-      dod:
-        - Complete the task
+      intent: |
+        Verify that /capture is flow-safe while working a project:
+        writes a thought file with no agent response, no acknowledgment.
       actions:
         - Do the work
 

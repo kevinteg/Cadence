@@ -66,14 +66,21 @@ Arguments resolve via fuzzy match, partial match, or natural language.
    - If the Intent reads like a single tweetable goal with no shape to
      it: "This might be an Action, not a Project. A Project usually
      covers more than one move. Is this really a Project?"
-   - Ask for a first action; if the user doesn't have one ready, the
+   - Ask for first action(s); if the user doesn't have one ready, the
      CLI defaults to `Brainstorm and add concrete actions for this
-     project`.
+     project`. If the user names multiple, pass them all as repeated
+     `--action` flags on the create call (cheaper than create + add).
    - Once accepted:
      ```bash
      cadence create-project <slug> --pursuit <pursuit-id> \
        --intent "<the Intent narrative>" \
-       --action "<first action>"
+       --action "<first action>" --action "<second action>"
+     ```
+   - If more actions need to land after creation, use the bulk variant
+     to avoid per-action round trips:
+     ```bash
+     cadence add-items <slug> --pursuit <pursuit-id> --section action \
+       --text "<...>" --text "<...>"
      ```
 
    **Idea → Action (Concreteness gate):**

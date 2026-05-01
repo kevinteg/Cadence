@@ -108,7 +108,7 @@ var require_path = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.convertPosixPathToPattern = exports2.convertWindowsPathToPattern = exports2.convertPathToPattern = exports2.escapePosixPath = exports2.escapeWindowsPath = exports2.escape = exports2.removeLeadingDotSegment = exports2.makeAbsolute = exports2.unixify = void 0;
     var os = __require("os");
-    var path19 = __require("path");
+    var path18 = __require("path");
     var IS_WINDOWS_PLATFORM = os.platform() === "win32";
     var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
     var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
@@ -120,7 +120,7 @@ var require_path = __commonJS({
     }
     exports2.unixify = unixify;
     function makeAbsolute(cwd, filepath) {
-      return path19.resolve(cwd, filepath);
+      return path18.resolve(cwd, filepath);
     }
     exports2.makeAbsolute = makeAbsolute;
     function removeLeadingDotSegment(entry) {
@@ -699,7 +699,7 @@ var require_fill_range = __commonJS({
       }
       return options2.stringify === true;
     };
-    var pad = (input, maxLength, toNumber) => {
+    var pad2 = (input, maxLength, toNumber) => {
       if (maxLength > 0) {
         let dash = input[0] === "-" ? "-" : "";
         if (dash) input = input.slice(1);
@@ -801,7 +801,7 @@ var require_fill_range = __commonJS({
         if (options2.toRegex === true && step > 1) {
           push(a);
         } else {
-          range.push(pad(format(a, index), maxLen, toNumber));
+          range.push(pad2(format(a, index), maxLen, toNumber));
         }
         a = descending ? a - step : a + step;
         index++;
@@ -1417,7 +1417,7 @@ var require_braces = __commonJS({
 var require_constants2 = __commonJS({
   "node_modules/picomatch/lib/constants.js"(exports2, module2) {
     "use strict";
-    var path19 = __require("path");
+    var path18 = __require("path");
     var WIN_SLASH = "\\\\/";
     var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
     var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
@@ -1591,7 +1591,7 @@ var require_constants2 = __commonJS({
       /* | */
       CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
       /* \uFEFF */
-      SEP: path19.sep,
+      SEP: path18.sep,
       /**
        * Create EXTGLOB_CHARS
        */
@@ -1618,7 +1618,7 @@ var require_constants2 = __commonJS({
 var require_utils2 = __commonJS({
   "node_modules/picomatch/lib/utils.js"(exports2) {
     "use strict";
-    var path19 = __require("path");
+    var path18 = __require("path");
     var win32 = process.platform === "win32";
     var {
       REGEX_BACKSLASH,
@@ -1647,7 +1647,7 @@ var require_utils2 = __commonJS({
       if (options2 && typeof options2.windows === "boolean") {
         return options2.windows;
       }
-      return win32 === true || path19.sep === "\\";
+      return win32 === true || path18.sep === "\\";
     };
     exports2.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx);
@@ -3011,7 +3011,7 @@ var require_parse2 = __commonJS({
 var require_picomatch = __commonJS({
   "node_modules/picomatch/lib/picomatch.js"(exports2, module2) {
     "use strict";
-    var path19 = __require("path");
+    var path18 = __require("path");
     var scan2 = require_scan();
     var parse2 = require_parse2();
     var utils = require_utils2();
@@ -3096,7 +3096,7 @@ var require_picomatch = __commonJS({
     };
     picomatch.matchBase = (input, glob, options2, posix = utils.isWindows(options2)) => {
       const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options2);
-      return regex.test(path19.basename(input));
+      return regex.test(path18.basename(input));
     };
     picomatch.isMatch = (str3, patterns, options2) => picomatch(patterns, options2)(str3);
     picomatch.parse = (pattern, options2) => {
@@ -3323,7 +3323,7 @@ var require_pattern = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isAbsolute = exports2.partitionAbsoluteAndRelative = exports2.removeDuplicateSlashes = exports2.matchAny = exports2.convertPatternsToRe = exports2.makeRe = exports2.getPatternParts = exports2.expandBraceExpansion = exports2.expandPatternsWithBraceExpansion = exports2.isAffectDepthOfReadingPattern = exports2.endsWithSlashGlobStar = exports2.hasGlobStar = exports2.getBaseDirectory = exports2.isPatternRelatedToParentDirectory = exports2.getPatternsOutsideCurrentDirectory = exports2.getPatternsInsideCurrentDirectory = exports2.getPositivePatterns = exports2.getNegativePatterns = exports2.isPositivePattern = exports2.isNegativePattern = exports2.convertToNegativePattern = exports2.convertToPositivePattern = exports2.isDynamicPattern = exports2.isStaticPattern = void 0;
-    var path19 = __require("path");
+    var path18 = __require("path");
     var globParent = require_glob_parent();
     var micromatch = require_micromatch();
     var GLOBSTAR = "**";
@@ -3418,7 +3418,7 @@ var require_pattern = __commonJS({
     }
     exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
     function isAffectDepthOfReadingPattern(pattern) {
-      const basename = path19.basename(pattern);
+      const basename = path18.basename(pattern);
       return endsWithSlashGlobStar(pattern) || isStaticPattern(basename);
     }
     exports2.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
@@ -3476,7 +3476,7 @@ var require_pattern = __commonJS({
     }
     exports2.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative;
     function isAbsolute(pattern) {
-      return path19.isAbsolute(pattern);
+      return path18.isAbsolute(pattern);
     }
     exports2.isAbsolute = isAbsolute;
   }
@@ -3653,8 +3653,8 @@ var require_utils3 = __commonJS({
     exports2.errno = errno;
     var fs = require_fs();
     exports2.fs = fs;
-    var path19 = require_path();
-    exports2.path = path19;
+    var path18 = require_path();
+    exports2.path = path18;
     var pattern = require_pattern();
     exports2.pattern = pattern;
     var stream = require_stream();
@@ -3766,8 +3766,8 @@ var require_async = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path19, settings, callback) {
-      settings.fs.lstat(path19, (lstatError, lstat) => {
+    function read(path18, settings, callback) {
+      settings.fs.lstat(path18, (lstatError, lstat) => {
         if (lstatError !== null) {
           callFailureCallback(callback, lstatError);
           return;
@@ -3776,7 +3776,7 @@ var require_async = __commonJS({
           callSuccessCallback(callback, lstat);
           return;
         }
-        settings.fs.stat(path19, (statError, stat) => {
+        settings.fs.stat(path18, (statError, stat2) => {
           if (statError !== null) {
             if (settings.throwErrorOnBrokenSymbolicLink) {
               callFailureCallback(callback, statError);
@@ -3786,9 +3786,9 @@ var require_async = __commonJS({
             return;
           }
           if (settings.markSymbolicLink) {
-            stat.isSymbolicLink = () => true;
+            stat2.isSymbolicLink = () => true;
           }
-          callSuccessCallback(callback, stat);
+          callSuccessCallback(callback, stat2);
         });
       });
     }
@@ -3808,17 +3808,17 @@ var require_sync = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path19, settings) {
-      const lstat = settings.fs.lstatSync(path19);
+    function read(path18, settings) {
+      const lstat = settings.fs.lstatSync(path18);
       if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) {
         return lstat;
       }
       try {
-        const stat = settings.fs.statSync(path19);
+        const stat2 = settings.fs.statSync(path18);
         if (settings.markSymbolicLink) {
-          stat.isSymbolicLink = () => true;
+          stat2.isSymbolicLink = () => true;
         }
-        return stat;
+        return stat2;
       } catch (error) {
         if (!settings.throwErrorOnBrokenSymbolicLink) {
           return lstat;
@@ -3885,17 +3885,17 @@ var require_out = __commonJS({
     var sync = require_sync();
     var settings_1 = require_settings();
     exports2.Settings = settings_1.default;
-    function stat(path19, optionsOrSettingsOrCallback, callback) {
+    function stat2(path18, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path19, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path18, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path19, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path18, getSettings(optionsOrSettingsOrCallback), callback);
     }
-    exports2.stat = stat;
-    function statSync(path19, optionsOrSettings) {
+    exports2.stat = stat2;
+    function statSync(path18, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path19, settings);
+      return sync.read(path18, settings);
     }
     exports2.statSync = statSync;
     function getSettings(settingsOrOptions = {}) {
@@ -4111,16 +4111,16 @@ var require_async2 = __commonJS({
           return;
         }
         const tasks = names.map((name) => {
-          const path19 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+          const path18 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
           return (done) => {
-            fsStat.stat(path19, settings.fsStatSettings, (error, stats) => {
+            fsStat.stat(path18, settings.fsStatSettings, (error, stats) => {
               if (error !== null) {
                 done(error);
                 return;
               }
               const entry = {
                 name,
-                path: path19,
+                path: path18,
                 dirent: utils.fs.createDirentFromStats(name, stats)
               };
               if (settings.stats) {
@@ -4238,7 +4238,7 @@ var require_settings2 = __commonJS({
   "node_modules/@nodelib/fs.scandir/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path19 = __require("path");
+    var path18 = __require("path");
     var fsStat = require_out();
     var fs = require_fs4();
     var Settings = class {
@@ -4246,7 +4246,7 @@ var require_settings2 = __commonJS({
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
         this.fs = fs.createFileSystemAdapter(this._options.fs);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path19.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path18.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
         this.fsStatSettings = new fsStat.Settings({
@@ -4273,17 +4273,17 @@ var require_out2 = __commonJS({
     var sync = require_sync2();
     var settings_1 = require_settings2();
     exports2.Settings = settings_1.default;
-    function scandir(path19, optionsOrSettingsOrCallback, callback) {
+    function scandir(path18, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path19, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path18, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path19, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path18, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.scandir = scandir;
-    function scandirSync(path19, optionsOrSettings) {
+    function scandirSync(path18, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path19, settings);
+      return sync.read(path18, settings);
     }
     exports2.scandirSync = scandirSync;
     function getSettings(settingsOrOptions = {}) {
@@ -4930,7 +4930,7 @@ var require_settings3 = __commonJS({
   "node_modules/@nodelib/fs.walk/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path19 = __require("path");
+    var path18 = __require("path");
     var fsScandir = require_out2();
     var Settings = class {
       constructor(_options = {}) {
@@ -4940,7 +4940,7 @@ var require_settings3 = __commonJS({
         this.deepFilter = this._getValue(this._options.deepFilter, null);
         this.entryFilter = this._getValue(this._options.entryFilter, null);
         this.errorFilter = this._getValue(this._options.errorFilter, null);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path19.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path18.sep);
         this.fsScandirSettings = new fsScandir.Settings({
           followSymbolicLinks: this._options.followSymbolicLinks,
           fs: this._options.fs,
@@ -5002,7 +5002,7 @@ var require_reader2 = __commonJS({
   "node_modules/fast-glob/out/readers/reader.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path19 = __require("path");
+    var path18 = __require("path");
     var fsStat = require_out();
     var utils = require_utils3();
     var Reader = class {
@@ -5015,7 +5015,7 @@ var require_reader2 = __commonJS({
         });
       }
       _getFullEntryPath(filepath) {
-        return path19.resolve(this._settings.cwd, filepath);
+        return path18.resolve(this._settings.cwd, filepath);
       }
       _makeEntry(stats, pattern) {
         const entry = {
@@ -5431,7 +5431,7 @@ var require_provider = __commonJS({
   "node_modules/fast-glob/out/providers/provider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path19 = __require("path");
+    var path18 = __require("path");
     var deep_1 = require_deep();
     var entry_1 = require_entry();
     var error_1 = require_error();
@@ -5445,7 +5445,7 @@ var require_provider = __commonJS({
         this.entryTransformer = new entry_2.default(this._settings);
       }
       _getRootDirectory(task) {
-        return path19.resolve(this._settings.cwd, task.base);
+        return path18.resolve(this._settings.cwd, task.base);
       }
       _getReaderOptions(task) {
         const basePath = task.base === "." ? "" : task.base;
@@ -9851,7 +9851,11 @@ var cac = (name = "") => new CAC(name);
 
 // src/cli.ts
 import { existsSync as existsSync8 } from "node:fs";
-import path18 from "node:path";
+import path17 from "node:path";
+
+// src/scan/repo.ts
+import { stat } from "node:fs/promises";
+import path7 from "node:path";
 
 // src/config.ts
 import { readFile } from "node:fs/promises";
@@ -12959,8 +12963,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path19, errorMaps, issueData } = params;
-  const fullPath = [...path19, ...issueData.path || []];
+  const { data, path: path18, errorMaps, issueData } = params;
+  const fullPath = [...path18, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -13076,11 +13080,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path19, key) {
+  constructor(parent, value, path18, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path19;
+    this._path = path18;
     this._key = key;
   }
   get path() {
@@ -16581,13 +16585,6 @@ var IdeaFrontmatterSchema = external_exports.object({
   promoted_to: external_exports.string().optional(),
   closed_reason: external_exports.string().optional()
 });
-var MarkerFrontmatterSchema = external_exports.object({
-  pursuit: external_exports.string(),
-  project: external_exports.string(),
-  session_start: external_exports.string(),
-  session_end: external_exports.string().optional(),
-  actions_completed: external_exports.array(external_exports.string()).optional().default([])
-});
 var CaptureFrontmatterSchema = external_exports.object({
   captured: external_exports.string(),
   verb_context: external_exports.string().optional()
@@ -16608,7 +16605,6 @@ var ConfigSchema = external_exports.object({
   }).optional(),
   defaults: external_exports.object({
     someday_review: external_exports.string().optional(),
-    marker_stale_days: external_exports.number().optional(),
     waiting_for_grace_days: external_exports.number().optional(),
     dormant_days: external_exports.number().optional()
   }).optional(),
@@ -16621,7 +16617,6 @@ var ConfigSchema = external_exports.object({
   }).optional()
 });
 var CONFIG_DEFAULTS = {
-  marker_stale_days: 7,
   waiting_for_grace_days: 2,
   dormant_days: 14,
   max_active_projects: 5,
@@ -16649,7 +16644,6 @@ function mergeDefaults(raw) {
   const reflect = raw.reflect ?? {};
   const wc = raw.win_cycles ?? {};
   return {
-    marker_stale_days: d.marker_stale_days ?? CONFIG_DEFAULTS.marker_stale_days,
     waiting_for_grace_days: d.waiting_for_grace_days ?? CONFIG_DEFAULTS.waiting_for_grace_days,
     dormant_days: d.dormant_days ?? CONFIG_DEFAULTS.dormant_days,
     max_active_projects: wip.max_active_projects ?? CONFIG_DEFAULTS.max_active_projects,
@@ -16703,6 +16697,168 @@ async function scanCaptures(repoRoot) {
   return results;
 }
 
+// src/scan/git-activity.ts
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+var execFileP = promisify(execFile);
+async function projectActivity(repoRoot, opts) {
+  const head = (await git(repoRoot, ["rev-parse", "HEAD"])).trim();
+  let revRange = [];
+  let consumed_from;
+  if (opts.sinceCommit) {
+    const isAncestor = await isAncestorOf(repoRoot, opts.sinceCommit, "HEAD");
+    if (isAncestor) {
+      revRange = [`${opts.sinceCommit}..HEAD`];
+      consumed_from = opts.sinceCommit;
+    } else {
+      revRange = scopeToRevRange(opts.scope);
+    }
+  } else {
+    revRange = scopeToRevRange(opts.scope);
+  }
+  const pathArg = opts.pursuit && opts.project ? `pursuits/${opts.pursuit}/projects/${opts.project}.md` : opts.pursuit ? `pursuits/${opts.pursuit}/projects/` : "pursuits/";
+  const logOut = await git(repoRoot, [
+    "log",
+    "--name-only",
+    "--format=COMMIT %H%n%aI%n%s",
+    ...revRange,
+    "--",
+    pathArg
+  ]);
+  const commits = parseLog(logOut);
+  const grouped = /* @__PURE__ */ new Map();
+  for (const c of commits) {
+    for (const file of c.files) {
+      const m = file.match(/^pursuits\/([^/]+)\/projects\/([^/]+)\.md$/);
+      if (!m) continue;
+      const [, pursuit, project] = m;
+      if (opts.pursuit && pursuit !== opts.pursuit) continue;
+      if (opts.project && project !== opts.project) continue;
+      const key = `${pursuit}/${project}`;
+      const list = grouped.get(key) ?? [];
+      list.push({
+        timestamp: c.timestamp,
+        commit: c.commit,
+        subject: c.subject
+      });
+      grouped.set(key, list);
+    }
+  }
+  const snapshot = await scan(repoRoot);
+  const projects = [];
+  for (const [key, events] of grouped) {
+    const [pursuit, projectId] = key.split("/");
+    const current = snapshot.projects.find(
+      (p) => p.pursuit === pursuit && p.id === projectId
+    );
+    if (!current) continue;
+    projects.push({ project: projectId, pursuit, current, events });
+  }
+  return {
+    scope: opts.scope,
+    consumed_from_commit: consumed_from,
+    consumed_through_commit: head,
+    projects
+  };
+}
+async function git(repoRoot, args) {
+  const { stdout } = await execFileP("git", args, {
+    cwd: repoRoot,
+    maxBuffer: 50 * 1024 * 1024
+  });
+  return stdout;
+}
+async function isAncestorOf(repoRoot, ancestor, descendant) {
+  try {
+    await execFileP(
+      "git",
+      ["merge-base", "--is-ancestor", ancestor, descendant],
+      { cwd: repoRoot }
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+function scopeToRevRange(scope) {
+  if (!scope || scope === "pursuit") return [];
+  const now = /* @__PURE__ */ new Date();
+  let since;
+  switch (scope) {
+    case "daily":
+      since = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      break;
+    case "weekly": {
+      const dow = (now.getDay() + 6) % 7;
+      since = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() - dow
+      );
+      break;
+    }
+    case "monthly":
+      since = new Date(now.getFullYear(), now.getMonth(), 1);
+      break;
+    case "annual":
+      since = new Date(now.getFullYear(), 0, 1);
+      break;
+  }
+  return [`--since=${since.toISOString()}`];
+}
+function parseLog(out) {
+  const lines = out.split("\n");
+  const commits = [];
+  let i = 0;
+  while (i < lines.length) {
+    if (!lines[i].startsWith("COMMIT ")) {
+      i++;
+      continue;
+    }
+    const hash = lines[i].slice("COMMIT ".length).trim();
+    i++;
+    const timestamp2 = (lines[i] ?? "").trim();
+    i++;
+    const subject = lines[i] ?? "";
+    i++;
+    if ((lines[i] ?? "").trim() === "") i++;
+    const files = [];
+    while (i < lines.length && lines[i].trim() !== "" && !lines[i].startsWith("COMMIT ")) {
+      files.push(lines[i].trim());
+      i++;
+    }
+    commits.push({ commit: hash, timestamp: timestamp2, subject, files });
+  }
+  return commits;
+}
+async function lastActivityMap(repoRoot) {
+  let out;
+  try {
+    out = await git(repoRoot, [
+      "log",
+      "--name-only",
+      "--format=COMMIT %aI",
+      "--",
+      "pursuits/"
+    ]);
+  } catch {
+    return /* @__PURE__ */ new Map();
+  }
+  const map2 = /* @__PURE__ */ new Map();
+  let currentTs = "";
+  for (const line of out.split("\n")) {
+    if (line.startsWith("COMMIT ")) {
+      currentTs = line.slice("COMMIT ".length).trim();
+      continue;
+    }
+    const file = line.trim();
+    if (!file) continue;
+    if (!/^pursuits\/[^/]+\/projects\/[^/]+\.md$/.test(file)) continue;
+    if (!map2.has(file)) map2.set(file, currentTs);
+  }
+  return map2;
+}
+
 // src/scan/ideas.ts
 var import_fast_glob2 = __toESM(require_out4(), 1);
 import { readFile as readFile3 } from "node:fs/promises";
@@ -16738,10 +16894,27 @@ async function scanIdeas(repoRoot, now) {
   return results;
 }
 
-// src/scan/markers.ts
+// src/scan/projects.ts
 var import_fast_glob3 = __toESM(require_out4(), 1);
 import { readFile as readFile4 } from "node:fs/promises";
 import path4 from "node:path";
+
+// src/parse/checklist.ts
+var ITEM_RE = /^\s*-\s+\[([ xX])\]\s+(.+?)\s*$/;
+function parseChecklist(text) {
+  const items = [];
+  for (const line of text.split("\n")) {
+    const match = ITEM_RE.exec(line);
+    if (!match) continue;
+    const mark = match[1] ?? " ";
+    const itemText = match[2] ?? "";
+    items.push({
+      text: itemText,
+      checked: mark.toLowerCase() === "x"
+    });
+  }
+  return items;
+}
 
 // src/parse/sections.ts
 function extractSections(content) {
@@ -16794,62 +16967,9 @@ function extractDescription(content) {
   return collected.join(" ").trim();
 }
 
-// src/scan/markers.ts
-async function scanMarkers(repoRoot) {
-  const files = await (0, import_fast_glob3.default)("pursuits/**/sessions/*.md", {
-    cwd: repoRoot,
-    absolute: true,
-    onlyFiles: true
-  });
-  const results = [];
-  for (const file of files) {
-    const raw = await readFile4(file, "utf8");
-    const { data, content } = parseFrontmatter(raw);
-    const fm = MarkerFrontmatterSchema.parse(data);
-    const sections = extractSections(content);
-    const filename = path4.basename(file, ".md");
-    results.push({
-      ...fm,
-      where: sections.get("where") ?? "",
-      next: sections.get("next") ?? "",
-      open: sections.get("open") ?? "",
-      path: path4.relative(repoRoot, file),
-      timestamp: fm.session_start || filenameToIso(filename)
-    });
-  }
-  return results;
-}
-function filenameToIso(name) {
-  const m = /^(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})$/.exec(name);
-  if (!m) return name;
-  return `${m[1]}T${m[2]}:${m[3]}:00`;
-}
-
-// src/scan/projects.ts
-var import_fast_glob4 = __toESM(require_out4(), 1);
-import { readFile as readFile5 } from "node:fs/promises";
-import path5 from "node:path";
-
-// src/parse/checklist.ts
-var ITEM_RE = /^\s*-\s+\[([ xX])\]\s+(.+?)\s*$/;
-function parseChecklist(text) {
-  const items = [];
-  for (const line of text.split("\n")) {
-    const match = ITEM_RE.exec(line);
-    if (!match) continue;
-    const mark = match[1] ?? " ";
-    const itemText = match[2] ?? "";
-    items.push({
-      text: itemText,
-      checked: mark.toLowerCase() === "x"
-    });
-  }
-  return items;
-}
-
 // src/scan/projects.ts
 async function scanProjects(repoRoot) {
-  const files = await (0, import_fast_glob4.default)("pursuits/*/projects/*.md", {
+  const files = await (0, import_fast_glob3.default)("pursuits/*/projects/*.md", {
     cwd: repoRoot,
     absolute: true,
     onlyFiles: true,
@@ -16857,7 +16977,7 @@ async function scanProjects(repoRoot) {
   });
   const results = [];
   for (const file of files) {
-    const raw = await readFile5(file, "utf8");
+    const raw = await readFile4(file, "utf8");
     const { data, content } = parseFrontmatter(raw);
     const fm = ProjectFrontmatterSchema.parse(data);
     const sections = extractSections(content);
@@ -16870,10 +16990,9 @@ async function scanProjects(repoRoot) {
       dod,
       actions,
       description: extractDescription(content),
-      path: path5.relative(repoRoot, file),
+      path: path4.relative(repoRoot, file),
       dodProgress: progress(dod),
-      actionProgress: progress(actions),
-      hasMarker: false
+      actionProgress: progress(actions)
     });
   }
   return results;
@@ -16886,9 +17005,9 @@ function progress(items) {
 }
 
 // src/scan/pursuits.ts
-var import_fast_glob5 = __toESM(require_out4(), 1);
-import { readFile as readFile6 } from "node:fs/promises";
-import path6 from "node:path";
+var import_fast_glob4 = __toESM(require_out4(), 1);
+import { readFile as readFile5 } from "node:fs/promises";
+import path5 from "node:path";
 var LIFECYCLE_ROOTS = [
   { lifecycle: "active", glob: "pursuits/*/pursuit.md" },
   { lifecycle: "someday", glob: "pursuits/_someday/*/pursuit.md" },
@@ -16897,7 +17016,7 @@ var LIFECYCLE_ROOTS = [
 async function scanPursuits(repoRoot) {
   const results = [];
   for (const { lifecycle, glob } of LIFECYCLE_ROOTS) {
-    const files = await (0, import_fast_glob5.default)(glob, {
+    const files = await (0, import_fast_glob4.default)(glob, {
       cwd: repoRoot,
       absolute: true,
       onlyFiles: true,
@@ -16906,14 +17025,14 @@ async function scanPursuits(repoRoot) {
       ...lifecycle === "active" ? { ignore: ["pursuits/_*/**"] } : {}
     });
     for (const file of files) {
-      const raw = await readFile6(file, "utf8");
+      const raw = await readFile5(file, "utf8");
       const { data, content } = parseFrontmatter(raw);
       const fm = PursuitFrontmatterSchema.parse(data);
       results.push({
         ...fm,
         lifecycle: PursuitLifecycleSchema.parse(lifecycle),
         description: extractDescription(content),
-        path: path6.relative(repoRoot, file)
+        path: path5.relative(repoRoot, file)
       });
     }
   }
@@ -16921,24 +17040,24 @@ async function scanPursuits(repoRoot) {
 }
 
 // src/scan/reflections.ts
-var import_fast_glob6 = __toESM(require_out4(), 1);
-import { readFile as readFile7 } from "node:fs/promises";
-import path7 from "node:path";
+var import_fast_glob5 = __toESM(require_out4(), 1);
+import { readFile as readFile6 } from "node:fs/promises";
+import path6 from "node:path";
 async function scanReflections(repoRoot) {
-  const files = await (0, import_fast_glob6.default)("reflections/*.md", {
+  const files = await (0, import_fast_glob5.default)("reflections/*.md", {
     cwd: repoRoot,
     absolute: true,
     onlyFiles: true
   });
   const results = [];
   for (const file of files) {
-    const raw = await readFile7(file, "utf8");
+    const raw = await readFile6(file, "utf8");
     const { data, content } = parseFrontmatter(raw);
     const fm = ReflectionFrontmatterSchema.parse(data);
     results.push({
       ...fm,
       body: content.trim(),
-      path: path7.relative(repoRoot, file)
+      path: path6.relative(repoRoot, file)
     });
   }
   return results;
@@ -16946,39 +17065,43 @@ async function scanReflections(repoRoot) {
 
 // src/scan/repo.ts
 async function scan(repoRoot, now = /* @__PURE__ */ new Date()) {
-  const [config, pursuits, projects, ideas, markers, captures, reflections] = await Promise.all([
+  const [config, pursuits, projects, ideas, captures, reflections] = await Promise.all([
     loadConfig(repoRoot),
     scanPursuits(repoRoot),
     scanProjects(repoRoot),
     scanIdeas(repoRoot, now),
-    scanMarkers(repoRoot),
     scanCaptures(repoRoot),
     scanReflections(repoRoot)
   ]);
-  for (const project of projects) {
-    annotateProjectMarker(project, markers);
-  }
+  const activityMap = await lastActivityMap(repoRoot);
+  await Promise.all(
+    projects.map((p) => annotateLastActivity(p, repoRoot, activityMap))
+  );
   return {
     config,
     pursuits,
     projects,
     ideas,
-    markers,
     captures,
     reflections,
     generatedAt: now.toISOString(),
     repoRoot
   };
 }
-function annotateProjectMarker(project, markers) {
-  let mostRecent;
-  for (const m of markers) {
-    if (m.pursuit !== project.pursuit) continue;
-    if (m.project !== project.id) continue;
-    if (!mostRecent || m.timestamp > mostRecent) mostRecent = m.timestamp;
+async function annotateLastActivity(project, repoRoot, activityMap) {
+  const gitTs = activityMap.get(project.path);
+  let fsTs;
+  try {
+    const s = await stat(path7.join(repoRoot, project.path));
+    fsTs = s.mtime.toISOString();
+  } catch {
+    fsTs = void 0;
   }
-  project.hasMarker = mostRecent !== void 0;
-  if (mostRecent) project.mostRecentMarker = mostRecent;
+  if (gitTs && fsTs) {
+    project.last_activity_at = gitTs > fsTs ? gitTs : fsTs;
+  } else {
+    project.last_activity_at = gitTs ?? fsTs;
+  }
 }
 
 // src/report/reconciler.ts
@@ -16993,8 +17116,7 @@ function report(snapshot) {
     (p) => p.status === "active" && activePursuitIds.has(p.pursuit)
   );
   flagOverdueWaitingFor(flags, snapshot, now);
-  const dormantSet = flagDormantProjects(flags, activeProjects, now, config);
-  flagStaleMarkers(flags, activeProjects, dormantSet, now, config);
+  flagDormantProjects(flags, activeProjects, now, config);
   flagStructural(flags, activeProjects);
   flagWipOverLimit(flags, activeProjects, config);
   return { snapshot, flags };
@@ -17018,35 +17140,17 @@ function flagOverdueWaitingFor(flags, snapshot, now) {
   }
 }
 function flagDormantProjects(flags, activeProjects, now, config) {
-  const dormantSet = /* @__PURE__ */ new Set();
   for (const project of activeProjects) {
     const hasUnchecked = project.actions.some((a) => !a.checked);
     if (!hasUnchecked) continue;
-    const reference = project.mostRecentMarker ?? project.created;
+    const reference = project.last_activity_at ?? project.created;
     const days = daysBetween(reference, now);
     if (days >= config.dormant_days) {
-      dormantSet.add(projectKey(project));
       flags.push({
         kind: "dormant_project",
         pursuitId: project.pursuit,
         projectId: project.id,
-        daysSinceMarker: project.mostRecentMarker ? days : null
-      });
-    }
-  }
-  return dormantSet;
-}
-function flagStaleMarkers(flags, activeProjects, dormantSet, now, config) {
-  for (const project of activeProjects) {
-    if (dormantSet.has(projectKey(project))) continue;
-    if (!project.mostRecentMarker) continue;
-    const days = daysBetween(project.mostRecentMarker, now);
-    if (days > config.marker_stale_days) {
-      flags.push({
-        kind: "stale_marker",
-        pursuitId: project.pursuit,
-        projectId: project.id,
-        daysSinceMarker: days
+        daysSinceActivity: project.last_activity_at ? days : null
       });
     }
   }
@@ -17064,7 +17168,9 @@ function flagStructural(flags, activeProjects) {
   }
 }
 function flagWipOverLimit(flags, activeProjects, config) {
-  const inProgress = activeProjects.filter((p) => p.hasMarker);
+  const inProgress = activeProjects.filter(
+    (p) => p.actions.some((a) => !a.checked)
+  );
   if (inProgress.length > config.max_active_projects) {
     flags.push({
       kind: "wip_over_limit",
@@ -17073,9 +17179,6 @@ function flagWipOverLimit(flags, activeProjects, config) {
       projectIds: inProgress.map((p) => p.id)
     });
   }
-}
-function projectKey(project) {
-  return `${project.pursuit}/${project.id}`;
 }
 
 // src/render/status.ts
@@ -17087,7 +17190,7 @@ function renderStatus(result) {
   const lp = leveragedPriority(snapshot);
   out.push(`Leveraged Priority: ${lp ?? "not set"}`);
   out.push(lastReflectLine(snapshot));
-  out.push(lastSessionLine(snapshot));
+  out.push(lastActivityLine(snapshot));
   out.push("");
   out.push(pursuitsLine(snapshot));
   out.push(projectsLine(snapshot));
@@ -17100,11 +17203,71 @@ function renderStatus(result) {
   } else {
     for (const flag of flags) out.push("  - " + describeFlag(flag, snapshot));
   }
+  out.push("");
+  const next = nextSteps(snapshot, flags);
+  out.push("Next:");
+  for (const step of next) out.push("  - " + step);
   return out.join("\n");
 }
 function renderFlags(flags, snapshot) {
   if (flags.length === 0) return "No flags. System is healthy.";
   return flags.map((f) => "- " + describeFlag(f, snapshot)).join("\n");
+}
+function nextSteps(snapshot, flags) {
+  const suggestions = [];
+  const activePursuitIds = new Set(
+    snapshot.pursuits.filter((p) => p.lifecycle === "active").map((p) => p.id)
+  );
+  const projectsInActivePursuits = snapshot.projects.filter(
+    (p) => activePursuitIds.has(p.pursuit)
+  );
+  const inProgress = projectsInActivePursuits.filter(
+    (p) => p.status === "active" && p.actions.some((a) => !a.checked)
+  );
+  const onHold = projectsInActivePursuits.filter((p) => p.status === "on_hold");
+  const capturesCount = snapshot.captures.length;
+  const sortedReflections = [...snapshot.reflections].sort(
+    (a, b) => a.date < b.date ? 1 : -1
+  );
+  const lastReflect = sortedReflections[0];
+  const today = new Date(snapshot.generatedAt);
+  const daysSinceReflect = lastReflect ? daysBetween(lastReflect.date, today) : Number.POSITIVE_INFINITY;
+  if (capturesCount > 0) {
+    suggestions.push(
+      `Triage ${capturesCount} unprocessed capture${capturesCount === 1 ? "" : "s"} \u2014 /cadence:reflect (Get Clear).`
+    );
+  }
+  if (inProgress.length > 0) {
+    const first = inProgress[0];
+    const tail = inProgress.length > 1 ? ` (or one of ${inProgress.length - 1} other in-progress project${inProgress.length - 1 === 1 ? "" : "s"})` : "";
+    suggestions.push(
+      `Resume in-progress work \u2014 /cadence:start ${first.id}${tail}.`
+    );
+  }
+  if (flags.length > 0 && suggestions.length < 3) {
+    suggestions.push(
+      `Review ${flags.length} flag${flags.length === 1 ? "" : "s"} \u2014 /cadence:reconcile.`
+    );
+  }
+  if (daysSinceReflect > 7 && suggestions.length < 3 && projectsInActivePursuits.length > 0) {
+    suggestions.push(
+      lastReflect ? `Last reflect was ${daysSinceReflect}d ago \u2014 time for /cadence:reflect.` : `No reflection yet \u2014 /cadence:reflect to set a Leveraged Priority.`
+    );
+  }
+  if (suggestions.length < 2 && onHold.length > 0) {
+    suggestions.push(
+      `${onHold.length} project${onHold.length === 1 ? "" : "s"} on hold \u2014 /cadence:start to pick one up.`
+    );
+  }
+  if (suggestions.length === 0) {
+    suggestions.push(
+      `Get started \u2014 /cadence:brainstorm to generate ideas, or /cadence:init for a fresh repo.`
+    );
+  }
+  if (suggestions.length < 3) {
+    suggestions.push(`Browse the full verb surface \u2014 /cadence:help.`);
+  }
+  return suggestions.slice(0, 3);
 }
 function leveragedPriority(snapshot) {
   const sorted = [...snapshot.reflections].sort(
@@ -17123,19 +17286,19 @@ function lastReflectLine(snapshot) {
   const r = sorted[0];
   return `Last Reflect: ${r.date} (${r.status})`;
 }
-function lastSessionLine(snapshot) {
-  if (snapshot.markers.length === 0) return "Last Session: none";
-  const sorted = [...snapshot.markers].sort(
-    (a, b) => a.timestamp < b.timestamp ? 1 : -1
+function lastActivityLine(snapshot) {
+  const candidates = snapshot.projects.filter(
+    (p2) => p2.last_activity_at && p2.status !== "done" && p2.status !== "dropped"
   );
-  const m = sorted[0];
-  const project = snapshot.projects.find(
-    (p) => p.id === m.project && p.pursuit === m.pursuit
+  if (candidates.length === 0) return "Last Activity: none";
+  const sorted = [...candidates].sort(
+    (a, b) => (a.last_activity_at ?? "") < (b.last_activity_at ?? "") ? 1 : -1
   );
-  const stateLabel = project?.status === "done" ? "done" : "WIP";
-  const days = daysBetween(m.timestamp, new Date(snapshot.generatedAt));
+  const p = sorted[0];
+  const stateLabel = p.status === "on_hold" ? "on hold" : "WIP";
+  const days = daysBetween(p.last_activity_at, new Date(snapshot.generatedAt));
   const ago = relativeDays(days);
-  return `Last Session: ${ago} on ${m.pursuit}/${m.project} (${stateLabel})`;
+  return `Last Activity: ${ago} on ${p.pursuit}/${p.id} (${stateLabel})`;
 }
 function relativeDays(days) {
   if (days <= 0) return "today";
@@ -17184,9 +17347,7 @@ function describeFlag(flag, _snapshot) {
     case "overdue_waiting_for":
       return `overdue: ${flag.pursuitId}/${flag.projectId} \u2014 ${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`;
     case "dormant_project":
-      return flag.daysSinceMarker !== null ? `dormant: ${flag.pursuitId}/${flag.projectId} (${flag.daysSinceMarker}d since marker)` : `dormant: ${flag.pursuitId}/${flag.projectId} (no markers; project created earlier)`;
-    case "stale_marker":
-      return `stale marker: ${flag.pursuitId}/${flag.projectId} (${flag.daysSinceMarker}d old)`;
+      return flag.daysSinceActivity !== null ? `dormant: ${flag.pursuitId}/${flag.projectId} (${flag.daysSinceActivity}d since last activity)` : `dormant: ${flag.pursuitId}/${flag.projectId} (no activity recorded; project created earlier)`;
     case "structural_active_no_open_actions":
       return `structural: ${flag.pursuitId}/${flag.projectId} all actions checked \u2014 does the intent feel achieved?`;
     case "wip_over_limit":
@@ -17208,7 +17369,6 @@ function renderSnapshot(snapshot) {
   out.push("");
   out.push(...renderSection("Pursuits", pursuitTable(snapshot)));
   out.push(...renderSection("Projects", projectTable(snapshot)));
-  out.push(...renderSection("Markers", markerTable(snapshot)));
   out.push(...renderSection("Ideas", ideaTable(snapshot)));
   out.push(...renderSection("Captures", captureTable(snapshot)));
   out.push(...renderSection("Reflections", reflectionTable(snapshot)));
@@ -17264,27 +17424,13 @@ function pursuitTable(snapshot) {
 }
 function projectTable(snapshot) {
   return {
-    headers: ["ID", "PURSUIT", "STATUS", "ACTIONS", "STARTED"],
+    headers: ["ID", "PURSUIT", "STATUS", "ACTIONS", "LAST ACTIVITY"],
     rows: snapshot.projects.map((p) => [
       p.id,
       p.pursuit,
       p.status,
       `${p.actionProgress.done}/${p.actionProgress.total}`,
-      p.hasMarker ? "yes" : "no"
-    ])
-  };
-}
-function markerTable(snapshot) {
-  const sorted = [...snapshot.markers].sort(
-    (a, b) => a.timestamp < b.timestamp ? 1 : -1
-  );
-  return {
-    headers: ["TIMESTAMP", "PURSUIT", "PROJECT", "NEXT"],
-    rows: sorted.map((m) => [
-      m.timestamp,
-      m.pursuit,
-      m.project,
-      truncate(firstLine(m.next), 60)
+      p.last_activity_at ? p.last_activity_at.slice(0, 10) : "\u2014"
     ])
   };
 }
@@ -17339,9 +17485,7 @@ function flagDetail(flag) {
     case "overdue_waiting_for":
       return `${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`;
     case "dormant_project":
-      return flag.daysSinceMarker !== null ? `${flag.daysSinceMarker}d since marker` : "no markers";
-    case "stale_marker":
-      return `${flag.daysSinceMarker}d old`;
+      return flag.daysSinceActivity !== null ? `${flag.daysSinceActivity}d since activity` : "no activity";
     case "structural_active_no_open_actions":
       return "all actions checked \u2014 does the intent feel achieved?";
     case "wip_over_limit":
@@ -17364,6 +17508,184 @@ function firstLine(text) {
 }
 function truncate(text, max) {
   return text.length > max ? text.slice(0, max - 1) + "\u2026" : text;
+}
+
+// src/find.ts
+var KIND_PRIORITY = {
+  project: 1,
+  idea: 2,
+  marker: 3,
+  capture: 4,
+  pursuit: 5
+};
+function findEntities(snapshot, query) {
+  const q = query.toLowerCase();
+  if (q.length === 0) return [];
+  const results = [];
+  for (const p of snapshot.projects) {
+    const fields = [
+      { name: "id", text: p.id },
+      { name: "intent", text: p.intent ?? "" },
+      { name: "description", text: p.description ?? "" }
+    ];
+    for (let i = 0; i < p.actions.length; i++) {
+      fields.push({ name: `action[${i}]`, text: p.actions[i].text });
+    }
+    for (let i = 0; i < p.dod.length; i++) {
+      fields.push({ name: `dod[${i}]`, text: p.dod[i].text });
+    }
+    const matched = fields.filter((f) => f.text.toLowerCase().includes(q));
+    if (matched.length > 0) {
+      results.push({
+        kind: "project",
+        id: p.id,
+        context: p.pursuit,
+        matched_fields: matched.map((m) => m.name),
+        snippet: extractSnippet(matched[0].text, q),
+        timestamp: p.created
+      });
+    }
+  }
+  for (const i of snapshot.ideas) {
+    const fields = [
+      { name: "id", text: i.id },
+      { name: "body", text: i.body }
+    ];
+    const matched = fields.filter((f) => f.text.toLowerCase().includes(q));
+    if (matched.length > 0) {
+      results.push({
+        kind: "idea",
+        id: i.id,
+        context: i.parent,
+        matched_fields: matched.map((m) => m.name),
+        snippet: extractSnippet(matched[0].text, q),
+        timestamp: i.developed_at ?? i.created
+      });
+    }
+  }
+  for (const c of snapshot.captures) {
+    const fields = [{ name: "body", text: c.body }];
+    const matched = fields.filter((f) => f.text.toLowerCase().includes(q));
+    if (matched.length > 0) {
+      results.push({
+        kind: "capture",
+        id: c.captured,
+        matched_fields: matched.map((mm) => mm.name),
+        snippet: extractSnippet(matched[0].text, q),
+        timestamp: c.captured
+      });
+    }
+  }
+  for (const p of snapshot.pursuits) {
+    const fields = [
+      { name: "id", text: p.id },
+      { name: "description", text: p.description ?? "" },
+      { name: "why", text: p.why ?? "" }
+    ];
+    const matched = fields.filter((f) => f.text.toLowerCase().includes(q));
+    if (matched.length > 0) {
+      results.push({
+        kind: "pursuit",
+        id: p.id,
+        matched_fields: matched.map((m) => m.name),
+        snippet: extractSnippet(matched[0].text, q),
+        timestamp: p.created
+      });
+    }
+  }
+  results.sort((a, b) => {
+    const pa = KIND_PRIORITY[a.kind];
+    const pb = KIND_PRIORITY[b.kind];
+    if (pa !== pb) return pa - pb;
+    if (a.timestamp === b.timestamp) return 0;
+    return a.timestamp < b.timestamp ? 1 : -1;
+  });
+  return results;
+}
+function extractSnippet(text, query, windowChars = 80) {
+  const lowerText = text.toLowerCase();
+  const lowerQuery = query.toLowerCase();
+  const idx = lowerText.indexOf(lowerQuery);
+  if (idx < 0) {
+    const head = text.slice(0, windowChars).replace(/\s+/g, " ").trim();
+    return text.length > windowChars ? head + "\u2026" : head;
+  }
+  const half = Math.floor((windowChars - query.length) / 2);
+  const start = Math.max(0, idx - half);
+  const end = Math.min(text.length, idx + query.length + half);
+  let snippet2 = text.slice(start, end).replace(/\s+/g, " ").trim();
+  if (start > 0) snippet2 = "\u2026" + snippet2;
+  if (end < text.length) snippet2 = snippet2 + "\u2026";
+  return snippet2;
+}
+
+// src/render/find.ts
+var KIND_LABELS = {
+  project: "Projects",
+  idea: "Ideas",
+  capture: "Captures",
+  pursuit: "Pursuits"
+};
+var KIND_ORDER = ["project", "idea", "capture", "pursuit"];
+var KIND_VERBS = {
+  project: [
+    "/cadence:status <id>",
+    "/cadence:start <id>",
+    "/cadence:complete <action>",
+    "/cadence:cancel <id>"
+  ],
+  idea: [
+    "/cadence:promote <id>",
+    "/cadence:develop <id>"
+  ],
+  capture: ["/cadence:reflect (Get Clear) to triage"],
+  pursuit: [
+    "/cadence:status <id>",
+    "/cadence:start (pick a project)",
+    "/cadence:narrate <id>"
+  ]
+};
+function renderFindResults(results, query) {
+  if (results.length === 0) return `No matches for "${query}".`;
+  const grouped = /* @__PURE__ */ new Map();
+  for (const r of results) {
+    const list = grouped.get(r.kind) ?? [];
+    list.push(r);
+    grouped.set(r.kind, list);
+  }
+  const out = [];
+  out.push(
+    `Found ${results.length} match${results.length === 1 ? "" : "es"} for "${query}"`
+  );
+  out.push("");
+  let n = 1;
+  for (const kind of KIND_ORDER) {
+    const list = grouped.get(kind) ?? [];
+    if (list.length === 0) continue;
+    out.push(`${KIND_LABELS[kind]} (${list.length}):`);
+    for (const r of list) {
+      const idLine = formatHeader(r);
+      out.push(`  ${n}. ${idLine}`);
+      out.push(`     "${r.snippet}"`);
+      n++;
+    }
+    out.push(`  Verbs: ${KIND_VERBS[kind].join(" | ")}`);
+    out.push("");
+  }
+  out.push("/cadence:help to browse the full verb surface.");
+  return out.join("\n");
+}
+function formatHeader(r) {
+  if (r.kind === "idea") {
+    return r.context ? `${r.id} (parent: ${r.context})` : r.id;
+  }
+  if (r.kind === "project") {
+    return r.context ? `${r.id} (in ${r.context})` : r.id;
+  }
+  if (r.kind === "capture") {
+    return r.id;
+  }
+  return r.id;
 }
 
 // src/render/drilldown.ts
@@ -17401,6 +17723,9 @@ function renderPursuits(snapshot) {
   if (archivedCount > 0) {
     out.push(`[${archivedCount} archived hidden]`);
   }
+  out.push("");
+  out.push("Available actions:");
+  for (const line of pursuitsListMenu()) out.push("  " + line);
   return out.join("\n");
 }
 function renderPursuit(snapshot, pursuitId) {
@@ -17434,6 +17759,9 @@ function renderPursuit(snapshot, pursuitId) {
   if (done.length > 0) {
     out.push(`[${done.length} done projects hidden]`);
   }
+  out.push("");
+  out.push("Available actions:");
+  for (const line of pursuitMenu(pursuit.id)) out.push("  " + line);
   return out.join("\n");
 }
 function renderProject(snapshot, projectId, pursuitHint) {
@@ -17445,7 +17773,7 @@ function renderProject(snapshot, projectId, pursuitHint) {
   if (!project) project = candidates[0];
   if (!project) return `project not found: ${projectId}`;
   const out = [];
-  const startedTag = project.hasMarker ? "" : " [not started]";
+  const startedTag = project.status === "on_hold" ? " [not started]" : "";
   out.push(
     `${project.id} \u2014 ${project.actionProgress.done}/${project.actionProgress.total} actions [${project.status}]${startedTag}`
   );
@@ -17477,6 +17805,11 @@ function renderProject(snapshot, projectId, pursuitHint) {
       const flag = w.flagged ? " [flagged]" : "";
       out.push(`  - ${w.person} re: ${w.what} (expected ${w.expected})${flag}`);
     }
+    out.push("");
+  }
+  out.push("Available actions:");
+  for (const line of projectMenu(project.id, project.status)) {
+    out.push("  " + line);
   }
   return out.join("\n").trimEnd();
 }
@@ -17491,17 +17824,6 @@ function renderIdeas(ideas) {
   }
   return out.join("\n");
 }
-function renderMarkers(markers) {
-  if (markers.length === 0) return "No markers match.";
-  const out = [];
-  for (const m of markers) {
-    out.push(
-      `- ${m.timestamp} ${m.pursuit}/${m.project}` + (m.next ? `
-    next: ${firstLine2(m.next)}` : "")
-    );
-  }
-  return out.join("\n");
-}
 function projectCounts(snapshot, pursuitId) {
   const projects = snapshot.projects.filter((p) => p.pursuit === pursuitId);
   return {
@@ -17512,7 +17834,7 @@ function projectCounts(snapshot, pursuitId) {
 }
 function formatProjectLine(idx, p) {
   const desc = firstLine2(p.intent || p.description);
-  const not_started = p.hasMarker ? "" : " [not started]";
+  const not_started = p.status === "on_hold" ? " [not started]" : "";
   const tail = desc ? `: ${desc}` : "";
   return `  ${idx}. ${p.id}${tail} \u2014 ${p.actionProgress.done}/${p.actionProgress.total} actions${not_started}`;
 }
@@ -17520,13 +17842,53 @@ function firstLine2(text) {
   const line = text.split("\n")[0]?.trim() ?? "";
   return line.length > 120 ? line.slice(0, 117) + "..." : line;
 }
+var MENU_PAD = 36;
+function pad(verb) {
+  return verb.length >= MENU_PAD ? verb + "  " : verb.padEnd(MENU_PAD);
+}
+function pursuitsListMenu() {
+  return [
+    `${pad("/cadence:status <id|N>")}Drill into a pursuit`,
+    `${pad("/cadence:start")}Pick a project to work on`,
+    `${pad("/cadence:reflect")}Weekly review`,
+    `${pad("/cadence:help")}Browse the full verb surface`
+  ];
+}
+function pursuitMenu(_pursuitId) {
+  return [
+    `${pad("/cadence:start")}Pick a project to work on`,
+    `${pad("/cadence:status <project|N>")}Drill into a project`,
+    `${pad("/cadence:narrate <pursuit>")}Tell the pursuit's full arc`,
+    `${pad("/cadence:reconcile")}Show flags across the system`,
+    `${pad("/cadence:close <pursuit>")}Run the closure ritual`,
+    `${pad("/cadence:help")}Browse the full verb surface`
+  ];
+}
+function projectMenu(_projectId, status) {
+  if (status === "done" || status === "dropped") {
+    return [
+      `${pad("/cadence:narrate <project>")}Tell this project's story`,
+      `${pad("/cadence:status")}Back to dashboard`,
+      `${pad("/cadence:help")}Browse the full verb surface`
+    ];
+  }
+  return [
+    `${pad("/cadence:start <project>")}Open a session on this project`,
+    `${pad("/cadence:complete <action>")}Mark an action done`,
+    `${pad("/cadence:pause")}Save a marker and suspend`,
+    `${pad("/cadence:waiting <project>")}Track an external blocker`,
+    `${pad("/cadence:cancel <project>")}Drop with a reason`,
+    `${pad("/cadence:narrate <project>")}Tell this project's story`,
+    `${pad("/cadence:help")}Browse the full verb surface`
+  ];
+}
 
 // src/write/pursuit.ts
 import path9 from "node:path";
 import { existsSync } from "node:fs";
 
 // src/write/util.ts
-import { mkdir, readFile as readFile8, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile as readFile7, rename, writeFile } from "node:fs/promises";
 import path8 from "node:path";
 
 // src/write/yaml.ts
@@ -17558,7 +17920,7 @@ async function writeFrontmatterFile(filePath, data, body) {
   await writeFile(filePath, formatFrontmatterFile(data, body), "utf8");
 }
 async function loadFrontmatterFile(filePath) {
-  const text = await readFile8(filePath, "utf8");
+  const text = await readFile7(filePath, "utf8");
   return parseFrontmatter(text);
 }
 async function mutateFrontmatter(filePath, mutate) {
@@ -17571,16 +17933,16 @@ async function moveDir(from, to) {
   await rename(from, to);
 }
 function timestampSlug(date) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}-${pad(date.getMinutes())}`;
+  const pad2 = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}T${pad2(date.getHours())}-${pad2(date.getMinutes())}`;
 }
 function isoTimestamp(date) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  const pad2 = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}T${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`;
 }
 function dateString(date) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  const pad2 = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
 }
 
 // src/write/pursuit.ts
@@ -17593,7 +17955,6 @@ async function createPursuit(repoRoot, opts) {
     throw new Error(`pursuit already exists: ${opts.id}`);
   }
   await ensureDir(path9.join(pursuitDir, "projects"));
-  await ensureDir(path9.join(pursuitDir, "sessions"));
   await ensureDir(path9.join(pursuitDir, "ideas"));
   const data = {
     id: opts.id,
@@ -17741,63 +18102,30 @@ async function createIdea(repoRoot, opts) {
   return { path: path12.relative(repoRoot, filePath) };
 }
 
-// src/write/marker.ts
-import path13 from "node:path";
-async function writeMarker(repoRoot, opts) {
-  const now = opts.now ?? /* @__PURE__ */ new Date();
-  const pursuitDir = resolvePursuitDir(repoRoot, opts.pursuit);
-  if (!pursuitDir) throw new Error(`pursuit not found: ${opts.pursuit}`);
-  const sessionsDir = path13.join(pursuitDir, "sessions");
-  await ensureDir(sessionsDir);
-  const session_start = opts.session_start ?? isoTimestamp(new Date(now.getTime() - 30 * 60 * 1e3));
-  const session_end = opts.session_end ?? isoTimestamp(now);
-  const actions_completed = (opts.actions_completed ?? []).filter((a) => typeof a === "string" && a.length > 0);
-  const data = {
-    pursuit: opts.pursuit,
-    project: opts.project,
-    session_start,
-    session_end,
-    actions_completed
-  };
-  const sections = [`# Marker: ${opts.project}`];
-  if (truthy(opts.where)) sections.push("## Where", String(opts.where));
-  if (truthy(opts.next)) sections.push("## Next", String(opts.next));
-  if (truthy(opts.open)) sections.push("## Open", String(opts.open));
-  const body = sections.join("\n\n");
-  const filePath = path13.join(sessionsDir, `${timestampSlug(now)}.md`);
-  await writeFrontmatterFile(filePath, data, body);
-  return { path: path13.relative(repoRoot, filePath) };
-}
-function truthy(v) {
-  if (typeof v === "string") return v.length > 0;
-  if (typeof v === "number") return v !== 0;
-  return Boolean(v);
-}
-
 // src/write/capture.ts
-import path14 from "node:path";
+import path13 from "node:path";
 async function writeCapture(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
-  const dir = path14.join(repoRoot, "thoughts/unprocessed");
+  const dir = path13.join(repoRoot, "thoughts/unprocessed");
   await ensureDir(dir);
   const data = {
     captured: opts.captured ?? isoTimestamp(now)
   };
   if (opts.verb_context) data["verb_context"] = opts.verb_context;
-  const filePath = path14.join(dir, `${timestampSlug(now)}.md`);
+  const filePath = path13.join(dir, `${timestampSlug(now)}.md`);
   await writeFrontmatterFile(filePath, data, opts.body);
-  return { path: path14.relative(repoRoot, filePath) };
+  return { path: path13.relative(repoRoot, filePath) };
 }
 
 // src/write/reflection.ts
-import path15 from "node:path";
+import path14 from "node:path";
 import { existsSync as existsSync5 } from "node:fs";
 async function writeReflection(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const date = opts.date ?? dateString(now);
-  const dir = path15.join(repoRoot, "reflections");
+  const dir = path14.join(repoRoot, "reflections");
   await ensureDir(dir);
-  const filePath = path15.join(dir, `${date}.md`);
+  const filePath = path14.join(dir, `${date}.md`);
   const existing = existsSync5(filePath) ? await loadFrontmatterFile(filePath) : null;
   const data = existing ? { ...existing.data } : {};
   data["date"] = date;
@@ -17808,12 +18136,12 @@ async function writeReflection(repoRoot, opts) {
   }
   const body = opts.body ?? existing?.content ?? `# Reflection \u2014 ${date}`;
   await writeFrontmatterFile(filePath, data, body);
-  return { path: path15.relative(repoRoot, filePath) };
+  return { path: path14.relative(repoRoot, filePath) };
 }
 
 // src/write/edits.ts
-import path16 from "node:path";
-import { readdir, readFile as readFile9 } from "node:fs/promises";
+import path15 from "node:path";
+import { readdir, readFile as readFile8 } from "node:fs/promises";
 import { existsSync as existsSync6 } from "node:fs";
 
 // src/write/checklist.ts
@@ -17902,6 +18230,62 @@ function headerRegex(sectionName) {
 function capitalize(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+function appendParagraphToSection(body, sectionName, text) {
+  const sectionRe = headerRegex(sectionName);
+  const lines = body.split("\n");
+  const startIdx = lines.findIndex((l) => sectionRe.test(l));
+  if (startIdx < 0) {
+    const trailing = body.endsWith("\n") ? "" : "\n";
+    return body.replace(/\n+$/, "") + `
+
+## ${capitalize(sectionName)}
+
+${text}` + trailing;
+  }
+  let endIdx = lines.length;
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    if (/^##\s+/.test(lines[i] ?? "")) {
+      endIdx = i;
+      break;
+    }
+  }
+  while (endIdx > startIdx + 1 && (lines[endIdx - 1] ?? "").trim() === "") {
+    endIdx--;
+  }
+  const before = lines.slice(0, endIdx);
+  const after = lines.slice(endIdx);
+  if (endIdx > startIdx + 1 && (before[before.length - 1] ?? "").trim() !== "") {
+    before.push("");
+  }
+  before.push(text);
+  return [...before, ...after].join("\n");
+}
+function computeProjectProgress(body) {
+  return {
+    dodProgress: progressFor(body, "Definition of Done"),
+    actionProgress: progressFor(body, "Actions")
+  };
+}
+function progressFor(body, sectionName) {
+  const sectionRe = headerRegex(sectionName);
+  const lines = body.split("\n");
+  let inSection = false;
+  let total = 0;
+  let done = 0;
+  for (const line of lines) {
+    if (sectionRe.test(line)) {
+      inSection = true;
+      continue;
+    }
+    if (inSection && /^##\s+/.test(line)) inSection = false;
+    if (!inSection) continue;
+    const m = ITEM_RE2.exec(line);
+    if (!m) continue;
+    total++;
+    if ((m[2] ?? " ").toLowerCase() === "x") done++;
+  }
+  return { done, total };
+}
 
 // src/write/edits.ts
 async function setProjectStatus(repoRoot, opts) {
@@ -17918,7 +18302,41 @@ async function setProjectStatus(repoRoot, opts) {
     }
     return { data, body };
   });
-  return { path: path16.relative(repoRoot, filePath) };
+  const result = {
+    path: path15.relative(repoRoot, filePath)
+  };
+  if (opts.include_pursuit) {
+    result.pursuit = await summarizePursuit(repoRoot, filePath);
+  }
+  return result;
+}
+async function summarizePursuit(repoRoot, projectFilePath) {
+  const projectsDir = path15.dirname(projectFilePath);
+  const pursuitDir = path15.dirname(projectsDir);
+  const pursuitId = path15.basename(pursuitDir);
+  const projects = [];
+  if (existsSync6(projectsDir)) {
+    for (const entry of await readdir(projectsDir, { withFileTypes: true })) {
+      if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
+      const file = path15.join(projectsDir, entry.name);
+      const text = await readFile8(file, "utf8");
+      const { data } = parseFrontmatter(text);
+      const id = String(data["id"] ?? entry.name.replace(/\.md$/, ""));
+      const status = String(data["status"] ?? "active");
+      projects.push({ id, status });
+    }
+  }
+  const done = projects.filter(
+    (p) => p.status === "done" || p.status === "dropped"
+  ).length;
+  const total = projects.length;
+  return {
+    id: pursuitId,
+    projects,
+    done,
+    total,
+    allResolved: total > 0 && done === total
+  };
 }
 async function setIdeaState(repoRoot, opts) {
   const filePath = await locateIdea(repoRoot, opts.id, opts.parent);
@@ -17942,7 +18360,7 @@ async function setIdeaState(repoRoot, opts) {
     }
     return { data, body };
   });
-  return { path: path16.relative(repoRoot, filePath) };
+  return { path: path15.relative(repoRoot, filePath) };
 }
 async function checkItem(repoRoot, opts) {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
@@ -17950,6 +18368,7 @@ async function checkItem(repoRoot, opts) {
   const sectionName = opts.section === "dod" ? "Definition of Done" : "Actions";
   let matched = "";
   let promoted = false;
+  let finalBody = "";
   await mutateFrontmatter(filePath, (data, body) => {
     const result = toggleChecklistItem(body, sectionName, opts.match, checked);
     matched = result.matched;
@@ -17961,22 +18380,84 @@ async function checkItem(repoRoot, opts) {
       data["status"] = "active";
       promoted = true;
     }
+    finalBody = nextBody;
     return { data, body: nextBody };
   });
+  const progress2 = computeProjectProgress(finalBody);
   return {
-    path: path16.relative(repoRoot, filePath),
+    path: path15.relative(repoRoot, filePath),
     matched,
-    ...promoted ? { promoted: true } : {}
+    ...promoted ? { promoted: true } : {},
+    ...progress2
+  };
+}
+async function checkItems(repoRoot, opts) {
+  const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
+  const checked = opts.checked ?? true;
+  const sectionName = opts.section === "dod" ? "Definition of Done" : "Actions";
+  const matched = [];
+  let promoted = false;
+  let finalBody = "";
+  await mutateFrontmatter(filePath, (data, body) => {
+    let nextBody = body;
+    for (const match of opts.matches) {
+      const result = toggleChecklistItem(nextBody, sectionName, match, checked);
+      matched.push(result.matched);
+      nextBody = result.body;
+    }
+    if (opts.section === "action" && checked && data["status"] === "on_hold" && opts.matches.length > 0) {
+      data["status"] = "active";
+      promoted = true;
+    }
+    finalBody = nextBody;
+    return { data, body: nextBody };
+  });
+  const progress2 = computeProjectProgress(finalBody);
+  return {
+    path: path15.relative(repoRoot, filePath),
+    matched,
+    ...promoted ? { promoted: true } : {},
+    ...progress2
   };
 }
 async function addItem(repoRoot, opts) {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
-  const sectionName = opts.section === "dod" ? "Definition of Done" : "Actions";
-  await mutateFrontmatter(filePath, (data, body) => ({
-    data,
-    body: appendChecklistItem(body, sectionName, opts.text, opts.checked ?? false)
-  }));
-  return { path: path16.relative(repoRoot, filePath) };
+  const sectionName = opts.section === "dod" ? "Definition of Done" : opts.section === "action" ? "Actions" : "Notes";
+  let finalBody = "";
+  await mutateFrontmatter(filePath, (data, body) => {
+    const nextBody = opts.section === "notes" ? appendParagraphToSection(body, sectionName, opts.text) : appendChecklistItem(body, sectionName, opts.text, opts.checked ?? false);
+    finalBody = nextBody;
+    return { data, body: nextBody };
+  });
+  const progress2 = computeProjectProgress(finalBody);
+  return {
+    path: path15.relative(repoRoot, filePath),
+    ...progress2
+  };
+}
+async function addItems(repoRoot, opts) {
+  const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
+  const sectionName = opts.section === "dod" ? "Definition of Done" : opts.section === "action" ? "Actions" : "Notes";
+  let finalBody = "";
+  await mutateFrontmatter(filePath, (data, body) => {
+    let nextBody = body;
+    for (const text of opts.texts) {
+      nextBody = opts.section === "notes" ? appendParagraphToSection(nextBody, sectionName, text) : appendChecklistItem(
+        nextBody,
+        sectionName,
+        text,
+        opts.checked ?? false
+      );
+    }
+    finalBody = nextBody;
+    return { data, body: nextBody };
+  });
+  const progress2 = computeProjectProgress(finalBody);
+  return {
+    path: path15.relative(repoRoot, filePath),
+    added: opts.texts.length,
+    ...progress2
+  };
 }
 async function addWaitingFor(repoRoot, opts) {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
@@ -17991,7 +18472,7 @@ async function addWaitingFor(repoRoot, opts) {
     data["waiting_for"] = list;
     return { data, body };
   });
-  return { path: path16.relative(repoRoot, filePath) };
+  return { path: path15.relative(repoRoot, filePath) };
 }
 async function flagWaitingFor(repoRoot, opts) {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
@@ -18023,7 +18504,7 @@ async function flagWaitingFor(repoRoot, opts) {
     data["waiting_for"] = list;
     return { data, body };
   });
-  return { path: path16.relative(repoRoot, filePath), matched };
+  return { path: path15.relative(repoRoot, filePath), matched };
 }
 async function locateProject(repoRoot, projectId, pursuitHint) {
   if (pursuitHint) {
@@ -18035,11 +18516,11 @@ async function locateProject(repoRoot, projectId, pursuitHint) {
   }
   const roots = ["pursuits", "pursuits/_someday", "pursuits/_archived"];
   for (const root of roots) {
-    const absRoot = path16.join(repoRoot, root);
+    const absRoot = path15.join(repoRoot, root);
     if (!existsSync6(absRoot)) continue;
     for (const pursuit of await readdir(absRoot, { withFileTypes: true })) {
       if (!pursuit.isDirectory()) continue;
-      const candidate = path16.join(
+      const candidate = path15.join(
         absRoot,
         pursuit.name,
         "projects",
@@ -18060,11 +18541,11 @@ async function locateIdea(repoRoot, ideaId, parentHint) {
   }
   const roots = ["pursuits", "pursuits/_someday", "pursuits/_archived"];
   for (const root of roots) {
-    const absRoot = path16.join(repoRoot, root);
+    const absRoot = path15.join(repoRoot, root);
     if (!existsSync6(absRoot)) continue;
     for (const pursuit of await readdir(absRoot, { withFileTypes: true })) {
       if (!pursuit.isDirectory()) continue;
-      const candidate = path16.join(
+      const candidate = path15.join(
         absRoot,
         pursuit.name,
         "ideas",
@@ -18102,30 +18583,30 @@ function escapeRe(s) {
 }
 
 // src/write/move.ts
-import path17 from "node:path";
+import path16 from "node:path";
 import { existsSync as existsSync7 } from "node:fs";
 async function movePursuit(repoRoot, opts) {
   const from = resolvePursuitDir(repoRoot, opts.id);
   if (!from) throw new Error(`pursuit not found: ${opts.id}`);
-  const targetParent = opts.to === "active" ? path17.join(repoRoot, "pursuits") : opts.to === "someday" ? path17.join(repoRoot, "pursuits/_someday") : path17.join(repoRoot, "pursuits/_archived");
-  const to = path17.join(targetParent, opts.id);
-  if (path17.resolve(from) === path17.resolve(to)) {
+  const targetParent = opts.to === "active" ? path16.join(repoRoot, "pursuits") : opts.to === "someday" ? path16.join(repoRoot, "pursuits/_someday") : path16.join(repoRoot, "pursuits/_archived");
+  const to = path16.join(targetParent, opts.id);
+  if (path16.resolve(from) === path16.resolve(to)) {
     return {
-      from: path17.relative(repoRoot, from),
-      to: path17.relative(repoRoot, to)
+      from: path16.relative(repoRoot, from),
+      to: path16.relative(repoRoot, to)
     };
   }
   if (existsSync7(to)) {
-    throw new Error(`destination already exists: ${path17.relative(repoRoot, to)}`);
+    throw new Error(`destination already exists: ${path16.relative(repoRoot, to)}`);
   }
   await moveDir(from, to);
-  await mutateFrontmatter(path17.join(to, "pursuit.md"), (data, body) => {
+  await mutateFrontmatter(path16.join(to, "pursuit.md"), (data, body) => {
     data["status"] = opts.to;
     return { data, body };
   });
   return {
-    from: path17.relative(repoRoot, from),
-    to: path17.relative(repoRoot, to)
+    from: path16.relative(repoRoot, from),
+    to: path16.relative(repoRoot, to)
   };
 }
 
@@ -18181,7 +18662,7 @@ Run /cadence:init to set up.`;
     const snapshot = await scan(repoRoot);
     const result = report(snapshot);
     if (opts.hookOutput) {
-      const text = renderStatus(result) + "\n\nNext: /cadence:start to begin a session, /cadence:capture to save a thought, /cadence:status <id> to drill in.";
+      const text = renderStatus(result);
       process.stdout.write(
         JSON.stringify({
           systemMessage: text,
@@ -18273,23 +18754,6 @@ cli.command("ideas", "List ideas with optional filters").option("--root <path>",
     }
   }
 );
-cli.command("markers", "List markers with optional filters").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Filter by pursuit").option("--project <id>", "Filter by project").option("--since <date>", "Only markers on/after this YYYY-MM-DD").option("--json", "Emit as JSON").action(
-  async (opts) => {
-    const repoRoot = await resolveRepoRoot(opts.root);
-    const snapshot = await scan(repoRoot);
-    const markers = snapshot.markers.filter(
-      (m) => (!opts.pursuit || m.pursuit === opts.pursuit) && (!opts.project || m.project === opts.project) && (!opts.since || m.timestamp >= opts.since)
-    );
-    const sorted = [...markers].sort(
-      (a, b) => a.timestamp < b.timestamp ? 1 : -1
-    );
-    if (opts.json) {
-      process.stdout.write(JSON.stringify(sorted, null, 2) + "\n");
-    } else {
-      process.stdout.write(renderMarkers(sorted) + "\n");
-    }
-  }
-);
 cli.command("captures", "List unprocessed captures").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--json", "Emit as JSON").action(async (opts) => {
   const repoRoot = await resolveRepoRoot(opts.root);
   const snapshot = await scan(repoRoot);
@@ -18309,6 +18773,27 @@ cli.command("captures", "List unprocessed captures").option("--root <path>", "Re
     }
   }
 });
+cli.command(
+  "find <query>",
+  "Search projects, ideas, captures, and pursuits by case-insensitive substring"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--json", "Emit results as JSON").action(
+  async (query, opts) => {
+    const repoRoot = await resolveRepoRoot(opts.root);
+    const snapshot = await scan(repoRoot);
+    const results = findEntities(snapshot, query);
+    if (opts.json) {
+      process.stdout.write(
+        JSON.stringify(
+          { query, results, total: results.length },
+          null,
+          2
+        ) + "\n"
+      );
+    } else {
+      process.stdout.write(renderFindResults(results, query) + "\n");
+    }
+  }
+);
 cli.command("create-pursuit <id>", "Create a new pursuit").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--type <type>", "finite | ongoing | someday", { default: "finite" }).option("--status <status>", "active | someday | archived").option("--why <text>", "Optional why").option("--target <date>", "Optional target date").option("--win-cycle <cycle>", "Optional win cycle").option("--title <text>", "H1 title (default: derived from id)").option("--description <text>", "Body description paragraph").option("--created <YYYY-MM-DD>", "Override created date (default: today)").action(
   async (id, opts) => {
     const repoRoot = await resolveRepoRoot(opts.root);
@@ -18372,28 +18857,6 @@ cli.command("create-idea <id>", "Create a new idea (seed by default)").option("-
     process.stdout.write(JSON.stringify(result) + "\n");
   }
 );
-cli.command("write-marker", "Write a session marker (pause)").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Pursuit id (required)").option("--project <id>", "Project id (required)").option("--where <text>", "State of work").option("--next <text>", "First thing to do on return").option("--open <text>", "What's still open").option("--start <iso>", "Session start ISO timestamp").option("--end <iso>", "Session end ISO timestamp").option("--action-completed <text>", "Completed action (repeatable)", {
-  type: [String]
-}).action(
-  async (opts) => {
-    if (!opts.pursuit || !opts.project) {
-      throw new Error("--pursuit and --project are required");
-    }
-    const repoRoot = await resolveRepoRoot(opts.root);
-    const actionsCompleted = multistring(opts.actionCompleted);
-    const result = await writeMarker(repoRoot, {
-      pursuit: opts.pursuit,
-      project: opts.project,
-      ...typeof opts.where === "string" && opts.where.length > 0 ? { where: opts.where } : {},
-      ...typeof opts.next === "string" && opts.next.length > 0 ? { next: opts.next } : {},
-      ...typeof opts.open === "string" && opts.open.length > 0 ? { open: opts.open } : {},
-      ...opts.start ? { session_start: opts.start } : {},
-      ...opts.end ? { session_end: opts.end } : {},
-      ...actionsCompleted ? { actions_completed: actionsCompleted } : {}
-    });
-    process.stdout.write(JSON.stringify(result) + "\n");
-  }
-);
 cli.command("write-capture", "Write a thought to thoughts/unprocessed/").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--body <text>", "Capture body (required)").option("--verb-context <ctx>", "Verb context (note | seed | concern | ...)").action(
   async (opts) => {
     if (!opts.body) throw new Error("--body is required");
@@ -18419,7 +18882,10 @@ cli.command("write-reflection", "Write or update a reflection file").option("--r
     process.stdout.write(JSON.stringify(result) + "\n");
   }
 );
-cli.command("set-status <project-id>", "Update a project status").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Disambiguate when project IDs collide").option("--status <status>", "active | on_hold | done | dropped (required)").option("--reason <text>", "Required when --status=dropped").action(
+cli.command("set-status <project-id>", "Update a project status").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Disambiguate when project IDs collide").option("--status <status>", "active | on_hold | done | dropped (required)").option("--reason <text>", "Required when --status=dropped").option(
+  "--include-pursuit",
+  "Also return pursuit summary (id, projects, done/total, allResolved) for the upward-completion check"
+).action(
   async (projectId, opts) => {
     if (!opts.status) throw new Error("--status is required");
     const repoRoot = await resolveRepoRoot(opts.root);
@@ -18427,7 +18893,8 @@ cli.command("set-status <project-id>", "Update a project status").option("--root
       id: projectId,
       status: opts.status,
       ...opts.pursuit ? { pursuit: opts.pursuit } : {},
-      ...opts.reason ? { reason: opts.reason } : {}
+      ...opts.reason ? { reason: opts.reason } : {},
+      ...opts.includePursuit ? { include_pursuit: true } : {}
     });
     process.stdout.write(JSON.stringify(result) + "\n");
   }
@@ -18468,7 +18935,35 @@ cli.command("check <project-id>", "Toggle an Action item (or legacy DoD item) in
     process.stdout.write(JSON.stringify(result) + "\n");
   }
 );
-cli.command("add-item <project-id>", "Append an Action item (or legacy DoD item)").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Disambiguate when project IDs collide").option("--section <section>", "dod | action (required)").option("--text <text>", "Item text (required)").option("--checked", "Add as already checked").action(
+cli.command(
+  "check-items <project-id>",
+  "Toggle multiple Action items (or legacy DoD items) in one call"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Disambiguate when project IDs collide").option("--section <section>", "dod | action (required)").option(
+  "--match <text>",
+  "Substring or 0-based index of an item (repeatable)",
+  { type: [String] }
+).option("--unchecked", "Mark as unchecked instead of checked").action(
+  async (projectId, opts) => {
+    if (!opts.section) throw new Error("--section is required");
+    const matches = multistring(opts.match);
+    if (!matches || matches.length === 0) {
+      throw new Error("at least one --match is required");
+    }
+    const repoRoot = await resolveRepoRoot(opts.root);
+    const normalized = matches.map(
+      (m) => /^\d+$/.test(m) ? Number(m) : m
+    );
+    const result = await checkItems(repoRoot, {
+      project: projectId,
+      section: opts.section,
+      matches: normalized,
+      checked: !opts.unchecked,
+      ...opts.pursuit ? { pursuit: opts.pursuit } : {}
+    });
+    process.stdout.write(JSON.stringify(result) + "\n");
+  }
+);
+cli.command("add-item <project-id>", "Append an item to a section (Actions, legacy DoD, or Notes)").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Disambiguate when project IDs collide").option("--section <section>", "action | dod | notes (required)").option("--text <text>", "Item text (required)").option("--checked", "Add as already checked (action/dod only; ignored for notes)").action(
   async (projectId, opts) => {
     if (!opts.section || !opts.text) {
       throw new Error("--section and --text are required");
@@ -18478,6 +18973,27 @@ cli.command("add-item <project-id>", "Append an Action item (or legacy DoD item)
       project: projectId,
       section: opts.section,
       text: opts.text,
+      ...opts.pursuit ? { pursuit: opts.pursuit } : {},
+      ...opts.checked ? { checked: true } : {}
+    });
+    process.stdout.write(JSON.stringify(result) + "\n");
+  }
+);
+cli.command(
+  "add-items <project-id>",
+  "Append multiple items to a section in one call"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Disambiguate when project IDs collide").option("--section <section>", "action | dod | notes (required)").option("--text <text>", "Item text (repeatable)", { type: [String] }).option("--checked", "Add all as already checked (action/dod only)").action(
+  async (projectId, opts) => {
+    if (!opts.section) throw new Error("--section is required");
+    const texts = multistring(opts.text);
+    if (!texts || texts.length === 0) {
+      throw new Error("at least one --text is required");
+    }
+    const repoRoot = await resolveRepoRoot(opts.root);
+    const result = await addItems(repoRoot, {
+      project: projectId,
+      section: opts.section,
+      texts,
       ...opts.pursuit ? { pursuit: opts.pursuit } : {},
       ...opts.checked ? { checked: true } : {}
     });
@@ -18528,6 +19044,28 @@ cli.command(
     process.stdout.write(JSON.stringify(result) + "\n");
   }
 );
+cli.command(
+  "project-activity",
+  "Emit project-file git-log activity (the stream /narrate consumes)"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option(
+  "--since-commit <hash>",
+  "Resume from this commit (exclusive); falls back to scope window if not an ancestor of HEAD"
+).option(
+  "--scope <scope>",
+  "daily | weekly | monthly | annual | pursuit (default: daily)"
+).option("--pursuit <id>", "Filter to one pursuit").option("--project <id>", "Filter to one project (requires --pursuit)").action(
+  async (opts) => {
+    const repoRoot = await resolveRepoRoot(opts.root);
+    const scope = opts.scope ?? "daily";
+    const result = await projectActivity(repoRoot, {
+      sinceCommit: opts.sinceCommit,
+      scope,
+      pursuit: opts.pursuit,
+      project: opts.project
+    });
+    process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+  }
+);
 cli.help();
 cli.version("0.1.0");
 cli.parse(process.argv, { run: false });
@@ -18540,22 +19078,22 @@ if (cli.matchedCommand) {
   cli.outputHelp();
 }
 async function resolveRepoRoot(explicit) {
-  if (explicit) return path18.resolve(explicit);
+  if (explicit) return path17.resolve(explicit);
   return findRepoRoot(process.cwd());
 }
 function findRepoRoot(start) {
-  let dir = path18.resolve(start);
+  let dir = path17.resolve(start);
   for (; ; ) {
-    if (existsSync8(path18.join(dir, "cadence.yaml"))) return dir;
-    if (existsSync8(path18.join(dir, "pursuits"))) return dir;
-    const parent = path18.dirname(dir);
+    if (existsSync8(path17.join(dir, "cadence.yaml"))) return dir;
+    if (existsSync8(path17.join(dir, "pursuits"))) return dir;
+    const parent = path17.dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
-  return path18.resolve(start);
+  return path17.resolve(start);
 }
 function isCadenceRepo(root) {
-  return existsSync8(path18.join(root, "cadence.yaml")) || existsSync8(path18.join(root, "pursuits"));
+  return existsSync8(path17.join(root, "cadence.yaml")) || existsSync8(path17.join(root, "pursuits"));
 }
 function multistring(v) {
   if (!Array.isArray(v)) return void 0;

@@ -37,7 +37,6 @@ export async function scanProjects(repoRoot: string): Promise<Project[]> {
       path: path.relative(repoRoot, file),
       dodProgress: progress(dod),
       actionProgress: progress(actions),
-      hasMarker: false,
     })
   }
   return results

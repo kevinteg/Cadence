@@ -1,5 +1,5 @@
-name: Core Session Loop
-description: Verify /start → work → /pause → /start resumes correctly with auto-recap from marker
+name: Core Lifecycle Loop
+description: Verify the post-Session lifecycle — /start opens a view, /complete checks an action and promotes on_hold → active on the first check, no markers written
 
 setup:
   - create_pursuit:
@@ -10,9 +10,11 @@ setup:
       pursuit: test-journeys
       id: test-journey-project
       title: Test Journey Project
-      dod:
-        - First task complete
-        - Second task complete
+      intent: |
+        Walk the canonical lifecycle end-to-end: open a project view,
+        check off the first action and confirm status flips on_hold →
+        active, then check the second and confirm the upward intent
+        prompt fires. No markers should be written along the way.
       actions:
         - Do the first thing
         - Do the second thing
@@ -22,30 +24,26 @@ steps:
     assert:
       - contains: "test-journey-project"
       - contains: "Do the first thing"
+      - contains: "not started"
 
-  - action: Check off "Do the first thing" on the project
+  - action: Check off "Do the first thing" via /complete
     assert:
       - file_contains:
           path: pursuits/test-journeys/projects/test-journey-project.md
           pattern: "- [x] Do the first thing"
-
-  - command: /pause
-    assert:
-      - file_created:
-          path: pursuits/test-journeys/sessions/*.md
-          frontmatter:
-            project: test-journey-project
       - file_contains:
-          path: pursuits/test-journeys/sessions/*.md
-          pattern: "Where"
-      - file_contains:
-          path: pursuits/test-journeys/sessions/*.md
-          pattern: "Next"
+          path: pursuits/test-journeys/projects/test-journey-project.md
+          pattern: "status: active"
 
   - command: /start test-journey-project
     assert:
-      - contains: "Next:"
+      - contains: "test-journey-project"
       - contains: "Do the second thing"
+      - not_contains: "not started"
+
+  - action: Confirm no markers were written
+    assert:
+      - assert_clean: pursuits/test-journeys/sessions/
 
 teardown:
   - delete_files:

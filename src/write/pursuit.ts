@@ -37,7 +37,6 @@ export async function createPursuit(
     throw new Error(`pursuit already exists: ${opts.id}`)
   }
   await ensureDir(path.join(pursuitDir, 'projects'))
-  await ensureDir(path.join(pursuitDir, 'sessions'))
   await ensureDir(path.join(pursuitDir, 'ideas'))
 
   const data: Record<string, unknown> = {

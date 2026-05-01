@@ -18,11 +18,19 @@ evaluates assertions, and reports pass/fail.
 2. **Parse the YAML** and validate structure (setup, steps, teardown).
 
 3. **Execute setup**:
-   - For each setup operation, create the specified files:
-     - `create_pursuit`: Write `pursuit.md` with frontmatter to
-       `pursuits/<id>/pursuit.md`. Create `projects/` and `sessions/` dirs.
-     - `create_project`: Write project file with frontmatter, DoD, and
-       actions to `pursuits/<pursuit>/projects/<id>.md`.
+   - For each setup operation, prefer the bundled `cadence` CLI:
+     - `create_pursuit`: `cadence create-pursuit <id> --type <t>` (and
+       `--why`, `--description`, `--status` as the YAML provides).
+     - `create_project`: `cadence create-project <id> --pursuit <p>`
+       passing `--intent <text>` (preferred, narrative-first model)
+       OR `--dod <item>` repeated (legacy compat for older journeys),
+       plus `--action <text>` repeated. The CLI emits the right
+       sections based on which flags are passed.
+     - `create_idea`: `cadence create-idea <id> --parent <p> --body <text>`
+       and optionally `--state seed|developed`.
+   - If `cadence` is unavailable, fall back to writing files directly.
+     Whether the journey YAML uses `intent:` or `dod:` for a project
+     determines which section gets emitted in the body.
    - If setup fails, report error and skip to teardown.
 
 4. **Execute steps** sequentially. For each step:

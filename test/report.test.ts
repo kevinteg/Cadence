@@ -37,7 +37,6 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     path: 'pursuits/p/projects/proj.md',
     dodProgress: { done: 0, total: 0 },
     actionProgress: { done: 0, total: 1 },
-    hasMarker: false,
     ...overrides,
   }
 }
@@ -48,7 +47,6 @@ function makeSnapshot(overrides: Partial<Snapshot> = {}): Snapshot {
     pursuits: [makePursuit()],
     projects: [],
     ideas: [],
-    markers: [],
     captures: [],
     reflections: [],
     generatedAt: NOW.toISOString(),
@@ -104,12 +102,11 @@ test('overdue waiting_for does not fire within grace', () => {
   )
 })
 
-test('dormant project flagged when last marker > dormant_days old', () => {
+test('dormant project flagged when last activity > dormant_days old', () => {
   const snapshot = makeSnapshot({
     projects: [
       makeProject({
-        mostRecentMarker: '2026-04-01T10:00:00Z',
-        hasMarker: true,
+        last_activity_at: '2026-04-01T10:00:00Z',
       }),
     ],
   })
@@ -124,8 +121,7 @@ test('dormant project not flagged when actions are all checked', () => {
       makeProject({
         actions: [{ text: 'a', checked: true }],
         actionProgress: { done: 1, total: 1 },
-        mostRecentMarker: '2026-04-01T10:00:00Z',
-        hasMarker: true,
+        last_activity_at: '2026-04-01T10:00:00Z',
       }),
     ],
   })
@@ -133,44 +129,21 @@ test('dormant project not flagged when actions are all checked', () => {
   assert.equal(flags.filter((f) => f.kind === 'dormant_project').length, 0)
 })
 
-test('stale marker fires past marker_stale_days but suppressed when dormant', () => {
-  // Marker 10 days old: stale (>7) but not dormant (<14)
-  const snapshot1 = makeSnapshot({
+test('dormant_project uses last_activity_at when set', () => {
+  // last_activity_at 20 days ago → dormant (>14)
+  const snapshot = makeSnapshot({
     projects: [
       makeProject({
-        mostRecentMarker: '2026-04-17T12:00:00Z',
-        hasMarker: true,
+        last_activity_at: '2026-04-07T12:00:00Z',
       }),
     ],
   })
-  const r1 = report(snapshot1)
-  assert.equal(
-    r1.flags.filter((f) => f.kind === 'stale_marker').length,
-    1,
-  )
-  assert.equal(
-    r1.flags.filter((f) => f.kind === 'dormant_project').length,
-    0,
-  )
-
-  // Marker 20 days old: dormant suppresses stale
-  const snapshot2 = makeSnapshot({
-    projects: [
-      makeProject({
-        mostRecentMarker: '2026-04-07T12:00:00Z',
-        hasMarker: true,
-      }),
-    ],
-  })
-  const r2 = report(snapshot2)
-  assert.equal(
-    r2.flags.filter((f) => f.kind === 'dormant_project').length,
-    1,
-  )
-  assert.equal(
-    r2.flags.filter((f) => f.kind === 'stale_marker').length,
-    0,
-  )
+  const r = report(snapshot)
+  const dormant = r.flags.filter((f) => f.kind === 'dormant_project')
+  assert.equal(dormant.length, 1)
+  if (dormant[0]?.kind === 'dormant_project') {
+    assert.equal(dormant[0].daysSinceActivity, 20)
+  }
 })
 
 test('structural_active_no_open_actions fires when active project has no unchecked actions', () => {
@@ -211,8 +184,6 @@ test('WIP over limit fires when in-progress projects exceed max', () => {
     projects.push(
       makeProject({
         id: `proj-${i}`,
-        hasMarker: true,
-        mostRecentMarker: '2026-04-26T12:00:00Z',
       }),
     )
   }

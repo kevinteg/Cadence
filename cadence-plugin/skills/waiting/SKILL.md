@@ -10,7 +10,7 @@ their expected date so blockers don't silently rot. Reference
 
 ## Usage
 
-- `/waiting` — attach to the active session's project
+- `/waiting` — attach to the project under current discussion
 - `/waiting <project>` — attach to a specific project
 
 Arguments resolve via fuzzy match, partial match, or natural language.
@@ -18,11 +18,13 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 ## Steps
 
 1. **Resolve the project:**
-   - If in an active session with no argument: target the active project.
-   - If an argument is given: resolve to a project by fuzzy match against
+   - With no argument: target the project most recently in focus
+     (e.g., the most recent `/start` with-arg, or the project mentioned
+     earlier in the conversation).
+   - With an argument: resolve via fuzzy match against
      `cadence scan --json` (filter to `status: active` or `on_hold`).
-   - If no session and no argument: ask "Which project is this for?"
-     and present a short list of active projects.
+   - If neither: ask "Which project is this for?" and present a short
+     list of active projects.
    - Refuse if the project is `done` or `dropped`:
      "[Project] is [status] — waiting items only attach to live projects."
 
@@ -72,5 +74,5 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 - Do not re-ask if the user supplied a field in their opening message.
 - Resolve relative dates yourself; don't make the user type ISO format.
 - Don't surface this verb mid-flow — it's a breakpoint action. If the
-  user invokes it during a `/start` session, write it, confirm, and
-  return them to the session immediately.
+  user invokes it while working a project, write it, confirm tersely,
+  and let them return to the work.

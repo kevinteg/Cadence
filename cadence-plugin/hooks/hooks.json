@@ -9,6 +9,24 @@
             "command": "${CLAUDE_PLUGIN_ROOT}/bin/cadence status --hook-output"
           }
         ]
+      },
+      {
+        "matcher": "resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/bin/cadence status --hook-output"
+          }
+        ]
+      },
+      {
+        "matcher": "clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/bin/cadence status --hook-output"
+          }
+        ]
       }
     ]
   }

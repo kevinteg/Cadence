@@ -27,7 +27,7 @@ Arguments resolve via fuzzy match, partial match, or natural language.
      just do. If it needs brainstorming, it's probably a Project. Want to
      promote it?"
 
-2. **Start session:** Read the provocation deck from
+2. **Open the deck:** Read the provocation deck from
    `deck/provocations.yaml` (in the cadence plugin). If the user has a
    local deck file, read that too.
 
@@ -37,8 +37,8 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
    What challenge or question are you thinking about?
    ```
-   Wait for the user to state their challenge. Save it as the session's
-   anchor — all facilitation refers back to this.
+   Wait for the user to state their challenge. Save it as the
+   ideation's anchor — all facilitation refers back to this.
 
 4. **Facilitate free-flowing ideation:**
 

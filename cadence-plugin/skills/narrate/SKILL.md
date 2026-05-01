@@ -1,96 +1,108 @@
 ---
-description: Generate narrative from activity data — today, weekly, or pursuit arc. TRIGGER on explicit /cadence:narrate invocation, OR when the user asks for a generated narrative by name (e.g., "narrate today", "narrate this week", "tell the story of pursuit X"). SKIP for general "what did I do" questions that don't request a saved narrative.
+description: Generate narrative from project-file git activity — daily, weekly, monthly, annual, or pursuit arc. TRIGGER on explicit /cadence:narrate invocation, OR when the user asks for a generated narrative by name (e.g., "narrate today", "narrate this week", "tell the story of pursuit X"). SKIP for general "what did I do" questions that don't request a saved narrative.
 ---
 
 # /narrate
 
-Generate narrative from activity data. Reference
-`workflows/verb-contracts.md` for the narrate register.
+Generate narrative from activity data — committed changes to project files in the cadence repo. Each narrative carries a watermark in its frontmatter: subsequent runs for the same cadence resume from where the last one left off. The narrative IS the pointer into the stream.
 
 ## Usage
 
-- `/narrate` — today's activity
-- `/narrate <pursuit>` — full arc of a pursuit
-- `/narrate week` — weekly narrative (feeds into /reflect)
+- `/narrate` — today's activity (cadence: daily)
+- `/narrate today` — same as `/narrate`
+- `/narrate week` — this ISO week (cadence: weekly)
+- `/narrate month` — this calendar month (cadence: monthly)
+- `/narrate year` — this calendar year (cadence: annual)
+- `/narrate <pursuit>` — full arc of a pursuit (cadence: pursuit)
 
-Arguments resolve via fuzzy match, partial match, or natural language.
-
-## CLI binding
-
-Use it to gather time-windowed
-markers and ideas — the agent generates narrative prose from the
-returned data.
+Arguments resolve via fuzzy match. `today`, `week`, `month`, `year` are reserved keywords; anything else resolves to a pursuit ID.
 
 ## Steps
 
-### Today's Narrative (no argument)
+1. **Resolve cadence and target file.**
 
-1. Today's markers and actions completed:
-   ```bash
-   cadence markers --since <YYYY-MM-DD-today> --json
+   | argument | cadence | target filename |
+   |---|---|---|
+   | (none) or `today` | `daily` | `narratives/drafts/daily-YYYY-MM-DD.md` |
+   | `week` | `weekly` | `narratives/drafts/weekly-YYYY-WNN.md` (ISO week) |
+   | `month` | `monthly` | `narratives/drafts/monthly-YYYY-MM.md` |
+   | `year` | `annual` | `narratives/drafts/annual-YYYY.md` |
+   | `<pursuit-id>` | `pursuit` | `narratives/drafts/pursuit-<id>-YYYY-MM-DD.md` |
+
+   For pursuit cadence, fuzzy-match the argument against `cadence pursuits --json`; ask if ambiguous.
+
+2. **Compute resume watermark.**
+
+   Look for prior narratives of the same cadence:
+   - daily/weekly/monthly/annual: the target filename (overwrites the same file on same-period re-runs).
+   - pursuit: the most recent `pursuit-<id>-*.md` file by mtime.
+
+   If a prior file exists, read its frontmatter `consumed_through_commit`. That's the resume point. Otherwise, no resume point — the CLI defaults the window per cadence.
+
+3. **Delegate to the narrator subagent.** The whole point of this skill's design is to keep bulk activity JSON out of the main thread. The narrator agent fetches its own data via the cadence CLI in isolation and returns prose only.
+
+   Invoke via the Agent tool:
+   - `subagent_type: cadence:narrator`
+   - `prompt`: a short briefing that includes:
+     - The cadence (`daily` | `weekly` | `monthly` | `annual` | `pursuit:<id>`)
+     - Resume hint if present: `since-commit <hash>`
+     - Reminder of the McAdams output contract
+
+   Example prompt (daily, no resume):
    ```
-   Each marker's `actions_completed` field lists what was finished.
-2. Today's Idea movements:
-   ```bash
-   cadence ideas --since <YYYY-MM-DD-today> --json
+   Generate a daily narrative. Run `cadence project-activity --scope daily` to fetch project-file commits since midnight. Compose 3-5 paragraphs in McAdams structure (what happened / what it meant / what shifted / what's next). Return prose only — no frontmatter, no preamble.
    ```
-   For Ideas that *changed state* today (developed/promoted/closed but
-   `created` is older), read the `developed_at` field and per-idea
-   metadata from `cadence ideas --json` and filter by
-   timestamp.
-3. Generate narrative following McAdams structure:
-   - **What happened:** Activity summary — sessions, actions, Ideas moved
-   - **What it meant:** Progress on pursuits, milestones reached
-   - **What shifted:** Decisions made, direction changes, new priorities
-   - **What's next:** Tomorrow's ready-to-resume plans from markers
 
-### Pursuit Narrative (with pursuit argument)
-
-1. Gather everything for the pursuit:
-   ```bash
-   cadence pursuit <pursuit-id> --json     # pursuit + projects
-   cadence markers --pursuit <id> --json   # all markers, sorted desc
-   cadence ideas --parent <id> --json      # parent-level ideas
+   Example prompt (daily, with resume):
    ```
-   For project-scoped Ideas, run `ideas --json` and filter parents that
-   start with `<id>/` agent-side.
-2. Generate the full arc:
-   - **What happened:** Timeline of projects, milestones, key sessions
-   - **The Idea story:** How many Ideas generated, promoted to projects,
-     promoted to their own pursuits, closed with reasons, moved to Wandering
-   - **What it meant:** The pursuit's contribution to the win cycle
-   - **What shifted:** Pivots, course corrections, things learned
-   - **What's next:** Open projects, pending Ideas, trajectory
-
-### Weekly Narrative (`week` argument)
-
-1. Compute the ISO week's start date (Monday). Then:
-   ```bash
-   cadence markers --since <monday-YYYY-MM-DD> --json
-   cadence ideas --since <monday-YYYY-MM-DD> --json
+   Generate a daily narrative. Resume from commit abc123. Run `cadence project-activity --scope daily --since-commit abc123` to fetch commits since that point. Compose 3-5 paragraphs in McAdams structure. Return prose only.
    ```
-   For projects completed this week, filter `cadence scan
-   --json | .projects[]` for `status: done` (the agent already knows
-   which were not-done at week start by reading the previous week's
-   reflection or markers).
-2. Generate weekly summary:
-   - **What happened:** Pursuits touched, projects advanced, actions done
-   - **What it meant:** Progress toward Leveraged Priority
-   - **What shifted:** New ideas, changed plans, things dropped
-   - **What's next:** Leveraged Priority for the coming week
 
-3. Save to `narratives/drafts/week-<YYYY-WNN>.md`.
+4. **Save with watermark frontmatter.**
+
+   The agent returns prose; the skill wraps and saves it. Frontmatter shape:
+
+   ```yaml
+   ---
+   cadence: daily | weekly | monthly | annual | pursuit
+   pursuit_id: <id>          # only when cadence=pursuit
+   generated_at: <ISO timestamp>
+   consumed_from_commit: <hash>   # may be omitted on first run
+   consumed_through_commit: <hash>
+   projects_consulted:
+     - <pursuit-id>/<project-id>
+     - <pursuit-id>/<project-id>
+   ---
+   ```
+
+   To get `consumed_through_commit` and `projects_consulted` deterministically, run `cadence project-activity --scope <cadence> [--since-commit <hash>]` once with `--json` BEFORE delegating, and pass the resulting hashes to both the agent (in the prompt) and the file-write step. (Yes, this means two project-activity calls — once in the main thread for watermark metadata, once in the agent for prose generation. Acceptable since the call is cheap; alternatively, ask the agent to return the watermark fields alongside the prose.)
+
+   Save the file at the resolved target path. Same-period re-runs overwrite (daily-2026-04-30.md gets written twice if /narrate today is run twice on the same day, with each subsequent run consuming the smaller slice since the prior write).
+
+5. **Present.**
+
+   Show the narrative prose to the user (not the frontmatter) under a heading like:
+   - `Daily Narrative — 2026-04-30`
+   - `Weekly Narrative — 2026 W18`
+   - `[pursuit-id] — Full Arc`
+
+   Mention the saved path so the user can find it.
+
+## Fallback (in-thread)
+
+If the narrator subagent invocation fails, run the data fetching and narrative composition inline:
+
+```bash
+cadence project-activity --scope <cadence> [--since-commit <hash>]
+```
+
+Compose the McAdams narrative directly and write the file with the same watermark frontmatter. The fallback path keeps /narrate functional during plugin issues but pulls bulk JSON into the main context — the agent path is preferred whenever it works.
 
 ## Guardrails
 
-- **No evaluative praise.** No "great week" or "impressive progress."
-  Describe what happened specifically: "Advanced 3 projects, closed 2
-  Ideas, completed the reconciler in a single session."
-- **No "why" framing.** "What happened" and "what shifted", not "why
-  did this work" or "why did this fail."
-- **Redemption-aware.** A hard week gets an honest narrative, not
-  sugarcoating. "Tuesday's session stalled on the marker migration —
-  the format change was more involved than expected. Wednesday's session
-  resolved it by simplifying the field mapping."
-- **Narratives are views over data.** They are generated from markers,
-  actions, and Ideas — not separate content to maintain.
+- **No evaluative praise.** No "great week" or "impressive progress." Describe what happened specifically.
+- **No "why" framing.** "What happened" and "what shifted", not "why did this work" or "why did this fail."
+- **Redemption-aware.** A hard week gets an honest narrative, not sugarcoating.
+- **Narratives are views over data.** They are generated from project-file git history, ideas, and captures — not separate content to maintain.
+- **The narrative file IS the watermark.** Do not split watermark metadata into a separate pointer file. Subsequent runs read the latest narrative for the cadence and resume from its `consumed_through_commit`.
+- **Empty windows still get saved.** If no commits since the resume point, the narrator returns a short "quiet day" paragraph; save the file anyway with the new watermark so the next run resumes correctly.

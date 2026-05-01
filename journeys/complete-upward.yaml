@@ -10,8 +10,11 @@ setup:
       pursuit: test-complete
       id: test-complete-project
       title: Test Complete Project
-      dod:
-        - Only task done
+      intent: |
+        Walk the upward-completion flow: complete a project's only
+        action, confirm the agent fires the new "Does the intent feel
+        achieved?" prompt, accept completion, and verify the project
+        transitions to status: done.
       actions:
         - Do the only thing
 
@@ -26,24 +29,24 @@ steps:
           path: pursuits/test-complete/projects/test-complete-project.md
           pattern: "- [x] Do the only thing"
       - contains: "Done"
-
-  - action: Check off DoD item "Only task done"
-    assert:
-      - file_contains:
-          path: pursuits/test-complete/projects/test-complete-project.md
-          pattern: "- [x] Only task done"
-
-  - command: /complete
-    assert:
-      - contains: "Complete this project"
+      - contains: "Does the intent feel achieved"
 
   - action: User says "complete it"
     assert:
       - file_contains:
           path: pursuits/test-complete/projects/test-complete-project.md
           pattern: "status: done"
+      - contains: "Complete this pursuit"
+
+  - action: User says "complete it" (pursuit-level)
+    assert:
+      - file_contains:
+          path: pursuits/_archived/test-complete/pursuit.md
+          pattern: "status: archived"
 
 teardown:
   - delete_files:
       - pursuits/test-complete/
+      - pursuits/_archived/test-complete/
   - assert_clean: pursuits/test-complete/
+  - assert_clean: pursuits/_archived/test-complete/

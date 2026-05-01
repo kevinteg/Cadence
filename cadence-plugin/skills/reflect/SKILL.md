@@ -43,11 +43,11 @@ cadence report --json
 This single call yields snapshot + reconciler flags — captures count,
 projects with action lists, waiting-for items, and the structural/
 dormant/stale/WIP flag set covered by checks 1-5 in
-`workflows/reconciler.md`. Idea-specific checks (aging seeds,
-unpromoted developed, growing backlog) and someday cues are agent-
-implemented; for those, query
-`cadence ideas --json` and apply the threshold logic from
 `workflows/reconciler.md`.
+
+**Idea-specific checks and someday cues** are extracted into the
+reconciler subagent (see step 4c) so the bulk Ideas JSON does not have
+to land in this thread.
 
 4. **Phase 1 — Get Clear**
 
@@ -59,16 +59,23 @@ implemented; for those, query
       for active projects in active pursuits; surface trivial items
       ("These look quick — want to clear any of them now?").
 
-   c. Walk reconciler flags interactively. For each entry in `flags`,
-      present and ask: act on it, defer, or dismiss. The flag kinds the
-      CLI emits are: `overdue_waiting_for`, `dormant_project`,
-      `stale_marker`, `structural_*`, `wip_over_limit`. Then run the
-      idea-specific checks (aging seeds > 14d, unpromoted developed
-      > 7d, growing backlog ratio) by reading
-      `cadence ideas --json` and applying the thresholds
-      from `workflows/reconciler.md`. Finally check someday cues by
-      iterating `snapshot.pursuits` filtered to `lifecycle: someday` —
-      evaluate each `cue.trigger` against the current date.
+   c. Walk reconciler flags interactively. **Delegate the scan to the
+      reconciler subagent** to keep bulk Ideas JSON out of this thread:
+      invoke the Agent tool with `subagent_type: cadence:reconciler`
+      and `prompt: scan`. The agent returns a flag list (one per line,
+      grouped by severity) covering both the in-CLI checks
+      (`overdue_waiting_for`, `dormant_project`,
+      `structural_active_no_open_actions`, `wip_over_limit`) and the
+      idea-specific checks (`aging_seed`, `unpromoted_idea`,
+      `growing_backlog`). For each flag, present and ask: act on it,
+      defer, or dismiss. Finally check someday cues by iterating
+      `snapshot.pursuits` filtered to `lifecycle: someday` — evaluate
+      each `cue.trigger` against the current date.
+
+      **Fallback:** if the reconciler subagent invocation fails, run
+      the scans inline using `cadence flags --json` plus
+      `cadence ideas --json` with the thresholds from
+      `workflows/reconciler.md`.
 
    d. Project relevance check: iterate active projects from
       `snapshot.projects`. For each, ask "Still relevant?" If the user
@@ -87,24 +94,26 @@ implemented; for those, query
 
 5. **Phase 2 — Get Focused**
 
-   a. Generate a recap: summarize the week from markers, completed actions,
-      and narrative notes. Keep it to a paragraph.
+   a. Generate a recap: summarize the week from project-file activity
+      (run `cadence project-activity --scope weekly`) and idea state
+      changes. Keep it to a paragraph. Or invoke `/cadence:narrate week`
+      to get the McAdams version.
 
    b. Ask "What worked well this week?" Record the answer.
 
    c. WIP check: the `wip_over_limit` flag from step 4c already covers
       this if it fired. Otherwise count `snapshot.projects` filtered to
-      `status: active` AND `hasMarker: true` AND active pursuits. If
-      over `snapshot.config.max_active_projects`, suggest specific
-      projects to pause or drop — pick the ones with the oldest
-      `mostRecentMarker` or lowest alignment with the leveraged
+      `status: active` with at least one unchecked action. If over
+      `snapshot.config.max_active_projects`, suggest specific projects
+      to drop or hold — pick the ones with the oldest
+      `last_activity_at` or lowest alignment with the leveraged
       priority.
 
    d. Review waiting-for items: who owes you what, and what's your plan
       if they don't deliver?
 
-   e. Generate if-then Nudges: "When you start tomorrow, your first
-      session is [Project X], starting with [Action Y]."
+   e. Generate if-then Nudges: "When you start tomorrow, the first
+      project to open is [Project X], starting with [Action Y]."
 
    f. Ask: "What's the ONE thing that would make next week a win?"
       Record as the leveraged priority.

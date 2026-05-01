@@ -1,5 +1,5 @@
 name: Reconciler Flags
-description: Verify /status detects overdue waiting-for, dormant projects, stale markers, and structural issues
+description: Verify /status detects overdue waiting-for, dormant projects, stale markers, and the unified structural flag (active project with no unchecked actions — collapsed from three legacy DoD-based structural flags into one)
 
 setup:
   - create_pursuit:
@@ -10,8 +10,10 @@ setup:
       pursuit: test-reconciler
       id: overdue-waiting
       title: Overdue Waiting Project
-      dod:
-        - Get response from Alice
+      intent: |
+        Project deliberately blocked on a waiting_for item that has
+        passed its expected date. Should fire the overdue_waiting_for
+        reconciler flag.
       actions:
         - Follow up with Alice
       waiting_for:
@@ -24,19 +26,19 @@ setup:
       id: dormant-project
       title: Dormant Project
       created: 2026-03-01
-      dod:
-        - Ship the feature
+      intent: |
+        Project created weeks ago with no commit activity since.
+        Should fire the dormant_project flag.
       actions:
         - Write the code
   - create_project:
       pursuit: test-reconciler
-      id: structural-all-done
-      title: All Done Not Closed
-      dod:
-        - item: First thing
-          checked: true
-        - item: Second thing
-          checked: true
+      id: all-actions-checked
+      title: All Actions Checked Not Closed
+      intent: |
+        Project where every action is checked but status is still
+        active. Should fire structural_active_no_open_actions
+        ("does the intent feel achieved?").
       actions:
         - item: Do first thing
           checked: true
@@ -44,11 +46,12 @@ setup:
           checked: true
   - create_project:
       pursuit: test-reconciler
-      id: structural-no-actions
+      id: empty-actions
       title: No Actions Left
-      dod:
-        - Ship the widget
-        - Write docs
+      intent: |
+        Project with zero actions in the section. Same flag as
+        all-actions-checked — both reduce to "no unchecked actions"
+        on an active project under the collapsed flag model.
       actions: []
 
 steps:
@@ -57,8 +60,9 @@ steps:
       - contains: "Alice"
       - contains: "overdue"
       - contains: "dormant"
-      - contains: "structural-all-done"
-      - contains: "structural-no-actions"
+      - contains: "all-actions-checked"
+      - contains: "empty-actions"
+      - contains: "intent feel achieved"
       - not_contains: "No flags"
 
 teardown:

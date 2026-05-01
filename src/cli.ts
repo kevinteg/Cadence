@@ -5,29 +5,35 @@ import { scan } from './scan/repo.js'
 import { report } from './report/reconciler.js'
 import { renderStatus, renderFlags } from './render/status.js'
 import { renderSnapshot, renderReport } from './render/snapshot.js'
+import { findEntities } from './find.js'
+import { renderFindResults } from './render/find.js'
 import {
   renderIdeas,
-  renderMarkers,
   renderProject,
   renderPursuit,
   renderPursuits,
 } from './render/drilldown.js'
-import type { Idea, IdeaState, Marker } from './types.js'
+import type { Idea, IdeaState } from './types.js'
 import { createPursuit } from './write/pursuit.js'
 import { createProject } from './write/project.js'
 import { createIdea } from './write/idea.js'
-import { writeMarker } from './write/marker.js'
 import { writeCapture } from './write/capture.js'
 import { writeReflection } from './write/reflection.js'
 import {
   addItem,
+  addItems,
   addWaitingFor,
   checkItem,
+  checkItems,
   flagWaitingFor,
   setIdeaState,
   setProjectStatus,
 } from './write/edits.js'
 import { movePursuit } from './write/move.js'
+import {
+  projectActivity,
+  type ActivityScope,
+} from './scan/git-activity.js'
 
 const cli = cac('cadence')
 
@@ -95,9 +101,10 @@ cli
       const snapshot = await scan(repoRoot)
       const result = report(snapshot)
       if (opts.hookOutput) {
-        const text =
-          renderStatus(result) +
-          '\n\nNext: /cadence:start to begin a session, /cadence:capture to save a thought, /cadence:status <id> to drill in.'
+        // renderStatus now appends a "Next:" block with up to 3
+        // contextual suggestions (computed via nextSteps()), so we
+        // emit the same text in both bare-CLI and hook-output paths.
+        const text = renderStatus(result)
         process.stdout.write(
           JSON.stringify({
             systemMessage: text,
@@ -234,40 +241,6 @@ cli
   )
 
 cli
-  .command('markers', 'List markers with optional filters')
-  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--pursuit <id>', 'Filter by pursuit')
-  .option('--project <id>', 'Filter by project')
-  .option('--since <date>', 'Only markers on/after this YYYY-MM-DD')
-  .option('--json', 'Emit as JSON')
-  .action(
-    async (opts: {
-      root?: string
-      pursuit?: string
-      project?: string
-      since?: string
-      json?: boolean
-    }) => {
-      const repoRoot = await resolveRepoRoot(opts.root)
-      const snapshot = await scan(repoRoot)
-      const markers = snapshot.markers.filter(
-        (m) =>
-          (!opts.pursuit || m.pursuit === opts.pursuit) &&
-          (!opts.project || m.project === opts.project) &&
-          (!opts.since || m.timestamp >= opts.since),
-      ) as Marker[]
-      const sorted = [...markers].sort((a, b) =>
-        a.timestamp < b.timestamp ? 1 : -1,
-      )
-      if (opts.json) {
-        process.stdout.write(JSON.stringify(sorted, null, 2) + '\n')
-      } else {
-        process.stdout.write(renderMarkers(sorted) + '\n')
-      }
-    },
-  )
-
-cli
   .command('captures', 'List unprocessed captures')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--json', 'Emit as JSON')
@@ -288,6 +261,32 @@ cli
       }
     }
   })
+
+cli
+  .command(
+    'find <query>',
+    'Search projects, ideas, captures, and pursuits by case-insensitive substring',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--json', 'Emit results as JSON')
+  .action(
+    async (query: string, opts: { root?: string; json?: boolean }) => {
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const snapshot = await scan(repoRoot)
+      const results = findEntities(snapshot, query)
+      if (opts.json) {
+        process.stdout.write(
+          JSON.stringify(
+            { query, results, total: results.length },
+            null,
+            2,
+          ) + '\n',
+        )
+      } else {
+        process.stdout.write(renderFindResults(results, query) + '\n')
+      }
+    },
+  )
 
 cli
   .command('create-pursuit <id>', 'Create a new pursuit')
@@ -424,56 +423,6 @@ cli
   )
 
 cli
-  .command('write-marker', 'Write a session marker (pause)')
-  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--pursuit <id>', 'Pursuit id (required)')
-  .option('--project <id>', 'Project id (required)')
-  .option('--where <text>', 'State of work')
-  .option('--next <text>', 'First thing to do on return')
-  .option('--open <text>', "What's still open")
-  .option('--start <iso>', 'Session start ISO timestamp')
-  .option('--end <iso>', 'Session end ISO timestamp')
-  .option('--action-completed <text>', 'Completed action (repeatable)', {
-    type: [String],
-  })
-  .action(
-    async (opts: {
-      root?: string
-      pursuit?: string
-      project?: string
-      where?: string
-      next?: string
-      open?: string
-      start?: string
-      end?: string
-      actionCompleted?: string[]
-    }) => {
-      if (!opts.pursuit || !opts.project) {
-        throw new Error('--pursuit and --project are required')
-      }
-      const repoRoot = await resolveRepoRoot(opts.root)
-      const actionsCompleted = multistring(opts.actionCompleted)
-      const result = await writeMarker(repoRoot, {
-        pursuit: opts.pursuit,
-        project: opts.project,
-        ...(typeof opts.where === 'string' && opts.where.length > 0
-          ? { where: opts.where }
-          : {}),
-        ...(typeof opts.next === 'string' && opts.next.length > 0
-          ? { next: opts.next }
-          : {}),
-        ...(typeof opts.open === 'string' && opts.open.length > 0
-          ? { open: opts.open }
-          : {}),
-        ...(opts.start ? { session_start: opts.start } : {}),
-        ...(opts.end ? { session_end: opts.end } : {}),
-        ...(actionsCompleted ? { actions_completed: actionsCompleted } : {}),
-      })
-      process.stdout.write(JSON.stringify(result) + '\n')
-    },
-  )
-
-cli
   .command('write-capture', 'Write a thought to thoughts/unprocessed/')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--body <text>', 'Capture body (required)')
@@ -532,6 +481,10 @@ cli
   .option('--pursuit <id>', 'Disambiguate when project IDs collide')
   .option('--status <status>', 'active | on_hold | done | dropped (required)')
   .option('--reason <text>', 'Required when --status=dropped')
+  .option(
+    '--include-pursuit',
+    'Also return pursuit summary (id, projects, done/total, allResolved) for the upward-completion check',
+  )
   .action(
     async (
       projectId: string,
@@ -540,6 +493,7 @@ cli
         pursuit?: string
         status?: 'active' | 'on_hold' | 'done' | 'dropped'
         reason?: string
+        includePursuit?: boolean
       },
     ) => {
       if (!opts.status) throw new Error('--status is required')
@@ -549,6 +503,7 @@ cli
         status: opts.status,
         ...(opts.pursuit ? { pursuit: opts.pursuit } : {}),
         ...(opts.reason ? { reason: opts.reason } : {}),
+        ...(opts.includePursuit ? { include_pursuit: true } : {}),
       })
       process.stdout.write(JSON.stringify(result) + '\n')
     },
@@ -629,12 +584,19 @@ cli
   )
 
 cli
-  .command('add-item <project-id>', 'Append an Action item (or legacy DoD item)')
+  .command(
+    'check-items <project-id>',
+    'Toggle multiple Action items (or legacy DoD items) in one call',
+  )
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--pursuit <id>', 'Disambiguate when project IDs collide')
   .option('--section <section>', 'dod | action (required)')
-  .option('--text <text>', 'Item text (required)')
-  .option('--checked', 'Add as already checked')
+  .option(
+    '--match <text>',
+    'Substring or 0-based index of an item (repeatable)',
+    { type: [String] },
+  )
+  .option('--unchecked', 'Mark as unchecked instead of checked')
   .action(
     async (
       projectId: string,
@@ -642,6 +604,44 @@ cli
         root?: string
         pursuit?: string
         section?: 'dod' | 'action'
+        match?: string[]
+        unchecked?: boolean
+      },
+    ) => {
+      if (!opts.section) throw new Error('--section is required')
+      const matches = multistring(opts.match)
+      if (!matches || matches.length === 0) {
+        throw new Error('at least one --match is required')
+      }
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const normalized = matches.map((m) =>
+        /^\d+$/.test(m) ? Number(m) : m,
+      )
+      const result = await checkItems(repoRoot, {
+        project: projectId,
+        section: opts.section,
+        matches: normalized,
+        checked: !opts.unchecked,
+        ...(opts.pursuit ? { pursuit: opts.pursuit } : {}),
+      })
+      process.stdout.write(JSON.stringify(result) + '\n')
+    },
+  )
+
+cli
+  .command('add-item <project-id>', 'Append an item to a section (Actions, legacy DoD, or Notes)')
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--pursuit <id>', 'Disambiguate when project IDs collide')
+  .option('--section <section>', 'action | dod | notes (required)')
+  .option('--text <text>', 'Item text (required)')
+  .option('--checked', 'Add as already checked (action/dod only; ignored for notes)')
+  .action(
+    async (
+      projectId: string,
+      opts: {
+        root?: string
+        pursuit?: string
+        section?: 'dod' | 'action' | 'notes'
         text?: string
         checked?: boolean
       },
@@ -654,6 +654,44 @@ cli
         project: projectId,
         section: opts.section,
         text: opts.text,
+        ...(opts.pursuit ? { pursuit: opts.pursuit } : {}),
+        ...(opts.checked ? { checked: true } : {}),
+      })
+      process.stdout.write(JSON.stringify(result) + '\n')
+    },
+  )
+
+cli
+  .command(
+    'add-items <project-id>',
+    'Append multiple items to a section in one call',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--pursuit <id>', 'Disambiguate when project IDs collide')
+  .option('--section <section>', 'action | dod | notes (required)')
+  .option('--text <text>', 'Item text (repeatable)', { type: [String] })
+  .option('--checked', 'Add all as already checked (action/dod only)')
+  .action(
+    async (
+      projectId: string,
+      opts: {
+        root?: string
+        pursuit?: string
+        section?: 'dod' | 'action' | 'notes'
+        text?: string[]
+        checked?: boolean
+      },
+    ) => {
+      if (!opts.section) throw new Error('--section is required')
+      const texts = multistring(opts.text)
+      if (!texts || texts.length === 0) {
+        throw new Error('at least one --text is required')
+      }
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const result = await addItems(repoRoot, {
+        project: projectId,
+        section: opts.section,
+        texts,
         ...(opts.pursuit ? { pursuit: opts.pursuit } : {}),
         ...(opts.checked ? { checked: true } : {}),
       })
@@ -742,6 +780,42 @@ cli
       const repoRoot = await resolveRepoRoot(opts.root)
       const result = await movePursuit(repoRoot, { id, to: opts.to })
       process.stdout.write(JSON.stringify(result) + '\n')
+    },
+  )
+
+cli
+  .command(
+    'project-activity',
+    'Emit project-file git-log activity (the stream /narrate consumes)',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option(
+    '--since-commit <hash>',
+    'Resume from this commit (exclusive); falls back to scope window if not an ancestor of HEAD',
+  )
+  .option(
+    '--scope <scope>',
+    'daily | weekly | monthly | annual | pursuit (default: daily)',
+  )
+  .option('--pursuit <id>', 'Filter to one pursuit')
+  .option('--project <id>', 'Filter to one project (requires --pursuit)')
+  .action(
+    async (opts: {
+      root?: string
+      sinceCommit?: string
+      scope?: string
+      pursuit?: string
+      project?: string
+    }) => {
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const scope = (opts.scope ?? 'daily') as ActivityScope
+      const result = await projectActivity(repoRoot, {
+        sinceCommit: opts.sinceCommit,
+        scope,
+        pursuit: opts.pursuit,
+        project: opts.project,
+      })
+      process.stdout.write(JSON.stringify(result, null, 2) + '\n')
     },
   )
 

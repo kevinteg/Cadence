@@ -4,7 +4,6 @@ export { loadConfig } from './config.js'
 export { createPursuit } from './write/pursuit.js'
 export { createProject } from './write/project.js'
 export { createIdea } from './write/idea.js'
-export { writeMarker } from './write/marker.js'
 export { writeCapture } from './write/capture.js'
 export { writeReflection } from './write/reflection.js'
 export {
@@ -23,7 +22,6 @@ export type {
   Flag,
   Idea,
   IdeaState,
-  Marker,
   Progress,
   Project,
   ProjectStatus,

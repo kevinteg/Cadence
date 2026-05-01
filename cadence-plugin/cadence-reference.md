@@ -5,6 +5,64 @@ lifecycle mechanics, or operational recipes. The lean runtime at
 `cadence-runtime.md` carries the attention-shaping content; this file
 carries the rest.
 
+## Verb Catalogue
+
+Cadence's surface is 17 verbs grouped by cognitive mode. Use the group
+to find the right verb for what you're doing right now; consult each
+verb's `SKILL.md` or `/cadence:help <verb>` for its full contract.
+
+### Diverge — find what to build
+
+| Verb | Purpose |
+|---|---|
+| `brainstorm` | Divergent ideation. Generate quantity. Find what the Pursuit is. |
+| `develop` | Convergent evaluation on Ideas: PPCo, criteria, pre-mortems. Decide what to commit to. |
+| `promote` | Advance an Idea through the pipeline. Enforces the graduation gate (Why for Pursuit, Intent for Project, Concreteness for Action). |
+
+### Execute — do the work
+
+| Verb | Purpose |
+|---|---|
+| `start` | Open a project's view (Intent + actions + first unchecked). View-only — no session ceremony. |
+| `complete` | Mark an action done. First check promotes on_hold → active. Triggers upward completion prompts. |
+| `cancel` | Drop a project with a reason. Not completion — it didn't succeed or is no longer relevant. |
+| `capture` | Flow-safe parking lot. Get a thought out of your head, zero friction, no agent response. |
+| `waiting` | Record an external blocker so it's tracked, not forgotten. |
+
+### Reflect — see meaning, check state
+
+| Verb | Purpose |
+|---|---|
+| `reflect` | Weekly ritual: Get Clear, then Get Focused. See the whole picture. Set one Leveraged Priority. |
+| `narrate` | Generate the story (today, week, or pursuit-arc) from activity data. Make meaning visible. |
+| `close` | Run the closure ritual for a project or pursuit. Resolves unresolved Ideas. |
+| `reconcile` | Quiet on-demand report of system health (stale state, aging Ideas, dormant projects). |
+
+### Setup — one-off
+
+| Verb | Purpose |
+|---|---|
+| `init` | Bootstrap a new repo for Cadence. One-time per repo. |
+
+### Browse — navigation
+
+| Verb | Purpose |
+|---|---|
+| `status` | System dashboard with contextual next-step hints, or drill into pursuits / projects / actions. Each drill ends with an action menu showing the verbs applicable to the viewed entity. |
+| `find` | Search across projects, ideas, captures, and pursuits by case-insensitive substring. Results grouped by kind with per-group verb hints so any result is directly actionable. |
+
+### Discovery flow
+
+If you're new to Cadence and unsure where to start:
+
+1. `/cadence:status` — read the dashboard's contextual hints
+2. Follow a hint into a pursuit (`/cadence:status <id>` or numbered) to see its projects + the pursuit-level action menu
+3. Pick a project (`/cadence:status <project-id>`) to see its Intent, Actions, and the project-level action menu
+4. Use the verb the action menu suggests (`/cadence:start`, `/cadence:complete`, etc.)
+
+`/cadence:help` renders this catalogue inline; `/cadence:help <verb>`
+shows a single verb's contract.
+
 ## File Operations
 
 - All paths are relative to this repo root.
@@ -27,12 +85,18 @@ markdown content. The key formats are:
   projects.
 - **Idea** (`<id>.md`): frontmatter with id, parent, state, created,
   optional developed_at, promoted_to, closed_reason
-- **Marker** (`<timestamp>.md`): frontmatter with pursuit, project,
-  session_start, session_end; sections for Where, Next, Open
 - **Capture** (`<timestamp>.md`): frontmatter with captured, verb_context;
   raw input. Lives in `thoughts/unprocessed/`.
 - **Reflection** (`<YYYY-MM-DD>.md`): frontmatter with date, status, phase,
   leveraged_priority; sections for Get Clear and Get Focused
+- **Narrative** (`<cadence>-<period>.md` in `narratives/drafts/`):
+  frontmatter with cadence, generated_at, consumed_from_commit,
+  consumed_through_commit, projects_consulted; body is McAdams prose.
+  The frontmatter doubles as a watermark — the next /narrate run for
+  the same cadence reads the latest narrative and resumes from its
+  consumed_through_commit. Historical session markers (legacy
+  `pursuits/*/sessions/*.md`) may exist in older repos; they are
+  preserved on disk but no longer read or written by any verb.
 
 ## CLI Subcommand Catalog
 
@@ -43,15 +107,20 @@ list.
 ### Read subcommands
 
 `scan`, `report`, `status`, `flags`, `pursuits`, `pursuit <id>`,
-`project <id>`, `ideas`, `markers`, `captures`. All accept `--json` for
-structured output. Skills consume `--json` and reason over the typed
-result; the human-readable default is for the user invoking the CLI
-directly during an AI outage.
+`project <id>`, `ideas`, `captures`, `find <query>`,
+`project-activity`. All accept `--json` for structured output. Skills
+consume `--json` and reason over the typed result; the human-readable
+default is for the user invoking the CLI directly during an AI outage.
+
+`project-activity` is the stream `/narrate` consumes — git log of
+`pursuits/**/projects/*.md` rendered as a per-project event list.
+Supports `--scope` (daily/weekly/monthly/annual/pursuit) and
+`--since-commit <hash>` for watermark-based resume.
 
 ### Write subcommands
 
 `create-pursuit <id>`, `create-project <id>`, `create-idea <id>`,
-`write-marker`, `write-capture`, `write-reflection`,
+`write-capture`, `write-reflection`,
 `set-status <project-id>`, `set-idea-state <idea-id>`,
 `check <project-id>`, `add-item <project-id>`,
 `add-waiting-for <project-id>`, `flag-waiting-for <project-id>`,
@@ -141,31 +210,44 @@ The user can override — this is a guardrail, not a gate.
 Create the project file via the CLI:
 ```bash
 cadence create-project <slug> --pursuit <pursuit-id> \
-  --description "<the Intent narrative>" \
-  --action "<first action>"
+  --intent "<the Intent narrative>" \
+  --action "<first action>" --action "<second action>"
 ```
 
-Note: until the follow-up project `narrative-first-implementation`
-ships, the Intent narrative is passed via `--description` and lands as
-the project intro paragraph rather than a dedicated `## Intent`
-section. Do not pass `--dod` / `--dod-checked` for new projects — they
-are legacy flags retained only for parsing existing files.
+`--action` is repeatable — pass several at once when the user names
+multiple first moves. To add more actions after creation, prefer the
+bulk variant:
+```bash
+cadence add-items <slug> --pursuit <pursuit-id> --section action \
+  --text "<...>" --text "<...>"
+```
+
+Do not pass `--dod` / `--dod-checked` for new projects — they are
+legacy flags retained only for parsing existing files.
 
 The CLI rejects creation with zero actions and defaults the new project
-to `status: on_hold`. The project promotes to `active` when `/start`
-opens a session on it OR when the first action is checked off via
-`cadence check`. This keeps backlog projects out of the WIP count until
-they're actually being worked on.
+to `status: on_hold`. The project promotes to `active` when the first
+action is checked off via `cadence check` (or `/complete`). This keeps
+backlog projects out of the WIP count until they're actually being
+worked on.
 
 ## Completing a Project
 
-Triggered by `/complete` when the last action is checked:
+Triggered by `/complete` when the last action is checked. The mutating
+command (`cadence check` or `cadence check-items`) returns the
+post-mutation `actionProgress` directly — read it from the response
+to decide whether to prompt; do not re-fetch the project.
+
 1. System prompts: "All actions checked. Does the intent feel achieved?
    Complete this project, add more actions, or split?"
-2. **Complete:** update `status: done` via `cadence set-status`. Note
-   the milestone — this is worth acknowledging.
-3. **Add more actions:** use `cadence add-item --section action` for
-   each new action; project stays active.
+2. **Complete:** update `status: done` via
+   `cadence set-status <id> --status done --include-pursuit`. The
+   `--include-pursuit` flag returns the pursuit summary in the same
+   response — read `result.pursuit.allResolved` for the upward check
+   without a separate `cadence pursuit` call. Note the milestone — this
+   is worth acknowledging.
+3. **Add more actions:** use `cadence add-items --section action`
+   (bulk) for each new action; project stays active.
 4. **Split:** existing project goes to `done` or `dropped` with a
    reason; new project(s) created via `cadence create-project` for the
    remaining work, each carrying its own Intent.
@@ -175,7 +257,7 @@ Triggered by `/complete` when the last action is checked:
    - On-hold projects that might be ready to activate
    - Suggest what to work on next based on leveraged priority and
      dependencies
-   - Ask: "Want to pick up [suggested project], or /pause for now?"
+   - Ask: "Want to open [suggested project], or stop here for now?"
 
 ## Waiting For
 

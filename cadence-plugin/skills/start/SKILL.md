@@ -1,51 +1,56 @@
 ---
-description: Start a session — curated selection or direct project entry with flow protection. TRIGGER on explicit /cadence:start invocation, OR when the user asks to begin a tracked work session by name (e.g., "let's start a session", "start working on X", "open a session on Y"). SKIP for conversation that merely picks a topic to think about without requesting a tracked session.
+description: Open a project view — curated selection or direct project entry. TRIGGER on explicit /cadence:start invocation, OR when the user asks to begin work by name (e.g., "let's start a session", "start working on X", "open X"). SKIP for conversation that merely picks a topic to think about.
 ---
 
 # /start
 
-Begin a work session. Reference `workflows/verb-contracts.md` for the
-start register.
+Open a project for work. Reference `workflows/verb-contracts.md` for
+the start register.
+
+`/start` is a view-only verb under the new lifecycle: it doesn't mark
+sessions, doesn't write pointers, doesn't load markers. It surfaces the
+project's current state so the user can pick up from where the project
+file says they are. Promotion from `on_hold` to `active` happens only
+on the first checked action — the act of working, not the act of
+viewing.
 
 ## Usage
 
 - `/start` — curated selection of what to work on
-- `/start <project>` — start a session on that project
+- `/start <project>` — open that project's view
 
 Arguments resolve via fuzzy match, partial match, or natural language.
 
 ## CLI binding
 
-Gather all curation data with one
-call:
+Gather all curation data with one call:
 
 ```bash
 cadence report --json
 ```
 
 The response includes `snapshot.config`, `snapshot.pursuits`,
-`snapshot.projects` (with `dodProgress`, `actionProgress`, `hasMarker`,
-`mostRecentMarker`), `snapshot.captures`, `snapshot.reflections`, and
-`flags`. The agent reads from this single payload — no separate Read or
-Glob calls needed for state.
+`snapshot.projects` (with `dodProgress`, `actionProgress`,
+`last_activity_at`), `snapshot.captures`, `snapshot.reflections`, and
+`flags`. The agent reads from this single payload — no separate Read
+or Glob calls needed for state.
 
 ## Steps
 
 ### No-argument entry (curated selection)
 
-1. Run `cadence report --json` and parse it. From the
-   payload extract:
+1. Run `cadence report --json` and parse it. From the payload extract:
    - **Leveraged Priority:** sort `snapshot.reflections` by date desc,
      take the first non-null `leveraged_priority`.
-   - **Most recent marker:** run
-     `cadence markers --json` (sorted desc by timestamp,
-     first entry is most recent across all pursuits).
+   - **Most recently active project:** active projects (status: active)
+     sorted desc by `last_activity_at`.
    - **Unprocessed captures count:** `snapshot.captures.length`.
    - **2-minute quick wins:** scan unchecked `actions` across active
      projects in active pursuits; heuristic — actions whose text is
      short (<= ~6 words) or matches imperative verbs ("verify", "send",
      "ping", "rename"). Surface 1-3.
    - **Reconciler flag summary:** `flags.length`.
+
 2. Present the curated entry:
 
    ```
@@ -64,55 +69,35 @@ Glob calls needed for state.
    [If reconciler flags > 0]: [N] flags — run /cadence:reconcile for details
    ```
 
-3. Wait for the user to choose. Resolve their choice to a project.
+3. Wait for the user to choose. Resolve their choice to a project, then
+   run the with-argument flow below.
 
-### With-argument entry (direct session)
+### With-argument entry (direct view)
 
 1. Resolve the argument to an `active` or `on_hold` project (fuzzy/partial
-   match against the `snapshot.projects` array from
-   `cadence scan --json`). If status is `done` or `dropped`:
+   match against `snapshot.projects`). If status is `done` or `dropped`:
    "[Project] is already [status]. Want to create a follow-up project?"
 
-2. If there is already an active session in this conversation, prompt:
-   "You have an active session on [project]. /pause first, or switch?"
-   If the user switches, auto-pause the current session before starting
-   the new one.
+2. Fetch the project state with
+   `cadence project <id> --pursuit <pursuit-id> --json`.
 
-### Promote on_hold projects
+3. Present the view:
 
-If the resolved project's `status` is `on_hold`, promote it to `active`
-before opening the session — starting the project IS the act of pulling
-it off the backlog:
-
-```bash
-cadence set-status <project-id> --pursuit <pursuit-id> --status active
-```
-
-This applies to both no-argument (curated) and with-argument entry paths.
-
-### Session start
-
-1. Read the most recent marker for this project:
-   ```bash
-   cadence markers --pursuit <pursuit-id> --project <project-id> --json
-   ```
-   The list is sorted desc by timestamp; the first entry is the most
-   recent.
-2. If a marker exists, present the ready-to-resume recap:
    ```
    [pursuit] / [project] — [N/M actions]
 
-   Next: [*next* field from marker, verbatim]
-   Where: [brief summary of *where* field]
-   ```
-3. If no marker exists, fetch the project state with
-   `cadence project <id> --pursuit <pursuit-id> --json` and
-   present:
-   ```
-   [pursuit] / [project] — [N/M actions]
+   Intent: [first sentence or two of intent]
 
-   New session. First action: [first unchecked action]
+   Next: [first unchecked action text]
    ```
+
+   If status is `on_hold`, append `[not started — first action check
+   promotes to active]`.
+
+4. The user works the project from there — checking actions via
+   `/complete`, adding via `/cadence:add` (or direct CLI), capturing
+   via `/capture`, etc. The first checked action will auto-promote
+   `on_hold` → `active` via the existing CLI behavior.
 
 ### During flow
 
@@ -120,7 +105,7 @@ This applies to both no-argument (curated) and with-argument entry paths.
 - **No unsolicited suggestions.** No "have you considered." No observations.
 - **Batch everything for breakpoints.** If you notice something (a quick
   win, a flag, a concern), hold it until a natural pause.
-- **Keep the session moving.** After completing a step, prompt with what's
+- **Keep the work moving.** After completing a step, prompt with what's
   next rather than waiting for explicit continuation.
 
 ### At breakpoints (natural pauses, task completion, user-initiated)
@@ -130,9 +115,11 @@ This applies to both no-argument (curated) and with-argument entry paths.
 
 ## Guardrails
 
-- No mid-flow interruptions.
-- No unsolicited suggestions during flow state.
-- Captures via /capture are parking lot only — no triage, no response.
-- No evaluative commentary on progress.
-- Sessions do NOT auto-close. The user must explicitly `/pause` or
-  `/complete` actions. No auto-mark on natural language exit signals.
+- **No mid-flow interruptions.**
+- **No unsolicited suggestions during flow state.**
+- **Captures via /capture are parking lot only — no triage, no response.**
+- **No evaluative commentary on progress.**
+- **No session ceremony.** /start is a view; the project file is the truth.
+  There is no /pause counterpart, no marker write, no active-session
+  pointer. Lifecycle changes happen via `/complete` (action checks),
+  `/cancel` (drop), or direct CLI mutations.

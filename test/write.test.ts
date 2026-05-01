@@ -1,24 +1,27 @@
 import { test } from 'node:test'
 import { strict as assert } from 'node:assert'
-import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises'
 import path from 'node:path'
 import os from 'node:os'
 import { createPursuit } from '../src/write/pursuit.ts'
 import { createProject } from '../src/write/project.ts'
 import { createIdea } from '../src/write/idea.ts'
-import { writeMarker } from '../src/write/marker.ts'
 import { writeCapture } from '../src/write/capture.ts'
 import { writeReflection } from '../src/write/reflection.ts'
 import {
   addItem,
+  addItems,
   addWaitingFor,
   checkItem,
+  checkItems,
   flagWaitingFor,
   setIdeaState,
   setProjectStatus,
 } from '../src/write/edits.ts'
 import { movePursuit } from '../src/write/move.ts'
 import { scan } from '../src/scan/repo.ts'
+import { writeFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 
 const NOW = new Date('2026-04-27T13:00:00Z')
 
@@ -133,40 +136,6 @@ test('createIdea round-trip with body', async () => {
     assert.equal(idea.id, 'spark')
     assert.equal(idea.state, 'seed')
     assert.match(idea.body, /worth exploring/)
-  } finally {
-    await rm(dir, { recursive: true, force: true })
-  }
-})
-
-test('writeMarker creates session file with where/next/open', async () => {
-  const dir = await tempRepo()
-  try {
-    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
-    await createProject(dir, {
-      pursuit: 'p',
-      id: 'proj',
-      dod: ['ship'],
-      actions: ['do thing'],
-      now: NOW,
-    })
-    await writeMarker(dir, {
-      pursuit: 'p',
-      project: 'proj',
-      where: 'context',
-      next: 'first thing',
-      open: 'big question',
-      actions_completed: ['cleared inbox'],
-      now: NOW,
-    })
-    const snapshot = await scan(dir, NOW)
-    assert.equal(snapshot.markers.length, 1)
-    const m = snapshot.markers[0]!
-    assert.equal(m.where, 'context')
-    assert.equal(m.next, 'first thing')
-    assert.equal(m.open, 'big question')
-    assert.deepEqual(m.actions_completed, ['cleared inbox'])
-    // Project should reflect the new marker after re-scan.
-    assert.equal(snapshot.projects[0]?.hasMarker, true)
   } finally {
     await rm(dir, { recursive: true, force: true })
   }
@@ -479,29 +448,216 @@ test('checkItem promotes on_hold → active when first action is checked; not on
   }
 })
 
-test('writeMarker omits empty section bodies', async () => {
+test('checkItem returns post-mutation actionProgress and dodProgress', async () => {
   const dir = await tempRepo()
   try {
     await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
     await createProject(dir, {
       pursuit: 'p',
       id: 'proj',
-      dod: ['x'],
-      actions: ['y'],
+      actions: ['First', 'Second', 'Third'],
       now: NOW,
     })
-    await writeMarker(dir, {
-      pursuit: 'p',
+    const r = await checkItem(dir, {
       project: 'proj',
-      where: 'something happened',
-      // next + open intentionally omitted
+      section: 'action',
+      match: 'First',
+    })
+    assert.equal(r.actionProgress.done, 1)
+    assert.equal(r.actionProgress.total, 3)
+    assert.equal(r.dodProgress.done, 0)
+    assert.equal(r.dodProgress.total, 0)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('checkItems toggles multiple items in one call and returns combined progress', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'proj',
+      actions: ['One', 'Two', 'Three', 'Four'],
       now: NOW,
     })
+    const r = await checkItems(dir, {
+      project: 'proj',
+      section: 'action',
+      matches: ['One', 'Three', 'Four'],
+    })
+    assert.deepEqual(r.matched, ['One', 'Three', 'Four'])
+    assert.equal(r.actionProgress.done, 3)
+    assert.equal(r.actionProgress.total, 4)
+    assert.equal(r.promoted, true) // first action checked promotes on_hold → active
     const snapshot = await scan(dir, NOW)
-    assert.equal(snapshot.markers[0]?.where, 'something happened')
-    assert.equal(snapshot.markers[0]?.next, '')
-    assert.equal(snapshot.markers[0]?.open, '')
-    assert.deepEqual(snapshot.markers[0]?.actions_completed, [])
+    const proj = snapshot.projects[0]!
+    assert.equal(proj.actions.filter((a) => a.checked).length, 3)
+    assert.equal(proj.status, 'active')
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('setProjectStatus with include_pursuit returns the pursuit summary in one call', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'alpha',
+      actions: ['a'],
+      now: NOW,
+    })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'beta',
+      actions: ['b'],
+      now: NOW,
+    })
+    // Mark alpha done; pursuit not yet fully resolved.
+    const r1 = await setProjectStatus(dir, {
+      id: 'alpha',
+      status: 'done',
+      include_pursuit: true,
+    })
+    assert.ok(r1.pursuit)
+    assert.equal(r1.pursuit!.id, 'p')
+    assert.equal(r1.pursuit!.total, 2)
+    assert.equal(r1.pursuit!.done, 1)
+    assert.equal(r1.pursuit!.allResolved, false)
+    // Mark beta done; pursuit now fully resolved.
+    const r2 = await setProjectStatus(dir, {
+      id: 'beta',
+      status: 'done',
+      include_pursuit: true,
+    })
+    assert.equal(r2.pursuit!.done, 2)
+    assert.equal(r2.pursuit!.allResolved, true)
+    // Without --include-pursuit, pursuit field omitted.
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'gamma',
+      actions: ['g'],
+      now: NOW,
+    })
+    const r3 = await setProjectStatus(dir, {
+      id: 'gamma',
+      status: 'on_hold',
+    })
+    assert.equal(r3.pursuit, undefined)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('addItem returns post-mutation progress', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'proj',
+      actions: ['Existing'],
+      now: NOW,
+    })
+    const r = await addItem(dir, {
+      project: 'proj',
+      section: 'action',
+      text: 'New action',
+    })
+    assert.equal(r.actionProgress.done, 0)
+    assert.equal(r.actionProgress.total, 2)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('addItems appends multiple items in one call (bulk variant)', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'proj',
+      actions: ['Existing'],
+      now: NOW,
+    })
+    const r = await addItems(dir, {
+      project: 'proj',
+      section: 'action',
+      texts: ['First new', 'Second new', 'Third new'],
+    })
+    assert.equal(r.added, 3)
+    assert.equal(r.actionProgress.total, 4)
+    assert.equal(r.actionProgress.done, 0)
+    const snapshot = await scan(dir, NOW)
+    const proj = snapshot.projects[0]!
+    assert.equal(proj.actions.length, 4)
+    assert.equal(proj.actions[3]?.text, 'Third new')
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('addItem with section notes appends a paragraph and creates the section', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'proj',
+      actions: ['kickoff'],
+      now: NOW,
+    })
+    const r1 = await addItem(dir, {
+      project: 'proj',
+      section: 'notes',
+      text: 'First note paragraph.',
+    })
+    // Notes don't affect checklist progress
+    assert.equal(r1.actionProgress.total, 1)
+    const r2 = await addItem(dir, {
+      project: 'proj',
+      section: 'notes',
+      text: 'Second note paragraph.',
+    })
+    assert.equal(r2.actionProgress.total, 1)
+    const text = await readFile(
+      path.join(dir, 'pursuits/p/projects/proj.md'),
+      'utf8',
+    )
+    assert.match(text, /## Notes/)
+    assert.match(text, /First note paragraph\./)
+    assert.match(text, /Second note paragraph\./)
+    // Both paragraphs should be present, separated by a blank line.
+    assert.match(text, /First note paragraph\.\n\nSecond note paragraph\./)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('addItems with section notes appends multiple paragraphs in one call', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'proj',
+      actions: ['kickoff'],
+      now: NOW,
+    })
+    await addItems(dir, {
+      project: 'proj',
+      section: 'notes',
+      texts: ['Para one.', 'Para two.', 'Para three.'],
+    })
+    const text = await readFile(
+      path.join(dir, 'pursuits/p/projects/proj.md'),
+      'utf8',
+    )
+    assert.match(text, /## Notes\n\nPara one\.\n\nPara two\.\n\nPara three\./)
   } finally {
     await rm(dir, { recursive: true, force: true })
   }

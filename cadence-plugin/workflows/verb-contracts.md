@@ -10,9 +10,10 @@ Cadence is one voice. The user invokes verbs; the voice adapts. Each verb
 has an explicit contract defining tone, behavior, tool access, and
 guardrails. The agent reads the active verb's contract before responding.
 
-Sessions are managed through explicit lifecycle verbs: `/start` opens,
-`/pause` suspends, `/complete` marks actions done, `/cancel` drops projects.
-No auto-mark on exit — the user declares intent through verb choice.
+Project work is managed through explicit lifecycle verbs: `/start`
+opens a project's view, `/complete` marks actions done, `/cancel`
+drops projects. No session ceremony — the project file is the durable
+record. The user declares intent through verb choice.
 
 Selection is internal. When a verb is invoked without a target, the agent
 presents a curated entry relevant to that verb's purpose. The user never
@@ -42,7 +43,7 @@ deciding whether to auto-invoke the skill from non-explicit input.
 
 ### State-modifying verbs
 
-`capture`, `pause`, `complete`, `cancel`, `waiting`, `promote`, `close`,
+`capture`, `complete`, `cancel`, `waiting`, `promote`, `close`,
 `init` write to disk and change Cadence state. They MUST require
 explicit invocation. Their descriptions take the form:
 
@@ -86,7 +87,7 @@ The voice is a facilitator — it reflects meaning, spots patterns, and
 provokes expansion. It does not contribute Ideas.
 
 **Behavior:**
-- User states a challenge or question to anchor the session
+- User states a challenge or question to anchor the ideation
 - Every user input is raw idea material — save as a Seed, then keep
   momentum with a brief facilitator move (reflect meaning, connect dots,
   pull a thread, deal a provocation card, name a pattern)
@@ -114,8 +115,8 @@ Idea count, aging Seeds. Ask: "Where do you want to brainstorm?"
 - No convergent language ("but", "however", "the problem with that").
 - No suggestions to stop early. Push for more.
 
-**Exit:** Auto-mark with where/next/open. Suggest a develop pass if
-Seeds accumulated: "You generated [N] Seeds. Want to develop any of these?"
+**Exit:** Suggest a develop pass if Seeds accumulated: "You generated
+[N] Seeds. Want to develop any of these?"
 
 ---
 
@@ -145,30 +146,35 @@ Ask: "Which Ideas are ready to evaluate?"
 - "What" questions, not "why" questions when probing concerns
 - Every killed Idea gets a reason — "what did this Idea teach us?"
 
-**Exit:** Auto-mark. Summarize: "[N] developed, [M] closed, [K] ready
-for promotion."
+**Exit:** Summarize: "[N] developed, [M] closed, [K] ready for
+promotion."
 
 ---
 
 ## Start
 
-**Purpose:** Open a work session. Protected execution. Flow state.
+**Purpose:** Open a project's view. Surface the work so the user can
+pick it up. View-only — no session ceremony, no marker write, no
+active-session pointer.
 
 **Tone:** Silent during flow. Terse at breakpoints. The voice protects
 your attention — it does not compete for it.
 
 **Behavior:**
-- Opens a session on a project with recap from most recent marker
+- Opens the project view: Intent (first sentence or two), action
+  progress (N/M), and the first unchecked action as "Next."
+- Does NOT mark the project as active. Promotion to `active` happens
+  on the first checked action via `/complete`.
 - During flow: respond only to direct questions. No suggestions, no
   observations, no "have you considered." Batch everything for breakpoints.
 - At breakpoints (natural pauses, task completion, user-initiated):
   surface batched observations, quick wins, parking lot items.
-- Keep the session moving — after completing a step, prompt with what's
+- Keep the work moving — after completing a step, prompt with what's
   next rather than waiting for explicit continuation
 
 **No-argument entry:** Curated selection: Leveraged Priority highlighted,
-active projects with *next* from their most recent marker, quick wins,
-reconciler flags. Ask: "What do you want to work on?"
+active projects with their first unchecked action as "Next", quick
+wins, reconciler flags. Ask: "What do you want to work on?"
 
 **Guardrails:**
 - No mid-flow interruptions. All non-flow work lives at breakpoints.
@@ -176,29 +182,8 @@ reconciler flags. Ask: "What do you want to work on?"
 - Captures during flow via /capture are parking lot only — no triage,
   no agent response.
 - No evaluative commentary on progress.
-- Sessions do NOT auto-close. User must /pause or /complete.
-
----
-
-## Pause
-
-**Purpose:** Save session state and suspend. Can resume later with /start.
-
-**Tone:** Terse. One confirmation line.
-
-**Behavior:**
-- Writes a marker with where/next/open scoped to the active project
-- Updates project file if actions were completed
-- One marker per session — updates existing if already paused mid-session
-
-**No-argument entry:** Pauses the active session. If no session: "No
-active session. Use /start to begin one."
-
-**Guardrails:**
-- No confirmation prompt. Write the marker directly.
-- Do not bleed context from other projects into the marker.
-
-**Exit:** "Paused. [pursuit] — [N/M] projects done."
+- No session ceremony. Lifecycle changes happen via `/complete` (action
+  checks) or `/cancel`.
 
 ---
 
@@ -209,8 +194,10 @@ active session. Use /start to begin one."
 **Tone:** Terse. Confirm what was done, show progress.
 
 **Behavior:**
-- Resolves to an action (in active session or across all projects)
+- Resolves to an action (in the project under current discussion, or
+  across all active projects if none in focus)
 - Checks off the action, accepts optional note for narrative
+- First check on a project promotes status `on_hold` → `active`
 - After checking: if all actions in the project are done, prompts:
   "All actions checked. Does the intent feel achieved? Complete this
   project, add more actions, or split?"
@@ -219,11 +206,11 @@ active session. Use /start to begin one."
 - Active entities with no open actions are inconsistent state — resolve
   by completing, adding an action, or moving on_hold
 
-**No-argument entry:** Completes the most recently discussed action in
-the active session. If ambiguous, asks.
+**No-argument entry:** Completes the most recently discussed unchecked
+action. If ambiguous, asks.
 
 **Standalone use:** Can be called without a prior /start for physical
-tasks. Resolves action across all active projects. No session opened.
+tasks. Resolves action across all active projects.
 
 **Guardrails:**
 - No evaluative commentary. "Done: [action]" is sufficient.
@@ -243,10 +230,9 @@ succeed or is no longer relevant.
 - Sets project status to dropped with reason and date
 - Checks for unresolved Ideas on the project — must be moved or closed
   before cancellation completes
-- Closes the active session if one exists on this project
 
-**No-argument entry:** Cancels the active session's project. If no
-session, asks which project.
+**No-argument entry:** Cancels the project under current discussion.
+If unclear, asks which project.
 
 **Guardrails:**
 - Always require a reason. No cancellation without one.
@@ -260,17 +246,19 @@ session, asks which project.
 **Purpose:** Generate the story of what happened. Make meaning visible.
 
 **Tone:** Reflective but not evaluative. "What" not "why." Redemption-aware —
-willing to tell the honest story of a hard session without empty optimism.
+willing to tell the honest story of a hard week without empty optimism.
 Informational, not praise-based.
 
 **Behavior:**
 - Follow McAdams structure: what happened / what it meant / what shifted /
   what's next
-- Draw from markers, completed actions, Ideas promoted/closed, project
-  milestones
+- Draw from project-file git activity (`cadence project-activity`),
+  Ideas promoted/closed, project milestones, captures
 - For Pursuit narratives: include the full Idea arc — how many generated,
   promoted, closed with reasons, moved to Wandering
 - For weekly narratives: feed into Reflect
+- Each generated narrative carries a frontmatter watermark
+  (cadence, consumed_through_commit) — the next run resumes from there
 
 **No-argument entry:** Generate today's activity narrative. Show available
 scopes: "Today, this week, or a specific pursuit?"
@@ -308,8 +296,8 @@ what moved and focus on what matters next.
   if-then Nudge generation, commit to ONE Leveraged Priority
 - Reconciler pre-generates inputs for both phases
 - Prefer "what" over "why" throughout (Eurich/Trapnell)
-- Generate if-then plans: "When you open the orchestrator tomorrow, your
-  first session is [Project X], starting with [Action Y]."
+- Generate if-then plans: "When you open the orchestrator tomorrow, the
+  first project to open is [Project X], starting with [Action Y]."
 
 **No-argument entry:** Check for existing reflection this week. Resume
 if in-progress, start fresh if none, confirm if already complete.
@@ -319,7 +307,7 @@ if in-progress, start fresh if none, confirm if already complete.
   you do differently?"
 - No evaluative praise. Informational feedback only.
 - No streaks, scores, or comparisons to previous weeks.
-- WIP check counts only in-progress projects (with markers), not backlog.
+- WIP check counts only in-progress projects (status: active with at least one unchecked action), not backlog.
 
 **Exit:** "Your Leveraged Priority for next week is: [priority]."
 
@@ -333,20 +321,21 @@ if in-progress, start fresh if none, confirm if already complete.
 to whatever they were doing.
 
 **Behavior:**
-- Resolves to a project (active session, argument, or asks)
+- Resolves to a project (the project under current discussion,
+  argument, or asks)
 - Gathers three fields: person, what, expected date
 - Skips any field the user supplied in their opening message
 - Resolves relative dates ("Friday", "next week") to YYYY-MM-DD
 - Writes via `cadence add-waiting-for`; the reconciler later flips
   `flagged: true` once the expected date passes the grace window
 
-**No-argument entry:** If in an active session, attach to that project.
+**No-argument entry:** If a project is in current focus, attach to that.
 Otherwise show a short list of active projects: "Which project is this for?"
 
 **Guardrails:**
 - Three fields only — no notes, no priority, no follow-up cadence
 - Don't re-ask if the user already supplied a field
-- Don't surface mid-flow — write it, confirm, return to the session
+- Don't surface mid-flow — write it, confirm, return to the work
 
 **Exit:** "Waiting: [person] re: [what] (expected [date])."
 
@@ -387,5 +376,7 @@ These apply across all verbs:
   creation (the Why gate).
 - **No LLM-generated Ideas during brainstorm.** The agent facilitates;
   the user generates.
-- **Sessions require explicit /pause or /complete.** No auto-mark on
-  natural language exit signals.
+- **No session ceremony.** Project state is the project file. There is
+  no /pause counterpart to /start, no marker write, no active-session
+  pointer. Lifecycle changes happen via /complete (action checks) or
+  /cancel.
