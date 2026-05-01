@@ -9,15 +9,6 @@ created: 2026-04-27
 
 Bring the 7 journey YAMLs in journeys/ up to date with the canonical data model. Surfaced when the journey suite was run end-to-end against the rewritten skills: every journey failed at least one assertion, and every failure traced to journey-spec staleness rather than skill bugs.
 
-## Definition of Done
-
-- [x] All 7 journey YAMLs use state: for idea fixtures and assertions (was stage:)
-- [x] idea-closure asserts on state: closed + closed_reason: instead of a non-existent resolution: field; step 2 closes both ideas uniformly so assertions are clean
-- [x] contains: assertions match project IDs the skills actually render (was matching title: body text the skills don't print)
-- [x] capture-flow-safe teardown narrowed to thoughts/unprocessed/*.md plus assert_clean so any captures the skill writes get cleared
-- [x] All 7 journeys pass end-to-end against the rewritten skills
-- [x] git status clean after journey runs (no leaked test fixtures)
-
 ## Actions
 
 - [x] Run journey suite via subagent; collect failure reasons

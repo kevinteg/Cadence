@@ -7,14 +7,6 @@ created: 2026-04-20
 
 # WIP Guardrails
 
-## Definition of Done
-- [x] /status warns when active projects > `max_active_projects`
-- [x] Project creation (CLAUDE.md convention) checks WIP limits before creating, warns if over
-- [x] Pursuit activation (someday → active) checks project count, warns if over
-- [x] /reflect Get Focused WIP check suggests specific projects to pause/drop when overextended
-- [x] Thresholds configurable in cadence.yaml under `wip_limits` (default: `max_active_projects: 10`)
-- [x] Warnings are firm but not blocking (user can override)
-
 ## Actions
 - [x] Add `wip_limits` section to cadence.yaml with `max_active_projects: 10`
 - [x] Update /status to check WIP limits and display warning in Flags section

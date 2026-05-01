@@ -7,26 +7,6 @@ created: 2026-04-20
 
 # Curated Session Entry & Session Awareness
 
-## Definition of Done
-
-### Session entry (via /do)
-- [x] `/do` (no argument) shows curated entry: leveraged priority, most recent session, active pursuit overview with project counts
-- [x] Entry surfaces 2-minute quick wins (trivial unchecked actions) if any exist
-- [x] Entry shows unprocessed thought count with prompt to triage if > 0
-- [x] Entry shows reconciler flag summary (count + most urgent) — degrades gracefully if none
-- [x] `/do <project>` shows pursuit context header before project recap with auto-resume from marker
-
-### Session awareness (visible context throughout)
-- [x] Session context line shown at key touchpoints: after /do, in /recap, after /mark
-- [x] Context line format shows current pursuit, project, and progress
-- [x] /mark exit shows pursuit-level context (not just "marker saved")
-- [x] Project completion triggers pursuit checkpoint with routing (already in CLAUDE.md — verify it works)
-- [x] /recap includes session context
-
-### Tested
-- [x] Tested curated entry against real data
-- [x] Tested session context line appears at all touchpoints
-
 ## Actions
 - [x] Define session context line format for each level
 - [x] Design curated entry screen layout (information hierarchy, what shows vs. hides)

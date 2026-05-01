@@ -7,16 +7,6 @@ created: 2026-04-20
 
 # Implement Reconciler
 
-## Definition of Done
-- [x] Detect waiting_for items past `expected` + `waiting_for_grace_days` (from cadence.yaml), set `flagged: true`
-- [x] Detect dormant projects (active, no marker/action activity in 14+ days)
-- [x] Detect stale markers (most recent marker per project older than `marker_stale_days`)
-- [x] Detect structural issues (empty DoD, projects with all actions done but status not `done`)
-- [x] Surface someday pursuit cues whose trigger conditions are met
-- [x] /reflect Get Clear step 3c presents reconciler flags with suggested actions
-- [x] /status Flags section uses reconciler output
-- [x] Tested against real data with at least one synthetic flag scenario
-
 ## Actions
 - [x] Define reconciler flag output format (type, severity, entity, suggested action)
 - [x] Implement waiting_for overdue detection in /status and /reflect

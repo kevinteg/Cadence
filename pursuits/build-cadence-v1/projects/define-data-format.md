@@ -7,18 +7,6 @@ created: 2026-04-15
 
 # Define Data Format
 
-## Definition of Done
-- [x] Hierarchy decided (Pursuit > Project > Action)
-- [x] Pursuit file format with frontmatter schema
-- [x] Project file format with Definition of Done as first-class checklist
-- [x] Marker file format with session context sections
-- [x] Thought file format with triage suggestion
-- [x] Reflection file format that serves as its own checkpoint
-- [x] Persistence model decided (markdown source of truth + SQLite cache)
-- [x] Directory layout designed with lifecycle directories
-- [x] Session levels defined (project, pursuit, orchestrator)
-- [x] Formats validated by writing real seed data
-
 ## Actions
 - [x] Draft initial state examples (markdown format exploration)
 - [x] Evaluate markdown vs SQLite vs hybrid persistence

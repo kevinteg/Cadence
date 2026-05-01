@@ -7,16 +7,6 @@ created: 2026-04-17
 
 # Implement Agent Skills
 
-## Definition of Done
-- [x] CLAUDE.md teaches agent the full Cadence vocabulary and conventions
-- [x] /recap shows curated session entry with pursuit/project status
-- [x] /mark writes a well-structured session marker
-- [x] /reflect walks through the full Get Clear + Get Focused ritual
-- [x] /thought captures and triages a raw idea
-- [x] /status shows a system health dashboard
-- [x] Agent naturally prompts for markers on session exit
-- [x] All commands work against real seed data in this repo
-
 ## Actions
 - [x] Draft CLAUDE.md with vocabulary, modes, and conventions
 - [x] Draft /recap command

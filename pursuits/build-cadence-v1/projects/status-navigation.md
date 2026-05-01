@@ -7,15 +7,6 @@ created: 2026-04-21
 
 # Status Navigation
 
-## Definition of Done
-- [x] `/status pursuits` lists all pursuits grouped by lifecycle (active, someday), hiding archived
-- [x] `/status <pursuit>` lists projects in that pursuit, showing active and not-started, hiding done
-- [x] `/status <project>` shows actions and DoD for that project (works in or out of session)
-- [x] `/status` (no argument) remains the system dashboard with counts and flags
-- [x] Arguments resolve via fuzzy match, partial match, and natural language
-- [x] Numbered shortcuts work after any list output (e.g., `/status 1` drills into first item)
-- [x] Display rules: active/not-started shown, done hidden (with count summary), on_hold shown dimmed
-
 ## Actions
 - [x] Design output format for each drill-down level (pursuits, projects, actions)
 - [x] Update status.md command to accept optional argument and route to appropriate level
