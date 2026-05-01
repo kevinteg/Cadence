@@ -291,9 +291,20 @@ what moved and focus on what matters next.
 - Phase 1 — Get Clear: process captures, clear 2-minute items, review
   reconciler flags (including Idea-specific flags: aging Seeds, unpromoted
   Developed Ideas, growing backlog), confirm project relevance
-- Phase 2 — Get Focused: recap (narrative-generated), learn what worked,
-  WIP check (max_active_projects, in-progress only), waiting-for review,
-  if-then Nudge generation, commit to ONE Leveraged Priority
+- Phase 2 — Get Focused: recap (narrative-generated), what worked /
+  what didn't work (interactive), WIP check (max_active_projects,
+  in-progress only), waiting-for review, if-then Nudge generation,
+  commit to ONE Leveraged Priority
+- **Phase 2 is interactive.** The user owns the reflection. Open
+  questions first, follow-ups to deepen, and the agent surfaces its
+  own observations ONLY after the user has answered fully — phrased
+  as "I also noticed X — does that resonate?", never as a top-of-list
+  claim. Pre-filling answers short-circuits meaning-making.
+- The Leveraged Priority question is asked verbatim: "What is the one
+  thing you will do that will make you feel like you won the week?"
+  Once the user names a candidate, help them shape it interactively
+  for achievability + challenge balance (proof shape, ceiling check,
+  bundled-goals check). Don't pre-suggest the priority.
 - Reconciler pre-generates inputs for both phases
 - Prefer "what" over "why" throughout (Eurich/Trapnell)
 - Generate if-then plans: "When you open the orchestrator tomorrow, the
@@ -307,9 +318,13 @@ if in-progress, start fresh if none, confirm if already complete.
   you do differently?"
 - No evaluative praise. Informational feedback only.
 - No streaks, scores, or comparisons to previous weeks.
+- No pre-filled answers in Phase 2. Open question, wait, follow up,
+  THEN add observations — in that order. Always.
 - WIP check counts only in-progress projects (status: active with at least one unchecked action), not backlog.
 
-**Exit:** "Your Leveraged Priority for next week is: [priority]."
+**Exit:** Brief ELI5 recap of what Reflect produced (captures triaged,
+structural changes, worked/didn't-work narrative, LP), then: "Your
+Leveraged Priority for next week is: [priority]."
 
 ---
 

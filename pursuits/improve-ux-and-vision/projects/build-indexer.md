@@ -1,6 +1,6 @@
 ---
 id: build-indexer
-pursuit: cadence-performance-and-indexing
+pursuit: improve-ux-and-vision
 status: on_hold
 created: 2026-04-17
 ---

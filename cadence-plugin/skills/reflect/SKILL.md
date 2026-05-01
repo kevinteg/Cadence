@@ -94,14 +94,34 @@ to land in this thread.
 
 5. **Phase 2 — Get Focused**
 
+   Phase 2 is interactive. The user owns the reflection. Every prompt
+   below is an open question first, with a follow-up cycle to deepen
+   the user's own thinking. The agent surfaces its own observations
+   only AFTER the user has answered fully — and frames them as
+   "I also noticed X — does that resonate?", never as a top-of-list
+   claim. Pre-filling answers short-circuits meaning-making (the user
+   either rubber-stamps or argues with the agent's list, neither of
+   which is the reflective work the ritual exists to do).
+
    a. Generate a recap: summarize the week from project-file activity
       (run `cadence project-activity --scope weekly`) and idea state
       changes. Keep it to a paragraph. Or invoke `/cadence:narrate week`
       to get the McAdams version.
 
-   b. Ask "What worked well this week?" Record the answer.
+   b. **What worked well this week?** Open question — wait for the
+      user's answer. Use follow-ups to deepen ("what made that work?",
+      "say more about that"), not to lead. After the user has finished
+      naming what worked, the agent MAY add observations it noticed
+      that the user did not — phrased as "I also noticed X — does
+      that resonate?" Capture all of it as the worked-well narrative.
 
-   c. WIP check: the `wip_over_limit` flag from step 4c already covers
+   c. **What didn't work this week?** Same shape — open question first,
+      follow-ups to deepen, agent observations only after the user has
+      answered. The "what didn't work" pass is not in the legacy step
+      ordering; treat it as a distinct turn after step b. Use "what
+      happened" / "what shifted" framing — never "why did you fail."
+
+   d. WIP check: the `wip_over_limit` flag from step 4c already covers
       this if it fired. Otherwise count `snapshot.projects` filtered to
       `status: active` with at least one unchecked action. If over
       `snapshot.config.max_active_projects`, suggest specific projects
@@ -109,21 +129,33 @@ to land in this thread.
       `last_activity_at` or lowest alignment with the leveraged
       priority.
 
-   d. Review waiting-for items: who owes you what, and what's your plan
+   e. Review waiting-for items: who owes you what, and what's your plan
       if they don't deliver?
 
-   e. Generate if-then Nudges: "When you start tomorrow, the first
+   f. Generate if-then Nudges: "When you start tomorrow, the first
       project to open is [Project X], starting with [Action Y]."
 
-   f. Ask: "What's the ONE thing that would make next week a win?"
-      Record as the leveraged priority.
+   g. **Leveraged Priority — ask the canonical question verbatim:**
+      "What is the one thing you will do that will make you feel like
+      you won the week?" Wait for the user's candidate. Once they have
+      one, help them shape it interactively for the right balance of
+      achievable and challenging — pressure-test by asking about the
+      win condition's shape ("what does proof look like at next
+      Friday's Reflect?"), the achievability ceiling ("is this one
+      week's worth of work, or three?"), and the bundled-goals risk
+      ("of these N things you named, which one IS the win and the
+      others are preconditions?"). Don't pre-suggest the priority.
+      Once the user names it, capture it verbatim as the leveraged
+      priority.
 
-   g. Finalize the reflection file via the CLI:
+   h. Finalize the reflection file via the CLI:
       ```bash
       cadence write-reflection \
         --date <YYYY-MM-DD> --status complete --phase get_focused \
         --leveraged-priority "<their answer>"
       ```
 
-6. Close with: "Reflection complete. Your leveraged priority for next week
-   is: [priority]."
+6. Close with an ELI5 recap of what the Reflect produced (captures
+   triaged, any structural changes, the worked/didn't-work narrative,
+   the LP), then the canonical exit line: "Your Leveraged Priority
+   for next week is: [priority]."

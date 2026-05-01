@@ -84,3 +84,18 @@ Workflows are at `cadence-plugin/workflows/`. The provocation deck is at
 When editing skills or workflows, edit the plugin files directly —
 they are the single source of truth. The `.claude/commands/` directory
 only contains dev-only commands (run-journey).
+
+## Product Behavior vs Personal Memory
+
+In this repo, do **not** save working-style preferences, conversational
+patterns, or verb behavior to per-user memory at
+`~/.claude/projects/.../memory/`. That memory is per-user and per-machine
+and does not ship with the plugin. Anything that should be how Cadence
+works for **everyone** belongs in the plugin's skill contracts
+(`cadence-plugin/skills/*/SKILL.md`), the runtime
+(`cadence-plugin/cadence-runtime.md`), or the verb contracts
+(`cadence-plugin/workflows/verb-contracts.md`) — so it survives
+installation, propagates to every user, and lives in the same review
+loop as the rest of the product. Reserve memory for things that are
+genuinely user-specific (user role, project context, references to
+external systems).

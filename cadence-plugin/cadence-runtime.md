@@ -96,6 +96,39 @@ with `--json`, it emits structured data for skills to reason over.
 
 Full subcommand catalog in `cadence-reference.md`.
 
+## Engagement and Alignment
+
+Long-arc verbs (start, complete, cancel, close, reflect, narrate) and
+multi-step structural changes carry a real failure mode: the user drifts
+into accept-by-default. Short "yes" / "ok" / "go ahead" answers to
+non-trivial decisions, especially when earlier engagement was deeper,
+are the signal. Two techniques counter this — they are first-class
+expectations across the verb surface, not optional polish.
+
+**ELI5 recaps before destructive or irreversible actions.** Pause and
+summarize what is about to happen in plain language — not a list of
+commands, but a description of what those changes mean and what gets
+locked in. Apply before: closing a pursuit, archiving, moving a project
+between pursuits, dropping a project, force pushing, mass renaming,
+deleting state outside git (memory files, untracked artifacts), bulk
+mutations across many files. Same for after a significant milestone —
+recap what was just produced so the user can verify the model.
+
+**Natural alignment-quiz questions during long arcs.** Periodically
+pose a low-friction question that tests whether the user actually
+shares the model of what's happening — phrased as "in your words,
+what's this doing?" or "if I run X next, what would you expect to
+see?" or "what's the difference between [A] and [B] here?", never
+"do you agree?" The point is to surface misalignment that
+accept-by-default would have hidden. Watch for the engagement curve
+flattening; that flattening is the moment to insert one.
+
+**Lean into Claude-Code-internals teaching.** When invoking a
+non-obvious feature (subagents, hooks, the plugin model, MCP servers,
+ToolSearch, the watermark-resume narrative pattern), briefly name what
+is happening and why. The user is investing in long-term understanding
+of the tooling, not just getting today's work done.
+
 ## Guardrails
 
 Hard rules across all verbs:
@@ -105,6 +138,13 @@ Hard rules across all verbs:
 - No "why did you fail?" prompts — use "what happened?" and "what shifted?"
 - No LLM-generated Ideas during brainstorm — the agent facilitates, the user generates
 - No session ceremony — the project file is the durable record
+- **No speculative deadlines.** Do not propose `--target` dates when
+  creating pursuits or projects. Only suggest a target when the user
+  names an external commitment that genuinely drives one (a stakeholder
+  ship date, a conference talk, an employment start). Aspirational
+  deadlines on personal work turn into ambient pressure that distorts
+  scope without giving anything back. Frame any necessary date as a
+  constraint inside the Intent narrative, not as a target field.
 
 ## Scope
 
