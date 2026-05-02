@@ -376,9 +376,18 @@ Show history lives at `.cadence/tip-state.json` (gitignored, per-repo):
 }
 ```
 
-The CLI exposes `cadence tip status` (show recent activity + which tips
-are eligible right now) and `cadence tip reset --match <id-substring>`
-(clear state for testing or repeating a tip).
+The CLI exposes three subcommands (matching the codebase's hyphenated
+naming convention — `set-status`, `add-waiting-for`, etc.):
+
+- `cadence tip-status [--triggers <tags>] [--eligible-only] [--json]`
+  — show which tips have been shown, which are eligible right now,
+  optionally filtered to a trigger set.
+- `cadence tip-reset --match <id-substring>` (or `--all`) — clear
+  show-state for matching tips. Useful for testing or repeating a tip.
+- `cadence tip-pick --triggers <tags> [--tones <list>] [--types <list>] [--no-record]`
+  — the consumer-facing primitive. Skills call this to ask "given
+  these active trigger tags, give me one tip." Records the show by
+  default; `--no-record` for preview. Returns JSON or `null`.
 
 ### Editor's guidelines
 

@@ -129,6 +129,51 @@ ToolSearch, the watermark-resume narrative pattern), briefly name what
 is happening and why. The user is investing in long-term understanding
 of the tooling, not just getting today's work done.
 
+**Surface tips from the curated library at appropriate breakpoints.**
+Cadence ships a tip library at `cadence-plugin/tips/library.yaml`
+(schema: see `cadence-reference.md` "Tip Library" section). Three
+content types coexist: brain-tickler **quotes** (Allen, Newport, Doerr,
+Brooks, Karpathy, Willison, etc. — non-sappy, smart-colleague tone),
+**skill-teaching** tooltips ("Running `/cadence:resolve` — this marks
+projects done"), and **verb-hints** (contextual next-step suggestions).
+At natural breakpoints (verb completion, ritual phase, long-agent-run
+wait, state changes detected by the reconciler), select a tip whose
+`triggers` overlap the active context, that isn't frequency-capped, and
+whose `tone` matches the moment (`framing` for waits, `directive` for
+post-verb, `diagnostic` for reconciler flags, `structural` for
+operational guidance). Render it in one line. Update
+`.cadence/tip-state.json` with the show.
+
+The selection rule is **contextual fit, not random** — a quote that
+appears in a context it doesn't fit is worse than no quote. The
+frequency model uses cool-down windows (per-tip `cool_down_minutes`,
+`cool_down_days`, optional `lifetime_max`) rather than session
+boundaries; this matters because Sessions are not a Cadence primitive,
+and because the library is large enough that aggressive caps are
+unnecessary.
+
+The tone target is **smart-colleague-marginalia, not motivational-
+poster.** A returning user should feel accompanied by a thoughtful
+colleague who occasionally mentions a useful frame — never lectured,
+never streak-flavored, never sappy. The library editor's guide
+(`cadence-plugin/tips/README.md`) names a sanity check: if a tip
+wouldn't survive being read aloud at a senior engineering review with
+a straight face, it doesn't belong.
+
+**Honor the wallpaper warning.** The author of the source library
+(`docs/teaching-tips-research.md`) explicitly named the failure mode:
+over-rotation turns the surface into wallpaper. Default cool-downs are
+generous (most quotes at 14-30 days; long-agent-run interjections at
+7+ days) for a reason — sparse is better than constant. If a tip
+context is firing too often in practice, lengthen the cool-down rather
+than removing the tip.
+
+Tips never interrupt flow. They appear at natural breakpoints — never
+mid-`/start`, never during `/capture` (which has its own zero-response
+contract), never inside a long subagent's working time except as a
+single pre-invocation interjection. The flow-protection guardrail
+applies to tips like it applies to everything else.
+
 ## Guardrails
 
 Hard rules across all verbs:

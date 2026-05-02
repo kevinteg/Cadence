@@ -108,7 +108,7 @@ var require_path = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.convertPosixPathToPattern = exports2.convertWindowsPathToPattern = exports2.convertPathToPattern = exports2.escapePosixPath = exports2.escapeWindowsPath = exports2.escape = exports2.removeLeadingDotSegment = exports2.makeAbsolute = exports2.unixify = void 0;
     var os = __require("os");
-    var path18 = __require("path");
+    var path20 = __require("path");
     var IS_WINDOWS_PLATFORM = os.platform() === "win32";
     var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
     var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
@@ -120,7 +120,7 @@ var require_path = __commonJS({
     }
     exports2.unixify = unixify;
     function makeAbsolute(cwd, filepath) {
-      return path18.resolve(cwd, filepath);
+      return path20.resolve(cwd, filepath);
     }
     exports2.makeAbsolute = makeAbsolute;
     function removeLeadingDotSegment(entry) {
@@ -1417,7 +1417,7 @@ var require_braces = __commonJS({
 var require_constants2 = __commonJS({
   "node_modules/picomatch/lib/constants.js"(exports2, module2) {
     "use strict";
-    var path18 = __require("path");
+    var path20 = __require("path");
     var WIN_SLASH = "\\\\/";
     var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
     var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
@@ -1591,7 +1591,7 @@ var require_constants2 = __commonJS({
       /* | */
       CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
       /* \uFEFF */
-      SEP: path18.sep,
+      SEP: path20.sep,
       /**
        * Create EXTGLOB_CHARS
        */
@@ -1618,7 +1618,7 @@ var require_constants2 = __commonJS({
 var require_utils2 = __commonJS({
   "node_modules/picomatch/lib/utils.js"(exports2) {
     "use strict";
-    var path18 = __require("path");
+    var path20 = __require("path");
     var win32 = process.platform === "win32";
     var {
       REGEX_BACKSLASH,
@@ -1647,7 +1647,7 @@ var require_utils2 = __commonJS({
       if (options2 && typeof options2.windows === "boolean") {
         return options2.windows;
       }
-      return win32 === true || path18.sep === "\\";
+      return win32 === true || path20.sep === "\\";
     };
     exports2.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx);
@@ -3011,7 +3011,7 @@ var require_parse2 = __commonJS({
 var require_picomatch = __commonJS({
   "node_modules/picomatch/lib/picomatch.js"(exports2, module2) {
     "use strict";
-    var path18 = __require("path");
+    var path20 = __require("path");
     var scan2 = require_scan();
     var parse2 = require_parse2();
     var utils = require_utils2();
@@ -3096,7 +3096,7 @@ var require_picomatch = __commonJS({
     };
     picomatch.matchBase = (input, glob, options2, posix = utils.isWindows(options2)) => {
       const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options2);
-      return regex.test(path18.basename(input));
+      return regex.test(path20.basename(input));
     };
     picomatch.isMatch = (str3, patterns, options2) => picomatch(patterns, options2)(str3);
     picomatch.parse = (pattern, options2) => {
@@ -3323,7 +3323,7 @@ var require_pattern = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isAbsolute = exports2.partitionAbsoluteAndRelative = exports2.removeDuplicateSlashes = exports2.matchAny = exports2.convertPatternsToRe = exports2.makeRe = exports2.getPatternParts = exports2.expandBraceExpansion = exports2.expandPatternsWithBraceExpansion = exports2.isAffectDepthOfReadingPattern = exports2.endsWithSlashGlobStar = exports2.hasGlobStar = exports2.getBaseDirectory = exports2.isPatternRelatedToParentDirectory = exports2.getPatternsOutsideCurrentDirectory = exports2.getPatternsInsideCurrentDirectory = exports2.getPositivePatterns = exports2.getNegativePatterns = exports2.isPositivePattern = exports2.isNegativePattern = exports2.convertToNegativePattern = exports2.convertToPositivePattern = exports2.isDynamicPattern = exports2.isStaticPattern = void 0;
-    var path18 = __require("path");
+    var path20 = __require("path");
     var globParent = require_glob_parent();
     var micromatch = require_micromatch();
     var GLOBSTAR = "**";
@@ -3418,7 +3418,7 @@ var require_pattern = __commonJS({
     }
     exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
     function isAffectDepthOfReadingPattern(pattern) {
-      const basename = path18.basename(pattern);
+      const basename = path20.basename(pattern);
       return endsWithSlashGlobStar(pattern) || isStaticPattern(basename);
     }
     exports2.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
@@ -3476,7 +3476,7 @@ var require_pattern = __commonJS({
     }
     exports2.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative;
     function isAbsolute(pattern) {
-      return path18.isAbsolute(pattern);
+      return path20.isAbsolute(pattern);
     }
     exports2.isAbsolute = isAbsolute;
   }
@@ -3653,8 +3653,8 @@ var require_utils3 = __commonJS({
     exports2.errno = errno;
     var fs = require_fs();
     exports2.fs = fs;
-    var path18 = require_path();
-    exports2.path = path18;
+    var path20 = require_path();
+    exports2.path = path20;
     var pattern = require_pattern();
     exports2.pattern = pattern;
     var stream = require_stream();
@@ -3766,8 +3766,8 @@ var require_async = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path18, settings, callback) {
-      settings.fs.lstat(path18, (lstatError, lstat) => {
+    function read(path20, settings, callback) {
+      settings.fs.lstat(path20, (lstatError, lstat) => {
         if (lstatError !== null) {
           callFailureCallback(callback, lstatError);
           return;
@@ -3776,7 +3776,7 @@ var require_async = __commonJS({
           callSuccessCallback(callback, lstat);
           return;
         }
-        settings.fs.stat(path18, (statError, stat2) => {
+        settings.fs.stat(path20, (statError, stat2) => {
           if (statError !== null) {
             if (settings.throwErrorOnBrokenSymbolicLink) {
               callFailureCallback(callback, statError);
@@ -3808,13 +3808,13 @@ var require_sync = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path18, settings) {
-      const lstat = settings.fs.lstatSync(path18);
+    function read(path20, settings) {
+      const lstat = settings.fs.lstatSync(path20);
       if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) {
         return lstat;
       }
       try {
-        const stat2 = settings.fs.statSync(path18);
+        const stat2 = settings.fs.statSync(path20);
         if (settings.markSymbolicLink) {
           stat2.isSymbolicLink = () => true;
         }
@@ -3885,17 +3885,17 @@ var require_out = __commonJS({
     var sync = require_sync();
     var settings_1 = require_settings();
     exports2.Settings = settings_1.default;
-    function stat2(path18, optionsOrSettingsOrCallback, callback) {
+    function stat2(path20, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path18, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path20, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path18, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path20, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.stat = stat2;
-    function statSync(path18, optionsOrSettings) {
+    function statSync(path20, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path18, settings);
+      return sync.read(path20, settings);
     }
     exports2.statSync = statSync;
     function getSettings(settingsOrOptions = {}) {
@@ -4111,16 +4111,16 @@ var require_async2 = __commonJS({
           return;
         }
         const tasks = names.map((name) => {
-          const path18 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+          const path20 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
           return (done) => {
-            fsStat.stat(path18, settings.fsStatSettings, (error, stats) => {
+            fsStat.stat(path20, settings.fsStatSettings, (error, stats) => {
               if (error !== null) {
                 done(error);
                 return;
               }
               const entry = {
                 name,
-                path: path18,
+                path: path20,
                 dirent: utils.fs.createDirentFromStats(name, stats)
               };
               if (settings.stats) {
@@ -4238,7 +4238,7 @@ var require_settings2 = __commonJS({
   "node_modules/@nodelib/fs.scandir/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path18 = __require("path");
+    var path20 = __require("path");
     var fsStat = require_out();
     var fs = require_fs4();
     var Settings = class {
@@ -4246,7 +4246,7 @@ var require_settings2 = __commonJS({
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
         this.fs = fs.createFileSystemAdapter(this._options.fs);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path18.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path20.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
         this.fsStatSettings = new fsStat.Settings({
@@ -4273,17 +4273,17 @@ var require_out2 = __commonJS({
     var sync = require_sync2();
     var settings_1 = require_settings2();
     exports2.Settings = settings_1.default;
-    function scandir(path18, optionsOrSettingsOrCallback, callback) {
+    function scandir(path20, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path18, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path20, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path18, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path20, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.scandir = scandir;
-    function scandirSync(path18, optionsOrSettings) {
+    function scandirSync(path20, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path18, settings);
+      return sync.read(path20, settings);
     }
     exports2.scandirSync = scandirSync;
     function getSettings(settingsOrOptions = {}) {
@@ -4930,7 +4930,7 @@ var require_settings3 = __commonJS({
   "node_modules/@nodelib/fs.walk/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path18 = __require("path");
+    var path20 = __require("path");
     var fsScandir = require_out2();
     var Settings = class {
       constructor(_options = {}) {
@@ -4940,7 +4940,7 @@ var require_settings3 = __commonJS({
         this.deepFilter = this._getValue(this._options.deepFilter, null);
         this.entryFilter = this._getValue(this._options.entryFilter, null);
         this.errorFilter = this._getValue(this._options.errorFilter, null);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path18.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path20.sep);
         this.fsScandirSettings = new fsScandir.Settings({
           followSymbolicLinks: this._options.followSymbolicLinks,
           fs: this._options.fs,
@@ -5002,7 +5002,7 @@ var require_reader2 = __commonJS({
   "node_modules/fast-glob/out/readers/reader.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path18 = __require("path");
+    var path20 = __require("path");
     var fsStat = require_out();
     var utils = require_utils3();
     var Reader = class {
@@ -5015,7 +5015,7 @@ var require_reader2 = __commonJS({
         });
       }
       _getFullEntryPath(filepath) {
-        return path18.resolve(this._settings.cwd, filepath);
+        return path20.resolve(this._settings.cwd, filepath);
       }
       _makeEntry(stats, pattern) {
         const entry = {
@@ -5431,7 +5431,7 @@ var require_provider = __commonJS({
   "node_modules/fast-glob/out/providers/provider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path18 = __require("path");
+    var path20 = __require("path");
     var deep_1 = require_deep();
     var entry_1 = require_entry();
     var error_1 = require_error();
@@ -5445,7 +5445,7 @@ var require_provider = __commonJS({
         this.entryTransformer = new entry_2.default(this._settings);
       }
       _getRootDirectory(task) {
-        return path18.resolve(this._settings.cwd, task.base);
+        return path20.resolve(this._settings.cwd, task.base);
       }
       _getReaderOptions(task) {
         const basePath = task.base === "." ? "" : task.base;
@@ -9850,8 +9850,8 @@ var CAC = class extends EventEmitter {
 var cac = (name = "") => new CAC(name);
 
 // src/cli.ts
-import { existsSync as existsSync9 } from "node:fs";
-import path17 from "node:path";
+import { existsSync as existsSync11 } from "node:fs";
+import path19 from "node:path";
 
 // src/scan/repo.ts
 import { stat } from "node:fs/promises";
@@ -12963,8 +12963,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path18, errorMaps, issueData } = params;
-  const fullPath = [...path18, ...issueData.path || []];
+  const { data, path: path20, errorMaps, issueData } = params;
+  const fullPath = [...path20, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -13080,11 +13080,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path18, key) {
+  constructor(parent, value, path20, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path18;
+    this._path = path20;
     this._key = key;
   }
   get path() {
@@ -18675,6 +18675,227 @@ async function movePursuit(repoRoot, opts) {
   };
 }
 
+// src/tip/library.ts
+import { existsSync as existsSync10, readFileSync as readFileSync2 } from "node:fs";
+import path18 from "node:path";
+import { fileURLToPath } from "node:url";
+
+// src/tip/state.ts
+import { existsSync as existsSync9, readFileSync, mkdirSync, writeFileSync } from "node:fs";
+import path17 from "node:path";
+var STATE_FILENAME = "tip-state.json";
+function statePath(repoRoot) {
+  return path17.join(repoRoot, ".cadence", STATE_FILENAME);
+}
+function readTipState(repoRoot) {
+  const filePath = statePath(repoRoot);
+  if (!existsSync9(filePath)) {
+    return { version: 1, tips: {} };
+  }
+  try {
+    const raw = readFileSync(filePath, "utf8");
+    const parsed = JSON.parse(raw);
+    if (parsed.version !== 1 || typeof parsed.tips !== "object") {
+      return { version: 1, tips: {} };
+    }
+    return parsed;
+  } catch {
+    return { version: 1, tips: {} };
+  }
+}
+function writeTipState(repoRoot, state) {
+  const dir = path17.join(repoRoot, ".cadence");
+  if (!existsSync9(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+  writeFileSync(statePath(repoRoot), JSON.stringify(state, null, 2) + "\n");
+}
+function recordShow(repoRoot, tipId, now = /* @__PURE__ */ new Date()) {
+  const state = readTipState(repoRoot);
+  const prior = state.tips[tipId];
+  const updated = {
+    show_count: (prior?.show_count ?? 0) + 1,
+    last_shown: now.toISOString()
+  };
+  state.tips[tipId] = updated;
+  writeTipState(repoRoot, state);
+  return updated;
+}
+function isEligible(state, tipId, cap, now = /* @__PURE__ */ new Date()) {
+  const record = state.tips[tipId];
+  if (!record) {
+    return { eligible: true, reason: "never-shown" };
+  }
+  if (cap.lifetime_max !== void 0 && record.show_count >= cap.lifetime_max) {
+    return { eligible: false, reason: "lifetime-max" };
+  }
+  const lastShown = new Date(record.last_shown);
+  const elapsedMs = now.getTime() - lastShown.getTime();
+  if (cap.cool_down_minutes !== void 0) {
+    const requiredMs = cap.cool_down_minutes * 60 * 1e3;
+    if (elapsedMs < requiredMs) {
+      return {
+        eligible: false,
+        reason: "cool-down-minutes",
+        next_eligible_at: new Date(
+          lastShown.getTime() + requiredMs
+        ).toISOString()
+      };
+    }
+  }
+  if (cap.cool_down_days !== void 0) {
+    const requiredMs = cap.cool_down_days * 24 * 60 * 60 * 1e3;
+    if (elapsedMs < requiredMs) {
+      return {
+        eligible: false,
+        reason: "cool-down-days",
+        next_eligible_at: new Date(
+          lastShown.getTime() + requiredMs
+        ).toISOString()
+      };
+    }
+  }
+  return { eligible: true, reason: "eligible" };
+}
+function resetTips(repoRoot, predicate) {
+  const state = readTipState(repoRoot);
+  const cleared = [];
+  for (const id of Object.keys(state.tips)) {
+    if (predicate(id)) {
+      delete state.tips[id];
+      cleared.push(id);
+    }
+  }
+  writeTipState(repoRoot, state);
+  return cleared;
+}
+
+// src/tip/library.ts
+var VALID_TYPES = ["quote", "skill-teaching", "verb-hint"];
+var VALID_TONES = ["framing", "directive", "diagnostic", "structural"];
+var VALID_WEIGHTS = ["low", "normal", "high"];
+function asStringArray(v) {
+  if (!Array.isArray(v)) return [];
+  return v.filter((x) => typeof x === "string");
+}
+function asNumber(v) {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  return void 0;
+}
+function asString(v) {
+  if (typeof v === "string" && v.length > 0) return v;
+  return void 0;
+}
+function libraryPath() {
+  const here = fileURLToPath(import.meta.url);
+  return path18.resolve(path18.dirname(here), "..", "tips", "library.yaml");
+}
+function readLibrary(libPath) {
+  const filePath = libPath ?? libraryPath();
+  if (!existsSync10(filePath)) {
+    return { version: 1, tips: [] };
+  }
+  const raw = readFileSync2(filePath, "utf8");
+  const doc = jsYaml.load(raw);
+  if (!doc || typeof doc !== "object") {
+    return { version: 1, tips: [] };
+  }
+  if (doc.version !== 1 || !Array.isArray(doc.tips)) {
+    return { version: 1, tips: [] };
+  }
+  const tips = [];
+  for (const r of doc.tips) {
+    const id = asString(r.id);
+    const type2 = VALID_TYPES.find((t) => t === r.type);
+    const content = asString(r.content);
+    const triggers = asStringArray(r.triggers);
+    if (!id || !type2 || !content || triggers.length === 0) continue;
+    const tone = VALID_TONES.find((t) => t === r.tone) ?? "structural";
+    const weight = VALID_WEIGHTS.find((w) => w === r.weight) ?? "normal";
+    const frequency = {};
+    if (r.frequency && typeof r.frequency === "object") {
+      const cdm = asNumber(r.frequency.cool_down_minutes);
+      const cdd = asNumber(r.frequency.cool_down_days);
+      const lim = asNumber(r.frequency.lifetime_max);
+      if (cdm !== void 0) frequency.cool_down_minutes = cdm;
+      if (cdd !== void 0) frequency.cool_down_days = cdd;
+      if (lim !== void 0) frequency.lifetime_max = lim;
+    }
+    const tip = {
+      id,
+      type: type2,
+      content: content.replace(/\s+$/u, ""),
+      triggers,
+      tone,
+      weight,
+      frequency
+    };
+    const attribution = asString(r.attribution);
+    if (attribution) tip.attribution = attribution;
+    const tags = asStringArray(r.tags);
+    if (tags.length > 0) tip.tags = tags;
+    tips.push(tip);
+  }
+  return { version: 1, tips };
+}
+function matchingTips(library, options2) {
+  const active = new Set(options2.triggers);
+  const candidates = [];
+  for (const tip of library.tips) {
+    const matched = tip.triggers.filter((t) => active.has(t));
+    if (matched.length === 0) continue;
+    if (options2.types && !options2.types.includes(tip.type)) continue;
+    if (options2.tones && !options2.tones.includes(tip.tone)) continue;
+    candidates.push({ tip, matched_triggers: matched });
+  }
+  return candidates;
+}
+function eligibleTips(library, state, options2) {
+  const now = options2.now ?? /* @__PURE__ */ new Date();
+  return matchingTips(library, options2).filter((c) => {
+    return isEligible(state, c.tip.id, c.tip.frequency, now).eligible;
+  });
+}
+function selectTip(library, state, options2) {
+  const eligible = eligibleTips(library, state, options2);
+  if (eligible.length === 0) return null;
+  const weightValue = (w) => w === "high" ? 3 : w === "low" ? 1 : 2;
+  const maxWeight = Math.max(
+    ...eligible.map((c) => weightValue(c.tip.weight))
+  );
+  const topTier = eligible.filter(
+    (c) => weightValue(c.tip.weight) === maxWeight
+  );
+  topTier.sort((a, b) => {
+    const ra = state.tips[a.tip.id];
+    const rb = state.tips[b.tip.id];
+    if (!ra && rb) return -1;
+    if (ra && !rb) return 1;
+    if (!ra && !rb) return 0;
+    const ta = new Date(ra.last_shown).getTime();
+    const tb = new Date(rb.last_shown).getTime();
+    return ta - tb;
+  });
+  return topTier[0] ?? null;
+}
+function tipStatus(library, state, now = /* @__PURE__ */ new Date()) {
+  return library.tips.map((tip) => {
+    const elig = isEligible(state, tip.id, tip.frequency, now);
+    const record = state.tips[tip.id];
+    const entry = {
+      id: tip.id,
+      type: tip.type,
+      content_preview: tip.content.split("\n")[0]?.slice(0, 80) ?? "",
+      triggers: tip.triggers,
+      show_count: record?.show_count ?? 0,
+      eligible_now: elig.eligible
+    };
+    if (record?.last_shown) entry.last_shown = record.last_shown;
+    if (elig.next_eligible_at) entry.next_eligible_at = elig.next_eligible_at;
+    return entry;
+  });
+}
+
 // src/cli.ts
 var cli = cac("cadence");
 cli.command("scan", "Show a tabular summary of the repo snapshot").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--json", "Emit the full Snapshot as JSON").action(async (opts) => {
@@ -19131,6 +19352,139 @@ cli.command(
     process.stdout.write(JSON.stringify(result, null, 2) + "\n");
   }
 );
+cli.command(
+  "tip-status",
+  "Show tip-library state: which tips have been shown, which are eligible"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--json", "Emit the full status as JSON").option("--eligible-only", "Only show tips that are eligible right now").option("--triggers <tags>", "Comma-separated active trigger tags to filter by").action(
+  async (opts) => {
+    const repoRoot = await resolveRepoRoot(opts.root);
+    const library = readLibrary();
+    const state = readTipState(repoRoot);
+    let entries = tipStatus(library, state);
+    if (opts.triggers) {
+      const active = new Set(
+        opts.triggers.split(",").map((s) => s.trim()).filter((s) => s.length > 0)
+      );
+      entries = entries.filter(
+        (e) => e.triggers.some((t) => active.has(t))
+      );
+    }
+    if (opts.eligibleOnly) {
+      entries = entries.filter((e) => e.eligible_now);
+    }
+    if (opts.json) {
+      process.stdout.write(
+        JSON.stringify(
+          { library_size: library.tips.length, entries },
+          null,
+          2
+        ) + "\n"
+      );
+      return;
+    }
+    const lines = [];
+    lines.push(
+      `Tip Library \u2014 ${library.tips.length} tips total, ${entries.length} shown / filtered`
+    );
+    lines.push("");
+    const eligible = entries.filter((e) => e.eligible_now).length;
+    const shown = entries.filter((e) => e.show_count > 0).length;
+    lines.push(`Eligible now: ${eligible}    Ever shown: ${shown}`);
+    lines.push("");
+    const recentlyShown = entries.filter((e) => e.show_count > 0).sort((a, b) => {
+      const ta = a.last_shown ? new Date(a.last_shown).getTime() : 0;
+      const tb = b.last_shown ? new Date(b.last_shown).getTime() : 0;
+      return tb - ta;
+    }).slice(0, 10);
+    if (recentlyShown.length > 0) {
+      lines.push("Recently shown:");
+      for (const e of recentlyShown) {
+        const when = e.last_shown ? new Date(e.last_shown).toISOString().slice(0, 16).replace("T", " ") : "never";
+        const status = e.eligible_now ? "eligible" : e.next_eligible_at ? `cap until ${e.next_eligible_at.slice(0, 10)}` : "capped";
+        lines.push(
+          `  ${e.id.padEnd(40)} ${when} (\xD7${e.show_count})  [${status}]`
+        );
+      }
+    } else {
+      lines.push("No tips shown yet.");
+    }
+    process.stdout.write(lines.join("\n") + "\n");
+  }
+);
+cli.command("tip-reset", "Clear show-state for tips matching a substring").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--match <text>", "Substring or exact id to match (required)").option("--all", "Clear ALL tip state (use with care)").action(
+  async (opts) => {
+    const repoRoot = await resolveRepoRoot(opts.root);
+    if (!opts.match && !opts.all) {
+      throw new Error("--match <text> or --all is required");
+    }
+    const cleared = resetTips(repoRoot, (id) => {
+      if (opts.all) return true;
+      return id.includes(opts.match);
+    });
+    process.stdout.write(
+      JSON.stringify({ cleared_count: cleared.length, cleared }, null, 2) + "\n"
+    );
+  }
+);
+cli.command(
+  "tip-pick",
+  "Pick one tip eligible for the given active trigger context (returns JSON or empty)"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option(
+  "--triggers <tags>",
+  "Comma-separated active trigger tags (required, e.g., verb-resolve,state-pursuit-near-completion)"
+).option(
+  "--tones <tones>",
+  "Comma-separated tone filter (framing | directive | diagnostic | structural)"
+).option(
+  "--types <types>",
+  "Comma-separated type filter (quote | skill-teaching | verb-hint)"
+).option(
+  "--no-record",
+  "Do not update tip-state with the show (preview mode)"
+).action(
+  async (opts) => {
+    const repoRoot = await resolveRepoRoot(opts.root);
+    if (!opts.triggers || opts.triggers.trim().length === 0) {
+      throw new Error("--triggers <tags> is required");
+    }
+    const triggers = opts.triggers.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
+    const select = { triggers };
+    if (opts.tones) {
+      select.tones = opts.tones.split(",").map((s) => s.trim()).filter(
+        (s) => ["framing", "directive", "diagnostic", "structural"].includes(s)
+      );
+    }
+    if (opts.types) {
+      select.types = opts.types.split(",").map((s) => s.trim()).filter(
+        (s) => ["quote", "skill-teaching", "verb-hint"].includes(s)
+      );
+    }
+    const library = readLibrary();
+    const state = readTipState(repoRoot);
+    const picked = selectTip(library, state, select);
+    if (!picked) {
+      process.stdout.write("null\n");
+      return;
+    }
+    if (opts.record !== false) {
+      recordShow(repoRoot, picked.tip.id);
+    }
+    process.stdout.write(
+      JSON.stringify(
+        {
+          id: picked.tip.id,
+          type: picked.tip.type,
+          content: picked.tip.content,
+          attribution: picked.tip.attribution,
+          tone: picked.tip.tone,
+          matched_triggers: picked.matched_triggers
+        },
+        null,
+        2
+      ) + "\n"
+    );
+  }
+);
 cli.help();
 cli.version("0.1.0");
 cli.parse(process.argv, { run: false });
@@ -19143,22 +19497,22 @@ if (cli.matchedCommand) {
   cli.outputHelp();
 }
 async function resolveRepoRoot(explicit) {
-  if (explicit) return path17.resolve(explicit);
+  if (explicit) return path19.resolve(explicit);
   return findRepoRoot(process.cwd());
 }
 function findRepoRoot(start) {
-  let dir = path17.resolve(start);
+  let dir = path19.resolve(start);
   for (; ; ) {
-    if (existsSync9(path17.join(dir, "cadence.yaml"))) return dir;
-    if (existsSync9(path17.join(dir, "pursuits"))) return dir;
-    const parent = path17.dirname(dir);
+    if (existsSync11(path19.join(dir, "cadence.yaml"))) return dir;
+    if (existsSync11(path19.join(dir, "pursuits"))) return dir;
+    const parent = path19.dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
-  return path17.resolve(start);
+  return path19.resolve(start);
 }
 function isCadenceRepo(root) {
-  return existsSync9(path17.join(root, "cadence.yaml")) || existsSync9(path17.join(root, "pursuits"));
+  return existsSync11(path19.join(root, "cadence.yaml")) || existsSync11(path19.join(root, "pursuits"));
 }
 function multistring(v) {
   if (!Array.isArray(v)) return void 0;

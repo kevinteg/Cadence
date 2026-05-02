@@ -34,6 +34,15 @@ import {
   projectActivity,
   type ActivityScope,
 } from './scan/git-activity.js'
+import {
+  readLibrary,
+  selectTip,
+  tipStatus,
+  type SelectOptions,
+  type TipTone,
+  type TipType,
+} from './tip/library.js'
+import { readTipState, recordShow, resetTips } from './tip/state.js'
 
 const cli = cac('cadence')
 
@@ -816,6 +825,193 @@ cli
         project: opts.project,
       })
       process.stdout.write(JSON.stringify(result, null, 2) + '\n')
+    },
+  )
+
+cli
+  .command(
+    'tip-status',
+    'Show tip-library state: which tips have been shown, which are eligible',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--json', 'Emit the full status as JSON')
+  .option('--eligible-only', 'Only show tips that are eligible right now')
+  .option('--triggers <tags>', 'Comma-separated active trigger tags to filter by')
+  .action(
+    async (opts: {
+      root?: string
+      json?: boolean
+      eligibleOnly?: boolean
+      triggers?: string
+    }) => {
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const library = readLibrary()
+      const state = readTipState(repoRoot)
+      let entries = tipStatus(library, state)
+      if (opts.triggers) {
+        const active = new Set(
+          opts.triggers
+            .split(',')
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0),
+        )
+        entries = entries.filter((e) =>
+          e.triggers.some((t) => active.has(t)),
+        )
+      }
+      if (opts.eligibleOnly) {
+        entries = entries.filter((e) => e.eligible_now)
+      }
+      if (opts.json) {
+        process.stdout.write(
+          JSON.stringify(
+            { library_size: library.tips.length, entries },
+            null,
+            2,
+          ) + '\n',
+        )
+        return
+      }
+      const lines: string[] = []
+      lines.push(
+        `Tip Library — ${library.tips.length} tips total, ${entries.length} shown / filtered`,
+      )
+      lines.push('')
+      const eligible = entries.filter((e) => e.eligible_now).length
+      const shown = entries.filter((e) => e.show_count > 0).length
+      lines.push(`Eligible now: ${eligible}    Ever shown: ${shown}`)
+      lines.push('')
+      const recentlyShown = entries
+        .filter((e) => e.show_count > 0)
+        .sort((a, b) => {
+          const ta = a.last_shown ? new Date(a.last_shown).getTime() : 0
+          const tb = b.last_shown ? new Date(b.last_shown).getTime() : 0
+          return tb - ta
+        })
+        .slice(0, 10)
+      if (recentlyShown.length > 0) {
+        lines.push('Recently shown:')
+        for (const e of recentlyShown) {
+          const when = e.last_shown
+            ? new Date(e.last_shown).toISOString().slice(0, 16).replace('T', ' ')
+            : 'never'
+          const status = e.eligible_now
+            ? 'eligible'
+            : e.next_eligible_at
+              ? `cap until ${e.next_eligible_at.slice(0, 10)}`
+              : 'capped'
+          lines.push(
+            `  ${e.id.padEnd(40)} ${when} (×${e.show_count})  [${status}]`,
+          )
+        }
+      } else {
+        lines.push('No tips shown yet.')
+      }
+      process.stdout.write(lines.join('\n') + '\n')
+    },
+  )
+
+cli
+  .command('tip-reset', 'Clear show-state for tips matching a substring')
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--match <text>', 'Substring or exact id to match (required)')
+  .option('--all', 'Clear ALL tip state (use with care)')
+  .action(
+    async (opts: { root?: string; match?: string; all?: boolean }) => {
+      const repoRoot = await resolveRepoRoot(opts.root)
+      if (!opts.match && !opts.all) {
+        throw new Error('--match <text> or --all is required')
+      }
+      const cleared = resetTips(repoRoot, (id) => {
+        if (opts.all) return true
+        return id.includes(opts.match!)
+      })
+      process.stdout.write(
+        JSON.stringify({ cleared_count: cleared.length, cleared }, null, 2) +
+          '\n',
+      )
+    },
+  )
+
+cli
+  .command(
+    'tip-pick',
+    'Pick one tip eligible for the given active trigger context (returns JSON or empty)',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option(
+    '--triggers <tags>',
+    'Comma-separated active trigger tags (required, e.g., verb-resolve,state-pursuit-near-completion)',
+  )
+  .option(
+    '--tones <tones>',
+    'Comma-separated tone filter (framing | directive | diagnostic | structural)',
+  )
+  .option(
+    '--types <types>',
+    'Comma-separated type filter (quote | skill-teaching | verb-hint)',
+  )
+  .option(
+    '--no-record',
+    'Do not update tip-state with the show (preview mode)',
+  )
+  .action(
+    async (opts: {
+      root?: string
+      triggers?: string
+      tones?: string
+      types?: string
+      record?: boolean
+    }) => {
+      const repoRoot = await resolveRepoRoot(opts.root)
+      if (!opts.triggers || opts.triggers.trim().length === 0) {
+        throw new Error('--triggers <tags> is required')
+      }
+      const triggers = opts.triggers
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0)
+      const select: SelectOptions = { triggers }
+      if (opts.tones) {
+        select.tones = opts.tones
+          .split(',')
+          .map((s) => s.trim() as TipTone)
+          .filter((s) =>
+            ['framing', 'directive', 'diagnostic', 'structural'].includes(s),
+          )
+      }
+      if (opts.types) {
+        select.types = opts.types
+          .split(',')
+          .map((s) => s.trim() as TipType)
+          .filter((s) =>
+            ['quote', 'skill-teaching', 'verb-hint'].includes(s),
+          )
+      }
+      const library = readLibrary()
+      const state = readTipState(repoRoot)
+      const picked = selectTip(library, state, select)
+      if (!picked) {
+        process.stdout.write('null\n')
+        return
+      }
+      if (opts.record !== false) {
+        recordShow(repoRoot, picked.tip.id)
+      }
+      process.stdout.write(
+        JSON.stringify(
+          {
+            id: picked.tip.id,
+            type: picked.tip.type,
+            content: picked.tip.content,
+            attribution: picked.tip.attribution,
+            tone: picked.tip.tone,
+            matched_triggers: picked.matched_triggers,
+          },
+          null,
+          2,
+        ) + '\n',
+      )
     },
   )
 
