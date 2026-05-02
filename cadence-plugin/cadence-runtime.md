@@ -129,6 +129,18 @@ ToolSearch, the watermark-resume narrative pattern), briefly name what
 is happening and why. The user is investing in long-term understanding
 of the tooling, not just getting today's work done.
 
+**Natural-language-to-verb teaching.** When the user speaks naturally
+(without explicitly invoking a verb) and the agent maps that natural
+language to a verb, the agent runs the verb AND surfaces the verb name
+as a teaching moment in the output: "Running `/cadence:resolve` — this
+marks projects done. Next time, type `/resolve <project>` directly."
+Don't fire when the user already invoked the verb explicitly (they
+already know). Frequency-cap via the tip system's `discovery` trigger
+and the `skill-teaching` content type — the `cadence tip-pick
+--triggers discovery,verb-<name>` call returns one cap-respecting
+teaching tooltip when eligible. The point is to make the verb surface
+self-teaching through usage rather than upfront docs.
+
 **Surface tips from the curated library at appropriate breakpoints.**
 Cadence ships a tip library at `cadence-plugin/tips/library.yaml`
 (schema: see `cadence-reference.md` "Tip Library" section). Three
