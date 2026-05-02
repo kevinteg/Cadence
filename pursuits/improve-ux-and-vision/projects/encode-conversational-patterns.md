@@ -1,7 +1,7 @@
 ---
 id: encode-conversational-patterns
 pursuit: improve-ux-and-vision
-status: active
+status: done
 created: 2026-05-01
 ---
 
@@ -20,4 +20,4 @@ Three behaviors that emerged from real use need to migrate from personal memory 
 - [x] Add a 'no speculative deadlines' principle to cadence-runtime.md and update relevant skills (skills/promote, skills/start, project- and pursuit-creation guidance in cadence-reference.md) to omit --target by default. Only suggest a target date when the user names an external commitment that drives one.
 - [x] Add a one-line note to CLAUDE.md: in this repo, working-style preferences belong in skill/runtime contracts (so they ship as product behavior), not in ~/.claude/.../memory/.
 - [x] Delete the three migrated memory files (feedback_reflect_interactive.md, feedback_eli5_and_alignment_checks.md, feedback_no_speculative_deadlines.md) at ~/.claude/projects/-Users-kevinteg-code-cadence/memory/ and remove their entries from MEMORY.md.
-- [ ] User-story validation: in a fresh Claude conversation in this repo, run /cadence:reflect through Phase 2 and confirm (a) the agent asks open questions and waits for answers, (b) the agent surfaces an ELI5 recap before any irreversible action, and (c) the agent does not propose target dates when creating pursuits or projects.
+- [x] User-story validation: in a fresh Claude conversation in this repo, run /cadence:reflect through Phase 2 and confirm (a) the agent asks open questions and waits for answers, (b) the agent surfaces an ELI5 recap before any irreversible action, and (c) the agent does not propose target dates when creating pursuits or projects.

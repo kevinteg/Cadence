@@ -5,6 +5,7 @@ import {
   NO_SIGNALS,
   type SuggestionSignals,
 } from './signals.js'
+import { readPendingValidations } from '../validation/queue.js'
 
 export function renderStatus(result: Report): string {
   const { snapshot, flags } = result
@@ -23,6 +24,23 @@ export function renderStatus(result: Report): string {
   out.push(actionsLine(snapshot))
   out.push(`Thoughts: ${snapshot.captures.length} unprocessed`)
   out.push('')
+
+  // Pending validations — surface above flags so a fresh session sees
+  // the things that need to be tested in this session before anything
+  // else. Stays silent when the queue is empty.
+  const pending = readPendingValidations(snapshot.repoRoot)
+  if (pending.length > 0) {
+    out.push(
+      `New behaviors to validate in this fresh session (${pending.length}):`,
+    )
+    for (const entry of pending) {
+      out.push(`  - ${entry.description}`)
+    }
+    out.push(
+      `  Clear with: cadence pending-validation-clear --match "<text>"`,
+    )
+    out.push('')
+  }
 
   out.push('Flags:')
   if (flags.length === 0) {

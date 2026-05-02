@@ -1,7 +1,7 @@
 ---
 id: add-pending-validations-mechanism
 pursuit: improve-ux-and-vision
-status: on_hold
+status: done
 created: 2026-05-01
 ---
 
@@ -15,9 +15,9 @@ Replace the in-project user-story-validation action pattern with a sticky queue 
 
 ## Actions
 
-- [ ] Encode the 'domain neutrality' principle in cadence-runtime.md — Cadence verbs and vocabulary stay domain-agnostic because most users work on non-dev repos. New verbs and examples must serve household projects, creative practice, fitness, and family logistics as well as code. Avoid dev-flavored vocabulary ('test', 'deploy', 'merge'); favor universal language ('validate', 'ship', 'finish').
-- [ ] Design and implement the validations/pending.md storage format and CLI subcommands. Single markdown file with one entry per line (timestamp + description). Add cadence pending-validation add --description '...', cadence pending-validation list, cadence pending-validation clear --match '...'. CLI accepts --json. Use domain-neutral subcommand naming.
-- [ ] Extend the SessionStart hook output (cadence status --hook-output) to read validations/pending.md and, when non-empty, surface entries inline as a 'New behaviors to validate in this fresh session' block above the existing Next: block. Block stays silent when the file is empty.
-- [ ] Update CLAUDE.md 'Feature Work Goes Through Cadence' section: replace the user-story-validation-action guidance with the queue-append pattern. New guidance: when a project ships a behavior worth fresh-session verification, run cadence pending-validation add as part of the project work, not as a dangling action.
-- [ ] Update or write the reflect user journey YAML so it covers the new interactive Phase 2 shape (open 'what worked' question, follow-up cycle, agent observations only after the user has answered, LP question verbatim, ELI5 close). The journey YAML serves as the durable acceptance test, replacing manual fresh-session validation for this project class.
-- [ ] Migrate the dangling encode-conversational-patterns user-story validation action into the new validations queue (one entry: 'verify /reflect Phase 2 runs interactively, ELI5 recaps appear before destructive actions, no target dates proposed by default'); then complete encode-conversational-patterns via dialogue against its Intent.
+- [x] Encode the 'domain neutrality' principle in cadence-runtime.md — Cadence verbs and vocabulary stay domain-agnostic because most users work on non-dev repos. New verbs and examples must serve household projects, creative practice, fitness, and family logistics as well as code. Avoid dev-flavored vocabulary ('test', 'deploy', 'merge'); favor universal language ('validate', 'ship', 'finish').
+- [x] Design and implement the validations/pending.md storage format and CLI subcommands. Single markdown file with one entry per line (timestamp + description). Add cadence pending-validation add --description '...', cadence pending-validation list, cadence pending-validation clear --match '...'. CLI accepts --json. Use domain-neutral subcommand naming.
+- [x] Extend the SessionStart hook output (cadence status --hook-output) to read validations/pending.md and, when non-empty, surface entries inline as a 'New behaviors to validate in this fresh session' block above the existing Next: block. Block stays silent when the file is empty.
+- [x] Update CLAUDE.md 'Feature Work Goes Through Cadence' section: replace the user-story-validation-action guidance with the queue-append pattern. New guidance: when a project ships a behavior worth fresh-session verification, run cadence pending-validation add as part of the project work, not as a dangling action.
+- [x] Update or write the reflect user journey YAML so it covers the new interactive Phase 2 shape (open 'what worked' question, follow-up cycle, agent observations only after the user has answered, LP question verbatim, ELI5 close). The journey YAML serves as the durable acceptance test, replacing manual fresh-session validation for this project class.
+- [x] Migrate the dangling encode-conversational-patterns user-story validation action into the new validations queue (one entry: 'verify /reflect Phase 2 runs interactively, ELI5 recaps appear before destructive actions, no target dates proposed by default'); then complete encode-conversational-patterns via dialogue against its Intent.

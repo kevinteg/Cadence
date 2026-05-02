@@ -45,11 +45,14 @@ by being used to build itself.
    verification, do NOT add a "user-story validation in a fresh
    conversation" action to the project — those pile up at N-1 of N
    and block project closure indefinitely. Instead, queue the
-   validation via `cadence pending-validation add` (when that
-   mechanism ships under `add-pending-validations-mechanism`). The
-   SessionStart hook surfaces pending validations on every fresh
-   session until cleared. Project completion is decoupled from
-   fresh-session validation.
+   validation via `cadence pending-validation-add --description "..."`
+   as part of the project work. The SessionStart hook reads
+   `validations/pending.md` and surfaces a "New behaviors to validate
+   in this fresh session" block above Next: on every fresh session
+   until the user clears the entry with
+   `cadence pending-validation-clear --match "<text>"` after
+   verifying. Project completion is decoupled from fresh-session
+   validation.
 4. New projects start as `on_hold` and promote to `active` when
    `/cadence:start` opens a session OR when the first action is
    checked off. Work the project's actions in order; check each off

@@ -43,6 +43,11 @@ import {
   type TipType,
 } from './tip/library.js'
 import { readTipState, recordShow, resetTips } from './tip/state.js'
+import {
+  addPendingValidation,
+  clearPendingValidations,
+  readPendingValidations,
+} from './validation/queue.js'
 
 const cli = cac('cadence')
 
@@ -1011,6 +1016,77 @@ cli
           null,
           2,
         ) + '\n',
+      )
+    },
+  )
+
+cli
+  .command(
+    'pending-validation-add',
+    'Append a behavior to the pending-validations queue (surfaced by the SessionStart hook on every fresh session until cleared)',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--description <text>', 'What needs fresh-session validation (required)')
+  .action(async (opts: { root?: string; description?: string }) => {
+    const repoRoot = await resolveRepoRoot(opts.root)
+    if (!opts.description || opts.description.trim().length === 0) {
+      throw new Error('--description <text> is required')
+    }
+    const entry = addPendingValidation(repoRoot, opts.description)
+    process.stdout.write(JSON.stringify({ added: entry }, null, 2) + '\n')
+  })
+
+cli
+  .command(
+    'pending-validation-list',
+    'List pending validations awaiting fresh-session verification',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--json', 'Emit as JSON')
+  .action(async (opts: { root?: string; json?: boolean }) => {
+    const repoRoot = await resolveRepoRoot(opts.root)
+    const entries = readPendingValidations(repoRoot)
+    if (opts.json) {
+      process.stdout.write(
+        JSON.stringify({ count: entries.length, entries }, null, 2) + '\n',
+      )
+      return
+    }
+    if (entries.length === 0) {
+      process.stdout.write('No pending validations.\n')
+      return
+    }
+    const lines: string[] = [
+      `${entries.length} pending validation${entries.length === 1 ? '' : 's'}:`,
+      '',
+    ]
+    for (const e of entries) {
+      lines.push(`- ${e.timestamp.slice(0, 10)} — ${e.description}`)
+    }
+    process.stdout.write(lines.join('\n') + '\n')
+  })
+
+cli
+  .command(
+    'pending-validation-clear',
+    'Clear pending validations matching a substring (or --all)',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--match <text>', 'Substring to match against the description')
+  .option('--all', 'Clear ALL pending validations (use with care)')
+  .action(
+    async (opts: { root?: string; match?: string; all?: boolean }) => {
+      const repoRoot = await resolveRepoRoot(opts.root)
+      if (!opts.match && !opts.all) {
+        throw new Error('--match <text> or --all is required')
+      }
+      const cleared = clearPendingValidations(repoRoot, (entry) => {
+        if (opts.all) return true
+        return entry.description.includes(opts.match!)
+      })
+      process.stdout.write(
+        JSON.stringify({ cleared_count: cleared.length, cleared }, null, 2) +
+          '\n',
       )
     },
   )

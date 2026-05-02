@@ -226,6 +226,46 @@ contract), never inside a long subagent's working time except as a
 single pre-invocation interjection. The flow-protection guardrail
 applies to tips like it applies to everything else.
 
+## Domain Neutrality
+
+Cadence is a cognitive operating system, not a dev tool. Most users
+work on non-dev repos: household projects, creative practice, fitness
+arcs, family logistics, writing, study. The vision-doc framing
+("be a present father" alongside "stand up CI") only holds if every
+verb, vocabulary choice, and example stays domain-agnostic.
+
+**What this means in practice:**
+
+- **Verb names favor universal language** over dev-flavored vocabulary.
+  Use `validate` (not `test`), `ship` or `finish` (not `deploy`),
+  `wrap up` (not `merge`). Avoid CI/PR/branch metaphors in
+  user-facing prompts.
+- **Examples in skills, contracts, and tips** rotate domains: a
+  household project ("fix the kitchen sink") is as natural an example
+  as a coding one ("stand up the test harness"). Don't default every
+  example to code.
+- **Heuristics adapt by detected domain.** When a project's Intent or
+  ID indicates physical-space work (rooms, tools, materials, body
+  parts, cooking, repair vocabulary), the agent's prompts adapt:
+  ask about workspace and constraints, not CI configuration. (See
+  the `add-physical-domain-awareness-to-prompts` project for the
+  full pattern.)
+- **New verbs are scrutinized for domain bias.** Before adding a
+  verb, ask: does this serve household projects, creative practice,
+  fitness, family logistics — not just code? If only code, it
+  probably belongs as a CLI subcommand or skill internal, not a
+  user-facing verb.
+- **Hook outputs and tip surfaces** are domain-neutral. The existing
+  SessionStart hook + the tip library both follow this principle —
+  no language assumes the user is a developer.
+
+This principle informed concrete design decisions: `/resolve` chosen
+over `/done` (universal-shaped); the tip library curated for
+"smart-colleague-marginalia" tone (works at any desk, not just a
+coding one); the pending-validations sticky surfaced via the
+SessionStart hook rather than as a `/test` or `/validate` verb (a
+verb name carrying coding flavor would shrink the audience).
+
 ## Guardrails
 
 Hard rules across all verbs:

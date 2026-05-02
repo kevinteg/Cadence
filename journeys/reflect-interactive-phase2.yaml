@@ -1,0 +1,117 @@
+name: Reflect Phase 2 Interactive
+description: |
+  Verify /cadence:reflect's Phase 2 (Get Focused) is interactive — open
+  questions first ('what worked' / 'what didn't work'), follow-up cycle to
+  deepen, agent observations only after the user has answered, the
+  Leveraged Priority question asked verbatim, and an ELI5 recap on close.
+  This journey is the durable acceptance test for the interactive shape;
+  it replaces the old per-project user-story-validation pattern (which
+  required a fresh Claude conversation and piled up at N-1 of N).
+
+setup:
+  - create_pursuit:
+      id: test-reflect-interactive
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-reflect-interactive
+      id: test-reflect-project
+      title: Test Reflect Project
+      intent: |
+        Fixture so /reflect Phase 2 has at least one project to reason
+        about. The 'what worked' question should land naturally with
+        this project visible in active state.
+      actions:
+        - item: First action that landed (gives Phase 2 something to surface)
+          checked: true
+        - item: Carry-over action (gives next-week framing material)
+          checked: false
+
+steps:
+  - command: /cadence:reflect
+    assert:
+      - file_created:
+          path: reflections/*.md
+          frontmatter:
+            status: draft
+      - agent_output_contains:
+          pattern: "(?i)reflect.*get clear|phase 1"
+
+  - action: |
+      Walk through Phase 1 (Get Clear): no captures to triage in this
+      fixture; reconciler flags should be empty or close to it; project
+      relevance check confirms test-reflect-project is still active.
+    assert:
+      - file_contains:
+          path: reflections/*.md
+          pattern: "(?i)status:\\s*in_progress"
+
+  - action: |
+      Phase 2 (Get Focused) — interactive shape verification. The agent
+      should ask 'What worked well this week?' as an open question and
+      WAIT for the user's answer before surfacing any of its own
+      observations. Confirm the agent does not pre-fill a list of what
+      it noticed.
+    assert:
+      - agent_behavior:
+          description: Agent asks the open question first, waits for user input
+          pattern_present: "(?i)what worked well|what worked this week"
+          pattern_absent_before_user_answer: "(?i)i noticed|i also noticed|here's what i saw"
+
+  - action: |
+      User answers 'what worked' freely. Agent uses follow-up questions
+      ('what made that work', 'say more') to deepen the user's own
+      thinking. After the user has finished naming what worked, agent
+      MAY add 'I also noticed X — does that resonate?' framed as a
+      second move, never as a top-of-list claim.
+    assert:
+      - agent_behavior:
+          description: Follow-ups are open-ended, not leading
+          pattern_present: "(?i)what made|say more|anything else"
+
+  - action: |
+      Same shape for 'What didn't work this week?' — open question,
+      follow-up cycle, agent observations only after the user has
+      answered fully. Use 'what happened' / 'what shifted' framing,
+      never 'why did you fail.'
+    assert:
+      - agent_behavior:
+          description: 'What didn''t work' uses what/shift framing, not why-failure framing
+          pattern_present: "(?i)what didn'?t work|what didn'?t go|what shifted"
+          pattern_absent: "(?i)why did you fail|why didn'?t you"
+
+  - action: |
+      Leveraged Priority — agent asks the canonical question verbatim:
+      'What is the one thing you will do that will make you feel like
+      you won the week?' Once the user names a candidate, agent helps
+      shape it interactively for the right balance of achievable and
+      challenging — pressure-testing proof shape, ceiling, and
+      bundled-goals risk. Agent does not pre-suggest the priority.
+    assert:
+      - agent_output_contains:
+          pattern: "(?i)what is the one thing you will do that will make you feel like you won the week"
+
+  - command: /cadence:reflect (continue to finalization)
+    assert:
+      - file_contains:
+          path: reflections/*.md
+          pattern: "(?i)status:\\s*complete"
+      - file_contains:
+          path: reflections/*.md
+          pattern: "(?i)leveraged_priority:"
+
+  - action: |
+      Close — agent surfaces an ELI5 recap of what Reflect produced
+      (captures triaged, structural changes, worked/didn't-work
+      narrative, the LP) before the canonical exit line 'Your
+      Leveraged Priority for next week is: [priority].'
+    assert:
+      - agent_behavior:
+          description: ELI5 recap appears before the LP exit line
+          pattern_present: "(?i)recap|here's what just happened|here's what reflect produced"
+
+teardown:
+  - delete_files:
+      - pursuits/test-reflect-interactive/
+      - reflections/*.md
+  - assert_clean: pursuits/test-reflect-interactive/
