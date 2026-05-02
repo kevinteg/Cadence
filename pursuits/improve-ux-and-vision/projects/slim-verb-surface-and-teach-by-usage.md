@@ -1,7 +1,7 @@
 ---
 id: slim-verb-surface-and-teach-by-usage
 pursuit: improve-ux-and-vision
-status: active
+status: done
 created: 2026-05-01
 ---
 
