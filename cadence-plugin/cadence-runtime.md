@@ -141,6 +141,35 @@ and the `skill-teaching` content type — the `cadence tip-pick
 teaching tooltip when eligible. The point is to make the verb surface
 self-teaching through usage rather than upfront docs.
 
+**Verb-hint and teaching footer at exit.** Every verb's natural exit
+point ends with TWO standardized surfaces — never one or the other,
+both:
+
+1. **Verb-hint block** (always present): 2-3 contextual next-step
+   suggestions tied to where the user now is. Existing precedent: the
+   `Available actions:` block on every `/status` drill-down. The same
+   pattern extends to every verb. Source the suggestions in this order
+   of priority: (a) state-derived hints — what's natural to do next
+   given the new state (e.g., after `/promote` of an Idea→Project,
+   suggest `/start <project>` and `/brainstorm <project>`); (b)
+   verb-hint tips from the library (`cadence tip-pick --triggers
+   verb-<name>,state-<…> --types verb-hint`); (c) generic next-step
+   prompts that match the cognitive mode. Render as a short bulleted
+   list. The user should never have to type `/cadence:help` to find
+   the next move.
+
+2. **Teaching footer** (when eligible): a one-line tooltip from the
+   tip library — `skill-teaching` content for verb discovery, or a
+   contextually-fit `quote` at long cool-down. Multi-fire (not
+   once-only) — repeats after the per-tip cool-down expires. Render
+   below the verb-hint block, separated by a blank line. Skip when
+   no tip is eligible. Pulled via `cadence tip-pick --triggers
+   verb-<name>` (and any active state/discovery tags).
+
+These two surfaces are mandatory across the verb surface. The only
+exemption is `/capture` (whose contract is silent — zero response by
+design). Every other verb's exit obeys this pattern.
+
 **Surface tips from the curated library at appropriate breakpoints.**
 Cadence ships a tip library at `cadence-plugin/tips/library.yaml`
 (schema: see `cadence-reference.md` "Tip Library" section). Three

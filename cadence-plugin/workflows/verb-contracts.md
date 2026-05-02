@@ -376,6 +376,29 @@ Otherwise show a short list of active projects: "Which project is this for?"
 
 ---
 
+## Exit Conventions
+
+Every verb's natural exit point ends with two standardized surfaces.
+Both are mandatory; the exemption is `/capture` (silent by contract).
+
+1. **Verb-hint block** — 2-3 contextual next-step suggestions tied to
+   the user's new state. Same shape as `/status`'s "Available actions:"
+   block; extends to every verb. Source priority: state-derived hints
+   first (what's natural given the new state), then verb-hint entries
+   from the tip library (`cadence tip-pick --triggers verb-<name> --types
+   verb-hint`), then generic mode-fit prompts. Short bulleted list.
+2. **Teaching footer** (when eligible) — one-line tooltip pulled via
+   `cadence tip-pick --triggers verb-<name>` (plus any active state or
+   `discovery` tags). Multi-fire, frequency-capped per the tip system.
+   Skip silently when no tip is eligible.
+
+Render verb-hint block first, blank line, teaching footer if present.
+Each verb's individual contract focuses on the verb's specific
+behavior; the exit shape is universal.
+
+The runtime declaration of this convention lives in
+`cadence-runtime.md`'s "Engagement and Alignment" section.
+
 ## Universal Rules
 
 These apply across all verbs:
