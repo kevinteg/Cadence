@@ -1,0 +1,104 @@
+# Cadence Tip Library
+# Schema reference: cadence-plugin/cadence-reference.md "Tip Library" section
+# Editor's guide: cadence-plugin/tips/README.md
+#
+# This file is a STUB seeded with example entries that exercise the schema.
+# Full content migration from docs/teaching-tips-research.md happens in
+# project add-tip-and-teaching-surfaces, action 3.
+
+version: 1
+
+tips:
+  # --- type: quote ---
+
+  - id: allen-mind-for-ideas
+    type: quote
+    content: |
+      "Your mind is for having ideas, not holding them."
+    attribution: David Allen, Getting Things Done
+    triggers: [verb-capture, moment-long-agent-run, idle]
+    tone: framing
+    frequency:
+      cool_down_minutes: 60
+      cool_down_days: 14
+    weight: normal
+    tags: [capture, gtd, attention]
+
+  - id: karpathy-leash
+    type: quote
+    content: |
+      Keep AI on the leash; you're still the bottleneck. (after Karpathy)
+    attribution: Andrej Karpathy, YC AI Startup School keynote (June 2025)
+    triggers: [moment-long-agent-run, ritual-pursuit-close]
+    tone: framing
+    frequency:
+      cool_down_days: 7
+    weight: normal
+    tags: [agentic-engineering, verification]
+
+  - id: brooks-attention
+    type: quote
+    content: |
+      "The essential moral act is the act of attention."
+    attribution: David Brooks, How to Know a Person (citing Iris Murdoch)
+    triggers: [ritual-reflect-get-focused, moment-long-agent-run, idle]
+    tone: framing
+    frequency:
+      cool_down_days: 21
+    weight: normal
+    tags: [attention, reflection]
+
+  # --- type: skill-teaching ---
+
+  - id: resolve-verb-discovery
+    type: skill-teaching
+    content: |
+      Running `/cadence:resolve` — this marks projects done. Next time,
+      type `/resolve <project>` directly.
+    triggers: [discovery]
+    tone: directive
+    frequency:
+      cool_down_minutes: 30
+      cool_down_days: 1
+    weight: high
+    tags: [verb-discovery, resolve]
+
+  - id: capture-flow-safe-explainer
+    type: skill-teaching
+    content: |
+      `/capture` is flow-safe — the agent saves your thought silently and
+      doesn't respond. Triage happens at your next `/reflect`.
+    triggers: [verb-capture]
+    tone: structural
+    frequency:
+      cool_down_days: 7
+      lifetime_max: 5
+    weight: normal
+    tags: [verb-discovery, capture]
+
+  # --- type: verb-hint ---
+
+  - id: post-promote-next-step
+    type: verb-hint
+    content: |
+      Next: `/cadence:start <project>` to open the project view, or
+      `/cadence:brainstorm <project>` to seed actions on it.
+    triggers: [verb-promote-project]
+    tone: directive
+    frequency:
+      cool_down_minutes: 0
+      cool_down_days: 0
+    weight: high
+    tags: [next-step, promote]
+
+  - id: post-resolve-pursuit-near-completion
+    type: verb-hint
+    content: |
+      One project closer to closing the pursuit. `/cadence:status <pursuit>`
+      to see what's left, or `/cadence:close <pursuit>` if you're ready.
+    triggers: [verb-resolve, state-pursuit-near-completion]
+    tone: directive
+    frequency:
+      cool_down_minutes: 0
+    weight: high
+    tags: [next-step, resolve, pursuit-close]

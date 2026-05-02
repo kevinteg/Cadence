@@ -278,3 +278,119 @@ When the user dumps a raw thought mid-flow via `/capture`, save it to
 `thoughts/unprocessed/` with no response. Captures are triaged into
 Ideas or Actions at the next breakpoint or during Reflect. Flag
 uncertain routing for human review.
+
+## Tip Library
+
+The tip library at `cadence-plugin/tips/library.yaml` holds curated
+content the agent surfaces at appropriate breakpoints — quotes,
+skill-teaching tooltips, and contextual verb hints. The library design
+honors the "smart-colleague-marginalia, not motivational-poster" tone
+target documented in `docs/teaching-tips-research.md`, and frequency
+caps prevent over-rotation from turning the surface into wallpaper.
+
+### Schema
+
+```yaml
+# cadence-plugin/tips/library.yaml
+version: 1
+tips:
+  - id: <kebab-case-id>             # required, unique
+    type: quote | skill-teaching | verb-hint   # required
+    content: |                       # required, the body of the tip
+      <one or two short lines>
+    attribution: <author, source>    # required for type: quote
+    triggers: [<tag1>, <tag2>, ...]  # required, fires when ANY active context matches
+    tone: framing | directive | diagnostic | structural   # default: structural
+    frequency:
+      cool_down_minutes: <int>       # min minutes between consecutive shows; default 60
+      cool_down_days: <int>          # min days between shows; default 0
+      lifetime_max: <int>            # rare; total times shown ever; default unbounded
+    weight: low | normal | high      # tie-breaker when multiple tips match; default normal
+    tags: [<topic1>, <topic2>]       # informational; useful for filtering
+```
+
+### Content types
+
+| Type | Purpose | Example |
+|---|---|---|
+| `quote` | Brain-tickler quotes from the curated library — non-sappy, smart-colleague tone. Surfaces during long agent runs and at breakpoints. Requires `attribution`. | "Your mind is for having ideas, not holding them." — David Allen |
+| `skill-teaching` | Tooltip-style verb explanations. Surfaces when natural language maps to a verb, or after teaching-eligible actions. | "Running `/cadence:resolve` — this marks projects done. Next time, type `/resolve <project>` directly." |
+| `verb-hint` | Contextual next-step suggestions. Surfaces at the natural exit of a verb. | "Next: `/cadence:start <project>` to open the view, or `/cadence:brainstorm` to seed actions." |
+
+### Trigger tag taxonomy
+
+Triggers are open-vocabulary string tags. Skills register which tags
+are active at a given moment; the tip-selection layer queries the
+library for entries whose `triggers` include any active tag.
+Conventional namespacing:
+
+| Prefix | Meaning | Examples |
+|---|---|---|
+| `verb-` | Fires during or after a specific verb | `verb-promote-pursuit`, `verb-resolve`, `verb-narrate` |
+| `ritual-` | Fires during a ritual phase | `ritual-reflect-get-clear`, `ritual-reflect-get-focused`, `ritual-pursuit-close` |
+| `state-` | Fires when a system state holds | `state-pursuit-near-completion`, `state-wip-over-limit`, `state-aging-seed` |
+| `moment-` | Fires at temporal breakpoints | `moment-long-agent-run`, `moment-end-of-day`, `moment-week-closing` |
+| `discovery` | Fires when natural language maps to a verb (teaching footer pattern) | `discovery` |
+| `idle` | Generic loading-screen pull when no specific context applies | `idle` |
+
+New tags can be added by skill code without library schema changes.
+The library schema is open by design — keep the registered-tags list
+in this section informal so additions are friction-free.
+
+### Tone
+
+The `tone` field guides selection by context, not by content. Long
+agent runs prefer `framing` (a quote to chew on while waiting); post-verb
+moments prefer `directive` (a clear next move); reconciler flags prefer
+`diagnostic` ("consider whether X"); operational prompts default to
+`structural` ("Open editor at file Y"). The agent picks tips matching
+the desired tone for the active context.
+
+### Frequency model
+
+The frequency model uses cool-down windows rather than session boundaries
+(Sessions are not a Cadence primitive — the project file IS the durable
+state). A tip can fire when ALL of:
+
+- `now - last_shown >= cool_down_minutes`
+- `now - last_shown >= cool_down_days * 86400`
+- `show_count < lifetime_max` (if set)
+
+The "per_session" feel is achieved with `cool_down_minutes: 60` (won't
+fire twice in the same hour) or longer. Long-running-agent interjections
+that should feel like a surprise gift use `cool_down_days: 7`.
+
+### State tracking
+
+Show history lives at `.cadence/tip-state.json` (gitignored, per-repo):
+
+```json
+{
+  "version": 1,
+  "tips": {
+    "<tip-id>": {
+      "show_count": <int>,
+      "last_shown": "<ISO-8601 timestamp>"
+    }
+  }
+}
+```
+
+The CLI exposes `cadence tip status` (show recent activity + which tips
+are eligible right now) and `cadence tip reset --match <id-substring>`
+(clear state for testing or repeating a tip).
+
+### Editor's guidelines
+
+When adding tips to the library:
+
+- Follow the **smart-colleague-marginalia** tone target — never
+  motivational-poster, never sappy, never streak-flavored.
+- For `quote` entries, attribute precisely (author, source); paraphrase
+  is OK but mark it as such.
+- Pick `triggers` thoughtfully — a tip that fires on too many tags
+  becomes wallpaper.
+- Default `cool_down_days` to at least 7 for `quote` entries; longer
+  for verbose ones.
+- When in doubt, set lower `weight` so the tip doesn't dominate
+  selection in its trigger contexts.
