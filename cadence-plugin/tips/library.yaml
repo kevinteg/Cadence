@@ -1,15 +1,111 @@
 # Cadence Tip Library
 # Schema reference: cadence-plugin/cadence-reference.md "Tip Library" section
 # Editor's guide: cadence-plugin/tips/README.md
+# Source material: docs/teaching-tips-research.md (227-entry curated library)
 #
-# This file is a STUB seeded with example entries that exercise the schema.
-# Full content migration from docs/teaching-tips-research.md happens in
-# project add-tip-and-teaching-surfaces, action 3.
+# Migration of curated content from the research doc.
+# Tone target: smart-colleague-marginalia, never motivational-poster.
+# Triggers are precise on purpose — the failure mode is the right quote
+# in the wrong context, not having too few quotes.
 
 version: 1
 
 tips:
-  # --- type: quote ---
+
+  # ============================================================
+  # A. Setting the Why — Pursuit-level framing
+  # ============================================================
+
+  - id: sinek-golden-circle
+    type: quote
+    content: |
+      "People don't buy WHAT you do; they buy WHY you do it."
+    attribution: Simon Sinek, Start with Why
+    triggers: [verb-promote-pursuit]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: sinek-why-precedes-how
+    type: quote
+    content: |
+      The inspired order is Why → How → What. The limbic brain decides;
+      the neocortex justifies.
+    attribution: paraphrase of Simon Sinek, Start with Why
+    triggers: [verb-promote-pursuit]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: sinek-why-decays
+    type: quote
+    content: |
+      A Pursuit without a clear Why decays into busywork.
+    attribution: paraphrase of Simon Sinek, Start with Why
+    triggers: [state-stale-pursuit-why, ritual-pursuit-review]
+    tone: diagnostic
+    frequency: { cool_down_days: 30 }
+
+  - id: doerr-ideas-execution
+    type: quote
+    content: |
+      "Ideas are easy. Execution is everything."
+    attribution: John Doerr, Measure What Matters
+    triggers: [state-no-actions-this-week, ritual-reflect-get-clear, idle]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  - id: doerr-stretch
+    type: quote
+    content: |
+      "If you're certain you're going to nail it, you're probably not
+      pushing hard enough."
+    attribution: John Doerr, Measure What Matters
+    triggers: [verb-promote-pursuit, ritual-reflect-get-focused]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: grove-less-is-more
+    type: quote
+    content: |
+      "A few extremely well-chosen objectives impart a clear message
+      about what we say 'yes' to and what we say 'no' to."
+    attribution: Andy Grove (via John Doerr, Measure What Matters)
+    triggers: [state-wip-over-limit, verb-promote-pursuit]
+    tone: diagnostic
+    frequency: { cool_down_days: 14 }
+
+  - id: dewey-reflection-beats-experience
+    type: quote
+    content: |
+      "We do not learn from experience . . . we learn from reflecting
+      on experience."
+    attribution: John Dewey (via John Doerr, Measure What Matters)
+    triggers: [ritual-reflect-get-focused, ritual-pursuit-close, idle]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  - id: sinek-why-survives
+    type: quote
+    content: |
+      A clear Why survives the founder leaving. Could a stranger
+      continue this Pursuit from your notes?
+    attribution: paraphrase of Simon Sinek, Start with Why
+    triggers: [ritual-pursuit-review]
+    tone: diagnostic
+    frequency: { cool_down_days: 30 }
+
+  - id: newport-mission-reduction
+    type: quote
+    content: |
+      "Any attempt to succeed with our first principle of slow
+      productivity must begin with the reduction of your main objectives."
+    attribution: Cal Newport, Slow Productivity
+    triggers: [ritual-pursuit-review, state-wip-over-limit]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  # ============================================================
+  # B. Capturing Intent — before project work or an action
+  # ============================================================
 
   - id: allen-mind-for-ideas
     type: quote
@@ -18,23 +114,1122 @@ tips:
     attribution: David Allen, Getting Things Done
     triggers: [verb-capture, moment-long-agent-run, idle]
     tone: framing
-    frequency:
-      cool_down_minutes: 60
-      cool_down_days: 14
-    weight: normal
-    tags: [capture, gtd, attention]
+    frequency: { cool_down_days: 14 }
+
+  - id: allen-two-minute-rule
+    type: quote
+    content: |
+      The two-minute rule: if it takes less than two minutes, do it now.
+      Otherwise capture, defer, or delegate.
+    attribution: David Allen, Getting Things Done
+    triggers: [verb-capture, ritual-reflect-get-clear]
+    tone: structural
+    frequency: { cool_down_days: 14 }
+
+  - id: allen-mind-off-mind
+    type: quote
+    content: |
+      "You must use your mind to get things off your mind."
+    attribution: David Allen, Getting Things Done
+    triggers: [verb-capture, ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: allen-mind-like-water
+    type: quote
+    content: |
+      Mind like water — a relaxed mind that responds proportionally to
+      input "doesn't overreact or underreact."
+    attribution: David Allen, Getting Things Done
+    triggers: [ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: allen-open-loops
+    type: quote
+    content: |
+      "As soon as you have two things to do stored in your RAM, you've
+      generated personal failure."
+    attribution: David Allen, Getting Things Done
+    triggers: [verb-capture, verb-start]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: allen-next-action
+    type: quote
+    content: |
+      "What is the very next physical, visible action required?"
+    attribution: David Allen, Getting Things Done
+    triggers: [verb-promote-action, verb-develop]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: sullivan-audience-first
+    type: quote
+    content: |
+      "It's not about you, it's all about the value you can provide to
+      others." Define who/what the artifact serves before generating it.
+    attribution: Jay Sullivan, Simply Said
+    triggers: [verb-narrate, moment-long-agent-run]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: sullivan-one-sentence
+    type: quote
+    content: |
+      One sentence, fewer than ten words — Sullivan's rule for the
+      core message. Find the kernel before expanding the narrative.
+    attribution: Jay Sullivan, Simply Said
+    triggers: [verb-promote-project]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: sullivan-most-important-first
+    type: quote
+    content: |
+      Most-important-info-first: main concept → key points →
+      fundamental takeaways.
+    attribution: Jay Sullivan, Simply Said
+    triggers: [verb-narrate]
+    tone: structural
+    frequency: { cool_down_days: 21 }
+
+  - id: sullivan-key-takeaway
+    type: quote
+    content: |
+      "Ask yourself, 'what's the one key takeaway I want everyone to
+      leave with?'"
+    attribution: Jay Sullivan, Simply Said
+    triggers: [verb-start, verb-promote-project]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: allen-clarify-before-generate
+    type: quote
+    content: |
+      "Most people have a resistance to initiating the burst of energy
+      that it will take to clarify the real meaning… of something they
+      have let into their world."
+    attribution: David Allen, Getting Things Done
+    triggers: [verb-capture, verb-start]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: twain-clear-next-step
+    type: quote
+    content: |
+      "The secret of getting started is breaking your complex
+      overwhelming tasks into small, manageable tasks."
+    attribution: Mark Twain (via David Allen, GTD)
+    triggers: [verb-promote-action, verb-develop]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: allen-think-about-not-of
+    type: quote
+    content: |
+      Use your mind to think *about* things, not *of* them.
+    attribution: David Allen, Getting Things Done
+    triggers: [ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  # ============================================================
+  # C. Diverge / Explore — opening the solution space
+  # ============================================================
+
+  - id: puccio-four-principles
+    type: quote
+    content: |
+      Diverge: defer judgment, go for quantity, make connections,
+      seek novelty.
+    attribution: Gerard Puccio, The Creative Thinker's Toolkit (Lect. 5)
+    triggers: [verb-brainstorm]
+    tone: structural
+    frequency: { cool_down_days: 14 }
+
+  - id: puccio-combining-opposites
+    type: quote
+    content: |
+      Diverge then converge. Switch modes deliberately; don't blend them.
+    attribution: Gerard Puccio, The Creative Thinker's Toolkit (Lect. 4)
+    triggers: [verb-brainstorm, verb-develop]
+    tone: structural
+    frequency: { cool_down_days: 14 }
+
+  - id: puccio-lateral-thinking-survival
+    type: quote
+    content: |
+      Lateral thinking is a survival skill. When stuck on a Project,
+      try a Diverge pass on a sibling.
+    attribution: Gerard Puccio, The Creative Thinker's Toolkit (Lect. 2)
+    triggers: [verb-brainstorm, state-stuck]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: kirton-adaptors-innovators
+    type: quote
+    content: |
+      Adaptors do better; Innovators do differently. Which kind of move
+      is this Project — better, or different?
+    attribution: Kirton (via Puccio, The Creative Thinker's Toolkit)
+    triggers: [verb-promote-project]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: epstein-sampling-period
+    type: quote
+    content: |
+      Sample first, specialize later. Encourage one exploratory Pursuit
+      alongside the focused ones.
+    attribution: David Epstein, Range
+    triggers: [ritual-pursuit-review]
+    tone: diagnostic
+    frequency: { cool_down_days: 30 }
+
+  - id: yokoi-withered-technology
+    type: quote
+    content: |
+      "Lateral thinking with withered technology." Old tools, new uses.
+    attribution: Gunpei Yokoi (via David Epstein, Range)
+    triggers: [state-stuck, verb-brainstorm, idle]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: ibarra-test-and-learn
+    type: quote
+    content: |
+      "Test-and-learn, not plan-and-implement." Act first; label later.
+    attribution: Herminia Ibarra (via David Epstein, Range)
+    triggers: [verb-promote-pursuit, ritual-pursuit-review]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: dyson-birds-frogs
+    type: quote
+    content: |
+      Visionary birds see horizons; focused frogs solve problems one at
+      a time. Pick a mode for this work.
+    attribution: Freeman Dyson (via David Epstein, Range)
+    triggers: [verb-narrate, verb-start]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: epstein-wicked-vs-kind
+    type: quote
+    content: |
+      In kind environments specialization wins; in wicked ones,
+      generalists do. Is this Project kind or wicked?
+    attribution: David Epstein, Range
+    triggers: [verb-promote-project, ritual-reflect-get-focused]
+    tone: diagnostic
+    frequency: { cool_down_days: 30 }
+
+  - id: epstein-analogical-thinking
+    type: quote
+    content: |
+      "Deep analogical thinking… recognizing conceptual similarities in
+      multiple domains." What is this Project like?
+    attribution: David Epstein, Range
+    triggers: [verb-brainstorm]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: paul-think-with-heads
+    type: quote
+    content: |
+      "What if we don't just think with our heads?" Externalize before
+      deciding.
+    attribution: paraphrase of Annie Murphy Paul, The Extended Mind
+    triggers: [verb-brainstorm, idle]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: paul-externalize-to-iterate
+    type: quote
+    content: |
+      "Whenever possible, we should endeavor to transform information
+      into an artifact… and then proceed to interact with it."
+    attribution: Annie Murphy Paul, The Extended Mind
+    triggers: [verb-brainstorm, verb-develop]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: paul-sketches-talk-back
+    type: quote
+    content: |
+      Sketches "talk back." Make the artifact, then let it iterate
+      with you.
+    attribution: Annie Murphy Paul, The Extended Mind
+    triggers: [ritual-reflect-get-clear, verb-brainstorm]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: puccio-quantity-quality
+    type: quote
+    content: |
+      Quantity is a quality strategy. We have 3 options — want 7?
+    attribution: Gerard Puccio, The Creative Thinker's Toolkit
+    triggers: [verb-brainstorm]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: epstein-wander-off
+    type: quote
+    content: |
+      "A paradox of innovation and mastery is that breakthroughs often
+      occur when you start down a road, but wander off."
+    attribution: David Epstein, Range
+    triggers: [ritual-reflect-get-focused]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  # ============================================================
+  # D. Converge / Decide — narrowing and committing
+  # ============================================================
+
+  - id: puccio-affirmative-judgment
+    type: quote
+    content: |
+      Practice affirmative judgment in convergence: not "no, because…"
+      but "yes, if…"
+    attribution: Gerard Puccio, The Creative Thinker's Toolkit (Lect. 6)
+    triggers: [verb-develop]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: puccio-novelty-in-convergence
+    type: quote
+    content: |
+      Don't let convergence kill the most interesting option. Mark
+      one wild card before pruning.
+    attribution: Gerard Puccio, The Creative Thinker's Toolkit
+    triggers: [verb-develop]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: newport-deciding-not-to-do
+    type: quote
+    content: |
+      "Deciding what not to do is as important as deciding what to do."
+    attribution: Cal Newport, Slow Productivity
+    triggers: [ritual-reflect-get-focused, ritual-pursuit-review]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  - id: doerr-focus-everything-nothing
+    type: quote
+    content: |
+      "If we try to focus on everything, we focus on nothing."
+    attribution: John Doerr, Measure What Matters
+    triggers: [state-wip-over-limit, ritual-reflect-get-focused]
+    tone: diagnostic
+    frequency: { cool_down_days: 14 }
+
+  - id: page-wood-fewer-arrows
+    type: quote
+    content: |
+      "Put more wood behind fewer arrows."
+    attribution: Larry Page (via John Doerr, Measure What Matters)
+    triggers: [ritual-reflect-get-focused, idle]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  - id: jobs-hire-smart
+    type: quote
+    content: |
+      "Hire smart people so they can tell us what to do." Brief
+      outcomes to your agents, not procedures.
+    attribution: Steve Jobs (via John Doerr, Measure What Matters)
+    triggers: [moment-long-agent-run]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: bentley-leveraged-priority
+    type: quote
+    content: |
+      Pick the priority that "acts as a force multiplier" — reducing
+      work this week and the next quarter.
+    attribution: Demir Bentley, Winning the Week
+    triggers: [ritual-reflect-get-focused]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: bentley-daily-list-trap
+    type: quote
+    content: |
+      "The daily to-do list is where high-impact tasks go to die."
+      Plan the week.
+    attribution: Demir Bentley, Winning the Week
+    triggers: [ritual-reflect-get-focused, idle]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  - id: bentley-triage-ruthlessly
+    type: quote
+    content: |
+      Triage to three buckets only: do, defer, delete.
+    attribution: Demir Bentley, Winning the Week
+    triggers: [ritual-reflect-get-clear]
+    tone: structural
+    frequency: { cool_down_days: 14 }
+
+  - id: horowitz-roll-hard-six
+    type: quote
+    content: |
+      "Roll a hard six." Wartime acceptance: there's no contingency.
+      Name the chosen risk explicitly.
+    attribution: Ben Horowitz, The Hard Thing About Hard Things
+    triggers: [state-stuck, ritual-reflect-get-focused]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: horowitz-10-percent-info
+    type: quote
+    content: |
+      "At the time of any given decision, the CEO will generally have
+      less than 10 percent of the information." Record assumptions
+      explicitly.
+    attribution: Ben Horowitz, The Hard Thing About Hard Things
+    triggers: [verb-promote-project, verb-develop]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: newport-single-project-day
+    type: quote
+    content: |
+      "Work on at most one project per day."
+    attribution: Cal Newport, Slow Productivity
+    triggers: [verb-start, ritual-reflect-get-focused]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: puccio-convergence-commitment
+    type: quote
+    content: |
+      Convergence is commitment. End converge work with a commit-
+      message-style summary.
+    attribution: Gerard Puccio, The Creative Thinker's Toolkit
+    triggers: [verb-develop, verb-resolve]
+    tone: structural
+    frequency: { cool_down_days: 21 }
+
+  # ============================================================
+  # E. Steering the Stream — human-in-the-loop on agentic work
+  # ============================================================
 
   - id: karpathy-leash
     type: quote
     content: |
-      Keep AI on the leash; you're still the bottleneck. (after Karpathy)
+      Keep AI on the leash; you're still the bottleneck.
     attribution: Andrej Karpathy, YC AI Startup School keynote (June 2025)
     triggers: [moment-long-agent-run, ritual-pursuit-close]
     tone: framing
-    frequency:
-      cool_down_days: 7
-    weight: normal
-    tags: [agentic-engineering, verification]
+    frequency: { cool_down_days: 14 }
+
+  - id: karpathy-bottleneck-visible
+    type: quote
+    content: |
+      "I'm still the bottleneck." Make the verification queue visible,
+      not hidden.
+    attribution: Andrej Karpathy, YC AI Startup School keynote (June 2025)
+    triggers: [moment-long-agent-run, ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: karpathy-iron-man-suit
+    type: quote
+    content: |
+      Iron Man suit, not Iron Man robot — partial-autonomy products
+      with the human still in the loop.
+    attribution: Andrej Karpathy
+    triggers: [verb-promote-project]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: willison-llm-tools-loop
+    type: quote
+    content: |
+      "An LLM agent runs tools in a loop to achieve a goal. The art
+      of using them well is to carefully design the tools and loop."
+    attribution: Simon Willison, "Designing agentic loops" (Sept 2025)
+    triggers: [verb-start, moment-long-agent-run]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: willison-wrecking-environment
+    type: quote
+    content: |
+      "An AI agent is an LLM wrecking its environment in a loop."
+      Use the worktree.
+    attribution: Simon Willison
+    triggers: [moment-long-agent-run, verb-start]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  - id: willison-brute-force-search
+    type: quote
+    content: |
+      Coding agents are brute-force search. The human's job is curation.
+      The narrate step summarizes search, not keystrokes.
+    attribution: paraphrase of Simon Willison
+    triggers: [verb-narrate, moment-long-agent-run]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: on-the-loop
+    type: quote
+    content: |
+      Move from "in the loop" to "on the loop." Steer and oversee
+      rather than approving each step.
+    attribution: industry framing (Karpathy-adjacent, 2025-26)
+    triggers: [ritual-reflect-get-clear, idle]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: willison-orchestrated-monsters
+    type: quote
+    content: |
+      "With an orchestrated army of agents… you have removed yourself
+      from the loop, so you don't even know that all the innocent
+      booboos have formed a monster."
+    attribution: Simon Willison
+    triggers: [moment-long-agent-run, ritual-reflect-get-focused]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: litt-code-like-surgeon
+    type: quote
+    content: |
+      Code like a surgeon. Stay in the loop for the critical incision;
+      let agents do prep and grunt work.
+    attribution: Geoffrey Litt
+    triggers: [verb-start, moment-long-agent-run]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: helmsman-not-hostage
+    type: quote
+    content: |
+      Helmsman, not hostage. A helmsman feels the wind and the wheel;
+      a hostage just watches the feed.
+    attribution: distilled
+    triggers: [verb-narrate]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: beer-cybernetic-steering
+    type: quote
+    content: |
+      Cybernetic steering: the human is the meta-controller of agent
+      loops, intervening only on dashboard violations.
+    attribution: Stafford Beer (Viable Systems Model, adapted)
+    triggers: [idle]
+    tone: framing
+    weight: low
+    frequency: { cool_down_days: 30 }
+
+  - id: attention-salience-not-recency
+    type: quote
+    content: |
+      Attention triage by salience, not recency. The most recent agent
+      token shouldn't win your attention by default.
+    attribution: distilled
+    triggers: [verb-narrate, moment-long-agent-run]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: verification-new-craft
+    type: quote
+    content: |
+      When generation is cheap, the scarce skill is judging output.
+      Verification is the new craft.
+    attribution: distilled
+    triggers: [ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: review-every-assumption
+    type: quote
+    content: |
+      Don't review every line — review every assumption.
+    attribution: practitioner heuristic
+    triggers: [verb-resolve, ritual-reflect-get-clear]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  # ============================================================
+  # F. Cognitive Ease & Attention Management
+  # ============================================================
+
+  - id: kahneman-system-1-2
+    type: quote
+    content: |
+      System 1 (fast, automatic) and System 2 (slow, deliberate) —
+      know which is in the chair.
+    attribution: Daniel Kahneman, Thinking, Fast and Slow
+    triggers: [idle, verb-narrate]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: kahneman-cognitive-minefield
+    type: quote
+    content: |
+      "Recognize the signs that you are in a cognitive minefield, slow
+      down, and ask for reinforcement of system 2."
+    attribution: Daniel Kahneman, Thinking, Fast and Slow
+    triggers: [moment-pattern-failed-agent-attempts, state-stuck]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: kahneman-cognitive-ease-vigilance
+    type: quote
+    content: |
+      Cognitive ease "links… to illusions of truth, pleasant feelings,
+      and reduced vigilance." Beware the polished agent answer that's
+      wrong.
+    attribution: Daniel Kahneman, Thinking, Fast and Slow
+    triggers: [ritual-reflect-get-clear, moment-long-agent-run]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: kahneman-wysiati
+    type: quote
+    content: |
+      WYSIATI — what you see is all there is. "What's NOT in the
+      context window?"
+    attribution: Daniel Kahneman, Thinking, Fast and Slow
+    triggers: [verb-develop, verb-promote-project]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: kahneman-intelligence-attention
+    type: quote
+    content: |
+      "Intelligence is… the ability to find relevant material in memory
+      and to deploy attention when needed."
+    attribution: Daniel Kahneman, Thinking, Fast and Slow
+    triggers: [idle]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: kahneman-simple-language
+    type: quote
+    content: |
+      "If you care about being thought credible and intelligent, do
+      not use complex language where simpler language will do."
+    attribution: Daniel Kahneman, Thinking, Fast and Slow
+    triggers: [verb-narrate]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: kahneman-law-least-effort
+    type: quote
+    content: |
+      Law of least effort: people gravitate to the least demanding
+      course. Make the right action also the easy action.
+    attribution: Daniel Kahneman, Thinking, Fast and Slow
+    triggers: [ritual-reflect-get-focused]
+    tone: structural
+    frequency: { cool_down_days: 21 }
+
+  - id: kahneman-anchoring
+    type: quote
+    content: |
+      Anchoring bites: arbitrary first numbers shape later judgment.
+      Separate "estimate" from "agent's first guess" before deciding.
+    attribution: Daniel Kahneman, Thinking, Fast and Slow
+    triggers: [verb-promote-project]
+    tone: diagnostic
+    frequency: { cool_down_days: 30 }
+
+  - id: paul-brain-offloading
+    type: quote
+    content: |
+      "The human brain is limited in its ability to pay attention,
+      limited in facility with abstract concepts, and limited in its
+      power to persist." Offloading is competence, not weakness.
+    attribution: Annie Murphy Paul, The Extended Mind
+    triggers: [verb-capture]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: paul-cognitively-congenial
+    type: quote
+    content: |
+      "Cognitively congenial situations." Deliberately design your
+      space to think well.
+    attribution: Annie Murphy Paul, The Extended Mind
+    triggers: [idle]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: paul-movement-breaks
+    type: quote
+    content: |
+      "Moderate-intensity exercise sharpens our mental faculties."
+      Walk for ten minutes; the prefrontal cortex thanks you.
+    attribution: Annie Murphy Paul, The Extended Mind
+    triggers: [moment-work-block-90-min]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: paul-place-anchoring
+    type: quote
+    content: |
+      Place-anchoring matters: same chair, same hour, same agent for
+      deep work sessions.
+    attribution: Annie Murphy Paul, The Extended Mind
+    triggers: [idle]
+    tone: framing
+    weight: low
+    frequency: { cool_down_days: 30 }
+
+  - id: newport-attention-residue
+    type: quote
+    content: |
+      "When switching tasks some of our attention remains attached to
+      the previous task."
+    attribution: Cal Newport, Deep Work
+    triggers: [verb-start, moment-long-agent-run]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: newport-dont-peek
+    type: quote
+    content: |
+      "Even the very quickest of glances can actually be the worst" —
+      attention residue is the cost of "just one quick check."
+    attribution: Cal Newport, Deep Work
+    triggers: [moment-long-agent-run, verb-start]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: newport-clarity-matters
+    type: quote
+    content: |
+      "Clarity about what matters provides clarity about what does not."
+    attribution: Cal Newport, Deep Work
+    triggers: [ritual-reflect-get-focused, idle]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  # ============================================================
+  # G. Deep Work Sessions — protecting focused time
+  # ============================================================
+
+  - id: newport-time-x-focus
+    type: quote
+    content: |
+      High-Quality Work = Time Spent × Intensity of Focus.
+    attribution: Cal Newport, Deep Work
+    triggers: [verb-narrate, idle]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: newport-three-to-four-hours
+    type: quote
+    content: |
+      Three to four hours of deep work a day, five days a week, beats
+      a 60-hour blur.
+    attribution: Cal Newport, Deep Work
+    triggers: [idle]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  - id: newport-shutdown-complete
+    type: quote
+    content: |
+      Schedule shutdown, complete. Close the workday and let the brain
+      restore. Write a one-line "tomorrow first move."
+    attribution: Cal Newport, Deep Work
+    triggers: [moment-end-of-day]
+    tone: directive
+    frequency: { cool_down_days: 7 }
+
+  - id: newport-without-structure
+    type: quote
+    content: |
+      "Without structure, it's easy to allow your time to devolve into
+      the shallow."
+    attribution: Cal Newport, Deep Work
+    triggers: [ritual-reflect-get-focused]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: newport-single-tasking
+    type: quote
+    content: |
+      Single-tasking. Multi-tasking fragments cognition; one Project
+      per work block.
+    attribution: Cal Newport, Deep Work
+    triggers: [verb-start]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: clear-disciplined-people
+    type: quote
+    content: |
+      Disciplined people structure their lives so they don't need
+      heroic willpower.
+    attribution: paraphrase of James Clear, Atomic Habits
+    triggers: [idle, verb-start]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: clear-environment-willpower
+    type: quote
+    content: |
+      Environment beats willpower. Per-Project workspace presets that
+      mute Slack and open the right files.
+    attribution: paraphrase of James Clear, Atomic Habits
+    triggers: [verb-start, idle]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: newport-drop-network
+    type: quote
+    content: |
+      "Schedule in advance when you'll use the Internet, and then
+      avoid it altogether outside these times."
+    attribution: Cal Newport, Deep Work
+    triggers: [verb-start]
+    tone: directive
+    frequency: { cool_down_days: 30 }
+
+  - id: newport-boredom-feature
+    type: quote
+    content: |
+      Boredom is a feature. Train the ability to tolerate non-stimulation;
+      it's the soil for depth.
+    attribution: Cal Newport, Deep Work
+    triggers: [moment-long-agent-run]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: newport-depth-craftsmanship
+    type: quote
+    content: |
+      Depth is craftsmanship. Frame this as a craftsperson's tool, not
+      a productivity dashboard.
+    attribution: paraphrase of Cal Newport, Deep Work
+    triggers: [idle]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  # ============================================================
+  # H. Reflect Ritual — Get Clear / Get Focused
+  # ============================================================
+
+  - id: allen-pre-vacation-review
+    type: quote
+    content: |
+      "Most people feel best about their work the week before their
+      vacation… Do this weekly instead of yearly."
+    attribution: David Allen, Getting Things Done
+    triggers: [verb-reflect, ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: bentley-30-min-plan
+    type: quote
+    content: |
+      A 30-minute weekly planning session beats hours of daily list-
+      making.
+    attribution: Demir Bentley, Winning the Week
+    triggers: [verb-reflect, ritual-reflect-get-clear]
+    tone: structural
+    frequency: { cool_down_days: 14 }
+
+  - id: bentley-plan-work-win
+    type: quote
+    content: |
+      "Plan your week. Work your plan. Win the week."
+    attribution: Demir Bentley, Winning the Week
+    triggers: [verb-reflect, idle]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  - id: doerr-closing-cycle-questions
+    type: quote
+    content: |
+      Closing-cycle questions: What contributed to success? What
+      obstacles? What would I rewrite? What altered my approach?
+    attribution: John Doerr, Measure What Matters
+    triggers: [ritual-pursuit-close, ritual-project-close]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: clear-actions-reveal-motivations
+    type: quote
+    content: |
+      "Your actions reveal your true motivations." Surface the gap
+      between stated Pursuits and where Action time actually went.
+    attribution: James Clear, Atomic Habits
+    triggers: [ritual-reflect-get-focused]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: kahneman-mood-affect
+    type: quote
+    content: |
+      Bad mood narrows; good mood loosens. Calibrate ambition to
+      energy.
+    attribution: paraphrase of Daniel Kahneman
+    triggers: [ritual-reflect-get-clear]
+    tone: diagnostic
+    frequency: { cool_down_days: 30 }
+
+  - id: allen-renegotiate-weekly
+    type: quote
+    content: |
+      "Renegotiate all your agreements with yourself." Old commitments
+      either get a new date or get killed.
+    attribution: David Allen, Getting Things Done
+    triggers: [ritual-reflect-get-focused]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: newport-forgive-deadlines
+    type: quote
+    content: |
+      "Forgive yourself when you miss your deadlines." Catch up
+      without shame language.
+    attribution: Cal Newport, Slow Productivity
+    triggers: [state-overdue-action, ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  # ============================================================
+  # I. Sustainable Pace & Burnout Defense
+  # ============================================================
+
+  - id: newport-three-principles
+    type: quote
+    content: |
+      "1. Do fewer things. 2. Work at a natural pace. 3. Obsess over
+      quality."
+    attribution: Cal Newport, Slow Productivity
+    triggers: [idle]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  - id: newport-pseudo-productivity
+    type: quote
+    content: |
+      "The use of visible activity as the primary means of
+      approximating actual productive effort." Surface output, not
+      motion.
+    attribution: Cal Newport, Slow Productivity
+    triggers: [verb-narrate, ritual-reflect-get-focused]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: newport-overhead-tax
+    type: quote
+    content: |
+      Every commitment brings ongoing administrative drag. The
+      active-Project count is a visible "overhead tax."
+    attribution: paraphrase of Cal Newport, Slow Productivity
+    triggers: [state-wip-over-limit]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: newport-work-seasonally
+    type: quote
+    content: |
+      Alternate intense periods with recovery. Pursuits can be tagged
+      "in season" or "fallow."
+    attribution: Cal Newport, Slow Productivity
+    triggers: [ritual-pursuit-review]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: newport-double-timelines
+    type: quote
+    content: |
+      Double your timelines. Doubling isn't pessimism — it's
+      calibration against the inside-view bias.
+    attribution: paraphrase of Cal Newport, Slow Productivity
+    triggers: [verb-promote-project]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: hbr-six-causes-burnout
+    type: quote
+    content: |
+      Six causes of burnout: workload, lack of control, insufficient
+      reward, broken community, unfairness, value mismatch.
+    attribution: HBR Guide to Beating Burnout
+    triggers: [state-burnout-indicators, ritual-reflect-get-clear]
+    tone: diagnostic
+    frequency: { cool_down_days: 30 }
+
+  - id: hbr-workload-capacity
+    type: quote
+    content: |
+      Matched workload allows "rest and recovery, and time for
+      professional growth."
+    attribution: HBR Guide to Beating Burnout
+    triggers: [state-wip-over-limit]
+    tone: diagnostic
+    frequency: { cool_down_days: 30 }
+
+  - id: hbr-micro-decisions
+    type: quote
+    content: |
+      Regain control with micro-decisions: small autonomous choices
+      restore agency.
+    attribution: HBR Guide to Beating Burnout
+    triggers: [state-stuck, idle]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: hbr-life-doesnt-have-to-be
+    type: quote
+    content: |
+      "Life doesn't have to be the way it's always been."
+    attribution: HBR Guide to Beating Burnout
+    triggers: [state-stuck, ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: hbr-co-drive
+    type: quote
+    content: |
+      Co-drive, don't push harder. Speed without burnout comes from
+      delegating cleanly, not micromanaging.
+    attribution: HBR Guide to Beating Burnout
+    triggers: [moment-long-agent-run]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: bentley-juicy-reward
+    type: quote
+    content: |
+      "No habit loop can establish itself without a juicy reward."
+      Pair work blocks with explicit recovery rewards.
+    attribution: Demir Bentley, Winning the Week
+    triggers: [verb-resolve, ritual-pursuit-close]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: newport-evenings-effectiveness
+    type: quote
+    content: |
+      "Trying to squeeze a little more work out of your evenings might
+      reduce your effectiveness the next day."
+    attribution: Cal Newport, Deep Work
+    triggers: [moment-end-of-day]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: bentley-do-less-today
+    type: quote
+    content: |
+      "I have to do less today to create a foundation to do more
+      tomorrow."
+    attribution: Demir Bentley, Winning the Week
+    triggers: [idle, ritual-reflect-get-focused]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  # ============================================================
+  # J. Habits & Systems
+  # ============================================================
+
+  - id: clear-fall-to-systems
+    type: quote
+    content: |
+      "You do not rise to the level of your goals. You fall to the
+      level of your systems."
+    attribution: James Clear, Atomic Habits
+    triggers: [idle]
+    tone: framing
+    frequency: { cool_down_days: 14 }
+
+  - id: clear-identity-based-habits
+    type: quote
+    content: |
+      Identity-based habits: be the type of person who… rather than
+      try to do…
+    attribution: James Clear, Atomic Habits
+    triggers: [verb-promote-pursuit]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: clear-vote-for-person
+    type: quote
+    content: |
+      "Every action you take is a vote for the type of person you wish
+      to become."
+    attribution: James Clear, Atomic Habits
+    triggers: [verb-complete]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: clear-compound-interest
+    type: quote
+    content: |
+      Small, repeated improvements outpace heroic bursts. Compound
+      interest of habits.
+    attribution: paraphrase of James Clear, Atomic Habits
+    triggers: [idle]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: clear-make-it-obvious
+    type: quote
+    content: |
+      Make it obvious. Today's Leveraged Priority is the first thing
+      on the dashboard.
+    attribution: paraphrase of James Clear, Atomic Habits
+    triggers: [idle]
+    tone: structural
+    frequency: { cool_down_days: 21 }
+
+  - id: clear-never-miss-twice
+    type: quote
+    content: |
+      Never miss twice. One missed day is noise; two is a signal.
+    attribution: James Clear, Atomic Habits
+    triggers: [state-overdue-action, ritual-reflect-get-clear]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: clear-flow-of-life
+    type: quote
+    content: |
+      "Habits are easier to build when they fit into the flow of your
+      life." Anchor Reflect to an existing weekly anchor.
+    attribution: James Clear, Atomic Habits
+    triggers: [idle]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: allen-trusted-system
+    type: quote
+    content: |
+      Stress drops not because you have less to do, but because nothing
+      is unaccounted for.
+    attribution: paraphrase of David Allen, GTD
+    triggers: [verb-capture, ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  # ============================================================
+  # K. Curiosity & Presence
+  # ============================================================
+
+  - id: brooks-illuminator-diminisher
+    type: quote
+    content: |
+      Illuminator vs. Diminisher. Be an Illuminator of your own work —
+      not a diminisher.
+    attribution: David Brooks, How to Know a Person
+    triggers: [idle, ritual-reflect-get-focused]
+    tone: framing
+    frequency: { cool_down_days: 21 }
 
   - id: brooks-attention
     type: quote
@@ -43,12 +1238,584 @@ tips:
     attribution: David Brooks, How to Know a Person (citing Iris Murdoch)
     triggers: [ritual-reflect-get-focused, moment-long-agent-run, idle]
     tone: framing
-    frequency:
-      cool_down_days: 21
-    weight: normal
-    tags: [attention, reflection]
+    frequency: { cool_down_days: 21 }
 
-  # --- type: skill-teaching ---
+  - id: brooks-witnessing-story
+    type: quote
+    content: |
+      "Wise people don't tell us what to do. They start by witnessing
+      our story."
+    attribution: David Brooks, How to Know a Person
+    triggers: [ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: brooks-crossroads
+    type: quote
+    content: |
+      "What crossroads are you at?"
+    attribution: David Brooks, How to Know a Person
+    triggers: [ritual-pursuit-review]
+    tone: directive
+    frequency: { cool_down_days: 30 }
+
+  - id: brooks-accompaniment
+    type: quote
+    content: |
+      "When you're accompanying someone, you're in a state of relaxed
+      awareness — attentive and sensitive and unhurried."
+    attribution: David Brooks, How to Know a Person
+    triggers: [moment-long-agent-run]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: brooks-naive-realism
+    type: quote
+    content: |
+      Naïve realism kills empathy: assuming the way the code looks to
+      you is the way it looks to everyone.
+    attribution: David Brooks, How to Know a Person
+    triggers: [verb-narrate, ritual-reflect-get-clear]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: brooks-inverse-charisma
+    type: quote
+    content: |
+      Inverse charisma: "a sense of being listened to with such
+      intensity that you have to be your most honest, sharpest, and
+      best self."
+    attribution: David Brooks, How to Know a Person
+    triggers: [idle]
+    tone: framing
+    weight: low
+    frequency: { cool_down_days: 30 }
+
+  - id: brooks-curiosity-craft
+    type: quote
+    content: |
+      Illuminators "have been trained or have trained themselves in
+      the craft of understanding others." Attention is a learnable
+      skill.
+    attribution: David Brooks, How to Know a Person
+    triggers: [idle]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  # ============================================================
+  # L. Leadership & The First 90 Days
+  # ============================================================
+
+  - id: watkins-first-90-days
+    type: quote
+    content: |
+      "The actions you take during your first few months… will largely
+      determine whether you succeed or fail."
+    attribution: Michael Watkins, The First 90 Days
+    triggers: [verb-promote-pursuit]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: watkins-stars
+    type: quote
+    content: |
+      STARS — which one are you in this week? Start-up, Turnaround,
+      Accelerated Growth, Realignment, Sustaining Success.
+    attribution: Michael Watkins, The First 90 Days
+    triggers: [verb-promote-pursuit, ritual-pursuit-review]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: watkins-break-even-point
+    type: quote
+    content: |
+      The break-even point: when does the value you create equal the
+      value you've consumed?
+    attribution: Michael Watkins, The First 90 Days
+    triggers: [ritual-pursuit-review]
+    tone: diagnostic
+    frequency: { cool_down_days: 30 }
+
+  - id: watkins-diagnose-prescribing
+    type: quote
+    content: |
+      Diagnose before prescribing. Don't apply your last-job playbook.
+    attribution: Michael Watkins, The First 90 Days
+    triggers: [verb-promote-project]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: watkins-early-wins
+    type: quote
+    content: |
+      Get the right early wins, the right way — wins aligned with your
+      boss's priorities and the company's culture.
+    attribution: Michael Watkins, The First 90 Days
+    triggers: [verb-promote-project]
+    tone: directive
+    frequency: { cool_down_days: 30 }
+
+  - id: watkins-five-questions-diagnosis
+    type: quote
+    content: |
+      Five questions: What are the biggest challenges? Why? What
+      unexploited opportunities? What would need to happen? What would
+      you focus on?
+    attribution: Michael Watkins, The First 90 Days
+    triggers: [ritual-pursuit-review]
+    tone: directive
+    frequency: { cool_down_days: 30 }
+
+  - id: horowitz-peacetime-wartime
+    type: quote
+    content: |
+      "Peacetime and wartime require radically different management
+      styles." Pick one before opening Slack.
+    attribution: Ben Horowitz, The Hard Thing About Hard Things
+    triggers: [verb-promote-project]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: horowitz-wartime-focus
+    type: quote
+    content: |
+      "Wartime CEO cares about a speck of dust on a gnat's ass if it
+      interferes with the prime directive."
+    attribution: Ben Horowitz, The Hard Thing About Hard Things
+    triggers: [state-pursuit-near-completion]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: horowitz-the-struggle
+    type: quote
+    content: |
+      The Struggle is normal. Every leader feels it; greatness comes
+      from working through it. Don't romanticize it; don't deny it.
+    attribution: Ben Horowitz, The Hard Thing About Hard Things
+    triggers: [state-stuck, ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: horowitz-lead-bullets
+    type: quote
+    content: |
+      "Lead bullets, not silver bullets." Most hard problems require
+      many small fixes.
+    attribution: Ben Horowitz, The Hard Thing About Hard Things
+    triggers: [state-stuck, idle]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: horowitz-stopped-too-positive
+    type: quote
+    content: |
+      "My single biggest personal improvement as CEO occurred on the
+      day when I stopped being too positive."
+    attribution: Ben Horowitz, The Hard Thing About Hard Things
+    triggers: [ritual-reflect-get-focused]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: horowitz-strengths-weaknesses
+    type: quote
+    content: |
+      "Write down the strengths you want and the weaknesses that you
+      are willing to tolerate." Apply to delegation: name what you
+      want and what flaws are acceptable.
+    attribution: Ben Horowitz, The Hard Thing About Hard Things
+    triggers: [moment-long-agent-run]
+    tone: directive
+    frequency: { cool_down_days: 30 }
+
+  - id: horowitz-process-communication
+    type: quote
+    content: |
+      "The purpose of process is communication. If there are five
+      people in your company, you don't need process."
+    attribution: Ben Horowitz, The Hard Thing About Hard Things
+    triggers: [idle]
+    tone: framing
+    weight: low
+    frequency: { cool_down_days: 30 }
+
+  - id: grove-bad-companies-crisis
+    type: quote
+    content: |
+      "Bad companies are destroyed by crisis. Good companies survive
+      them. Great companies are improved by them."
+    attribution: Andy Grove (via John Doerr, Measure What Matters)
+    triggers: [ritual-pursuit-close]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  # ============================================================
+  # M. Communication & Recap (narrate register)
+  # ============================================================
+
+  - id: sullivan-recipient-first
+    type: quote
+    content: |
+      Recipient-first framing: open with "You all are here today for X"
+      not "I am here to…"
+    attribution: Jay Sullivan, Simply Said
+    triggers: [verb-narrate]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: sullivan-three-structural-moves
+    type: quote
+    content: |
+      Three structural moves: state main concept → detail key points →
+      reinforce takeaway.
+    attribution: Jay Sullivan, Simply Said
+    triggers: [verb-narrate]
+    tone: structural
+    frequency: { cool_down_days: 21 }
+
+  - id: sullivan-glance-test
+    type: quote
+    content: |
+      Glance-test recaps: an audience should grasp it briefly. One-line
+      summary precedes any detail.
+    attribution: Jay Sullivan, Simply Said
+    triggers: [verb-narrate]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: sullivan-corporate-speak
+    type: quote
+    content: |
+      "Let's pool our strengths to work together more efficiently"
+      beats "leverage core competencies for synergy." Ban jargon.
+    attribution: Jay Sullivan, Simply Said
+    triggers: [verb-narrate]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: sullivan-keep-short
+    type: quote
+    content: |
+      "The longer your document, the less likely it is to be read."
+    attribution: Jay Sullivan, Simply Said
+    triggers: [verb-narrate]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: sullivan-persuasive-structure
+    type: quote
+    content: |
+      Persuasive structure: problem → solution → benefit → evidence →
+      next step.
+    attribution: Jay Sullivan, Simply Said
+    triggers: [verb-develop]
+    tone: structural
+    frequency: { cool_down_days: 21 }
+
+  - id: sullivan-status-three-line
+    type: quote
+    content: |
+      Status three-line rule: what's done, what's next, what's blocked.
+    attribution: distilled from Jay Sullivan
+    triggers: [verb-narrate]
+    tone: structural
+    frequency: { cool_down_days: 14 }
+
+  - id: heinrichs-emotion-before-reason
+    type: quote
+    content: |
+      Vivid stories outperform data for action. Include a one-line
+      "what this unlocks" hook for stakeholder updates.
+    attribution: Jay Heinrichs (cited in Sullivan reviews)
+    triggers: [verb-narrate]
+    tone: directive
+    frequency: { cool_down_days: 30 }
+
+  - id: horowitz-watered-down-feedback
+    type: quote
+    content: |
+      "Watered-down feedback can be worse than no feedback at all."
+    attribution: Ben Horowitz, The Hard Thing About Hard Things
+    triggers: [ritual-reflect-get-focused, idle]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  # ============================================================
+  # N. Range & Breadth
+  # ============================================================
+
+  - id: epstein-quitting-strategic
+    type: quote
+    content: |
+      "Knowing when to quit is such a big strategic advantage that
+      every single person… should enumerate conditions under which
+      they should quit."
+    attribution: David Epstein, Range
+    triggers: [verb-promote-pursuit, ritual-pursuit-review]
+    tone: directive
+    frequency: { cool_down_days: 30 }
+
+  - id: epstein-match-quality
+    type: quote
+    content: |
+      Career fit emerges from sampling and reflecting, not introspecting.
+      Which Pursuit fits you best right now?
+    attribution: David Epstein, Range
+    triggers: [ritual-pursuit-review]
+    tone: diagnostic
+    frequency: { cool_down_days: 30 }
+
+  - id: griffin-read-widely
+    type: quote
+    content: |
+      Serial innovators "read more (and more broadly) than other
+      technologists." Log one cross-domain read this week.
+    attribution: Abbie Griffin (via David Epstein, Range)
+    triggers: [idle]
+    tone: directive
+    frequency: { cool_down_days: 30 }
+
+  - id: epstein-desirable-difficulties
+    type: quote
+    content: |
+      Harder, slower learning sticks better. Don't over-hint; let
+      yourself struggle a bit before reaching for assistance.
+    attribution: Bjork (via David Epstein, Range)
+    triggers: [idle, moment-long-agent-run]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: epstein-flexible-knowledge
+    type: quote
+    content: |
+      "Knowledge with enduring utility must be very flexible." Tag by
+      concept, not just by Project.
+    attribution: David Epstein, Range
+    triggers: [ritual-reflect-get-focused]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: epstein-hypercorrection
+    type: quote
+    content: |
+      "The more confident a learner is of their wrong answer, the
+      better the information sticks when they subsequently learn the
+      right answer."
+    attribution: David Epstein, Range
+    triggers: [ritual-reflect-get-clear]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  # ============================================================
+  # O. Measuring at Personal Scale
+  # ============================================================
+
+  - id: doerr-aspirational-vs-committed
+    type: quote
+    content: |
+      Aspirational vs. committed OKRs. The aspirational expects ~50%
+      completion as success.
+    attribution: John Doerr, Measure What Matters
+    triggers: [verb-promote-pursuit]
+    tone: structural
+    frequency: { cool_down_days: 30 }
+
+  - id: doerr-stretch-goals-crushing
+    type: quote
+    content: |
+      "Stretch goals can be crushing if people don't believe they're
+      achievable." Calibrate to recent throughput.
+    attribution: John Doerr, Measure What Matters
+    triggers: [ritual-reflect-get-focused]
+    tone: diagnostic
+    frequency: { cool_down_days: 21 }
+
+  - id: doerr-decouple-measurement-compensation
+    type: quote
+    content: |
+      Decouple measurement from compensation. Don't tie self-worth
+      to KR completion. "What did this teach you?" before "Did you
+      hit it?"
+    attribution: paraphrase of John Doerr, Measure What Matters
+    triggers: [ritual-pursuit-close]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: doerr-contributors-engaged
+    type: quote
+    content: |
+      "Contributors are most engaged when they can actually see how
+      their work contributes."
+    attribution: John Doerr, Measure What Matters
+    triggers: [verb-narrate, idle]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: clear-habit-tracking
+    type: quote
+    content: |
+      "Habit tracking… keeps your eyes on the ball: you're focused on
+      the process rather than the result."
+    attribution: James Clear, Atomic Habits
+    triggers: [verb-narrate]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: clear-measurement-context
+    type: quote
+    content: |
+      "Measurement is only useful when it guides you and adds context
+      to a larger picture, not when it consumes you."
+    attribution: James Clear, Atomic Habits
+    triggers: [idle]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  # ============================================================
+  # P. Loading-Screen one-liners (unique entries not folded into A-O)
+  # ============================================================
+
+  - id: capture-now-clarify-later
+    type: quote
+    content: |
+      Capture now; clarify later. The captures inbox is cheaper than
+      your working memory.
+    attribution: distilled
+    triggers: [verb-capture, idle]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: first-action-not-plan-x
+    type: quote
+    content: |
+      The first action is never "Plan X." It's "Open editor at file Y."
+    attribution: distilled (after Allen)
+    triggers: [verb-promote-action, verb-develop]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: diverge-converge-dont-blend
+    type: quote
+    content: |
+      Diverge first. Converge second. Don't blend them.
+    attribution: distilled (after Puccio)
+    triggers: [verb-brainstorm, idle]
+    tone: structural
+    frequency: { cool_down_days: 21 }
+
+  - id: quantity-cheapest-quality
+    type: quote
+    content: |
+      Quantity is the cheapest form of quality — generate more, then
+      prune.
+    attribution: distilled (after Puccio)
+    triggers: [verb-brainstorm]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: doubling-not-pessimism
+    type: quote
+    content: |
+      Doubling your estimate isn't pessimism — it's calibration.
+    attribution: distilled (after Newport)
+    triggers: [verb-promote-project]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: calendar-task-list
+    type: quote
+    content: |
+      Calendar your task list; add the good stuff first.
+    attribution: distilled (after Bentley)
+    triggers: [ritual-reflect-get-focused]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: externalize-thought-before-debate
+    type: quote
+    content: |
+      Externalize the thought before you debate the thought.
+    attribution: distilled (after Paul)
+    triggers: [verb-brainstorm, verb-develop]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: ship-shutdown-actually-shut-down
+    type: quote
+    content: |
+      Ship your shutdown ritual. Then actually shut down.
+    attribution: distilled (after Newport)
+    triggers: [moment-end-of-day]
+    tone: directive
+    frequency: { cool_down_days: 14 }
+
+  - id: late-specialization
+    type: quote
+    content: |
+      Late specialization is fine. Sample first.
+    attribution: distilled (after Epstein)
+    triggers: [verb-promote-pursuit]
+    tone: framing
+    frequency: { cool_down_days: 30 }
+
+  - id: hard-leads-to-fun
+    type: quote
+    content: |
+      Hard leads to fun.
+    attribution: Cal Newport
+    triggers: [verb-start, idle]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: friction-protecting-blocks
+    type: quote
+    content: |
+      Friction is a feature when it's protecting work blocks.
+    attribution: distilled
+    triggers: [verb-start]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: big-things-small-beginnings
+    type: quote
+    content: |
+      Big things from small beginnings — every Pursuit started as a
+      captured thought.
+    attribution: distilled
+    triggers: [idle, verb-capture]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  - id: compress-helmsman-signal
+    type: quote
+    content: |
+      Compress agent output into helmsman-grade signal. Skip the foam.
+    attribution: distilled
+    triggers: [verb-narrate]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: first-sentence-answers
+    type: quote
+    content: |
+      The first sentence answers the question. Everything else supports
+      it.
+    attribution: distilled (after Sullivan)
+    triggers: [verb-narrate]
+    tone: directive
+    frequency: { cool_down_days: 21 }
+
+  - id: illuminator-of-own-work
+    type: quote
+    content: |
+      Be an illuminator of your own work — not a diminisher.
+    attribution: distilled (after Brooks)
+    triggers: [ritual-reflect-get-focused]
+    tone: framing
+    frequency: { cool_down_days: 21 }
+
+  # ============================================================
+  # Skill-teaching tooltips (verb discovery + capture explainer)
+  # ============================================================
 
   - id: resolve-verb-discovery
     type: skill-teaching
@@ -57,26 +1824,52 @@ tips:
       type `/resolve <project>` directly.
     triggers: [discovery]
     tone: directive
-    frequency:
-      cool_down_minutes: 30
-      cool_down_days: 1
     weight: high
-    tags: [verb-discovery, resolve]
+    frequency: { cool_down_minutes: 30, cool_down_days: 1 }
 
   - id: capture-flow-safe-explainer
     type: skill-teaching
     content: |
-      `/capture` is flow-safe — the agent saves your thought silently and
-      doesn't respond. Triage happens at your next `/reflect`.
+      `/capture` is flow-safe — the agent saves your thought silently
+      and doesn't respond. Triage happens at your next `/reflect`.
     triggers: [verb-capture]
     tone: structural
-    frequency:
-      cool_down_days: 7
-      lifetime_max: 5
-    weight: normal
-    tags: [verb-discovery, capture]
+    frequency: { cool_down_days: 7, lifetime_max: 5 }
 
-  # --- type: verb-hint ---
+  - id: brainstorm-explainer
+    type: skill-teaching
+    content: |
+      `/cadence:brainstorm` deals provocation cards from the deck and
+      asks questions — the ideas come from you, not the agent. Quantity
+      first; the cliff is around 12 ideas, the original ones often
+      come after.
+    triggers: [verb-brainstorm]
+    tone: structural
+    frequency: { cool_down_days: 14, lifetime_max: 5 }
+
+  - id: develop-explainer
+    type: skill-teaching
+    content: |
+      `/cadence:develop` runs PPCo (Praise / Potentials / Concerns /
+      Overcome) on Ideas. This is the convergent pass — it can kill
+      an Idea respectfully with a reason worth remembering.
+    triggers: [verb-develop]
+    tone: structural
+    frequency: { cool_down_days: 14, lifetime_max: 5 }
+
+  - id: reflect-phase2-interactive
+    type: skill-teaching
+    content: |
+      In Phase 2 of `/reflect`, the agent asks open questions first.
+      Take your time — your answers are the reflection, not anything
+      pre-filled.
+    triggers: [ritual-reflect-get-focused]
+    tone: structural
+    frequency: { cool_down_days: 14, lifetime_max: 5 }
+
+  # ============================================================
+  # Verb-hint next-step suggestions
+  # ============================================================
 
   - id: post-promote-next-step
     type: verb-hint
@@ -85,20 +1878,56 @@ tips:
       `/cadence:brainstorm <project>` to seed actions on it.
     triggers: [verb-promote-project]
     tone: directive
-    frequency:
-      cool_down_minutes: 0
-      cool_down_days: 0
     weight: high
-    tags: [next-step, promote]
+    frequency: { cool_down_minutes: 0 }
 
   - id: post-resolve-pursuit-near-completion
     type: verb-hint
     content: |
-      One project closer to closing the pursuit. `/cadence:status <pursuit>`
-      to see what's left, or `/cadence:close <pursuit>` if you're ready.
+      One project closer to closing the pursuit. `/cadence:status
+      <pursuit>` to see what's left, or `/cadence:close <pursuit>` if
+      you're ready.
     triggers: [verb-resolve, state-pursuit-near-completion]
     tone: directive
-    frequency:
-      cool_down_minutes: 0
     weight: high
-    tags: [next-step, resolve, pursuit-close]
+    frequency: { cool_down_minutes: 0 }
+
+  - id: post-capture-no-followup
+    type: verb-hint
+    content: |
+      Captured. Next breakpoint or `/cadence:reflect` will triage it.
+    triggers: [verb-capture]
+    tone: directive
+    weight: low
+    frequency: { cool_down_minutes: 0 }
+
+  - id: post-narrate-share-link
+    type: verb-hint
+    content: |
+      Saved. The narrative file is the watermark — next run resumes
+      from where this one left off.
+    triggers: [verb-narrate]
+    tone: structural
+    weight: low
+    frequency: { cool_down_minutes: 0 }
+
+  - id: post-reflect-leveraged-priority
+    type: verb-hint
+    content: |
+      Reflection complete. Your Leveraged Priority shows on the next
+      `/cadence:status` and SessionStart splash all week.
+    triggers: [verb-reflect, ritual-reflect-get-focused]
+    tone: structural
+    weight: high
+    frequency: { cool_down_minutes: 0 }
+
+  - id: post-close-pursuit-ritual
+    type: verb-hint
+    content: |
+      Pursuit archived. The closure narrative is in
+      `narratives/drafts/`. Open it before the file fades from
+      attention — it's the meaning-making artifact.
+    triggers: [verb-close]
+    tone: directive
+    weight: high
+    frequency: { cool_down_minutes: 0 }
