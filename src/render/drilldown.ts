@@ -201,8 +201,7 @@ function pursuitMenu(_pursuitId: string): string[] {
     `${pad('/cadence:start')}Pick a project to work on`,
     `${pad('/cadence:status <project|N>')}Drill into a project`,
     `${pad('/cadence:narrate <pursuit>')}Tell the pursuit's full arc`,
-    `${pad('/cadence:reconcile')}Show flags across the system`,
-    `${pad('/cadence:close <pursuit>')}Run the closure ritual`,
+    `${pad('/cadence:resolve <pursuit>')}Walk the closure ritual`,
     `${pad('/cadence:help')}Browse the full verb surface`,
   ]
 }
@@ -219,11 +218,10 @@ function projectMenu(
     ]
   }
   return [
-    `${pad('/cadence:start <project>')}Open a session on this project`,
+    `${pad('/cadence:start <project>')}Open the project view`,
     `${pad('/cadence:complete <action>')}Mark an action done`,
-    `${pad('/cadence:pause')}Save a marker and suspend`,
+    `${pad('/cadence:resolve <project>')}Wrap up (--state complete | dropped)`,
     `${pad('/cadence:waiting <project>')}Track an external blocker`,
-    `${pad('/cadence:cancel <project>')}Drop with a reason`,
     `${pad('/cadence:narrate <project>')}Tell this project's story`,
     `${pad('/cadence:help')}Browse the full verb surface`,
   ]

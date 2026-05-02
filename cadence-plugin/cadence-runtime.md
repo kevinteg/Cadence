@@ -30,9 +30,13 @@ tone, behavior, and guardrails change to match the cognitive mode required.
 
 Read `workflows/verb-contracts.md` for the full contract of each verb.
 
-The verbs are: **brainstorm**, **develop**, **promote**, **start**,
-**complete**, **cancel**, **waiting**, **narrate**, **reflect**,
-**capture**, **close**, **reconcile**.
+The user-facing verbs are: **brainstorm**, **start**, **complete**,
+**resolve**, **waiting**, **capture**, **reflect**, **narrate**.
+Internal verbs the agent invokes by chaining: **develop** (from
+brainstorm when convergence is ready) and **promote** (from develop
+or start at graduation moments). The reconciler runs as system
+behavior (SessionStart hook + during `/reflect` Get Clear) and is
+not a verb.
 
 Each verb has a no-argument path that presents a curated entry relevant
 to that verb's purpose. The user never types "select" — they invoke
@@ -48,7 +52,12 @@ state.
   unchecked action). View-only — does not mark the project active.
 - **`/complete`** marks an action done; first checked action promotes
   `on_hold` → `active`; triggers upward completion prompts.
-- **`/cancel`** drops a project with a reason.
+- **`/resolve <project>`** wraps up a project. Default `--state complete`
+  walks the intent-feel-achieved dialogue and sets status=done.
+  `--state dropped --reason "<text>"` drops with override-with-reason
+  for unresolved Ideas.
+- **`/resolve <pursuit>`** walks the closure ritual (absolute Ideas
+  block + cleaning) and archives the pursuit.
 - **`/waiting`** records an external blocker on a project's
   `waiting_for` array.
 
@@ -63,12 +72,14 @@ Rules:
 
 Completion flows upward from actions to projects to pursuits:
 - When all actions in a project are checked, the system prompts:
-  "All actions checked. Does the intent feel achieved? Complete this
-  project, add more actions, or split?" Done-ness is judged through
-  dialogue against the project's Intent — not by sweeping a checklist.
-- When all projects in a pursuit are done or dropped, the system
-  prompts: "All projects resolved. Complete this pursuit, or add more
-  projects?"
+  "All actions checked. `/resolve <project>` to wrap this up, or add
+  more actions?" The actual project transition (status=done, Intent-
+  feel-achieved dialogue) happens via `/resolve`, not `/complete` —
+  `/complete` is for actions only. Done-ness is judged through dialogue
+  against the project's Intent — not by sweeping a checklist.
+- When `/resolve` wraps a project and all pursuit projects are
+  resolved, the upward prompt continues: "All projects in [pursuit]
+  resolved. `/resolve <pursuit>` to walk the closure ritual?"
 - An active entity with no open actions is inconsistent state — resolve
   it (complete, add an action, or move on_hold) before continuing.
 

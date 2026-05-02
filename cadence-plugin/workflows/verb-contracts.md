@@ -183,7 +183,7 @@ wins, reconciler flags. Ask: "What do you want to work on?"
   no agent response.
 - No evaluative commentary on progress.
 - No session ceremony. Lifecycle changes happen via `/complete` (action
-  checks) or `/cancel`.
+  checks) or `/resolve` (project/pursuit wrap-up).
 
 ---
 
@@ -199,10 +199,12 @@ wins, reconciler flags. Ask: "What do you want to work on?"
 - Checks off the action, accepts optional note for narrative
 - First check on a project promotes status `on_hold` → `active`
 - After checking: if all actions in the project are done, prompts:
-  "All actions checked. Does the intent feel achieved? Complete this
-  project, add more actions, or split?"
-- If project completes and all pursuit projects are resolved, prompts:
-  "All projects resolved. Complete this pursuit, or add more projects?"
+  "All actions checked. `/resolve <project>` to wrap this up, or add
+  more actions?" The actual project transition (status=done) happens
+  via `/resolve`, not `/complete` — `/complete` is for actions only.
+- If `/resolve` fires next and all pursuit projects are resolved, the
+  upward prompt continues: "All projects resolved. `/resolve <pursuit>`
+  to walk the closure ritual?"
 - Active entities with no open actions are inconsistent state — resolve
   by completing, adding an action, or moving on_hold
 
@@ -219,25 +221,50 @@ tasks. Resolves action across all active projects.
 
 ---
 
-## Cancel
+## Resolve
 
-**Purpose:** Drop a project with a reason. Not completion — it didn't
-succeed or is no longer relevant.
+**Purpose:** Wrap up a project or pursuit. One verb, entity-aware
+behavior. Replaces the prior `/close` and `/cancel` verbs.
 
-**Tone:** Neutral. No judgment on the decision.
+**Tone:** Neutral and structural for project resolution; reflective
+and ritual-anchored for pursuit closure (the Zeigarnik-release event).
+No judgment on the decision in either direction.
 
 **Behavior:**
-- Sets project status to dropped with reason and date
-- Checks for unresolved Ideas on the project — must be moved or closed
-  before cancellation completes
+- **`/resolve <project>`** (default `--state complete`): walks the
+  intent-feel-achieved dialogue. Surfaces project Intent and asks
+  "does the intent feel achieved?" If yes, sets status=done. If
+  actions remain unchecked, requires explicit override.
+- **`/resolve <project> --state dropped --reason "<text>"`:** walks
+  override-with-reason for unresolved Ideas (move to another parent,
+  close-with-reason, promote, or develop-first), then sets status=
+  dropped with the reason recorded.
+- **`/resolve <pursuit>`:** walks the closure ritual — absolute block
+  on unresolved Ideas, walk each (move / close-with-reason / promote
+  / develop-first), then `move-pursuit --to archived`. Generates and
+  saves a closure narrative summarizing the Pursuit's arc.
+- Triggers upward-completion check on project resolution: if pursuit
+  has all projects resolved, prompts "All projects in [pursuit]
+  resolved. `/resolve <pursuit>` to walk the closure ritual?"
 
-**No-argument entry:** Cancels the project under current discussion.
-If unclear, asks which project.
+**No-argument entry:** Asks which project or pursuit. If unclear about
+entity type, lists active candidates.
 
 **Guardrails:**
-- Always require a reason. No cancellation without one.
-- Unresolved Ideas must be handled — nothing silently orphaned.
-- No evaluative commentary on the decision to cancel.
+- Pursuit closure is an absolute block on unresolved Ideas. No override.
+- `--state dropped` requires `--reason` for projects.
+- Unresolved Ideas on a project being dropped trigger override-with-
+  reason — nothing silently orphaned.
+- `--state` doesn't apply at pursuit level. Surfacing it on a pursuit
+  request gets a one-line note and falls through to closure.
+- Every closed Idea must have a reason ("what did this teach us?").
+- Closure narratives are generated, not manual. The user reviews but
+  doesn't write.
+- No evaluative commentary on the decision to drop or close.
+
+**Exit:** Project resolution: "[project] resolved as [state]. [N/M
+projects in pursuit done.]" Pursuit closure: "[pursuit] archived.
+Closure narrative saved to `narratives/drafts/<id>-closure.md`."
 
 ---
 

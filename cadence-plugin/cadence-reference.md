@@ -7,17 +7,16 @@ carries the rest.
 
 ## Verb Catalogue
 
-Cadence's surface is 17 verbs grouped by cognitive mode. Use the group
-to find the right verb for what you're doing right now; consult each
-verb's `SKILL.md` or `/cadence:help <verb>` for its full contract.
+Cadence's user-facing surface is 12 verbs grouped by cognitive mode.
+Use the group to find the right verb for what you're doing right now;
+consult each verb's `SKILL.md` or `/cadence:help <verb>` for its full
+contract.
 
 ### Diverge — find what to build
 
 | Verb | Purpose |
 |---|---|
-| `brainstorm` | Divergent ideation. Generate quantity. Find what the Pursuit is. |
-| `develop` | Convergent evaluation on Ideas: PPCo, criteria, pre-mortems. Decide what to commit to. |
-| `promote` | Advance an Idea through the pipeline. Enforces the graduation gate (Why for Pursuit, Intent for Project, Concreteness for Action). |
+| `brainstorm` | Divergent ideation. Generate quantity. Find what the Pursuit is. Chains internally into `develop` when the user is ready to converge, and `promote` when an Idea is ready to graduate. |
 
 ### Execute — do the work
 
@@ -25,7 +24,7 @@ verb's `SKILL.md` or `/cadence:help <verb>` for its full contract.
 |---|---|
 | `start` | Open a project's view (Intent + actions + first unchecked). View-only — no session ceremony. |
 | `complete` | Mark an action done. First check promotes on_hold → active. Triggers upward completion prompts. |
-| `cancel` | Drop a project with a reason. Not completion — it didn't succeed or is no longer relevant. |
+| `resolve` | Wrap up a project or pursuit. `resolve <project> --state complete` (default) walks the intent-feel-achieved dialogue; `--state dropped` requires a reason. `resolve <pursuit>` walks the closure ritual with absolute-Ideas-block, then archives. |
 | `capture` | Flow-safe parking lot. Get a thought out of your head, zero friction, no agent response. |
 | `waiting` | Record an external blocker so it's tracked, not forgotten. |
 
@@ -35,8 +34,6 @@ verb's `SKILL.md` or `/cadence:help <verb>` for its full contract.
 |---|---|
 | `reflect` | Weekly ritual: Get Clear, then Get Focused. See the whole picture. Set one Leveraged Priority. |
 | `narrate` | Generate the story (today, week, or pursuit-arc) from activity data. Make meaning visible. |
-| `close` | Run the closure ritual for a project or pursuit. Resolves unresolved Ideas. |
-| `reconcile` | Quiet on-demand report of system health (stale state, aging Ideas, dormant projects). |
 
 ### Setup — one-off
 
@@ -50,6 +47,30 @@ verb's `SKILL.md` or `/cadence:help <verb>` for its full contract.
 |---|---|
 | `status` | System dashboard with contextual next-step hints, or drill into pursuits / projects / actions. Each drill ends with an action menu showing the verbs applicable to the viewed entity. |
 | `find` | Search across projects, ideas, captures, and pursuits by case-insensitive substring. Results grouped by kind with per-group verb hints so any result is directly actionable. |
+| `help` | Render this catalogue inline, or a single verb's contract. |
+
+### Internal verbs (chained, not user-facing)
+
+These are real verbs the agent invokes internally; users typically
+don't type them. They appear in the catalog only when chained from
+another verb's flow.
+
+| Verb | Chained from |
+|---|---|
+| `develop` | `brainstorm` (when convergence is ready: PPCo, criteria, pre-mortems on Ideas) |
+| `promote` | `develop` or `start` (when an Idea is ready to graduate to Pursuit / Project / Action — enforces the appropriate gate) |
+
+Users CAN invoke `develop` and `promote` explicitly, but the design
+target is conversational discovery: the agent surfaces "running
+`/cadence:promote` — this advances an Idea to a Project" as a teaching
+moment when the chain fires (see the natural-language-to-verb teaching
+principle in `cadence-runtime.md`).
+
+### System behavior (not a verb)
+
+| Behavior | When it runs |
+|---|---|
+| `reconciler` | Automatically at SessionStart hook (every fresh session); during `/reflect` Get Clear; on demand via the `cadence flags` CLI subcommand for power users. Surfaces stale state, aging Ideas, dormant projects, structural issues — no longer a user-facing verb. |
 
 ### Discovery flow
 
