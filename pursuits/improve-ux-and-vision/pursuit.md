@@ -8,4 +8,8 @@ why: The v1 self-review surfaced structural gaps — terminal-only input exclude
 
 # Improve UX and Vision
 
-Improve Cadence UX and align the implementation with the vision. Single pursuit (not split) to keep momentum and avoid pursuit-as-roadmap fragmentation. First projects likely: input-surface expansion, doc/code drift reconciliation, onboarding quickstart, first non-self user test.
+The v1 self-review surfaced structural gaps in input surface, memory, verb count, doc/code drift, and onboarding. Walking those gaps revealed the answer is mostly **prune and sharpen, not build** — the implementation is sound where it shipped, the vision over-promised in places that don't fit Cadence's domain-neutral, local-first ethos, and most missing surface (autonomous execution, semantic memory, mobile capture, GTD-style derived contexts) belongs in Future Work or Someday rather than v1.1.
+
+This pursuit's center of gravity is **conceptual clarity and surface ergonomics work** — trimming the vision to match implementation reality, slimming the verb surface so it stops being a memorization problem, renaming Wandering to Inbox to reduce cognitive tax, building a non-judgmental catch-up path for skipped Reflects, encoding physical-domain awareness into existing verbs' prompts (rather than adding a `/log` verb), expanding the provocation deck, and writing a quickstart guide doubled as demo material. The personal-repo experiment (this week's Leveraged Priority) provides lived signal that informs the late-pursuit projects.
+
+Done feels like: a fresh user can install the plugin, run `/cadence:init` in any repo, browse a slim verb catalog without consulting help, and see vision-doc claims that match what they can actually do. The conceptual model is crisp enough that the mental tax is low. The personal-repo experiment landed and yielded the quickstart. Cadence is approachable and sticky enough to use on personal repos for non-dev pursuits.
