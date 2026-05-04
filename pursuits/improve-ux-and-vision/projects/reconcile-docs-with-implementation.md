@@ -1,7 +1,7 @@
 ---
 id: reconcile-docs-with-implementation
 pursuit: improve-ux-and-vision
-status: on_hold
+status: active
 created: 2026-05-01
 ---
 
@@ -15,10 +15,10 @@ Trim, relocate, and re-frame doc claims so vision and architecture match impleme
 
 ## Actions
 
-- [ ] Create docs/research-references.md and migrate encyclopedic research citations from product-vision.md (Beaty, Diehl & Stroebe, Sio & Ormerod, Doshi-Hauser, Default Mode Network, etc.). Keep load-bearing references in vision (McAdams structure, Gollwitzer if-then, Zeigarnik closure, Eurich/Trapnell what-vs-why).
-- [ ] Trim all Python references from product-vision.md and docs/architecture.md. The implementation is TypeScript-only; future LLM/embedding work can plausibly stay TypeScript.
-- [ ] Replace the 'three-tier isolation (sandbox / production / work)' paragraph in product-vision.md with an accurate description of the multi-repo plugin model: plugin installs into any repo via plugin-dir or future marketplace; each repo with cadence.yaml is a self-contained Cadence instance; /cadence:init bootstraps a new repo; uninit repos handled gracefully by the SessionStart hook.
-- [ ] Trim the autonomous-coding-execution claim ('Coding projects can be automated. Delegate an entire coding Project to autonomous execution.') from vision. Cuts against domain neutrality and isn't built.
-- [ ] Demote outside-view-estimation from first-class feature in vision/architecture to a brief Future Work mention noting the Pomodoro-style 90-minute-window-with-breaks framing as a possible later addition for dev/study contexts only.
-- [ ] Add a clearly-labeled 'Future Work' section in product-vision.md (or docs/architecture.md, whichever is the right home). Move into it: SQLite/embedding index (replacing 1.1's hybrid claim); Nudges system split into dev-specific session/progress nudges vs. domain-neutral calendar nudges; derived contexts (only if pursuing real GTD support).
-- [ ] Add a 'Someday' or fast-follow pointer in vision for voice/SMS/mobile capture and external-tool/reading-list ingestion, pointing at the new expand-cadence-input-and-ingestion someday pursuit.
+- [x] Create docs/research-references.md and migrate encyclopedic research citations from product-vision.md (Beaty, Diehl & Stroebe, Sio & Ormerod, Doshi-Hauser, Default Mode Network, etc.). Keep load-bearing references in vision (McAdams structure, Gollwitzer if-then, Zeigarnik closure, Eurich/Trapnell what-vs-why).
+- [x] Trim all Python references from product-vision.md and docs/architecture.md. The implementation is TypeScript-only; future LLM/embedding work can plausibly stay TypeScript.
+- [x] Replace the 'three-tier isolation (sandbox / production / work)' paragraph in product-vision.md with an accurate description of the multi-repo plugin model: plugin installs into any repo via plugin-dir or future marketplace; each repo with cadence.yaml is a self-contained Cadence instance; /cadence:init bootstraps a new repo; uninit repos handled gracefully by the SessionStart hook.
+- [x] Trim the autonomous-coding-execution claim ('Coding projects can be automated. Delegate an entire coding Project to autonomous execution.') from vision. Cuts against domain neutrality and isn't built.
+- [x] Demote outside-view-estimation from first-class feature in vision/architecture to a brief Future Work mention noting the Pomodoro-style 90-minute-window-with-breaks framing as a possible later addition for dev/study contexts only.
+- [x] Add a clearly-labeled 'Future Work' section in product-vision.md (or docs/architecture.md, whichever is the right home). Move into it: SQLite/embedding index (replacing 1.1's hybrid claim); Nudges system split into dev-specific session/progress nudges vs. domain-neutral calendar nudges; derived contexts (only if pursuing real GTD support).
+- [x] Add a 'Someday' or fast-follow pointer in vision for voice/SMS/mobile capture and external-tool/reading-list ingestion, pointing at the new expand-cadence-input-and-ingestion someday pursuit.

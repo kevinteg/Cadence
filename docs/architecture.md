@@ -1,442 +1,143 @@
-# Cadence Architecture
+# Cadence — Architecture
 
-*Definitive technical reference for the Cadence cognitive operating system.*
+*Design decisions and the rationale behind them. Operational mechanics (file formats, CLI catalog, lifecycle states, directory structure) live in `cadence-plugin/cadence-runtime.md` and `cadence-plugin/cadence-reference.md` and are not duplicated here.*
 
----
-
-## Core Concepts
-
-**Cadence** is a cognitive operating system that manages attention, protects
-flow state, and generates narrative across pursuits. It lives inside the
-terminal as a Claude Code plugin. One agent, one voice, verb-defined behavior.
-
-### Work Hierarchy
-
-```
-Pursuit  →  Project  →  Action
-```
-
-- **Pursuit**: An intentional commitment tied to values or a role/responsibility.
-  Lifecycle: active, someday, archived.
-- **Project**: A scoped effort framed by an Intent narrative and an
-  Actions list. Status: active, on_hold, done, dropped.
-- **Action**: An atomic task. A checkbox inside a project's Actions section.
-
-### Ideas (Adjacent Collection)
-
-Ideas are a first-class collection that lives alongside the work hierarchy,
-not inside it. Every Idea has a parent (pursuit or project) and flows
-through its own lifecycle: seed, developed, promoted, moved, closed.
-
-Ideas enter the hierarchy through graduation gates enforced by `/promote`:
-
-| Gate | Requirement | Enters Hierarchy As |
-|------|-------------|---------------------|
-| **Why** | Articulate why this matters | Pursuit |
-| **Intent** | Articulate motivation and felt-sense of done | Project |
-| **Concreteness** | Specific enough to start | Action |
-
-### Wandering
-
-**Wandering** is a standing pursuit that never closes. It holds unattached
-Ideas — things worth capturing that do not yet belong anywhere. During
-Reflect, Wandering Ideas are reviewed and either graduated, moved to a
-pursuit, or closed.
+This document answers the **why**: why the model is shaped the way it is, what tradeoffs got made, what we deliberately chose not to do. The vision (`docs/vision.md`) covers what Cadence is and what it does. The research foundations are in `docs/research-references.md`.
 
 ---
 
-## Voice Model
+## The Conceptual Model
 
-One voice, not three modes. The agent's behavior is defined by the active
-**verb**, not a declared mode. Each verb has a contract specifying tone,
-behavior, and guardrails. Contracts live in `workflows/verb-contracts.md`.
+```
+Idea ──► Pursuit ──► Project ──► Action
+ │         │           │            │
+Why?    Intent?    Concrete?   /complete
+```
 
-### Verbs
+**Pursuits, Projects, and Actions form a hierarchy.** Pursuits are intentional commitments tied to values or roles; Projects are scoped efforts with an Intent narrative; Actions are atomic tasks. Each level has a different cognitive cost and a different lifecycle.
 
-| Verb | Purpose |
-|------|---------|
-| **brainstorm** | Provoke thinking using the card deck. The LLM does NOT generate ideas — it deals cards and asks questions. |
-| **develop** | Help the user articulate why an Idea matters. Deepen, challenge, connect. |
-| **promote** | Graduate a developed Idea to a Project with Intent and first actions. |
-| **start** | Session-level focus on a specific project. Protect flow. Keep work moving. |
-| **pause** | Save a marker and suspend the session. |
-| **complete** | Mark an action done. Trigger upward completion when all actions are checked. |
-| **cancel** | Drop a project with a reason. Walk the cleaning ritual for Ideas. |
-| **narrate** | Generate writing from activity data. Draw from markers and history. |
-| **reflect** | Run the weekly ritual. Surface what matters across the whole system. |
-| **capture** | Save a raw thought. Flow-safe — no agent response beyond confirmation. |
-| **close** | Walk the closure ritual for a project or pursuit. |
-| **reconcile** | Background scan for stale markers, overdue items, dormant projects, structural issues. |
-| **status** | Show system dashboard or drill into pursuits, projects, and actions. |
+**Ideas are adjacent, not part of the hierarchy.** An Idea is a captured seed that may or may not become work. Treating Ideas as first-class but separate from the work hierarchy lets them incubate without consuming WIP budget. They enter the hierarchy through `/promote`, which enforces graduation gates appropriate to each target level.
 
-Each verb has a **no-argument curated entry path** — invoking the verb
-with no arguments presents a contextual starting point rather than demanding
-the user specify what to work on.
+**Why this shape rather than a flat task list?** A flat list (tasks under projects, no levels above) collapses the difference between "what I'm working on" and "what I'm committed to over years." Without that distinction, the system can't help you see the story of what you're building, and it can't protect long-running commitments from urgent-but-unimportant work. The Pursuit level is where identity lives.
+
+**Why graduation gates rather than free promotion?** An Idea without a Why becomes busywork at the Pursuit level. A Project without an Intent narrative becomes scope creep. An Action without concreteness becomes a procrastination shell. Each gate forces the work that the level requires; without gates, under-incubated commitments enter execution and clog the system.
 
 ---
 
-## Two Processes
+## One Voice, Verb-Defined Registers
 
-Work flows through two distinct processes: divergent thinking feeds into
-convergent execution.
+The agent is a single voice, not a roster of named personas. The active **verb** determines the agent's tone, behavior, and guardrails. Brainstorm is non-judgmental; develop is structured-critical; start is silent-during-flow; narrate is reflective-not-evaluative; reflect is structured-and-forward-looking.
 
-### Diverge (Ideas → Hierarchy)
+**Why one voice and not multiple agents?** Two reasons. First, the user's mental model is "I'm using Cadence" — they don't think about which sub-agent is in the chair. Naming personas adds vocabulary the user has to learn. Second, the verb is already a deliberate choice the user is making; tying the register to the verb is automatic and visible. It also matches the user's cognitive mode to the tool's behavior, which the DMN/ECN switching research (`docs/research-references.md` §1) says is the load-bearing capacity for creative work.
+
+**Why verb-defined and not mode-declared?** A declared mode requires the user to remember to set it. The verb the user invokes IS the mode. No declaration step, no mismatch between declared and actual.
+
+---
+
+## Two Processes: Diverge → Converge → Plan → Execute
 
 ```
-capture → brainstorm → develop → promote
+capture → brainstorm → develop → promote → start → complete → resolve
   seed       seed      developed   ──┐
                                      ├─► Pursuit (with Why)
                                      ├─► Project (with Intent)
                                      └─► Action  (concrete)
 ```
 
-Ideas can be **moved** to a different parent or **closed** with a reason
-at any point. Ideas can also enter at any stage if they arrive with
-enough shape.
+The diverge process feeds Ideas. The converge process executes the work. They are deliberately separated because the research is unambiguous that mixing them degrades both (`docs/research-references.md` §1).
 
-### Converge (Execution)
+**Why explicit verbs for divergent work and not just "use brainstorm and capture"?** Without a named divergent surface, ideation collapses into capture (which is convergent — a queue to be processed). The brainstorm verb is the named container that protects divergent thinking from premature evaluation.
 
-```
-start → work → complete / pause
-  │                │        │
-  │                │        └─► marker saved, session suspended
-  │                └─► action done, upward completion check
-  └─► session opened, marker loaded, flow protected
-```
-
-When all actions are checked, the system prompts the user against the
-project's Intent — does it feel achieved? If yes, the project closes;
-pursuit closure is then prompted if all projects are done or dropped. `/cancel` drops a project with a reason and walks the
-cleaning ritual for remaining Ideas.
+**Why the LLM provokes rather than generates Ideas during brainstorm?** Doshi-Hauser (2024) and Anderson-Shah-Kreminski (2024) showed LLMs raise the floor of individual creativity but compress its variance — "mode collapse." The provocation deck (Oblique Strategies + SCAMPER + How-Might-We) preserves the user's own associative search; the LLM's convergent bias is reserved for /develop where it's an asset.
 
 ---
 
-## Entity Formats
+## WIP Limits, Asymmetric
 
-### Pursuit (`pursuits/<pursuit-id>/pursuit.md`)
+| Entity | Limit | Why |
+|---|---|---|
+| Pursuits | None | Pursuits represent long-running commitments and may incubate. Limiting them would force premature commitment or premature abandonment. |
+| Projects | `max_active_projects` (default 5; counted only if status=active with at least one unchecked action) | Theory of Constraints: only the binding constraint matters. Cadence enforces WIP at the level where convergent attention is being split. |
+| Ideas | None | Sio & Ormerod (2009) meta-analysis on incubation: setting problems aside is often productive. Strict WIP on ideation cuts off the biological substrate of creative cognition. |
+| Captures | None | Captures are flow-safe and meant to be triaged at breakpoints. WIP on captures would re-introduce the interruption they exist to prevent. |
 
-```yaml
----
-id: slug-name
-type: finite | ongoing | someday
-status: active | someday | archived
-created: YYYY-MM-DD
-why: optional free text
----
+**Why WIP only on active Projects?** The Kanban argument (Little's Law) is most valid when items are roughly homogeneous and flow through a pipeline. Projects-in-execution behave that way. Pursuits and Ideas don't.
 
-# Pursuit Name
-
-Description of the pursuit — why it matters, what it represents.
-```
-
-### Project (`pursuits/<pursuit-id>/projects/<project-id>.md`)
-
-```yaml
----
-id: slug-name
-pursuit: parent-pursuit-id
-status: active | on_hold | done | dropped
-created: YYYY-MM-DD
-waiting_for:                 # optional
-  - person: name
-    what: description
-    expected: YYYY-MM-DD
-    flagged: false
----
-
-# Project Name
-
-## Intent
-
-Free-form narrative: motivation, scope, what "done" would feel like.
-Co-edited with the agent as actions land and the work focuses.
-
-## Actions
-- [x] Completed action
-- [ ] Next action
-
-## Notes
-Free-form notes, context, decisions.
-```
-
-Project completion is derived: all actions checked, Intent confirmed
-through dialogue, status set to done. Actions are simple checkboxes —
-no IDs, no metadata. Older project files carry a `## Definition of Done`
-section instead of `## Intent`; the scan path tolerates both shapes.
-
-### Idea (`pursuits/<pursuit-id>/ideas/<idea-id>.md`)
-
-```yaml
----
-id: slug-name
-parent: pursuit-id            # or pursuit-id/project-id
-state: seed | developed | promoted | moved | closed
-created: YYYY-MM-DD
-developed_at: YYYY-MM-DD     # optional, set when developed
-promoted_to: project-id      # optional, set when promoted
-closed_reason: text           # optional, set when closed
----
-
-# Idea Title
-
-Raw content, development notes, connections.
-```
-
-### Marker (`pursuits/<pursuit-id>/sessions/<timestamp>.md`)
-
-```yaml
----
-pursuit: pursuit-id
-project: project-id
-session_start: ISO-8601
-session_end: ISO-8601
----
-
-# Marker: Project Name
-
-## Where
-State of the work. What exists, what changed, what's true right now.
-
-## Next
-The first thing to do on return. A ready-to-resume plan, not a wish list.
-
-## Open
-What's still running in your head. Unresolved questions, hunches, tensions.
-```
-
-One marker per session. Written by `/pause`. If paused mid-session and
-then paused again, the same file is updated rather than creating a new one.
-
-### Capture (`thoughts/unprocessed/<timestamp>.md`)
-
-```yaml
----
-captured: ISO-8601
-verb_context: seed | concern | note
----
-
-Raw input text exactly as provided.
-```
-
-Flow-safe: no agent response beyond minimal confirmation. Typed by verb
-context. Triaged at breakpoints or during Reflect.
-
-### Reflection (`reflections/<YYYY-MM-DD>.md`)
-
-```yaml
----
-date: YYYY-MM-DD
-status: draft | in_progress | complete
-phase: get_clear | get_focused
-leveraged_priority: "text"
----
-
-# Reflection — YYYY-MM-DD
-
-## Get Clear
-[sections as defined in reflect workflow]
-
-## Get Focused
-[sections as defined in reflect workflow]
-```
+**Why the Reconciler flags rather than blocks?** A WIP block forces a hard stop; a flag is a signal the user can act on or override. Cadence trusts the user's judgment; it surfaces the structural signal without enforcing.
 
 ---
 
-## Session Lifecycle
+## Closure: Zeigarnik Release as a Hard Constraint
 
-Sessions are **internal mechanics** — the user invokes verbs, sessions
-happen underneath. The user never types "session" or "select."
+Pursuit closure is an **absolute block** if unresolved Ideas exist (Ideas in seed or developed state under that pursuit). All Ideas must be promoted, moved to another parent, or closed with a reason before the pursuit can close.
 
-### Flow
+Project closure uses **override-with-reason** rather than absolute block — friction-sensitive at projects' frequency.
 
-```
-User invokes /start (or /start <project>)
-    │
-    ▼
-Agent resolves context (no-arg entry path or specified target)
-    │
-    ▼
-Agent loads latest marker for the project (if applicable)
-    │
-    ▼
-Work happens — agent follows the verb contract
-    │
-    ▼
-User invokes /pause, /complete, or /cancel
-    │
-    ▼
-Next /start picks up from the marker
-```
+**Why an absolute block at the pursuit level?** Unfinished commitments produce ongoing executive interference (Zeigarnik 1927; Masicampo–Baumeister 2011). Closing a pursuit while leaving Ideas unresolved silently drops cognitive loops the user is still rehearsing. The cleaning ritual converts ending into meaning-making. Without the absolute block, the ritual gets skipped under time pressure — exactly the moment when the cognitive cost is highest.
 
-### Rules
-
-- `/start` opens a session. `/pause` suspends it. `/complete` marks actions
-  done and triggers upward completion. `/cancel` drops a project.
-- The marker's **Next** field is the contract with your future self: what
-  to do first when you come back.
-- Mentioning other projects does not change session context.
-- If context is ambiguous, the agent asks rather than guessing.
+**Why override-with-reason at the project level?** Projects close more often than pursuits. Strict blocking at every project closure would create ritual fatigue. The reason-required-for-override preserves the meaning-making intent without the friction.
 
 ---
 
-## WIP Limits
+## Persistence: Markdown Is the Source of Truth
 
-| Entity | Limit |
-|--------|-------|
-| Pursuits | No limit |
-| Projects | `max_active_projects` (in-progress with markers, default 5) |
-| Ideas | No limit |
+All Cadence state lives as markdown files in the user's repo: `pursuits/<id>/pursuit.md`, `pursuits/<id>/projects/<id>.md`, `pursuits/<id>/ideas/<id>.md`, `thoughts/unprocessed/`, `reflections/`, `narratives/drafts/`, `validations/pending.md`, etc. There is no database; the deterministic CLI scans markdown directly and returns in well under a second on this repo.
 
-The `max_active_projects` threshold is set in `cadence.yaml`. The reconciler
-flags violations but does not block work.
+**Why markdown and not a database?** Three reasons. First, markdown survives any tool — the user owns their data forever, even if Cadence dies. Second, git history of project files is itself the activity stream the narrate verb reads from; the file IS the watermark. Third, the GTD/Zettelkasten/BASB literature converges on durable, portable, plain-text storage as the precondition for trust in a productivity system.
 
----
+**Why no SQLite hybrid?** The original architecture promised one as an index for cross-cutting queries. The deterministic CLI handles current scale fine. SQLite (or, more likely, an embedding index) is on the Future Work list (`docs/vision.md`). When performance hurts or semantic recall becomes load-bearing, the index ships. Until then it would be a maintenance tax with no benefit.
 
-## Closure
-
-### Project Closure
-
-When all actions are checked and the project's Intent feels achieved,
-the agent walks the closure ritual. If the user wants to close a project
-with incomplete actions, an **override with reason** is required — the
-reason is recorded.
-
-### Pursuit Closure
-
-Pursuit closure is an **absolute block** if unresolved Ideas exist (Ideas
-in seed or developed state under that pursuit). All Ideas must be promoted,
-moved to another parent, or closed with a reason before the pursuit can
-close. This ensures nothing is silently dropped.
-
-Both project and pursuit closure walk a cleaning ritual: review remaining
-items, acknowledge what was done, handle loose ends.
+**Why git-history-as-activity-stream rather than a separate event log?** Git already stores every change with a timestamp, author, and diff. A separate event log would duplicate this and risk drift. The narrate verb's watermark-resume pattern reads the project-file git log directly: each generated narrative carries `consumed_through_commit` in its frontmatter, and the next narrative for the same cadence resumes from there. The narrative file IS the read pointer. No separate state.
 
 ---
 
-## Provocation Deck
+## Multi-Repo Plugin Model
 
-A curated YAML file at `cadence-plugin/deck/` containing prompt cards in
-these categories:
+Cadence ships as a Claude Code plugin at `cadence-plugin/`. The plugin installs into any repo via `claude --plugin-dir ./cadence-plugin` (or future marketplace). Each repo with a `cadence.yaml` is a self-contained Cadence instance. `/cadence:init` bootstraps a new repo. The SessionStart hook handles uninit repos gracefully.
 
-- **oblique** — lateral thinking prompts
-- **scamper** — substitute, combine, adapt, modify, put to other use, eliminate, reverse
-- **how-might-we** — reframe problems as opportunities
-- **forced-analogy** — connect unrelated domains
-- **challenge** — question assumptions
+**Why per-repo and not per-user?** Per-repo isolation matches how users actually think — work-repo pursuits are different from personal-repo pursuits. Per-repo also means no cross-repo state to synchronize; each instance stands alone.
 
-Used by `/brainstorm`. The LLM deals cards and provokes — it does **not**
-generate Ideas. Ideas come from the user. The deck is a fixed resource,
-not dynamically generated.
+**Why no cross-repo discovery?** "Show me my pursuits across all my Cadence repos" sounds useful but reintroduces the cross-cutting query problem markdown-as-source-of-truth was meant to avoid, and it cuts against the each-repo-stands-alone principle.
 
 ---
 
-## Narratives
+## Domain Neutrality
 
-Generated from activity data (markers, project completions, reflections).
-Follow McAdams narrative identity structure:
+Cadence is a cognitive operating system, not a dev tool. Most users work on non-dev repos: household projects, creative practice, fitness, family logistics. Every verb, vocabulary choice, and example stays domain-agnostic — universal language ("validate" not "test", "ship" not "deploy", "wrap up" not "merge"); examples rotate domains; heuristics adapt by detected domain.
 
-1. **What happened** — events and actions
-2. **What it meant** — interpretation and significance
-3. **What shifted** — changes in understanding or direction
-4. **What's next** — forward trajectory
-
-Narratives are **informational, not evaluative**. No praise, no judgment,
-no performance framing. They help the user see their own story.
+**Why this matters at the architecture level:** the vision-doc framing ("be a present father" alongside "stand up CI") only holds if every primitive is domain-agnostic. Once a coding metaphor enters the verb surface, the audience implicit in the vocabulary shrinks.
 
 ---
 
-## Directory Structure
+## Design Principles (Hard Rules)
 
-```
-cadence/
-├── CLAUDE.md                      # Agent instructions
-├── cadence.yaml                   # Global config (max_active_projects, etc.)
-├── .cadence.db                    # SQLite index (gitignored)
-├── docs/                          # Reference documentation
-├── pursuits/
-│   ├── <pursuit-id>/
-│   │   ├── pursuit.md
-│   │   ├── projects/
-│   │   │   └── <project-id>.md
-│   │   ├── ideas/
-│   │   │   └── <idea-id>.md
-│   │   └── sessions/
-│   │       └── <timestamp>.md     # Markers
-│   ├── wandering/                 # Standing pursuit for unattached Ideas
-│   │   ├── pursuit.md
-│   │   └── ideas/
-│   ├── _someday/
-│   │   └── <pursuit-id>/pursuit.md
-│   └── _archived/
-│       └── <pursuit-id>/pursuit.md
-├── thoughts/
-│   └── unprocessed/               # Raw captures awaiting triage
-├── reflections/
-├── narratives/
-│   └── drafts/
-├── workflows/                     # Verb contracts, reflect ritual, reconciler
-└── cadence-plugin/                # Claude Code plugin package
-    ├── .claude-plugin/
-    ├── cadence-runtime.md         # Plugin runtime instructions
-    ├── cadence.yaml               # Plugin config
-    ├── skills/                    # Verb implementations as skills
-    ├── deck/                      # Provocation card deck (YAML)
-    └── workflows/                 # Plugin-specific workflow definitions
-```
+These are not stylistic preferences. They are structural constraints; the system fails its own goals if they're violated.
 
-### Path Conventions
-
-- All paths relative to repo root.
-- Timestamps in filenames: `YYYY-MM-DDTHH-MM`.
-- IDs are slug-case: lowercase, hyphens, no special characters.
-- Directories prefixed with `_` are lifecycle states: `_someday/`, `_archived/`.
-- Dates use ISO 8601.
+1. **Markdown is the source of truth.** If the index breaks (when an index ships), rebuild from markdown.
+2. **The artifact IS the state.** Project files, narratives, reflections, captures — each carries its own status. No separate state file mirrors what a content file already says.
+3. **Completion is derived, not declared.** All actions checked + Intent confirmed through dialogue + status set to done. Self-reported "done" without dialogue against Intent is forbidden.
+4. **Verbs define behavior; no mode announcements.** The verb the user invokes IS the mode.
+5. **Flow protection.** No mid-flow interruptions. Batch observations for breakpoints.
+6. **No gamification.** No streaks, scores, badges, leaderboards, evaluative praise.
+7. **No "why did you fail?" prompts.** Reflection is forward-looking, not interrogative. "Why" is reserved for Pursuit creation.
+8. **Ideas come from the user.** The LLM provokes and develops. It does not generate Ideas during brainstorm.
+9. **Workflows are soft.** Defined in markdown, editable, swappable. The user can fork their own copy of the plugin and reshape any contract.
+10. **No speculative deadlines.** Target dates only when an external commitment drives one.
+11. **Domain-neutral by default.** Verb names, examples, and heuristics serve household projects as well as code.
+12. **Pending-validation queue, not in-project validation actions.** Project completion decouples from fresh-session verification (the queue surfaces validations on every fresh session until cleared).
 
 ---
 
-## Persistence Model
+## What's Inside the Plugin
 
-### Hybrid: Markdown + SQLite
+Operational specifics are in the plugin itself:
 
-- **Markdown is the source of truth** for all content.
-- **SQLite is a derived index** rebuilt from markdown on change.
-- Direction is always markdown to SQLite, never bidirectional.
-- SQLite is gitignored — the repo is complete without it.
+- `cadence-plugin/cadence-runtime.md` — always-loaded operational truth (vocabulary, verbs, working-a-project rules, upward completion, engagement and alignment principles, guardrails, scope)
+- `cadence-plugin/cadence-reference.md` — on-demand reference (verb catalogue, file formats, full CLI subcommand catalog, lifecycle mechanics, Intent and Actions discipline, Idea lifecycle, project recipes, tip library schema)
+- `cadence-plugin/workflows/verb-contracts.md` — per-verb behavioral contracts
+- `cadence-plugin/skills/<verb>/SKILL.md` — per-verb skill definitions invoked by Claude Code
+- `cadence-plugin/deck/provocations.yaml` — the divergent-thinking deck for /brainstorm
+- `cadence-plugin/tips/library.yaml` — the tip repository for teaching footers and verb hints
+- `cadence-plugin/bin/cadence` — bundled deterministic CLI
 
-### Why Hybrid
-
-| Need | Markdown | SQLite |
-|------|----------|--------|
-| Human readability | Yes | No |
-| Git-friendly diffs | Yes | No |
-| Cross-cutting queries | No (expensive) | Yes |
-| Reconciler scanning | No (expensive) | Yes |
-| Narrative source | Yes | No |
-| Manual fallback | Yes | No |
-
-### Plugin Model
-
-Cadence ships as a **Claude Code plugin**. Skills live in
-`cadence-plugin/skills/`. Runtime instructions in
-`cadence-plugin/cadence-runtime.md`. Install via `--plugin-dir`.
-
-The plugin provides verb-based skills that the agent invokes. Each skill
-reads the verb contract, operates on markdown files, and follows the
-guardrails defined in the contract.
-
----
-
-## Design Principles
-
-1. **Local-first** — Markdown + SQLite on your machine. No cloud dependencies.
-2. **Markdown is the source of truth** — If the index breaks, rebuild it.
-3. **The artifact IS the state** — Markers, reflections, and project files carry their own status.
-4. **Completion is derived** — all actions checked, Intent confirmed through dialogue, status set to done.
-5. **Git operations are lifecycle operations** — `git mv` to someday, archival is a file move.
-6. **Verbs define behavior** — No mode announcements. The verb contract governs tone and guardrails.
-7. **Flow protection** — No mid-flow interruptions. Batch observations for breakpoints.
-8. **No gamification** — No streaks, scores, badges, leaderboards, or evaluative praise.
-9. **No "why did you fail?" prompts** — Reflection is forward-looking, not interrogative.
-10. **Ideas come from the user** — The LLM provokes and develops. It does not generate Ideas in brainstorm.
-11. **Sessions are invisible** — The user invokes verbs. Sessions are internal mechanics.
-12. **Workflows are soft** — Defined in markdown, editable, swappable.
+This document does not duplicate any of those — read them for the operational truth.

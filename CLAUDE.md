@@ -76,9 +76,14 @@ before proceeding.
 
 ## Product-Specific References
 
-Read `docs/architecture.md` for full design decisions and rationale.
-Read `docs/product-vision.md` and `docs/one-pager.md` for the
-current product direction.
+Three doc lanes, read in order based on what you need:
+
+- `docs/vision.md` — what Cadence is and why (TL;DR + deep dive in one file). Start here for the product direction.
+- `docs/architecture.md` — design rationale: why the model is shaped this way, what tradeoffs were made, what we deliberately do NOT claim. Operational details (file formats, CLI catalog, lifecycle mechanics) deliberately do NOT live here — they live in the plugin's `cadence-reference.md`.
+- `docs/research-references.md` — research foundations mapped to design patterns. The full literature behind the design.
+- `docs/teaching-tips-research.md` — the curated content library that powers in-product tip surfaces.
+
+Operational truth lives in the plugin (`cadence-plugin/cadence-runtime.md`, `cadence-reference.md`, `workflows/verb-contracts.md`, `skills/<verb>/SKILL.md`).
 
 ## Plugin Development
 

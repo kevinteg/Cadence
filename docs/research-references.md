@@ -1,6 +1,12 @@
-# Cadence Design References
+# Cadence — Research References
 
 *Research foundations mapped to design patterns. Each entry answers: what does Cadence do, what research supports it, and how the research shaped the design.*
+
+This document is the design rationale for the patterns described in `docs/vision.md`. The vision doc keeps citations terse (load-bearing references inline only — McAdams for narrative structure, Gollwitzer for if-then plans, Zeigarnik/Masicampo–Baumeister for closure, Eurich/Trapnell for "what" not "why"). The full literature lives here.
+
+For the broader design synthesis — the four convergence claims, the diverge-vs-converge tension, prescriptive integration rules — see the **Cross-cutting convergences** and **Resolving the divergent-vs-GTD tension** sections at the end.
+
+> **Vocabulary note (2026-05-02 v1.1 alignment pass):** This document was originally drafted before v3's voice collapse and the Session/Marker removal during build-cadence-v1. Some pattern descriptions reference "Markers" (now: project Notes section entries + git history) and "Sessions" (now: project work — the project file IS the durable state). Content is preserved as design rationale; current operational vocabulary lives in `cadence-plugin/cadence-runtime.md`.
 
 ---
 
@@ -268,8 +274,64 @@ Five findings appeared across multiple patterns above. These are the highest-con
 
 | Signal | Frameworks that converge | Cadence features it grounds |
 |--------|--------------------------|----------------------------|
-| Externalization releases cognitive load | Allen, Forte, Ahrens, Masicampo-Baumeister, Gollwitzer, Leroy | Markers, Thoughts, /capture, Parking Lot, ready-to-resume plans |
+| Externalization releases cognitive load | Allen, Forte, Ahrens, Masicampo-Baumeister, Gollwitzer, Leroy | Captures, project Notes, /capture, project file as durable record |
 | Mode separation between generation and evaluation | Guilford, Beaty et al., Puccio CPS, Double Diamond, De Bono, Osborn, Ellamil et al. | Verb-defined registers, brainstorm vs. execution flow, provocation deck |
 | Small visible progress is the motivational backbone | Amabile-Kramer, Clear, Fogg, behavioral activation, SDT competence | Informational feedback, no gamification, narrative structure |
-| Specific plans outperform vague intentions | Gollwitzer, WOOP/MCII, Leroy, GTD next actions, OKR key results | If-then nudges, Intent narrative + atomic actions, marker three-field format |
+| Specific plans outperform vague intentions | Gollwitzer, WOOP/MCII, Leroy, GTD next actions, OKR key results | If-then nudges, Intent narrative + atomic actions |
 | Ritualized reflection beats ad-hoc introspection (if it avoids rumination) | GTD weekly review, Win the Week, Trapnell-Campbell, Eurich | Reflect with "what" questions, rotating prompts, rumination guardrails |
+
+---
+
+## Resolving the divergent-vs-GTD tension
+
+The core question: can divergent creative thinking and GTD-style capture-and-clarify coexist in one system without contamination? The research answers yes, conditionally, with four rules — directly absorbed into Cadence's design:
+
+**1. The active verb must be explicit and ritually separated.** The Double Diamond's four phases (Discover / Define / Develop / Deliver), Puccio's four CPS phases, and de Bono's one-hat-at-a-time rule all converge on this. Cadence never allows project work to be simultaneously divergent and convergent; the verb determines the register, the agent behaves accordingly, and the user knows which verb is active.
+
+**2. GTD-style capture is downstream of CPS-style ideation, not upstream.** The sequence is brainstorm → develop → (candidate emerges) → promote to Pursuit/Project/Action → GTD machinery (Actions, contexts, Waiting-Fors, Weekly Review) takes over. Capture-first is correct *within* a verb's flow, not across the lifecycle of a Pursuit. Cadence's Idea-as-first-class-collection adjacent to Pursuit/Project/Action implements this — Ideas incubate; Projects execute.
+
+**3. Ideas captured during brainstorm must be held and protected, not reconciled immediately.** The Reconciler's hunger for convergence is useful during execution and dangerous during ideation. A Seed during brainstorm belongs to a cluster, not an Action list, until /develop. The Reconciler respects Idea state (seed / developed / promoted / moved / closed) and does not flatten Seeds into Actions.
+
+**4. The LLM is a convergent anchor and must be deployed accordingly.** Doshi-Hauser (2024) and Anderson-Shah-Kreminski (2024) give the empirical ground: LLMs raise the floor of individual creativity but compress its variance. Cadence uses LLMs for /develop, /start, /narrate — tasks where convergence and structured elaboration are the job. The /brainstorm verb uses a curated provocation deck (`cadence-plugin/deck/provocations.yaml`), not free LLM generation, to avoid the homogenization trap.
+
+---
+
+## Incongruences — where frameworks contradict
+
+Where independent frameworks disagree, Cadence picks consciously rather than averaging:
+
+- **Bottom-up vs top-down goal structure.** GTD builds up from captured actions; OKRs cascade down from objectives. Cadence supports both: Pursuits can be authored either way (capture-driven or vision-driven). The Idea pipeline serves the bottom-up path; explicit Pursuit creation with a Why serves the top-down path.
+- **System vs goal.** Clear says "forget about goals, focus on systems"; Sinek says start with Why; Doerr's OKRs are goal-oriented. All are partially right: systems sustain execution; purpose sustains systems. Cadence does not force the choice — a Pursuit's Why anchors purpose; the verb surface is the system.
+- **Daily vs weekly cadence.** Make Time is daily-first; Win the Week is weekly-first; GTD is continuous-plus-weekly. Cadence supports both: /reflect is weekly, /narrate today is daily, the SessionStart hook is per-fresh-session. The Breakpoint structure is flexible enough.
+- **Mindset effects.** Popular treatments claim large; meta-analyses (Sisk et al. 2018; Macnamara & Burgoyne 2023) show small and contested. Cadence does not market mindset; feedback is structured to be informational (growth-compatible) rather than evaluative (fixed-compatible).
+
+---
+
+## What Cadence deliberately does NOT claim
+
+The literature has gaps and contested findings. Cadence's marketing copy and onboarding deliberately avoid these even when the popular versions are appealing:
+
+- **No "limbic-vs-neocortex" Sinek neuroscience.** The Golden Circle is useful as a *framing tool* for purpose-articulation. The strict functional-localization claims are widely rejected by neuroscientists. Cadence uses Sinek's structure (Why → How → What) for Pursuit creation without the brain-anatomy story.
+- **No "21 days to form a habit."** Lally et al. (2010) gave the better estimate: median 66 days, range 18–254, high behavior-type variance. Cadence does not treat habit formation as a deterministic countdown.
+- **No Pomodoro empirics.** The 25/5 pattern is a convention, not optimized. Biwer et al. (2023) found structured breaks of any disciplined kind outperform unstructured work, without showing Pomodoro-specific superiority. Cadence's Breakpoint cadence is user-configurable in the 45–90 minute range.
+- **No flow-neurochemistry marketing.** Csikszentmihalyi's flow construct is robust; the dopamine/anandamide/endorphins cocktail and "500% productivity" figure are extrapolations from popular treatments, not measured. Cadence promises "clear goals, immediate feedback, protected blocks" — the load-bearing evidence.
+- **No decision-fatigue / ego-depletion claims.** The "hungry judges" study (Danziger et al., 2011) has been critiqued on serious confounds; ego depletion has replication problems. Cadence does not build features on these.
+- **No mindset-intervention promises.** See above.
+
+---
+
+## Convergent themes — five strong signals
+
+Across everything researched, five themes appeared in three or more independent frameworks. These are the design targets with the highest confidence:
+
+1. **Externalization releases cognitive load.** Six frameworks (Allen, Forte, Ahrens, Masicampo-Baumeister, Gollwitzer, Leroy) one mechanism. Cadence's project files, captures inbox, /capture verb, and Notes-section accumulation all instantiate this.
+2. **Mode separation between generation and evaluation.** Seven frameworks (Guilford, Beaty et al., Puccio CPS, Double Diamond, De Bono, Osborn, Ellamil et al.) one claim. Cadence's verb-defined registers, brainstorm-vs-execution flow separation, and provocation deck implement this structurally.
+3. **Small, visible progress is the motivational backbone.** Five frameworks (Amabile-Kramer, Clear, Fogg, behavioral activation, SDT competence) one lesson. Cadence surfaces visible forward motion (projects advanced, pursuits closed, ideas resolved) without gamification.
+4. **Specific plans outperform vague intentions.** Five frameworks (Gollwitzer, WOOP/MCII, Leroy, GTD next actions, OKR key results) one prescription. Cadence's Intent narratives + atomic Actions + if-then Nudges all enforce specificity.
+5. **Ritualized reflection beats ad-hoc introspection if it avoids rumination.** Five frameworks (GTD weekly review, Win the Week, Make Time, Trapnell-Campbell, Eurich) one conditional rule. Cadence's /reflect ritual uses "what" questions exclusively; "why" is reserved for Pursuit creation where it serves purpose-articulation.
+
+---
+
+## The deepest insight
+
+The mind works better when its modes are separated, its open loops are externalized, its feedback is informational rather than evaluative, and its rituals are specific rather than performative. Cadence is the engineering of this insight into a working system.
