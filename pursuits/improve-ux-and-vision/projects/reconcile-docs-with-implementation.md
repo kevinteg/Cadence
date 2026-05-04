@@ -1,7 +1,7 @@
 ---
 id: reconcile-docs-with-implementation
 pursuit: improve-ux-and-vision
-status: active
+status: done
 created: 2026-05-01
 ---
 
