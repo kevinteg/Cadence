@@ -1,7 +1,7 @@
 ---
 id: cleanup-stale-session-references
 pursuit: improve-ux-and-vision
-status: active
+status: done
 created: 2026-05-04
 ---
 
