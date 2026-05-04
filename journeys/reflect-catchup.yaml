@@ -1,0 +1,144 @@
+name: Reflect Catch-up Entry
+description: |
+  Verify /cadence:reflect's catch-up entry behaviors:
+  - long_gap (>14 days since last reflection) opens with encouraging
+    "let's catch up" framing, NOT deficit "you missed N weeks" framing
+  - long_gap runs a condensed Get Clear (no per-project relevance walk;
+    severity-1 flags only)
+  - same_week_done re-opens an existing reflection by flipping
+    status back to in_progress (same upsert path); existing LP and body
+    are preserved.
+  The early_in_week tone check (gentle "are you wrapping or just
+  checking in?") is queued as a pending-validation entry rather than
+  asserted in YAML — that confirmation prompt is hard to pin to a
+  regex without overfitting.
+
+# ─── Long-gap entry ─────────────────────────────────────────────────
+
+setup:
+  - create_pursuit:
+      id: test-reflect-catchup
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-reflect-catchup
+      id: test-catchup-project
+      title: Test Catch-up Project
+      intent: |
+        Fixture so /reflect's catch-up flow has at least one project to
+        reason about during Phase 2. The condensed Get Clear should NOT
+        walk per-project relevance for this project.
+      actions:
+        - item: First action that landed (gives Phase 2 something to surface)
+          checked: true
+        - item: Carry-over action
+          checked: false
+  - write_reflection:
+      # 21 days before the journey runs (relative dates resolve at
+      # journey-execution time). >14 day threshold → long_gap.
+      date: relative:-21d
+      status: complete
+      phase: get_focused
+      leveraged_priority: "Land the test-catchup-project work"
+
+steps:
+  - command: /cadence:reflect
+    assert:
+      - agent_output_contains:
+          pattern: "(?i)been a while|let'?s catch up|keep this short"
+      - agent_output_absent:
+          pattern: "(?i)you missed|N weeks|you haven'?t reflected|deficit"
+      - file_created:
+          path: reflections/*.md
+          frontmatter:
+            status: draft
+
+  - action: |
+      Phase 1 — Get Clear should be CONDENSED for long_gap. Verify the
+      agent does NOT walk per-project relevance (would prompt about
+      test-catchup-project specifically). It should ask the single
+      "anything obvious to drop or hold?" question instead.
+    assert:
+      - agent_behavior:
+          description: Condensed Phase 1 — single drop/hold question instead of per-project walk
+          pattern_present: "(?i)anything obvious|drop or hold|drop or move"
+          pattern_absent: "(?i)still relevant\\?.*test-catchup-project"
+
+  - action: |
+      Phase 2 proceeds normally. The new interactive shape (open
+      questions, follow-up cycle) covered by reflect-interactive-phase2.yaml.
+    assert:
+      - agent_output_contains:
+          pattern: "(?i)what worked|what is the one thing"
+
+teardown:
+  - delete_files:
+      - pursuits/test-reflect-catchup/
+      - reflections/*.md
+  - assert_clean: pursuits/test-reflect-catchup/
+
+# ─── Same-week re-open ──────────────────────────────────────────────
+# Run after the long-gap teardown so we start from a clean slate.
+
+setup_2:
+  - create_pursuit:
+      id: test-reflect-reopen
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-reflect-reopen
+      id: test-reopen-project
+      title: Test Re-open Project
+      intent: |
+        Fixture for the same-week re-open path.
+      actions:
+        - item: Some action
+          checked: true
+  - write_reflection:
+      # Earlier today → same ISO week, status complete.
+      date: relative:-0d
+      status: complete
+      phase: get_focused
+      leveraged_priority: "Original LP that should be preserved on re-open"
+
+steps_2:
+  - command: /cadence:reflect
+    assert:
+      - agent_output_contains:
+          pattern: "(?i)already wrapped|stays editable|add to it"
+
+  - action: |
+      User chooses to add to the existing reflection. Agent re-runs
+      write-reflection with status=in_progress and same date. The CLI's
+      upsert preserves the existing leveraged_priority and body.
+    assert:
+      - file_contains:
+          path: reflections/*.md
+          pattern: "(?i)status:\\s*in_progress"
+      - file_contains:
+          path: reflections/*.md
+          pattern: "Original LP that should be preserved on re-open"
+
+  - action: |
+      Re-open lands directly in Phase 2 (Get Focused) — Phase 1 is
+      skipped on re-open because Get Clear already happened in the
+      first wrap.
+    assert:
+      - agent_behavior:
+          description: Re-open lands in Phase 2, not Phase 1
+          pattern_present: "(?i)phase 2|get focused"
+          pattern_absent: "(?i)phase 1|get clear"
+
+teardown_2:
+  - delete_files:
+      - pursuits/test-reflect-reopen/
+      - reflections/*.md
+  - assert_clean: pursuits/test-reflect-reopen/
+
+# ─── early_in_week is queued for human validation ───────────────────
+# The "are you wrapping or just checking in?" tone is hard to pin to a
+# regex without overfitting. Queue it via pending-validation so it
+# surfaces in a fresh session for human verification.
+
+post_journey:
+  - cli: cadence pending-validation-add --description "Verify /cadence:reflect early-in-week confirmation tone in a fresh session — last reflection was prior ISO week, today is Mon-Wed, agent should ask 'are you wrapping the week, or just checking in?' before starting a draft, with easy override."

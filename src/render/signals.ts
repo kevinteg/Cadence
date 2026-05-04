@@ -3,6 +3,41 @@ import { join } from 'node:path'
 import type { Reflection, Snapshot } from '../types.js'
 
 /**
+ * Threshold for `reflectEntryMode === 'long_gap'`. Matches the
+ * conventional "more than two weeks" intuition the catch-up flow
+ * targets, and aligns with the default `dormant_days` threshold
+ * elsewhere (close enough to be one constant worth keeping in mind).
+ */
+export const LONG_GAP_DAYS = 14
+
+/**
+ * Three-state-plus-shading classification of how /reflect should greet
+ * the user. The skill branches once on this signal at the top:
+ *
+ * - `first` — no reflections yet; standard fresh-draft flow
+ * - `same_week_done` — a complete reflection exists in the current
+ *   ISO week; offer to add to it (re-opens by flipping status back to
+ *   in_progress) or call it finished
+ * - `same_week_in_progress` — a draft/in_progress reflection exists in
+ *   the current ISO week; standard "pick up where you left off"
+ * - `early_in_week` — last reflection was the *prior* ISO week and
+ *   today is Monday/Tuesday/Wednesday; confirm "are you wrapping the
+ *   week, or just checking in?" before proceeding
+ * - `long_gap` — last reflection was >LONG_GAP_DAYS ago; encouraging
+ *   "let's catch up — we'll keep this short" entry, condensed Get
+ *   Clear (top severity-1 flags + most-recent captures only)
+ * - `normal` — last reflection was in a prior ISO week, ≤14 days ago
+ *   (and not early-in-week); standard flow
+ */
+export type ReflectEntryMode =
+  | 'first'
+  | 'same_week_done'
+  | 'same_week_in_progress'
+  | 'early_in_week'
+  | 'long_gap'
+  | 'normal'
+
+/**
  * Inputs to context-aware suggestion rules in nextSteps() that the
  * pure Snapshot can't answer on its own (filesystem checks, derived
  * date math). Computed once per renderStatus() call and threaded
@@ -21,11 +56,18 @@ export type SuggestionSignals = {
    * Hint that the weekly Reflect ritual is approaching.
    */
   weeklyPreviewDue: boolean
+  /**
+   * How /reflect should greet the user. See ReflectEntryMode for the
+   * branch table. Defaults to 'normal' for callers that don't pass
+   * signals (older tests, NO_SIGNALS).
+   */
+  reflectEntryMode: ReflectEntryMode
 }
 
 export const NO_SIGNALS: SuggestionSignals = {
   narrateTodayStale: false,
   weeklyPreviewDue: false,
+  reflectEntryMode: 'normal',
 }
 
 export function computeSuggestionSignals(
@@ -36,7 +78,39 @@ export function computeSuggestionSignals(
   return {
     narrateTodayStale: detectNarrateTodayStale(snapshot, repoRoot, now),
     weeklyPreviewDue: detectWeeklyPreviewDue(snapshot.reflections, now),
+    reflectEntryMode: detectReflectEntryMode(snapshot.reflections, now),
   }
+}
+
+function detectReflectEntryMode(
+  reflections: Reflection[],
+  now: Date,
+): ReflectEntryMode {
+  if (reflections.length === 0) return 'first'
+
+  const sorted = [...reflections].sort((a, b) => (a.date < b.date ? 1 : -1))
+  const latest = sorted[0]!
+  const latestDate = localMidnight(latest.date)
+  const currentWeek = isoWeekKeyLocal(now)
+  const latestWeek = isoWeekKeyLocal(latestDate)
+
+  if (latestWeek === currentWeek) {
+    return latest.status === 'complete'
+      ? 'same_week_done'
+      : 'same_week_in_progress'
+  }
+
+  // Different ISO week. Check the gap.
+  const daysSince = daysBetweenLocal(latestDate, now)
+
+  if (daysSince > LONG_GAP_DAYS) return 'long_gap'
+
+  // Last reflection was the prior ISO week (or close) AND today is
+  // Mon/Tue/Wed → likely too early to wrap a fresh week. Confirm.
+  const dow = mondayBasedDowLocal(now)
+  if (dow <= 3) return 'early_in_week'
+
+  return 'normal'
 }
 
 function detectNarrateTodayStale(
@@ -99,4 +173,11 @@ function isoWeekKeyLocal(d: Date): string {
 function localMidnight(yyyyMmDd: string): Date {
   const [y, m, d] = yyyyMmDd.split('-').map(Number)
   return new Date(y!, (m ?? 1) - 1, d ?? 1)
+}
+
+/** Day count between two Date objects in local-midnight days. */
+function daysBetweenLocal(from: Date, to: Date): number {
+  const start = new Date(from.getFullYear(), from.getMonth(), from.getDate())
+  const end = new Date(to.getFullYear(), to.getMonth(), to.getDate())
+  return Math.round((end.getTime() - start.getTime()) / (24 * 3600 * 1000))
 }

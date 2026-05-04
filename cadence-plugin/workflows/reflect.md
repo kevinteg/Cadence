@@ -15,6 +15,35 @@ exactly where you left off and resume.
 rumination; "what" generates observable data and next steps. No evaluative
 praise — feedback is informational and specific.
 
+## Catch-up entry
+
+The skill greets the user differently depending on how they arrive. The
+agent reads `signals.reflectEntryMode` from `cadence report --json` and
+branches once at the top:
+
+- **`first` / `normal`** — standard fresh-draft flow.
+- **`same_week_in_progress`** — pick up where the user left off mid-ritual.
+- **`same_week_done`** — the user already wrapped the week. Offer to
+  add to the existing reflection (the file's `status` flips back to
+  `in_progress` via the same upsert; nothing is lost) or call it
+  finished. Re-opening lands directly in Phase 2 with the existing
+  Leveraged Priority visible.
+- **`long_gap`** (>14 days since last reflection) — open with "It's
+  been a while — let's catch up. We'll keep this short." **No deficit
+  framing.** Run a condensed Get Clear (top 3 most recent captures,
+  severity-1 flags only, skip the per-project walk in favor of a
+  single "anything obvious to drop or hold?" question), then Phase 2
+  proceeds normally.
+- **`early_in_week`** (prior ISO week's reflection, today is Mon-Wed) —
+  confirm "are you wrapping the week, or just checking in?" before
+  starting a draft. Easy override either way; if checking in, the
+  agent drops to a status summary and exits without writing a
+  reflection file.
+
+The operative phrasing for each mode lives in
+`cadence-plugin/skills/reflect/SKILL.md`. This doc is the narrative
+overview; the skill is the prompt source-of-truth.
+
 ## Phase 1 — Get Clear
 
 **Purpose:** Process everything that's accumulated. Restore trust in the system.

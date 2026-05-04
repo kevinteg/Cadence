@@ -4,6 +4,7 @@ import path from 'node:path'
 import { scan } from './scan/repo.js'
 import { report } from './report/reconciler.js'
 import { renderStatus, renderFlags } from './render/status.js'
+import { computeSuggestionSignals } from './render/signals.js'
 import { renderSnapshot, renderReport } from './render/snapshot.js'
 import { findEntities } from './find.js'
 import { renderFindResults } from './render/find.js'
@@ -74,7 +75,13 @@ cli
     const snapshot = await scan(repoRoot)
     const result = report(snapshot)
     if (opts.json) {
-      process.stdout.write(JSON.stringify(result, null, 2) + '\n')
+      // Include derived signals so skills (e.g. /reflect) can branch on
+      // entry mode without a second CLI call. Additive — preserves
+      // backward compatibility with consumers that ignore signals.
+      const signals = computeSuggestionSignals(snapshot, repoRoot)
+      process.stdout.write(
+        JSON.stringify({ ...result, signals }, null, 2) + '\n',
+      )
     } else {
       process.stdout.write(renderReport(result) + '\n')
     }

@@ -17184,16 +17184,35 @@ function flagWipOverLimit(flags, activeProjects, config) {
 // src/render/signals.ts
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+var LONG_GAP_DAYS = 14;
 var NO_SIGNALS = {
   narrateTodayStale: false,
-  weeklyPreviewDue: false
+  weeklyPreviewDue: false,
+  reflectEntryMode: "normal"
 };
 function computeSuggestionSignals(snapshot, repoRoot) {
   const now = new Date(snapshot.generatedAt);
   return {
     narrateTodayStale: detectNarrateTodayStale(snapshot, repoRoot, now),
-    weeklyPreviewDue: detectWeeklyPreviewDue(snapshot.reflections, now)
+    weeklyPreviewDue: detectWeeklyPreviewDue(snapshot.reflections, now),
+    reflectEntryMode: detectReflectEntryMode(snapshot.reflections, now)
   };
+}
+function detectReflectEntryMode(reflections, now) {
+  if (reflections.length === 0) return "first";
+  const sorted = [...reflections].sort((a, b) => a.date < b.date ? 1 : -1);
+  const latest = sorted[0];
+  const latestDate = localMidnight(latest.date);
+  const currentWeek = isoWeekKeyLocal(now);
+  const latestWeek = isoWeekKeyLocal(latestDate);
+  if (latestWeek === currentWeek) {
+    return latest.status === "complete" ? "same_week_done" : "same_week_in_progress";
+  }
+  const daysSince = daysBetweenLocal(latestDate, now);
+  if (daysSince > LONG_GAP_DAYS) return "long_gap";
+  const dow = mondayBasedDowLocal(now);
+  if (dow <= 3) return "early_in_week";
+  return "normal";
 }
 function detectNarrateTodayStale(snapshot, repoRoot, now) {
   const todayKey = isoDateLocal(now);
@@ -17233,6 +17252,11 @@ function isoWeekKeyLocal(d) {
 function localMidnight(yyyyMmDd) {
   const [y, m, d] = yyyyMmDd.split("-").map(Number);
   return new Date(y, (m ?? 1) - 1, d ?? 1);
+}
+function daysBetweenLocal(from, to) {
+  const start = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  const end = new Date(to.getFullYear(), to.getMonth(), to.getDate());
+  return Math.round((end.getTime() - start.getTime()) / (24 * 3600 * 1e3));
 }
 
 // src/validation/queue.ts
@@ -18999,7 +19023,10 @@ cli.command("report", "Show a tabular summary of the snapshot + reconciler flags
   const snapshot = await scan(repoRoot);
   const result = report(snapshot);
   if (opts.json) {
-    process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+    const signals = computeSuggestionSignals(snapshot, repoRoot);
+    process.stdout.write(
+      JSON.stringify({ ...result, signals }, null, 2) + "\n"
+    );
   } else {
     process.stdout.write(renderReport(result) + "\n");
   }

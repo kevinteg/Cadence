@@ -12,24 +12,77 @@ Start or resume the weekly Reflect ritual. Reference
 
 1. Determine the current week number (ISO week).
 
-2. Check if a reflection file exists for this week in `reflections/`.
-   Use `cadence scan --json` and inspect `reflections` to
-   find one for this week's date range.
-   - If `status: complete`, say "Your Week [N] reflection is already
-     done. Want to review it or start something else?"
-   - If `status: in_progress`, say "You started your Week [N]
-     reflection and stopped during [phase]. Want to pick up where you
-     left off?"
-   - If no file exists, create one:
+2. **Branch on `signals.reflectEntryMode`** from `cadence report --json`.
+   The signal answers "how should I greet the user right now?" with one
+   of six values; each leads to a different opener and possibly a
+   different Phase 1 scope. The branch happens once at the top — Phase
+   2 is unchanged regardless.
+
+   - **`first`** — no reflections yet. Standard fresh-draft flow:
+     ```bash
+     cadence write-reflection --date <YYYY-MM-DD-this-week> --status draft
+     ```
+     Continue to Phase 1.
+
+   - **`normal`** — last reflection was a prior ISO week, ≤14 days ago,
+     today is Thu–Sun. Standard fresh-draft flow (same as `first`).
+
+   - **`same_week_in_progress`** — a draft/in_progress reflection
+     exists in the current ISO week. Say:
+     > "You started your Week [N] reflection and stopped during
+     > [phase]. Want to pick up where you left off?"
+     Continue from where it left off.
+
+   - **`same_week_done`** — a complete reflection already exists in
+     the current ISO week. Say:
+     > "You already wrapped your Week [N] reflection on [date]. Want
+     > to add to it (it stays editable while we're in the same week),
+     > or call it finished and start something else?"
+     If the user wants to add: re-run with the existing date and flip
+     status back:
      ```bash
      cadence write-reflection \
-       --date <YYYY-MM-DD-this-week> --status draft
+       --date <existing-date> --status in_progress --phase get_focused
      ```
+     The CLI's `writeReflection` upsert preserves the existing body
+     and Leveraged Priority — re-opening loses nothing. Skip Phase 1
+     and land directly in Phase 2 with the existing LP visible.
+
+   - **`long_gap`** — last reflection was >14 days ago. Open with the
+     canonical encouraging line:
+     > "It's been a while — let's catch up. We'll keep this short."
+     **No deficit framing.** No "you missed N weeks" language. Run a
+     **condensed Get Clear**:
+     - Captures: triage at most the 3 most recent. The rest stays
+       parked: "the older captures can ride; we can come back to them
+       once we're moving again."
+     - Reconciler flags: surface only severity-1 items (overdue
+       waiting-for, WIP-over-limit). Skip dormant-project flags —
+       everything is dormant after a long gap; listing them is the
+       deficit framing this catch-up flow exists to avoid.
+     - Skip the per-project relevance walk. Instead ask: "Anything
+       obvious that should be on hold or dropped before we look
+       forward?"
+     Then proceed to Phase 2 normally (which is itself interactive —
+     Phase 2 is unchanged here).
+
+   - **`early_in_week`** — last reflection was the prior ISO week and
+     today is Mon/Tue/Wed. Before opening a draft, say:
+     > "This is earlier than usual — your last reflection was [N] days
+     > ago. Are you wrapping the week, or is something else up? (We
+     > can go ahead either way.)"
+     If the user confirms wrapping: proceed with the standard fresh-
+     draft flow. If they say "just checking in" or similar: drop to a
+     status summary instead of starting a draft (i.e., delegate to
+     `cadence status`-like output and exit cleanly without writing a
+     reflection file).
 
 3. Show context before starting:
    ```
    Reflect — Week [N], Phase 1: Get Clear
    ```
+   For `same_week_done` re-open, label as `Phase 2: Get Focused`
+   (the user is editing the existing reflection, not starting fresh).
    Update when transitioning to Phase 2.
 
 ## CLI binding

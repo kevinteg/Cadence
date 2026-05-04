@@ -163,3 +163,103 @@ test('weeklyPreviewDue=true on Thursday when the only reflection is from a prior
     assert.equal(signals.weeklyPreviewDue, true)
   })
 })
+
+// ───── reflectEntryMode ────────────────────────────────────────────
+
+function makeReflection(overrides: Partial<Reflection> = {}): Reflection {
+  return {
+    date: '2026-04-26',
+    status: 'complete',
+    phase: 'get_focused',
+    leveraged_priority: undefined,
+    path: 'reflections/2026-04-26.md',
+    ...overrides,
+  }
+}
+
+test('reflectEntryMode = first when no reflections exist', () => {
+  withTempRoot((root) => {
+    const snapshot = makeSnapshot({ reflections: [], repoRoot: root })
+    const signals = computeSuggestionSignals(snapshot, root)
+    assert.equal(signals.reflectEntryMode, 'first')
+  })
+})
+
+test('reflectEntryMode = same_week_done when a complete reflection exists in the current ISO week', () => {
+  withTempRoot((root) => {
+    // generatedAt is 2026-04-30 (Thu, ISO week 18). Reflection on 2026-04-27
+    // (Mon) is the same ISO week.
+    const snapshot = makeSnapshot({
+      reflections: [makeReflection({ date: '2026-04-27', status: 'complete' })],
+      repoRoot: root,
+    })
+    const signals = computeSuggestionSignals(snapshot, root)
+    assert.equal(signals.reflectEntryMode, 'same_week_done')
+  })
+})
+
+test('reflectEntryMode = same_week_in_progress when a draft reflection exists in the current ISO week', () => {
+  withTempRoot((root) => {
+    const snapshot = makeSnapshot({
+      reflections: [
+        makeReflection({ date: '2026-04-27', status: 'in_progress' }),
+      ],
+      repoRoot: root,
+    })
+    const signals = computeSuggestionSignals(snapshot, root)
+    assert.equal(signals.reflectEntryMode, 'same_week_in_progress')
+  })
+})
+
+test('reflectEntryMode = long_gap when last reflection was >14 days ago', () => {
+  withTempRoot((root) => {
+    // generatedAt is 2026-04-30; 21 days back is 2026-04-09.
+    const snapshot = makeSnapshot({
+      reflections: [makeReflection({ date: '2026-04-09', status: 'complete' })],
+      repoRoot: root,
+    })
+    const signals = computeSuggestionSignals(snapshot, root)
+    assert.equal(signals.reflectEntryMode, 'long_gap')
+  })
+})
+
+test('reflectEntryMode = early_in_week when last reflection was prior ISO week and today is Mon-Wed', () => {
+  withTempRoot((root) => {
+    // 2026-04-27 = Monday. Prior reflection on 2026-04-19 (Sun, ISO week 16)
+    // is 8 days ago, prior ISO week, today is Mon → early_in_week.
+    const snapshot = makeSnapshot({
+      reflections: [makeReflection({ date: '2026-04-19', status: 'complete' })],
+      repoRoot: root,
+      generatedAt: '2026-04-27T12:00:00.000Z',
+    })
+    const signals = computeSuggestionSignals(snapshot, root)
+    assert.equal(signals.reflectEntryMode, 'early_in_week')
+  })
+})
+
+test('reflectEntryMode = normal when last reflection was prior ISO week, recent, and today is Thu-Sun', () => {
+  withTempRoot((root) => {
+    // generatedAt is 2026-04-30 (Thu). Reflection on 2026-04-19 (Sun, ISO
+    // week 16) is 11 days ago, prior week, today is Thu → normal.
+    const snapshot = makeSnapshot({
+      reflections: [makeReflection({ date: '2026-04-19', status: 'complete' })],
+      repoRoot: root,
+    })
+    const signals = computeSuggestionSignals(snapshot, root)
+    assert.equal(signals.reflectEntryMode, 'normal')
+  })
+})
+
+test('reflectEntryMode prefers most recent when multiple reflections exist', () => {
+  withTempRoot((root) => {
+    const snapshot = makeSnapshot({
+      reflections: [
+        makeReflection({ date: '2026-03-15', status: 'complete' }),
+        makeReflection({ date: '2026-04-27', status: 'complete' }),
+      ],
+      repoRoot: root,
+    })
+    const signals = computeSuggestionSignals(snapshot, root)
+    assert.equal(signals.reflectEntryMode, 'same_week_done')
+  })
+})

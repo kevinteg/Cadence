@@ -315,6 +315,25 @@ scopes: "Today, this week, or a specific pursuit?"
 what moved and focus on what matters next.
 
 **Behavior:**
+- **Catch-up entry modes** (branched at the top once on
+  `signals.reflectEntryMode` from `cadence report --json`):
+  - `first` / `normal` — standard fresh-draft flow.
+  - `same_week_in_progress` — pick up where the user left off.
+  - `same_week_done` — offer to add to the existing reflection
+    (status flips back to `in_progress` via the same upsert) or call
+    it finished. Re-opening lands directly in Phase 2 with the
+    existing LP preserved; Phase 1 is skipped.
+  - `long_gap` (>14 days since last reflection) — open with "It's
+    been a while — let's catch up. We'll keep this short." Run a
+    condensed Get Clear (top 3 most recent captures only, severity-1
+    flags only, skip per-project relevance walk; ask a single
+    "anything obvious to drop or hold?" question instead). Phase 2
+    proceeds normally.
+  - `early_in_week` (last reflection was the prior ISO week and
+    today is Mon-Wed) — confirm before proceeding: "This is earlier
+    than usual — are you wrapping the week, or just checking in?
+    (We can go ahead either way.)" If checking in, drop to a status
+    summary instead of starting a draft.
 - Phase 1 — Get Clear: process captures, clear 2-minute items, review
   reconciler flags (including Idea-specific flags: aging Seeds, unpromoted
   Developed Ideas, growing backlog), confirm project relevance
@@ -347,6 +366,10 @@ if in-progress, start fresh if none, confirm if already complete.
 - No streaks, scores, or comparisons to previous weeks.
 - No pre-filled answers in Phase 2. Open question, wait, follow up,
   THEN add observations — in that order. Always.
+- **No "you missed N weeks" framing.** Long gaps are met with
+  "let's catch up," not deficit language. The system's job after a
+  break is to make returning feel welcoming and fast, not to
+  enumerate what didn't happen.
 - WIP check counts only in-progress projects (status: active with at least one unchecked action), not backlog.
 
 **Exit:** Brief ELI5 recap of what Reflect produced (captures triaged,
