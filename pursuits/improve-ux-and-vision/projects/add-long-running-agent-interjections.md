@@ -1,7 +1,7 @@
 ---
 id: add-long-running-agent-interjections
 pursuit: improve-ux-and-vision
-status: on_hold
+status: done
 created: 2026-05-01
 ---
 
