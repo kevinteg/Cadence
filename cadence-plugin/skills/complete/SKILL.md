@@ -97,11 +97,34 @@ frontmatter) still use Edit.
    Otherwise (e.g., a non-completing mutation) skip this step.
    - If `allResolved`:
      ```
-     All projects in [pursuit] are resolved. Complete this pursuit, or
-     add more projects?
+     All projects in [pursuit] are resolved. `/cadence:resolve
+     <pursuit>` to walk the closure ritual, or add more projects?
      ```
-     - If the user completes: `cadence move-pursuit <pursuit-id> --to
-       archived`. Same rules: complete or extend, no third option.
+     - If the user resolves: `/cadence:resolve <pursuit>` walks the
+       closure ritual (absolute Ideas block + cleaning) then archives
+       via `cadence move-pursuit <pursuit-id> --to archived`. Same
+       rules: complete or extend, no third option.
+   - If NOT `allResolved` AND a project just completed AND
+     `cadence report --json | .flags[]` includes a
+     `closing_in_on_resolution` flag for this pursuit:
+     ```
+     [pursuit] is closing in — [resolvedCount]/[totalCount] projects
+     done, [unresolvedCount] left. What would need to be true for
+     [pursuit] to close? Common finalizing work to consider:
+
+     - audit: does the implementation match the Intent?
+     - narrative: capture the arc (run /cadence:narrate <pursuit>)
+     - demo: prepare to show others
+     - validation review: clear the pending-validations queue
+       (cadence pending-validation-list)
+
+     Add finalizing projects, or are we close enough to /resolve?
+     ```
+     This is a **suggestion, not a block** — the user can ignore it
+     and continue working. The point is to surface finalization as a
+     planned phase rather than a surprise discovery, so pursuits like
+     build-cadence-v1 don't need their audit/narrative/demo work
+     inserted at the very end.
 
 5. **Confirm:**
    ```

@@ -202,6 +202,13 @@ wins, reconciler flags. Ask: "What do you want to work on?"
   "All actions checked. `/resolve <project>` to wrap this up, or add
   more actions?" The actual project transition (status=done) happens
   via `/resolve`, not `/complete` — `/complete` is for actions only.
+- When `/resolve` wraps a project AND the pursuit's
+  `closing_in_on_resolution` flag is active (≥1 project resolved + 1-2
+  unresolved remaining), the upward prompt surfaces the finalization
+  question: "[pursuit] is closing in — what would need to be true for
+  it to close? Common finalizing work: audit, narrative, demo,
+  validation review. Add finalizing projects, or close enough to
+  /resolve?" Suggestion, not block.
 - If `/resolve` fires next and all pursuit projects are resolved, the
   upward prompt continues: "All projects resolved. `/resolve <pursuit>`
   to walk the closure ritual?"

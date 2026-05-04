@@ -211,7 +211,13 @@ test('on_hold and done projects do not get active-only flags', () => {
     ],
   })
   const { flags } = report(snapshot)
-  assert.equal(flags.length, 0)
+  // Filter to "active-only" flags — closing_in_on_resolution is a
+  // pursuit-level flag (a separate category) and is expected to fire
+  // here because the pursuit has 1 done + 1 unresolved (on_hold).
+  const activeOnlyFlags = flags.filter(
+    (f) => f.kind !== 'closing_in_on_resolution',
+  )
+  assert.equal(activeOnlyFlags.length, 0)
 })
 
 test('projects in non-active pursuits are excluded from active-only flags', () => {
@@ -225,4 +231,88 @@ test('projects in non-active pursuits are excluded from active-only flags', () =
   })
   const { flags } = report(snapshot)
   assert.equal(flags.length, 0)
+})
+
+// ───── closing_in_on_resolution ────────────────────────────────────
+
+test('closing_in_on_resolution fires when 1 done project + 1 active remains', () => {
+  const snapshot = makeSnapshot({
+    projects: [
+      makeProject({ id: 'p1', status: 'done' }),
+      makeProject({ id: 'p2', status: 'active' }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  const closing = flags.find((f) => f.kind === 'closing_in_on_resolution')
+  assert.ok(closing, 'expected closing_in_on_resolution flag')
+  if (closing && closing.kind === 'closing_in_on_resolution') {
+    assert.equal(closing.unresolvedCount, 1)
+    assert.equal(closing.resolvedCount, 1)
+    assert.equal(closing.totalCount, 2)
+  }
+})
+
+test('closing_in_on_resolution fires with 2 unresolved (mixed active + on_hold)', () => {
+  const snapshot = makeSnapshot({
+    projects: [
+      makeProject({ id: 'd1', status: 'done' }),
+      makeProject({ id: 'd2', status: 'dropped' }),
+      makeProject({ id: 'a1', status: 'active' }),
+      makeProject({ id: 'h1', status: 'on_hold' }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  const closing = flags.find((f) => f.kind === 'closing_in_on_resolution')
+  assert.ok(closing, 'expected closing_in_on_resolution flag with 2 unresolved')
+  if (closing && closing.kind === 'closing_in_on_resolution') {
+    assert.equal(closing.unresolvedCount, 2)
+    assert.equal(closing.resolvedCount, 2)
+  }
+})
+
+test('closing_in_on_resolution does NOT fire when 3+ unresolved remain', () => {
+  const snapshot = makeSnapshot({
+    projects: [
+      makeProject({ id: 'd1', status: 'done' }),
+      makeProject({ id: 'a1', status: 'active' }),
+      makeProject({ id: 'a2', status: 'active' }),
+      makeProject({ id: 'a3', status: 'active' }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  assert.equal(
+    flags.filter((f) => f.kind === 'closing_in_on_resolution').length,
+    0,
+    '3 unresolved is not "closing in" — should not fire',
+  )
+})
+
+test('closing_in_on_resolution does NOT fire on a brand-new pursuit (no done projects yet)', () => {
+  const snapshot = makeSnapshot({
+    projects: [
+      makeProject({ id: 'a1', status: 'active' }),
+      makeProject({ id: 'h1', status: 'on_hold' }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  assert.equal(
+    flags.filter((f) => f.kind === 'closing_in_on_resolution').length,
+    0,
+    'no done projects means the pursuit hasn\'t shipped anything yet',
+  )
+})
+
+test('closing_in_on_resolution does NOT fire when all projects are resolved', () => {
+  const snapshot = makeSnapshot({
+    projects: [
+      makeProject({ id: 'd1', status: 'done' }),
+      makeProject({ id: 'd2', status: 'done' }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  assert.equal(
+    flags.filter((f) => f.kind === 'closing_in_on_resolution').length,
+    0,
+    'all-done means resolve the pursuit, not "closing in"',
+  )
 })

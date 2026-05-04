@@ -17,6 +17,7 @@ export function report(snapshot: Snapshot): { snapshot: Snapshot; flags: Flag[] 
   flagDormantProjects(flags, activeProjects, now, config)
   flagStructural(flags, activeProjects)
   flagWipOverLimit(flags, activeProjects, config)
+  flagClosingInOnResolution(flags, snapshot, activePursuitIds)
 
   return { snapshot, flags }
 }
@@ -94,5 +95,45 @@ function flagWipOverLimit(
       limit: config.max_active_projects,
       projectIds: inProgress.map((p) => p.id),
     })
+  }
+}
+
+/**
+ * Flag pursuits that are closing in on resolution: ≥1 project already
+ * resolved AND 1-2 unresolved projects remain. Errs toward earlier
+ * surfacing — better to ask "what would close this?" before the user
+ * is staring at the final action.
+ */
+function flagClosingInOnResolution(
+  flags: Flag[],
+  snapshot: Snapshot,
+  activePursuitIds: Set<string>,
+): void {
+  for (const pursuitId of activePursuitIds) {
+    const pursuitProjects = snapshot.projects.filter(
+      (p) => p.pursuit === pursuitId,
+    )
+    if (pursuitProjects.length === 0) continue
+
+    const unresolvedCount = pursuitProjects.filter(
+      (p) => p.status === 'active' || p.status === 'on_hold',
+    ).length
+    const resolvedCount = pursuitProjects.filter(
+      (p) => p.status === 'done' || p.status === 'dropped',
+    ).length
+
+    if (
+      resolvedCount >= 1 &&
+      unresolvedCount >= 1 &&
+      unresolvedCount <= 2
+    ) {
+      flags.push({
+        kind: 'closing_in_on_resolution',
+        pursuitId,
+        unresolvedCount,
+        resolvedCount,
+        totalCount: pursuitProjects.length,
+      })
+    }
   }
 }

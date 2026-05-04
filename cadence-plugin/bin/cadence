@@ -17119,6 +17119,7 @@ function report(snapshot) {
   flagDormantProjects(flags, activeProjects, now, config);
   flagStructural(flags, activeProjects);
   flagWipOverLimit(flags, activeProjects, config);
+  flagClosingInOnResolution(flags, snapshot, activePursuitIds);
   return { snapshot, flags };
 }
 function flagOverdueWaitingFor(flags, snapshot, now) {
@@ -17178,6 +17179,29 @@ function flagWipOverLimit(flags, activeProjects, config) {
       limit: config.max_active_projects,
       projectIds: inProgress.map((p) => p.id)
     });
+  }
+}
+function flagClosingInOnResolution(flags, snapshot, activePursuitIds) {
+  for (const pursuitId of activePursuitIds) {
+    const pursuitProjects = snapshot.projects.filter(
+      (p) => p.pursuit === pursuitId
+    );
+    if (pursuitProjects.length === 0) continue;
+    const unresolvedCount = pursuitProjects.filter(
+      (p) => p.status === "active" || p.status === "on_hold"
+    ).length;
+    const resolvedCount = pursuitProjects.filter(
+      (p) => p.status === "done" || p.status === "dropped"
+    ).length;
+    if (resolvedCount >= 1 && unresolvedCount >= 1 && unresolvedCount <= 2) {
+      flags.push({
+        kind: "closing_in_on_resolution",
+        pursuitId,
+        unresolvedCount,
+        resolvedCount,
+        totalCount: pursuitProjects.length
+      });
+    }
   }
 }
 
@@ -17530,6 +17554,10 @@ function describeFlag(flag, _snapshot) {
       return `structural: ${flag.pursuitId}/${flag.projectId} all actions checked \u2014 does the intent feel achieved?`;
     case "wip_over_limit":
       return `WIP over limit: ${flag.count} in-progress projects (limit: ${flag.limit})`;
+    case "closing_in_on_resolution": {
+      const remaining = flag.unresolvedCount === 1 ? "1 project" : `${flag.unresolvedCount} projects`;
+      return `closing in: ${flag.pursuitId} (${flag.resolvedCount}/${flag.totalCount} done, ${remaining} left) \u2014 what would need to be true to close?`;
+    }
   }
   const _exhaustive = flag;
   return _exhaustive;

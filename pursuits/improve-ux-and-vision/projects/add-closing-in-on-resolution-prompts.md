@@ -1,7 +1,7 @@
 ---
 id: add-closing-in-on-resolution-prompts
 pursuit: improve-ux-and-vision
-status: on_hold
+status: active
 created: 2026-05-01
 ---
 
@@ -15,8 +15,8 @@ Add a lifecycle prompt that fires when a pursuit approaches resolution, asking '
 
 ## Actions
 
-- [ ] Define and tune the trigger criteria for 'pursuit approaching resolution': N projects left active, M% of actions checked across remaining projects, recent activity rate. Extend the reconciler's existing pursuit_near_completion logic. Settle on a heuristic that errs toward earlier surfacing (better to ask early).
-- [ ] Update the reconciler check to fire a closing_in_on_resolution flag with the actionable prompt content when criteria are met. Surface in /status output and SessionStart hook output.
-- [ ] Update /complete skill: when completing the last action of a project on a near-closing pursuit, agent surfaces 'What would need to be true for [pursuit] to close? Common finalizing work to consider: audit (does the implementation match the intent?), narrative (capture the arc), demo (prepare to show others), validation review (clear the pending-validations queue). Add finalizing projects, or are we close enough to /resolve?' Suggestion, not block.
-- [ ] Update cadence-runtime.md (Upward Completion section) and verb-contracts.md (Complete contract) to document the new lifecycle prompt as expected behavior, not bonus.
-- [ ] Update or extend the complete-upward user journey YAML to cover the new prompt behavior.
+- [x] Define and tune the trigger criteria for 'pursuit approaching resolution': N projects left active, M% of actions checked across remaining projects, recent activity rate. Extend the reconciler's existing pursuit_near_completion logic. Settle on a heuristic that errs toward earlier surfacing (better to ask early).
+- [x] Update the reconciler check to fire a closing_in_on_resolution flag with the actionable prompt content when criteria are met. Surface in /status output and SessionStart hook output.
+- [x] Update /complete skill: when completing the last action of a project on a near-closing pursuit, agent surfaces 'What would need to be true for [pursuit] to close? Common finalizing work to consider: audit (does the implementation match the intent?), narrative (capture the arc), demo (prepare to show others), validation review (clear the pending-validations queue). Add finalizing projects, or are we close enough to /resolve?' Suggestion, not block.
+- [x] Update cadence-runtime.md (Upward Completion section) and verb-contracts.md (Complete contract) to document the new lifecycle prompt as expected behavior, not bonus.
+- [x] Update or extend the complete-upward user journey YAML to cover the new prompt behavior.

@@ -214,6 +214,18 @@ export type Flag =
       projectId: string
     }
   | { kind: 'wip_over_limit'; count: number; limit: number; projectIds: string[] }
+  | {
+      // Pursuit is closing in on resolution: ≥1 project resolved
+      // (done|dropped) AND 1-2 unresolved (active|on_hold) remain.
+      // Surfaces a "what would need to be true to close?" prompt at
+      // /complete and during /reflect Get Clear so finalization
+      // becomes a planned phase, not a surprise discovery.
+      kind: 'closing_in_on_resolution'
+      pursuitId: string
+      unresolvedCount: number
+      resolvedCount: number
+      totalCount: number
+    }
 
 export type Report = {
   snapshot: Snapshot

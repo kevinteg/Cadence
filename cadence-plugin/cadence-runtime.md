@@ -70,13 +70,24 @@ Rules:
 
 ## Upward Completion
 
-Completion flows upward from actions to projects to pursuits:
+Completion flows upward from actions to projects to pursuits, with a
+"closing in" surface that fires *before* the pursuit is fully resolved:
 - When all actions in a project are checked, the system prompts:
   "All actions checked. `/resolve <project>` to wrap this up, or add
   more actions?" The actual project transition (status=done, Intent-
   feel-achieved dialogue) happens via `/resolve`, not `/complete` —
   `/complete` is for actions only. Done-ness is judged through dialogue
   against the project's Intent — not by sweeping a checklist.
+- When `/resolve` wraps a project AND the pursuit is "closing in on
+  resolution" (`closing_in_on_resolution` flag from `cadence report
+  --json` — fires when ≥1 project is resolved AND 1-2 unresolved
+  projects remain), the system surfaces the finalization prompt:
+  "[pursuit] is closing in — what would need to be true for it to
+  close? Common finalizing work: audit, narrative, demo, validation
+  review. Add finalizing projects, or close enough to /resolve?"
+  Suggestion, not block. The point is to make finalization a planned
+  phase rather than a surprise — pursuits should NOT need their
+  audit/narrative/demo work inserted at the very end.
 - When `/resolve` wraps a project and all pursuit projects are
   resolved, the upward prompt continues: "All projects in [pursuit]
   resolved. `/resolve <pursuit>` to walk the closure ritual?"

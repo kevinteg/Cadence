@@ -1,5 +1,10 @@
 name: Complete with Upward Completion
-description: Verify /complete marks actions done and triggers upward completion when all DoD items are checked
+description: |
+  Verify /complete marks actions done and triggers upward completion
+  when all actions are checked. Also verifies the closing-in-on-
+  resolution prompt fires when a pursuit has ≥1 done project + 1-2
+  unresolved projects, so finalization becomes a planned phase rather
+  than a surprise discovery.
 
 setup:
   - create_pursuit:
@@ -8,13 +13,27 @@ setup:
       status: active
   - create_project:
       pursuit: test-complete
+      id: prior-shipped
+      title: Prior Shipped Project
+      status: done
+      intent: |
+        Already-resolved fixture project. Its existence (status=done)
+        proves the pursuit has shipped something — required for the
+        closing_in_on_resolution flag to fire.
+      actions:
+        - item: Already shipped
+          checked: true
+  - create_project:
+      pursuit: test-complete
       id: test-complete-project
       title: Test Complete Project
       intent: |
         Walk the upward-completion flow: complete a project's only
-        action, confirm the agent fires the new "Does the intent feel
-        achieved?" prompt, accept completion, and verify the project
-        transitions to status: done.
+        action, confirm the agent fires the "Does the intent feel
+        achieved?" prompt, accept completion via /resolve. Because the
+        pursuit has 1 done + 1 active project (this one), the
+        closing_in_on_resolution flag fires and the agent surfaces the
+        "what would need to be true to close?" prompt.
       actions:
         - Do the only thing
 
@@ -31,14 +50,20 @@ steps:
       - contains: "Done"
       - contains: "Does the intent feel achieved"
 
-  - action: User says "complete it"
+  - action: User says "complete it" — invokes /resolve test-complete-project --state complete
     assert:
       - file_contains:
           path: pursuits/test-complete/projects/test-complete-project.md
           pattern: "status: done"
-      - contains: "Complete this pursuit"
+      - agent_output_contains:
+          # All projects in the pursuit are now resolved (1 prior + 1
+          # just-completed = 2 done, 0 unresolved). The closing-in
+          # flag does NOT fire here (it requires 1-2 UNRESOLVED). The
+          # standard "all projects resolved" upward prompt fires
+          # instead.
+          pattern: "(?i)all projects.*resolved|/resolve <pursuit>|closure ritual"
 
-  - action: User says "complete it" (pursuit-level)
+  - action: User says "complete it" (pursuit-level — invokes /resolve test-complete)
     assert:
       - file_contains:
           path: pursuits/_archived/test-complete/pursuit.md
@@ -50,3 +75,66 @@ teardown:
       - pursuits/_archived/test-complete/
   - assert_clean: pursuits/test-complete/
   - assert_clean: pursuits/_archived/test-complete/
+
+# ─── closing_in_on_resolution prompt ────────────────────────────────
+# Separate setup with a 3-project pursuit (1 done + 2 active) so the
+# closing-in flag fires when one of the active projects gets resolved,
+# leaving 1 unresolved.
+
+setup_2:
+  - create_pursuit:
+      id: test-closing-in
+      type: finite
+      status: active
+  - create_project:
+      pursuit: test-closing-in
+      id: shipped-1
+      status: done
+      intent: |
+        Already-shipped project — bumps resolvedCount to 1 so the
+        closing_in_on_resolution flag becomes eligible.
+      actions:
+        - item: Done thing
+          checked: true
+  - create_project:
+      pursuit: test-closing-in
+      id: about-to-finish
+      title: About to Finish
+      intent: |
+        Finishing this leaves the pursuit with 2 done + 1 active = 1
+        unresolved. The closing-in flag fires. Agent should surface the
+        finalization prompt at this moment.
+      actions:
+        - Final action
+  - create_project:
+      pursuit: test-closing-in
+      id: still-going
+      title: Still Going
+      intent: |
+        Stays active so the pursuit isn't fully resolved when
+        about-to-finish completes — the closing-in flag fires (1
+        unresolved remains), not the all-projects-resolved one.
+      actions:
+        - Ongoing action
+
+steps_2:
+  - command: /start about-to-finish
+  - command: /complete Final action
+    assert:
+      - contains: "Does the intent feel achieved"
+
+  - action: User says "complete it" — /resolve about-to-finish --state complete
+    assert:
+      - agent_output_contains:
+          pattern: "(?i)closing in|what would need to be true|finalizing work"
+      - agent_output_contains:
+          pattern: "(?i)audit|narrative|demo|validation"
+      - agent_output_absent:
+          # This is a suggestion, not a block — the agent should NOT
+          # halt or refuse to continue.
+          pattern: "(?i)cannot proceed|blocked|must add"
+
+teardown_2:
+  - delete_files:
+      - pursuits/test-closing-in/
+  - assert_clean: pursuits/test-closing-in/

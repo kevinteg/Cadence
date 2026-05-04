@@ -271,6 +271,10 @@ function describeFlag(flag: Flag, _snapshot: Snapshot): string {
       return `structural: ${flag.pursuitId}/${flag.projectId} all actions checked — does the intent feel achieved?`
     case 'wip_over_limit':
       return `WIP over limit: ${flag.count} in-progress projects (limit: ${flag.limit})`
+    case 'closing_in_on_resolution': {
+      const remaining = flag.unresolvedCount === 1 ? '1 project' : `${flag.unresolvedCount} projects`
+      return `closing in: ${flag.pursuitId} (${flag.resolvedCount}/${flag.totalCount} done, ${remaining} left) — what would need to be true to close?`
+    }
   }
   const _exhaustive: never = flag
   return _exhaustive
