@@ -255,12 +255,26 @@ verb, vocabulary choice, and example stays domain-agnostic.
   household project ("fix the kitchen sink") is as natural an example
   as a coding one ("stand up the test harness"). Don't default every
   example to code.
-- **Heuristics adapt by detected domain.** When a project's Intent or
-  ID indicates physical-space work (rooms, tools, materials, body
-  parts, cooking, repair vocabulary), the agent's prompts adapt:
-  ask about workspace and constraints, not CI configuration. (See
-  the `add-physical-domain-awareness-to-prompts` project for the
-  full pattern.)
+- **Heuristics adapt by detected domain.** Each project carries a
+  `detected_domain` (heuristic over Intent + project ID against
+  physical/digital keyword lists) and an `effective_domain`
+  (frontmatter `domain:` override if set, otherwise the detection
+  result). Skills consume `effective_domain` to adapt their prompts:
+  - **Physical domain** (kitchen, garden, workshop, fitness, etc.):
+    `/promote` asks about workspace, tools, parts, constraints
+    (water shutoff, weather window, parts availability) — never
+    CI configuration. First-action suggestions are physical-action-
+    shaped ("turn off water supply", "lay drop cloth"). `/complete`
+    prompts "what changed in the physical space?" and appends the
+    response to the project's Notes section as a timestamped entry —
+    the natural log replacement, no `/log` verb required.
+  - **Digital domain**: standard Cadence prompts work.
+  - **Hybrid**: ask both kinds of questions; surface the duality.
+  - **Unknown**: ask one open question and let the user lead.
+  Override available via `domain:` frontmatter on the project file
+  (values: `physical` | `digital` | `hybrid`). The agent should not
+  auto-set this — only surface the option if the user's framing
+  differs from the heuristic's detection.
 - **New verbs are scrutinized for domain bias.** Before adding a
   verb, ask: does this serve household projects, creative practice,
   fitness, family logistics — not just code? If only code, it

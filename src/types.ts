@@ -52,12 +52,23 @@ export const ProjectStatusSchema = z.enum([
 ])
 export type ProjectStatus = z.infer<typeof ProjectStatusSchema>
 
+export const DomainSchema = z.enum(['physical', 'digital', 'hybrid'])
+export type DomainOverride = z.infer<typeof DomainSchema>
+
 export const ProjectFrontmatterSchema = z.object({
   id: z.string(),
   pursuit: z.string(),
   status: ProjectStatusSchema,
   created: z.string(),
   waiting_for: z.array(WaitingForSchema).optional().default([]),
+  /**
+   * Optional override for the heuristic in src/scan/domain.ts. When
+   * set, this value takes precedence and `effective_domain` reports
+   * it directly. When absent, `effective_domain` falls back to the
+   * `detected_domain` (which may be 'unknown'). Skills should adapt
+   * their prompts based on `effective_domain`.
+   */
+  domain: DomainSchema.optional(),
 })
 export type ProjectFrontmatter = z.infer<typeof ProjectFrontmatterSchema>
 
@@ -78,6 +89,10 @@ export type Project = ProjectFrontmatter & {
    * directories.
    */
   last_activity_at?: string
+  /** Result of running the domain heuristic over `intent` + `id`. */
+  detected_domain: 'physical' | 'digital' | 'hybrid' | 'unknown'
+  /** Override (`domain` frontmatter) if set, else `detected_domain`. */
+  effective_domain: 'physical' | 'digital' | 'hybrid' | 'unknown'
 }
 
 export const IdeaStateSchema = z.enum([

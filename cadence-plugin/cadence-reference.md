@@ -100,10 +100,14 @@ markdown content. The key formats are:
 - **Pursuit** (`pursuit.md`): frontmatter with id, type, status, created,
   optional why
 - **Project** (`<id>.md`): frontmatter with id, pursuit, status, created,
-  optional waiting_for; sections for Intent, Actions, Notes. Older
+  optional waiting_for, optional `domain` (`physical` | `digital` |
+  `hybrid` — overrides the keyword heuristic in `src/scan/domain.ts`,
+  used by `/promote` and `/complete` to adapt their prompts; leave
+  unset to use detection); sections for Intent, Actions, Notes. Older
   project files still carry a `Definition of Done` section instead of
   Intent — that's a historical shape, parsed but not emitted for new
-  projects.
+  projects. The CLI exposes `detected_domain` (heuristic) and
+  `effective_domain` (override-or-detected) on the project JSON output.
 - **Idea** (`<id>.md`): frontmatter with id, parent, state, created,
   optional developed_at, promoted_to, closed_reason
 - **Capture** (`<timestamp>.md`): frontmatter with captured, verb_context;

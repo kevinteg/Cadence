@@ -11,6 +11,7 @@ import {
   type Project,
   ProjectFrontmatterSchema,
 } from '../types.js'
+import { detectDomain } from './domain.js'
 
 export async function scanProjects(repoRoot: string): Promise<Project[]> {
   const files = await fg('pursuits/*/projects/*.md', {
@@ -28,6 +29,7 @@ export async function scanProjects(repoRoot: string): Promise<Project[]> {
     const intent = (sections.get('intent') ?? '').trim()
     const dod = parseChecklist(sections.get('definition of done') ?? '')
     const actions = parseChecklist(sections.get('actions') ?? '')
+    const detection = detectDomain(intent, fm.id)
     results.push({
       ...fm,
       intent,
@@ -37,6 +39,8 @@ export async function scanProjects(repoRoot: string): Promise<Project[]> {
       path: path.relative(repoRoot, file),
       dodProgress: progress(dod),
       actionProgress: progress(actions),
+      detected_domain: detection.domain,
+      effective_domain: fm.domain ?? detection.domain,
     })
   }
   return results

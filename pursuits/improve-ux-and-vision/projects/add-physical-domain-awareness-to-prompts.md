@@ -1,7 +1,7 @@
 ---
 id: add-physical-domain-awareness-to-prompts
 pursuit: improve-ux-and-vision
-status: on_hold
+status: active
 created: 2026-05-01
 ---
 
@@ -15,9 +15,9 @@ Add physical-domain awareness to the prompts in promote, start, and complete so 
 
 ## Actions
 
-- [ ] Add a heuristic for physical-domain detection — keyword-based scan of Intent text and project ID for physical-space language (rooms, tools, materials, body parts, cooking verbs, repair verbs, etc.). Returns confidence + detected domain (physical | digital | hybrid | unknown). Implement in CLI and expose via the project JSON output.
-- [ ] Add an optional 'domain' frontmatter field to project files (values: physical | digital | hybrid). When set, overrides the heuristic. Document in cadence-reference.md.
-- [ ] Update skills/promote/SKILL.md so when promoting an Idea to a Project and the detected/declared domain is physical, the Intent questions adapt: ask about workspace, tools/parts, constraints (water shutoff, parts availability), rather than digital-flavored questions about CI/code paths.
-- [ ] Update skills/promote/SKILL.md (and possibly start) so first-action suggestions for physical-domain projects are physical-action-shaped (e.g., 'turn off water supply', 'lay drop cloth') rather than digital examples.
-- [ ] Update skills/complete/SKILL.md (or wherever /complete prompts live) so when completing an action on a physical-domain project, the prompt asks 'what changed in the physical space?' and appends the response to the project's Notes section as a timestamped entry. This is the natural log replacement.
-- [ ] Add domain awareness as a cross-cutting principle in cadence-runtime.md, noting that domain detection is heuristic with optional frontmatter override, and that prompts should adapt across promote/start/complete to fit the detected domain.
+- [x] Add a heuristic for physical-domain detection — keyword-based scan of Intent text and project ID for physical-space language (rooms, tools, materials, body parts, cooking verbs, repair verbs, etc.). Returns confidence + detected domain (physical | digital | hybrid | unknown). Implement in CLI and expose via the project JSON output.
+- [x] Add an optional 'domain' frontmatter field to project files (values: physical | digital | hybrid). When set, overrides the heuristic. Document in cadence-reference.md.
+- [x] Update skills/promote/SKILL.md so when promoting an Idea to a Project and the detected/declared domain is physical, the Intent questions adapt: ask about workspace, tools/parts, constraints (water shutoff, parts availability), rather than digital-flavored questions about CI/code paths.
+- [x] Update skills/promote/SKILL.md (and possibly start) so first-action suggestions for physical-domain projects are physical-action-shaped (e.g., 'turn off water supply', 'lay drop cloth') rather than digital examples.
+- [x] Update skills/complete/SKILL.md (or wherever /complete prompts live) so when completing an action on a physical-domain project, the prompt asks 'what changed in the physical space?' and appends the response to the project's Notes section as a timestamped entry. This is the natural log replacement.
+- [x] Add domain awareness as a cross-cutting principle in cadence-runtime.md, noting that domain detection is heuristic with optional frontmatter override, and that prompts should adapt across promote/start/complete to fit the detected domain.

@@ -16562,12 +16562,21 @@ var ProjectStatusSchema = external_exports.enum([
   "done",
   "dropped"
 ]);
+var DomainSchema = external_exports.enum(["physical", "digital", "hybrid"]);
 var ProjectFrontmatterSchema = external_exports.object({
   id: external_exports.string(),
   pursuit: external_exports.string(),
   status: ProjectStatusSchema,
   created: external_exports.string(),
-  waiting_for: external_exports.array(WaitingForSchema).optional().default([])
+  waiting_for: external_exports.array(WaitingForSchema).optional().default([]),
+  /**
+   * Optional override for the heuristic in src/scan/domain.ts. When
+   * set, this value takes precedence and `effective_domain` reports
+   * it directly. When absent, `effective_domain` falls back to the
+   * `detected_domain` (which may be 'unknown'). Skills should adapt
+   * their prompts based on `effective_domain`.
+   */
+  domain: DomainSchema.optional()
 });
 var IdeaStateSchema = external_exports.enum([
   "seed",
@@ -16967,6 +16976,265 @@ function extractDescription(content) {
   return collected.join(" ").trim();
 }
 
+// src/scan/domain.ts
+var PHYSICAL_KEYWORDS = [
+  // Rooms / spaces
+  "kitchen",
+  "bathroom",
+  "bedroom",
+  "garage",
+  "basement",
+  "attic",
+  "garden",
+  "yard",
+  "lawn",
+  "driveway",
+  "patio",
+  "shed",
+  "closet",
+  "pantry",
+  "hallway",
+  // Tools
+  "hammer",
+  "screwdriver",
+  "wrench",
+  "drill",
+  "saw",
+  "ladder",
+  "pliers",
+  "crowbar",
+  "mallet",
+  // Materials
+  "lumber",
+  "paint",
+  "drywall",
+  "concrete",
+  "cement",
+  "mortar",
+  "caulk",
+  "grout",
+  "plaster",
+  "fabric",
+  "thread",
+  "yarn",
+  "tile",
+  "tiling",
+  // Strong-signal repair verbs (skip ambiguous: fix, replace, install, mount)
+  "repair",
+  "sanding",
+  "rewire",
+  "rewiring",
+  "plumbing",
+  // Household objects / fixtures
+  "sink",
+  "faucet",
+  "toilet",
+  "oven",
+  "stove",
+  "fridge",
+  "refrigerator",
+  "dishwasher",
+  "washer",
+  "dryer",
+  "microwave",
+  "couch",
+  "sofa",
+  "fixture",
+  "outlet",
+  "thermostat",
+  "doorknob",
+  "hinge",
+  // Cooking
+  "cook",
+  "cooking",
+  "bake",
+  "baking",
+  "roast",
+  "grill",
+  "simmer",
+  "recipe",
+  "ingredients",
+  "dough",
+  "batter",
+  "marinade",
+  // Outdoors
+  "mow",
+  "mowing",
+  "prune",
+  "pruning",
+  "weed",
+  "weeds",
+  "plant",
+  "planting",
+  "shrub",
+  "mulch",
+  "compost",
+  // Body / health / fitness
+  "workout",
+  "stretch",
+  "stretching",
+  "yoga",
+  "pilates",
+  "gym",
+  "exercise",
+  "hike",
+  "hiking",
+  // Family / kids / household logistics
+  "kid",
+  "kids",
+  "child",
+  "children",
+  "family",
+  "dinner",
+  "lunch",
+  "breakfast",
+  "school",
+  "daycare",
+  "soccer",
+  "dentist",
+  "pediatrician",
+  "birthday",
+  "anniversary",
+  // Creative practice (physical making)
+  "painting",
+  "sketch",
+  "canvas",
+  "pottery",
+  "sculpt",
+  "sculpting",
+  "knit",
+  "knitting",
+  "crochet",
+  "sew",
+  "sewing",
+  "quilt",
+  "guitar",
+  "piano",
+  "violin",
+  // Multi-word physical signals
+  "by hand",
+  "in-person",
+  "in person"
+];
+var DIGITAL_KEYWORDS = [
+  // Code constructs (specific terms)
+  "function",
+  "interface",
+  "namespace",
+  // Languages
+  "typescript",
+  "javascript",
+  "python",
+  "rust",
+  "golang",
+  "kotlin",
+  "haskell",
+  "elixir",
+  // Frameworks / runtimes
+  "react",
+  "next.js",
+  "vue",
+  "angular",
+  "svelte",
+  "django",
+  "flask",
+  "rails",
+  // Infrastructure
+  "docker",
+  "kubernetes",
+  "k8s",
+  "terraform",
+  "ansible",
+  "aws",
+  "gcp",
+  "azure",
+  "lambda",
+  // Dev tools / process (skip ambiguous: branch, build, cd, test, mr)
+  "git",
+  "commit",
+  "rebase",
+  "pull request",
+  "codebase",
+  "repository",
+  "repo",
+  "ci",
+  "pipeline",
+  "deploy",
+  "deployment",
+  "compile",
+  "lint",
+  // Data / API (skip ambiguous: index, table, column, row, migration)
+  "api",
+  "endpoint",
+  "schema",
+  "database",
+  "sql",
+  "query",
+  "json",
+  "yaml",
+  "http",
+  "rest",
+  "graphql",
+  "webhook",
+  // Software concepts (skip ambiguous: fix, test, unit, fixture)
+  "refactor",
+  "integration",
+  "regression",
+  // Misc digital signals (skip ambiguous: cli, tap, click, level)
+  "login",
+  "logout",
+  "auth",
+  "oauth",
+  "frontend",
+  "backend",
+  "fullstack",
+  "unit test"
+];
+function detectDomain(intent, projectId) {
+  const haystack = (intent + " " + projectId.replace(/-/gu, " ")).toLowerCase();
+  const physical = matchKeywords(haystack, PHYSICAL_KEYWORDS);
+  const digital = matchKeywords(haystack, DIGITAL_KEYWORDS);
+  const evidence = { physical, digital };
+  const pCount = physical.length;
+  const dCount = digital.length;
+  if (pCount === 0 && dCount === 0) {
+    return { domain: "unknown", confidence: 0, evidence };
+  }
+  if (pCount > 0 && dCount === 0) {
+    return { domain: "physical", confidence: Math.min(pCount, 10), evidence };
+  }
+  if (dCount > 0 && pCount === 0) {
+    return { domain: "digital", confidence: Math.min(dCount, 10), evidence };
+  }
+  if (pCount >= dCount * 2) {
+    return { domain: "physical", confidence: Math.min(pCount, 10), evidence };
+  }
+  if (dCount >= pCount * 2) {
+    return { domain: "digital", confidence: Math.min(dCount, 10), evidence };
+  }
+  return {
+    domain: "hybrid",
+    confidence: Math.min(Math.max(pCount, dCount), 10),
+    evidence
+  };
+}
+function matchKeywords(haystack, keywords) {
+  const matched = /* @__PURE__ */ new Set();
+  for (const kw of keywords) {
+    if (kw.includes(" ")) {
+      if (haystack.includes(kw)) matched.add(kw);
+    } else {
+      const escaped = escapeForRegex(kw);
+      const re = new RegExp(`\\b${escaped}\\b`, "iu");
+      if (re.test(haystack)) matched.add(kw);
+    }
+  }
+  return [...matched];
+}
+function escapeForRegex(s) {
+  return s.replace(/[\\^$.*+?()[\]{}|]/gu, (m) => "\\" + m);
+}
+
 // src/scan/projects.ts
 async function scanProjects(repoRoot) {
   const files = await (0, import_fast_glob3.default)("pursuits/*/projects/*.md", {
@@ -16984,6 +17252,7 @@ async function scanProjects(repoRoot) {
     const intent = (sections.get("intent") ?? "").trim();
     const dod = parseChecklist(sections.get("definition of done") ?? "");
     const actions = parseChecklist(sections.get("actions") ?? "");
+    const detection = detectDomain(intent, fm.id);
     results.push({
       ...fm,
       intent,
@@ -16992,7 +17261,9 @@ async function scanProjects(repoRoot) {
       description: extractDescription(content),
       path: path4.relative(repoRoot, file),
       dodProgress: progress(dod),
-      actionProgress: progress(actions)
+      actionProgress: progress(actions),
+      detected_domain: detection.domain,
+      effective_domain: fm.domain ?? detection.domain
     });
   }
   return results;

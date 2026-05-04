@@ -66,16 +66,49 @@ Arguments resolve via fuzzy match, partial match, or natural language.
    - If the Intent reads like a single tweetable goal with no shape to
      it: "This might be an Action, not a Project. A Project usually
      covers more than one move. Is this really a Project?"
+   - **Domain-adapt the prompts.** Run the domain heuristic on the
+     Intent draft (or read it back from `cadence project <id> --json`
+     after creation) and adapt follow-up questions to fit:
+     - **Physical domain** (kitchen, garage, garden, fitness, etc.):
+       ask about workspace ("where is this work going to happen?"),
+       tools and parts ("what materials do you need? are they on hand
+       or do you need to source them?"), and constraints ("water
+       shutoff timing, weather window, parts availability, who else
+       in the space"). Avoid CI/code metaphors entirely.
+     - **Digital domain** (code, infrastructure, schemas, etc.):
+       standard Cadence prompts work — ask about the test surface,
+       integration points, deploy considerations.
+     - **Hybrid** (e.g., a kitchen-inventory app): ask both kinds of
+       questions in turn. Surface the duality explicitly: "this looks
+       hybrid — let's cover both the physical workflow and the
+       software."
+     - **Unknown**: ask one open question ("what's the shape of this
+       work?") and let the user lead. Don't guess.
    - Ask for first action(s); if the user doesn't have one ready, the
      CLI defaults to `Brainstorm and add concrete actions for this
      project`. If the user names multiple, pass them all as repeated
      `--action` flags on the create call (cheaper than create + add).
+   - **Domain-adapt first-action suggestions.** If the agent suggests
+     a first action when the user hesitates:
+     - Physical: physical-action-shaped ("turn off the water supply",
+       "lay drop cloth in the work area", "measure the existing
+       fixture", "drive to the hardware store").
+     - Digital: digital-action-shaped ("open the file at `path:line`",
+       "run the existing test to confirm it currently fails", "draft
+       the schema migration").
+     - Don't volunteer suggestions for hybrid/unknown — ask instead.
    - Once accepted:
      ```bash
      cadence create-project <slug> --pursuit <pursuit-id> \
        --intent "<the Intent narrative>" \
        --action "<first action>" --action "<second action>"
      ```
+   - **Optional explicit override.** If the heuristic gets the domain
+     wrong, the user can set `domain: physical | digital | hybrid` in
+     the project's frontmatter. The override is documented in
+     `cadence-reference.md`. The agent should not auto-set this; only
+     surface the option if the user volunteers their domain framing
+     differently than the heuristic detected.
    - If more actions need to land after creation, use the bulk variant
      to avoid per-action round trips:
      ```bash

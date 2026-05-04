@@ -126,7 +126,25 @@ frontmatter) still use Edit.
      build-cadence-v1 don't need their audit/narrative/demo work
      inserted at the very end.
 
-5. **Confirm:**
+5. **Physical-domain Notes capture.** If the project's
+   `effective_domain` is `physical` or `hybrid` (read from
+   `cadence project <id> --json`), prompt before confirming:
+   ```
+   What changed in the physical space? (Optional — anything notable
+   about the result, condition, parts used, time spent, surprises.)
+   ```
+   If the user provides text, append it to the project's Notes section
+   as a timestamped entry:
+   ```bash
+   cadence add-item <project-id> --pursuit <pursuit-id> \
+     --section notes --text "<YYYY-MM-DDTHH:MM> — [action text]: <user response>"
+   ```
+   This is the natural log replacement — the project file accumulates
+   activity that the narrative engine can read, without adding a /log
+   verb. For digital and unknown domains, skip this step (commit
+   messages and code changes already provide the activity stream).
+
+6. **Confirm:**
    ```
    Done: [action text]
    [project] — [N/M actions]
