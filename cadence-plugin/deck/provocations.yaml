@@ -5,11 +5,14 @@
 # Users can create a local deck file to extend.
 #
 # Categories:
-#   oblique   — Eno/Schmidt-style lateral thinking prompts
-#   scamper   — Structured creativity (Substitute, Combine, Adapt, Modify, Put to other use, Eliminate, Reverse)
-#   hmw       — "How might we..." reframing prompts
-#   analogy   — Forced analogy and cross-domain prompts
-#   challenge — Push-through-the-cliff prompts for when energy dips
+#   oblique       — Eno/Schmidt-style lateral thinking prompts
+#   scamper       — Structured creativity (Substitute, Combine, Adapt, Modify, Put to other use, Eliminate, Reverse)
+#   hmw           — "How might we..." reframing prompts
+#   analogy       — Forced analogy and cross-domain prompts
+#   challenge     — Push-through-the-cliff prompts for when energy dips
+#   thinking-hats — de Bono Six Thinking Hats (one mode at a time)
+#   verb-anchored — Verb-substitution prompts (shrink/expand/merge/...)
+#                   that adapt to the user's content at runtime
 
 cards:
 
@@ -254,3 +257,209 @@ cards:
   - id: challenge-08
     category: challenge
     text: "What's the version a 10-year-old would come up with?"
+
+  # === OBLIQUE (cont.) ===
+
+  - id: oblique-19
+    category: oblique
+    text: "Disconnect from desire."
+
+  - id: oblique-20
+    category: oblique
+    text: "Use unqualified people."
+
+  - id: oblique-21
+    category: oblique
+    text: "Question the heroic approach."
+
+  - id: oblique-22
+    category: oblique
+    text: "Discover the recipes you are using and abandon them."
+
+  - id: oblique-23
+    category: oblique
+    text: "Are there sections? Consider transitions."
+
+  - id: oblique-24
+    category: oblique
+    text: "Look closely at the most embarrassing details and amplify them."
+
+  - id: oblique-25
+    category: oblique
+    text: "Take a break."
+
+  - id: oblique-26
+    category: oblique
+    text: "Once the search is in progress, something will be found."
+
+  # === SCAMPER (cont.) ===
+
+  - id: scamper-11
+    category: scamper
+    text: "What could you SUBSTITUTE here? Pick a person, material, place, or process and swap it."
+
+  - id: scamper-12
+    category: scamper
+    text: "COMBINE this with something that doesn't normally belong with it."
+
+  - id: scamper-13
+    category: scamper
+    text: "ADAPT something from a domain you'd never associate with this."
+
+  - id: scamper-14
+    category: scamper
+    text: "MAGNIFY one part dramatically — what if it were 10x bigger? What does that surface?"
+
+  - id: scamper-15
+    category: scamper
+    text: "What other USES could this serve that you haven't considered?"
+
+  - id: scamper-16
+    category: scamper
+    text: "What could you ELIMINATE without losing the essence?"
+
+  - id: scamper-17
+    category: scamper
+    text: "REARRANGE the sequence — what if the last step came first?"
+
+  # === HOW MIGHT WE (cont.) ===
+
+  - id: hmw-13
+    category: hmw
+    text: "How might we make this 10x faster than it needs to be?"
+
+  - id: hmw-14
+    category: hmw
+    text: "How might we make this work with no internet, no electricity, no agents?"
+
+  - id: hmw-15
+    category: hmw
+    text: "How might we make this feel like a gift instead of a chore?"
+
+  - id: hmw-16
+    category: hmw
+    text: "How might we get someone outside this team to find this irresistible?"
+
+  - id: hmw-17
+    category: hmw
+    text: "How might we make the worst version on purpose — what would that look like?"
+
+  # === FORCED ANALOGY (cont.) ===
+
+  - id: analogy-11
+    category: analogy
+    text: "If this idea were a song, what genre? What instrument carries the melody?"
+
+  - id: analogy-12
+    category: analogy
+    text: "If this were a recipe, what's the surprise ingredient?"
+
+  - id: analogy-13
+    category: analogy
+    text: "How would a librarian solve this? A jazz musician? A bricklayer?"
+
+  - id: analogy-14
+    category: analogy
+    text: "What if this had to fit on a postcard? In a tweet? On a billboard?"
+
+  - id: analogy-15
+    category: analogy
+    text: "What animal does this idea most resemble — and what does that suggest?"
+
+  # === CHALLENGE (cont.) ===
+
+  - id: challenge-09
+    category: challenge
+    text: "Set a two-minute stopwatch and write the dumbest possible idea."
+
+  - id: challenge-10
+    category: challenge
+    text: "What's the most expensive way to do this? What does the cheapest way teach you?"
+
+  - id: challenge-11
+    category: challenge
+    text: "What would a user say about this in five years?"
+
+  - id: challenge-12
+    category: challenge
+    text: "Steal the structure of something you admire and apply it here."
+
+  - id: challenge-13
+    category: challenge
+    text: "If you had to teach this to a kid, what's the one thing they'd remember?"
+
+  # === THINKING HATS ===
+  # de Bono's Six Thinking Hats. Each card invites one mode of thought
+  # at a time — the discipline is in NOT mixing modes mid-card. Useful
+  # standalone or run as a sequence (white → red → black → yellow →
+  # green → blue) when the brainstorm warrants it.
+
+  - id: thinking-hats-01
+    category: thinking-hats
+    text: "WHITE HAT — facts. What facts do you actually have? What facts are missing?"
+
+  - id: thinking-hats-02
+    category: thinking-hats
+    text: "RED HAT — feelings. What does your gut say without justification? What's the feeling in the room?"
+
+  - id: thinking-hats-03
+    category: thinking-hats
+    text: "BLACK HAT — caution. What's the realistic worst-case? What's the failure mode you'd defend against?"
+
+  - id: thinking-hats-04
+    category: thinking-hats
+    text: "YELLOW HAT — benefits. If this works, what becomes possible? Who wins?"
+
+  - id: thinking-hats-05
+    category: thinking-hats
+    text: "GREEN HAT — creativity. What's the wild card — the version that breaks the assumptions?"
+
+  - id: thinking-hats-06
+    category: thinking-hats
+    text: "BLUE HAT — process. Where are you in the conversation? What's the next move?"
+
+  # === VERB-ANCHORED ===
+  # Verb-substitution prompts that adapt to the user's content at
+  # runtime — the agent applies the verb to whatever the user is
+  # brainstorming. These are strong cliff-pushers alongside challenge
+  # cards because they force a fresh angle without prescribing one.
+
+  - id: verb-anchored-01
+    category: verb-anchored
+    text: "SHRINK this — what's the smallest version that still works?"
+
+  - id: verb-anchored-02
+    category: verb-anchored
+    text: "EXPAND this — what would the 10x version look like?"
+
+  - id: verb-anchored-03
+    category: verb-anchored
+    text: "MERGE this with something else you're working on. What changes?"
+
+  - id: verb-anchored-04
+    category: verb-anchored
+    text: "SEPARATE this — what's actually two ideas wearing one costume?"
+
+  - id: verb-anchored-05
+    category: verb-anchored
+    text: "REVERSE the perspective — what if the people you're solving for were solving for you?"
+
+  - id: verb-anchored-06
+    category: verb-anchored
+    text: "RELOCATE this — what changes if you move it to a different place, time, or domain?"
+
+  - id: verb-anchored-07
+    category: verb-anchored
+    text: "AGE this — fast-forward five years. What does it look like? Now ten years in the past?"
+
+  - id: verb-anchored-08
+    category: verb-anchored
+    text: "EXAGGERATE one feature dramatically. Then dial it back to find the right level."
+
+  - id: verb-anchored-09
+    category: verb-anchored
+    text: "ANIMATE it — if it had a will of its own, what would it want?"
+
+  - id: verb-anchored-10
+    category: verb-anchored
+    text: "PERSONIFY it — if it were a person at a dinner party, who?"

@@ -79,7 +79,9 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 
 5. **Push through the cliff:**
    - At idea 10-12, energy often dips. Push: "You're at [N] — the
-     surprising ones usually come after 15." Deal a challenge card.
+     surprising ones usually come after 15." Deal a challenge card or
+     a verb-anchored card; both categories are designed to force a
+     fresh angle without prescribing one.
    - Keep facilitating. Don't suggest stopping.
    - If the user wants to stop, respect it but note the count.
 

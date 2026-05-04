@@ -1,7 +1,7 @@
 ---
 id: expand-provocation-deck
 pursuit: improve-ux-and-vision
-status: on_hold
+status: active
 created: 2026-05-01
 ---
 
@@ -15,8 +15,8 @@ Grow deck/provocations.yaml from 58 to ~100 cards by sourcing from established c
 
 ## Actions
 
-- [ ] Source candidate prompts from Creative Thinker's Toolkit, expanded SCAMPER variants, Six Thinking Hats, Eno's Oblique Strategies (full deck), classic 'How Might We' exemplars, and forced-analogy/forced-connection literature. Curate ~50 new card candidates in a working doc.
-- [ ] Emphasize verb-anchored prompts in the curation: shrink/expand/merge/separate/reverse/relocate/age/personify/exaggerate/recombine/abstract/concretize/animate. The agent should be able to substitute content-relevant nouns at runtime, so the prompts adapt to the user's actual brainstorm topic.
-- [ ] Add new categories to the deck if the curation surfaces them naturally (e.g., 'thinking-hats', 'forced-connection'). Update the brainstorm skill if new categories require category-specific handling.
-- [ ] Update deck/provocations.yaml with the new cards, organized by category. Hand-edit YAML; don't auto-generate — quality matters more than count.
-- [ ] Verify the brainstorm skill still works correctly with the expanded deck (no schema regressions, category sampling still feels balanced).
+- [x] Source candidate prompts from Creative Thinker's Toolkit, expanded SCAMPER variants, Six Thinking Hats, Eno's Oblique Strategies (full deck), classic 'How Might We' exemplars, and forced-analogy/forced-connection literature. Curate ~50 new card candidates in a working doc.
+- [x] Emphasize verb-anchored prompts in the curation: shrink/expand/merge/separate/reverse/relocate/age/personify/exaggerate/recombine/abstract/concretize/animate. The agent should be able to substitute content-relevant nouns at runtime, so the prompts adapt to the user's actual brainstorm topic.
+- [x] Add new categories to the deck if the curation surfaces them naturally (e.g., 'thinking-hats', 'forced-connection'). Update the brainstorm skill if new categories require category-specific handling.
+- [x] Update deck/provocations.yaml with the new cards, organized by category. Hand-edit YAML; don't auto-generate — quality matters more than count.
+- [x] Verify the brainstorm skill still works correctly with the expanded deck (no schema regressions, category sampling still feels balanced).
