@@ -6,7 +6,7 @@ export type FindResult = {
   kind: FindKind
   id: string
   // Project: parent pursuit id. Idea: parent (pursuit or pursuit/project).
-  // Marker: <pursuit>/<project>. Capture/pursuit: omitted.
+  // Capture/pursuit: omitted.
   context?: string
   matched_fields: string[]
   snippet: string
@@ -17,9 +17,8 @@ export type FindResult = {
 const KIND_PRIORITY: Record<FindKind, number> = {
   project: 1,
   idea: 2,
-  marker: 3,
-  capture: 4,
-  pursuit: 5,
+  capture: 3,
+  pursuit: 4,
 }
 
 export function findEntities(

@@ -227,10 +227,11 @@ When the user describes new work, ask:
 
 **WIP check before creating:** Read `snapshot.projects` and
 `snapshot.config` from `cadence scan --json`. Count in-progress projects
-(`status: active` AND `hasMarker: true`). If at or above
-`config.max_active_projects`, warn: "You have [N] in-progress projects
-(limit: [max]). Consider finishing or pausing one before adding more."
-The user can override — this is a guardrail, not a gate.
+(`status: active` AND has at least one unchecked action). If at or
+above `config.max_active_projects`, warn: "You have [N] in-progress
+projects (limit: [max]). Consider finishing or moving one to on_hold
+before adding more." The user can override — this is a guardrail,
+not a gate.
 
 Create the project file via the CLI:
 ```bash

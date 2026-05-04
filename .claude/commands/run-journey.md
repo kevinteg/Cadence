@@ -5,7 +5,7 @@ evaluates assertions, and reports pass/fail.
 
 ## Usage
 
-- "/run-journey core-session-loop" — run a specific journey by name
+- "/run-journey core-lifecycle-loop" — run a specific journey by name
 - "/run-journey" — run all journeys in the `journeys/` directory
 
 ## Steps
@@ -79,7 +79,7 @@ evaluates assertions, and reports pass/fail.
 7. If running multiple journeys, present a summary at the end:
    ```
    Journey Results:
-   - core-session-loop: PASS
+   - core-lifecycle-loop: PASS
    - thought-capture: FAIL (step 3)
 
    [N/M journeys passed]

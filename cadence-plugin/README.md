@@ -22,8 +22,8 @@ claude --plugin-dir ./cadence-plugin
 
 The repo's `CLAUDE.md` already imports the runtime via a relative path,
 so the SessionStart dashboard appears immediately. You're inside the
-Cadence repo — poke around the existing `build-cadence-v1` pursuit, or
-`cd` into a fresh subdirectory and run `/cadence:init` to start clean.
+Cadence repo — poke around the active `improve-ux-and-vision` pursuit,
+or `cd` into a fresh subdirectory and run `/cadence:init` to start clean.
 
 ### Use Cadence in your own repo
 
@@ -51,59 +51,78 @@ Inside Claude Code, run `/cadence:init`. It will:
 - Set up .gitignore entries for generated files
 
 After init completes, you're ready to use `/cadence:start` to begin
-your first session.
+work.
 
 ## Verbs
 
-The core command surface. One voice, verb-defined register. Per-verb
-tone, behavior, and guardrails are specified in
+The user-facing surface is **12 verbs**, grouped by cognitive mode.
+One voice, verb-defined register. Per-verb tone, behavior, and
+guardrails are specified in
 [`workflows/verb-contracts.md`](workflows/verb-contracts.md).
 
-### Divergent (find what to build)
+### Diverge — find what to build
 
 | Verb | Description |
 |------|-------------|
-| `/cadence:brainstorm` | Facilitated ideation — you state a challenge, generate ideas, agent keeps momentum |
-| `/cadence:develop` | Convergent evaluation — PPCo, criteria, pre-mortem on Ideas |
-| `/cadence:promote` | Advance an Idea to Pursuit/Project/Action (enforces graduation gates) |
+| `/cadence:brainstorm` | Facilitated divergent ideation. Agent deals provocation cards; user generates ideas. Chains internally into `develop` and `promote`. |
 
-### Execution (build it)
+### Execute — do the work
 
 | Verb | Description |
 |------|-------------|
-| `/cadence:start` | Open a session on a project — curated selection or direct entry, flow protection |
-| `/cadence:pause` | Save a marker (where/next/open) and suspend the session |
-| `/cadence:complete` | Mark an action done — triggers upward completion prompts |
-| `/cadence:cancel` | Drop a project with a reason |
-| `/cadence:capture` | Flow-safe parking lot — saves a thought with no agent response |
+| `/cadence:start` | Open a project's view (Intent + actions + first unchecked). View-only — no session ceremony. |
+| `/cadence:complete` | Mark an action done. First check promotes `on_hold` → `active`. Triggers upward completion prompt. |
+| `/cadence:resolve` | Wrap up a project or pursuit. `--state complete` (default) walks the intent-feel-achieved dialogue; `--state dropped` requires a reason. Pursuit-level invokes the closure ritual + archive. |
+| `/cadence:waiting` | Record an external blocker so it's tracked. |
+| `/cadence:capture` | Flow-safe parking lot — saves a thought silently, no agent response. |
 
-### Reflection & output (see what you did)
-
-| Verb | Description |
-|------|-------------|
-| `/cadence:reflect` | Weekly ritual — Get Clear + Get Focused |
-| `/cadence:narrate` | Generate narrative — today, weekly, or pursuit arc |
-| `/cadence:close` | Close a pursuit or project — cleaning ritual for unresolved Ideas |
-| `/cadence:reconcile` | Quiet system health report |
-
-### Utility
+### Reflect — see meaning, check state
 
 | Verb | Description |
 |------|-------------|
-| `/cadence:status` | System dashboard, or drill into pursuits/projects/actions |
-| `/cadence:find` | Search projects, ideas, markers, captures, and pursuits by substring |
-| `/cadence:help` | Browse the verb surface — catalogue, group, or single verb |
-| `/cadence:init` | Bootstrap a new repo |
+| `/cadence:reflect` | Weekly ritual — Get Clear (process captures + flags) + Get Focused (interactive what-worked / Leveraged Priority). Catch-up entry modes for long gaps. |
+| `/cadence:narrate` | Generate narrative — today (standup), week (LP-anchored), or pursuit arc (full story). Watermark-resume from git history. |
+
+### Setup — one-off
+
+| Verb | Description |
+|------|-------------|
+| `/cadence:init` | Bootstrap a new repo. |
+
+### Browse — navigation
+
+| Verb | Description |
+|------|-------------|
+| `/cadence:status` | System dashboard, or drill into pursuits/projects/actions. |
+| `/cadence:find` | Substring search across projects, ideas, captures, and pursuits. |
+| `/cadence:help` | Browse the verb surface — catalogue, group, or single verb. |
+
+### Internal verbs (chained, not user-facing)
+
+These are real verbs the agent invokes internally; users typically don't
+type them directly. They appear when chained from another verb's flow.
+
+- **`/cadence:develop`** — chained from `/brainstorm` when convergence is ready (PPCo, criteria, pre-mortems on Ideas).
+- **`/cadence:promote`** — chained from `/develop` or `/start` at graduation moments (Idea → Pursuit/Project/Action with the appropriate gate).
+
+Users CAN invoke them explicitly; the design target is conversational
+discovery. The agent surfaces "running `/cadence:promote` — this advances
+an Idea to a Project" as a teaching moment when the chain fires.
+
+### System behavior (not a verb)
+
+- **`reconciler`** — runs automatically at SessionStart hook (every fresh session) and during `/reflect` Get Clear. Surfaces stale state, aging Ideas, dormant projects, structural issues. The CLI subcommand `cadence flags` is available for power users who want to query on demand.
 
 ## Quick Navigation
 
 Cadence is designed to be navigated from the dashboard alone — you
-shouldn't need to memorize 15 verbs to get started.
+shouldn't need to memorize the verb surface to get started.
 
 **At session start**, the SessionStart hook prints the dashboard with
 up to 3 contextual `Next:` suggestions ranked by your current state
-(in-progress sessions, unprocessed captures, reconciler flags, reflect
-cadence, on-hold pickup candidates). Follow whichever fits.
+(in-progress projects, unprocessed captures, reconciler flags, reflect
+cadence, on-hold pickup candidates, pending validations). Follow
+whichever fits.
 
 **Drill in** with `/cadence:status pursuits` (list) → `/cadence:status
 <pursuit>` (its projects) → `/cadence:status <project>` (Intent +
@@ -112,33 +131,22 @@ listing the verbs that apply to the viewed entity, so you always know
 what's possible without leaving the dashboard.
 
 **Search by substring** with `/cadence:find <text>` — searches project
-IDs, intent prose, action texts, idea bodies, marker where/next/open,
-capture bodies, and pursuit metadata. Results group by kind with
-per-group verb hints (e.g., Projects show `/cadence:start <id>`;
-Ideas show `/cadence:promote <id>`).
+IDs, intent prose, action texts, idea bodies, capture bodies, and
+pursuit metadata. Results group by kind with per-group verb hints.
 
-**Browse the verb surface** with `/cadence:help`. The catalogue is
-organized by cognitive mode:
-
-- **Diverge** — `brainstorm`, `develop`, `promote`
-- **Execute** — `start`, `pause`, `complete`, `cancel`, `capture`, `waiting`
-- **Reflect** — `reflect`, `narrate`, `close`, `reconcile`
-- **Setup** — `init`
-- **Browse** — `status`, `find`, `help`
-
-`/cadence:help <verb>` shows a single verb's full contract;
-`/cadence:help <group>` lists every verb in that group.
+**Browse the verb surface** with `/cadence:help`. Pass a group name
+(`diverge` / `execute` / `reflect` / `setup` / `browse`) to list the
+verbs in one mode, or a single verb name to see its full contract.
 
 **Typical first session:**
 
 ```
 [session start: dashboard appears]
-/cadence:status build-cadence-v1   # see projects in your active pursuit
-/cadence:status <project>          # see Intent and actions
-/cadence:start <project>           # open a session
-... do work ...
-/cadence:complete <action>         # mark progress
-/cadence:pause                     # save a marker, end the session
+/cadence:status improve-ux-and-vision  # see projects in your active pursuit
+/cadence:status <project>              # see Intent and actions
+/cadence:start <project>               # open the project view
+... do work, check off actions via /cadence:complete ...
+/cadence:resolve <project>             # wrap it up when ready
 ```
 
 ## The Pipeline
@@ -149,8 +157,10 @@ organized by cognitive mode:
   Why?    Intent?    Concrete?   /complete
 ```
 
-Three graduation gates. `brainstorm` generates Seeds. `develop` evaluates
-them. `promote` advances them through the gate that matches the target level.
+Three graduation gates. `brainstorm` generates Seeds. `develop`
+evaluates them (chained from brainstorm). `promote` advances them
+through the gate that matches the target level (chained from develop
+or start).
 
 ## Configuration
 
@@ -162,9 +172,8 @@ wip_limits:
 
 defaults:
   someday_review: monthly
-  marker_stale_days: 7
   waiting_for_grace_days: 2
-  dormant_days: 14           # active projects with no marker in this many days
+  dormant_days: 14           # active projects with no activity in this many days
 
 reflect:
   day: sunday
@@ -173,27 +182,24 @@ reflect:
 
 ## Hooks
 
-The plugin ships its own SessionStart and PreCompact hook config in
-`hooks/hooks.json`. No per-repo setup required — installing the plugin
-turns these on automatically.
+The plugin ships its SessionStart hook config in `hooks/hooks.json`. No
+per-repo setup required — installing the plugin turns it on automatically.
 
 | Event / matcher | Command | Purpose |
 |---|---|---|
 | `SessionStart / startup` | `cadence status --hook-output` | Show the dashboard when Claude Code launches |
 | `SessionStart / resume` | `cadence status --hook-output` | Re-show the dashboard when a session resumes |
 | `SessionStart / clear` | `cadence status --hook-output` | Re-show the dashboard after `/clear` |
-| `PreCompact` | `cadence pre-compact` | If a Cadence session is active, urge `/cadence:pause` before context is discarded |
 
 The `--hook-output` flag wraps the human-readable status in a JSON
 envelope (`systemMessage` for the user, `hookSpecificOutput` for the
 model) — Claude Code consumes that shape; bare `cadence status`
-prints the plain text for terminal use.
+prints plain text for terminal use.
 
-`cadence pre-compact` reads `.cadence/active-session.json` (written
-by `/cadence:start`, cleared by `/pause`/`/complete`/`/cancel`). If
-absent: silent no-op. If present: emits a systemMessage naming the
-active pursuit/project and urging `/cadence:pause` so a marker
-captures where/next/open before compaction discards the context.
+The dashboard surfaces pending validations from `validations/pending.md`
+above the Flags block on every fresh session until cleared, so
+behaviors that need fresh-session verification stay visible without
+piling up as dangling project actions.
 
 ## Bundled CLI
 
@@ -213,12 +219,16 @@ cadence project <id>
 # Write commands
 cadence create-pursuit my-thing --type finite
 cadence create-project ship-it --pursuit my-thing \
-  --dod "It works" --dod "Tests pass" --action "Write code"
+  --intent "What done feels like" --action "Write code"
 cadence check ship-it --section action --match "Write code"
-cadence write-marker --pursuit my-thing --project ship-it \
-  --where "..." --next "..." --open "..."
+cadence set-status ship-it --pursuit my-thing --status done
 cadence write-capture --body "stray thought"
+cadence pending-validation-add --description "verify X in a fresh session"
+cadence tip-pick --triggers verb-resolve --types verb-hint
 ```
+
+Full subcommand catalog: see `cadence-plugin/cadence-reference.md`
+"CLI Subcommand Catalog".
 
 The bundle requires Node 20+ and has no `node_modules` runtime
 dependency.
@@ -234,8 +244,8 @@ npm run bundle      # rebuilds cadence-plugin/bin/cadence
 ## Getting Started
 
 1. `/cadence:init` — bootstrap the repo
-2. `/cadence:brainstorm` — generate ideas for what to build
-3. `/cadence:develop` — evaluate your ideas
-4. `/cadence:promote` — turn ideas into pursuits and projects
-5. `/cadence:start` — begin working on a project
-6. `/cadence:reflect` — weekly review to stay focused
+2. `/cadence:brainstorm` — generate ideas for what to build (chains into develop+promote at the right moments)
+3. `/cadence:start <project>` — begin working
+4. `/cadence:complete <action>` — mark progress; `/cadence:resolve <project>` to wrap up
+5. `/cadence:reflect` — weekly review to stay focused
+6. `/cadence:narrate week` — see the story of what you shipped

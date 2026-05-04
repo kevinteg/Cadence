@@ -17991,9 +17991,8 @@ function truncate(text, max) {
 var KIND_PRIORITY = {
   project: 1,
   idea: 2,
-  marker: 3,
-  capture: 4,
-  pursuit: 5
+  capture: 3,
+  pursuit: 4
 };
 function findEntities(snapshot, query) {
   const q = query.toLowerCase();
