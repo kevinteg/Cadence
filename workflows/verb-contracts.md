@@ -37,11 +37,11 @@ The voice is a provocateur, not a contributor.
 - Track card count and Ideas generated in the session
 - Create Seed Ideas on the target parent as they emerge
 
-**No-argument entry:** Show pursuits available for ideation, Wandering
+**No-argument entry:** Show pursuits available for ideation, Inbox
 Idea count, aging Seeds. Ask: "Where do you want to brainstorm?"
 
 **Scope sensitivity:**
-- No target → Ideas on Wandering (candidate Pursuits)
+- No target → Ideas on the Inbox (candidate Pursuits)
 - Pursuit → Ideas on that Pursuit (candidate Projects)
 - Project → Ideas on that Project (candidate Actions)
 - Action → Rejected: "That sounds like it needs its own Project. Want to
@@ -137,7 +137,7 @@ Informational, not praise-based.
 - Draw from markers, completed actions, Ideas promoted/closed, project
   milestones
 - For Pursuit narratives: include the full Idea arc — how many generated,
-  promoted, closed with reasons, moved to Wandering
+  promoted, closed with reasons, moved to the Inbox
 - For weekly narratives: feed into Reflect
 
 **No-argument entry:** Generate today's activity narrative. Show available

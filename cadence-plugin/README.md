@@ -45,7 +45,7 @@ claude --plugin-dir ~/code/cadence/cadence-plugin
 ### Bootstrap with /cadence:init
 
 Inside Claude Code, run `/cadence:init`. It will:
-- Create the directory structure (pursuits/, ideas, Wandering, etc.)
+- Create the directory structure (pursuits/, ideas, Inbox, etc.)
 - Generate cadence.yaml with default configuration
 - Walk you through creating your first pursuit and project
 - Set up .gitignore entries for generated files

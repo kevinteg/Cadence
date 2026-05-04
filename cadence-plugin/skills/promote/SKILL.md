@@ -34,7 +34,7 @@ Arguments resolve via fuzzy match, partial match, or natural language.
      ```
 
 2. **Determine target level:**
-   - Idea on Wandering (no parent pursuit context) → candidate **Pursuit**
+   - Idea on Inbox (no parent pursuit context) → candidate **Pursuit**
    - Idea on a Pursuit → candidate **Project**
    - Idea on a Project → candidate **Action**
    - Ask to confirm: "This looks like a [Project]. Is that right, or should

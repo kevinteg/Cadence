@@ -140,16 +140,16 @@ test('renderSnapshot empty collections render "None." instead of a table', () =>
 test('renderSnapshot ideas table shows state, parent, age', () => {
   const idea: Idea = {
     id: 'spark',
-    parent: 'wandering',
+    parent: 'inbox',
     state: 'seed',
     created: '2026-04-21',
     body: '',
-    path: 'pursuits/wandering/ideas/spark.md',
+    path: 'pursuits/inbox/ideas/spark.md',
     ageDays: 6,
   }
   const out = renderSnapshot(makeSnapshot({ ideas: [idea] }))
   assert.match(out, /Ideas \(1\)/)
-  assert.match(out, /spark\s+seed\s+wandering\s+6d/)
+  assert.match(out, /spark\s+seed\s+inbox\s+6d/)
 })
 
 test('renderReport appends a Flags section after the snapshot', () => {
@@ -236,7 +236,7 @@ test('nextSteps falls back to on-hold pickup when no active', () => {
 
 test('nextSteps emits a bootstrap suggestion when nothing else applies', () => {
   const steps = nextSteps(
-    makeSnapshot({ pursuits: [makePursuit({ id: 'wandering' })] }),
+    makeSnapshot({ pursuits: [makePursuit({ id: 'inbox' })] }),
     [],
   )
   // No reflections, no projects, no captures, no flags →
@@ -355,8 +355,7 @@ test('renderPursuit ends with the pursuit-level action menu', () => {
   assert.match(out, /Available actions:/)
   assert.match(out, /\/cadence:start /)
   assert.match(out, /\/cadence:narrate <pursuit>/)
-  assert.match(out, /\/cadence:reconcile/)
-  assert.match(out, /\/cadence:close <pursuit>/)
+  assert.match(out, /\/cadence:resolve <pursuit>/)
 })
 
 test('renderProject ends with the project-level action menu for active projects', () => {
@@ -370,7 +369,7 @@ test('renderProject ends with the project-level action menu for active projects'
   assert.match(out, /Available actions:/)
   assert.match(out, /\/cadence:start <project>/)
   assert.match(out, /\/cadence:complete <action>/)
-  assert.match(out, /\/cadence:cancel <project>/)
+  assert.match(out, /\/cadence:resolve <project>/)
   assert.match(out, /\/cadence:waiting <project>/)
 })
 

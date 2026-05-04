@@ -1,5 +1,5 @@
 ---
-description: Bootstrap a new Cadence repo — create directory structure, config, Wandering pursuit, and .gitignore. TRIGGER ONLY when the user explicitly invokes /cadence:init or /init. SKIP all natural-language equivalents — never auto-fire from "set up Cadence", "initialize this repo", or onboarding requests; surface the command instead.
+description: Bootstrap a new Cadence repo — create directory structure, config, Inbox pursuit, and .gitignore. TRIGGER ONLY when the user explicitly invokes /cadence:init or /init. SKIP all natural-language equivalents — never auto-fire from "set up Cadence", "initialize this repo", or onboarding requests; surface the command instead.
 ---
 
 # /init
@@ -12,11 +12,18 @@ Set up a new repo for Cadence. Only needs to run once per repo.
    root. If it exists, say: "This repo is already set up for Cadence.
    Run /cadence:start to get started."
 
-2. **Create the Wandering pursuit via the CLI:**
+   **Legacy check:** If `pursuits/wandering/` exists (from a pre-v1.1
+   install), surface a one-line migration note: "This repo has the
+   legacy `pursuits/wandering/` directory. Cadence renamed this to
+   `inbox` in v1.1. To migrate: `git mv pursuits/wandering pursuits/inbox`,
+   then update the pursuit.md frontmatter `id: wandering` → `id: inbox`
+   and the H1 title."
+
+2. **Create the Inbox pursuit via the CLI:**
    ```bash
-   cadence create-pursuit wandering \
+   cadence create-pursuit inbox \
      --type ongoing \
-     --description "The default home for unattached ideas. Seeds captured here don't yet belong to any pursuit — they're waiting to be developed, promoted, or closed. Wandering never closes."
+     --description "The default home for unattached ideas. Seeds captured here don't yet belong to any pursuit — they're waiting to be developed, promoted, or closed. The Inbox never closes."
    ```
    The CLI creates the pursuit directory plus `projects/` and
    `ideas/` subdirectories.

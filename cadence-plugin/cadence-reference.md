@@ -183,7 +183,7 @@ scan/report path tolerates both shapes.
 
 Ideas are a first-class collection adjacent to the work hierarchy. Every
 Idea has a parent — either a pursuit or a project. Ideas without a clear
-parent are placed on Wandering with an auto-generated name. The parent
+parent are placed on the Inbox with an auto-generated name. The parent
 field uses the same ID convention as projects (e.g., `parent:
 build-cadence-v1` for a pursuit, `parent:
 build-cadence-v1/implement-reconciler` for a project).
@@ -205,7 +205,7 @@ the target is an active pursuit or project.
 - **Active** pursuits live in `pursuits/<id>/`
 - **Someday** pursuits live in `pursuits/_someday/<id>/`
 - **Archived** pursuits live in `pursuits/_archived/<id>/`
-- **Wandering** lives in `pursuits/wandering/` — never closes
+- **Inbox** lives in `pursuits/inbox/` — never closes
 - Moving between states is a file move (git mv)
 - Someday pursuits can have cue metadata in frontmatter for reconciler
   surfacing

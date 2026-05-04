@@ -1,7 +1,7 @@
 ---
 id: rename-wandering-to-inbox
 pursuit: improve-ux-and-vision
-status: on_hold
+status: active
 created: 2026-05-01
 ---
 
@@ -15,9 +15,9 @@ Rename the standing pursuit from Wandering to Inbox throughout the system: direc
 
 ## Actions
 
-- [ ] Rename pursuits/wandering/ → pursuits/inbox/ in this repo (git mv); update pursuit.md frontmatter id field; update H1 title.
-- [ ] Update cadence-runtime.md Vocabulary section (Wandering → Inbox); update any other runtime references to Wandering.
-- [ ] Update product-vision.md, one-pager.md, docs/architecture.md to use Inbox throughout — including the example narratives ('moved to Wandering for later' becomes 'moved to Inbox for later').
-- [ ] Update cadence-plugin/cadence-reference.md to use Inbox throughout.
-- [ ] Update all skill files that reference wandering by name (capture, brainstorm, promote, develop, close) — change to Inbox in user-facing strings and parent IDs.
-- [ ] Update CLI init logic that creates the wandering pursuit by default — change to create the inbox pursuit. Also handle migration: if a repo has pursuits/wandering/ on first cadence command after upgrade, prompt user once or auto-rename with a notice.
+- [x] Rename pursuits/wandering/ → pursuits/inbox/ in this repo (git mv); update pursuit.md frontmatter id field; update H1 title.
+- [x] Update cadence-runtime.md Vocabulary section (Wandering → Inbox); update any other runtime references to Wandering.
+- [x] Update product-vision.md, one-pager.md, docs/architecture.md to use Inbox throughout — including the example narratives ('moved to Wandering for later' becomes 'moved to Inbox for later').
+- [x] Update cadence-plugin/cadence-reference.md to use Inbox throughout.
+- [x] Update all skill files that reference wandering by name (capture, brainstorm, promote, develop, close) — change to Inbox in user-facing strings and parent IDs.
+- [x] Update CLI init logic that creates the wandering pursuit by default — change to create the inbox pursuit. Also handle migration: if a repo has pursuits/wandering/ on first cadence command after upgrade, prompt user once or auto-rename with a notice.

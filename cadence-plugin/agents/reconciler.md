@@ -37,7 +37,7 @@ If no flags exist, return exactly: `No flags. System is healthy.`
 action_needed overdue_waiting_for build-cadence-v1/foo — alice re: review (5d overdue)
 warning dormant_project build-cadence-v1/bar — 17d since marker
 info structural_active_no_open_actions build-cadence-v1/baz — all actions checked, status still active
-info aging_seed wandering/spark-1 — 21d old
+info aging_seed inbox/spark-1 — 21d old
 info unpromoted_idea build-cadence-v1/quux-design — 9d since develop
 ```
 

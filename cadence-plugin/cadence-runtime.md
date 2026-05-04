@@ -14,7 +14,7 @@ lives in `cadence-reference.md` — load on demand.
 - **Project**: A scoped effort framed by an Intent narrative (motivation + felt-sense of done) and an Actions list. Status: active | on_hold | done | dropped. New projects start `on_hold`; promote to `active` on the first checked action.
 - **Action**: An atomic, concrete task. A checkbox in a project's Actions section. Every project requires at least one at creation.
 - **Idea**: A captured seed, possibly developed, not yet promoted. States: seed → developed → promoted | moved | closed.
-- **Wandering**: A standing pursuit that never closes. Default parent for unattached ideas. Auto-created at init.
+- **Inbox**: A standing pursuit that never closes. Default parent for unattached ideas. Auto-created at init.
 - **Capture**: A raw thought saved to `thoughts/unprocessed/`. Flow-safe — no agent response at capture time.
 - **Reflection**: A weekly ritual artifact in `reflections/<YYYY-MM-DD>.md`.
 - **Narrative**: Generated writing from activity data. McAdams structure: what happened / what it meant / what shifted / what's next. Each generated narrative carries a watermark in its frontmatter (cadence, consumed_through_commit) — the narrative IS the pointer into the project-file activity stream.

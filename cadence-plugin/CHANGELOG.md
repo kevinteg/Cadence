@@ -13,6 +13,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Patch** (`0.0.X`) — fixes, doc updates, internal refactors with no
   user-visible behavior change
 
+---
+
+## [Unreleased] — v1.1 in progress (improve-ux-and-vision pursuit)
+
+### Renamed: Wandering → Inbox
+
+The standing pursuit that holds unattached Ideas — formerly `wandering` —
+is now `inbox`. Domain-neutral familiar word; reduces cognitive tax for
+new users. The metaphor was load-bearing in the v1 vision but the
+audience cost outweighed the framing benefit.
+
+**Migration for existing repos with `pursuits/wandering/`:**
+
+```bash
+# 1. Move the directory
+git mv pursuits/wandering pursuits/inbox
+
+# 2. Update the pursuit.md frontmatter
+# Open pursuits/inbox/pursuit.md and change:
+#   id: wandering   →   id: inbox
+# Update the H1 title from "# Wandering" to "# Inbox"
+```
+
+The CLI still resolves either name in legacy data, but new installs and
+new Ideas use `inbox`. The init skill has a legacy-detection note that
+surfaces the migration command if it sees `pursuits/wandering/`.
+
 ## [Unreleased]
 
 ## [0.1.0] — 2026-04-27

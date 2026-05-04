@@ -22,12 +22,12 @@ Arguments resolve via fuzzy match, partial match, or natural language.
      cadence ideas --state seed --json
      ```
      Group
-     the returned ideas by `parent` (Wandering first, then other
+     the returned ideas by `parent` (Inbox first, then other
      pursuits) and present:
      ```
      Develop — Ideas ready for evaluation
 
-     **Wandering** (unattached)
+     **Inbox** (unattached)
      1. [idea-id]: [first line of body]
 
      **[Parent Pursuit ID]**

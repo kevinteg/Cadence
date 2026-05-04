@@ -9,7 +9,7 @@ brainstorm register.
 
 ## Usage
 
-- `/brainstorm` — free-floating ideation → seeds on Wandering
+- `/brainstorm` — free-floating ideation → seeds on the Inbox
 - `/brainstorm <pursuit>` — ideation attached to a pursuit → candidate Projects
 - `/brainstorm <project>` — ideation on a project → candidate Actions
 - `/brainstorm <action>` — rejected: "That sounds like it needs its own Project. Want to promote it?"
@@ -19,7 +19,7 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 ## Steps
 
 1. **Resolve scope:**
-   - No argument → target is Wandering pursuit. Ideas created here are
+   - No argument → target is the Inbox pursuit. Ideas created here are
      candidates for future Pursuits.
    - Pursuit specified → target is that pursuit. Ideas are candidate Projects.
    - Project specified → target is that project. Ideas are candidate Actions.

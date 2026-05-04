@@ -148,7 +148,7 @@ Prose, not bullets. No headings. 3-5 paragraphs total.
 
 For `pursuit:<id>` scope, include the **Idea arc** in "what happened"
 or "what it meant": how many Ideas generated, how many promoted, how
-many closed-with-reason, how many moved to Wandering. That's the
+many closed-with-reason, how many moved to the Inbox. That's the
 meaning-making spine of pursuit closure.
 
 **Empty window:** "Quiet [period]. No committed activity since [last

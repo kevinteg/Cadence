@@ -2,9 +2,9 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 
 /**
- * Locate a pursuit directory across active, someday, archived, and the
- * special wandering location. Returns the absolute directory path or
- * null if not found.
+ * Locate a pursuit directory across active (which includes the standing
+ * `inbox` pursuit), someday, and archived locations. Returns the absolute
+ * directory path or null if not found.
  */
 export function resolvePursuitDir(
   repoRoot: string,

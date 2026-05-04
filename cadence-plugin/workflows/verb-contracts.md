@@ -99,11 +99,11 @@ provokes expansion. It does not contribute Ideas.
   develop pass. What else?"
 - Create Seed Ideas on the target parent as they emerge
 
-**No-argument entry:** Show pursuits available for ideation, Wandering
+**No-argument entry:** Show pursuits available for ideation, Inbox
 Idea count, aging Seeds. Ask: "Where do you want to brainstorm?"
 
 **Scope sensitivity:**
-- No target → Ideas on Wandering (candidate Pursuits)
+- No target → Ideas on the Inbox (candidate Pursuits)
 - Pursuit → Ideas on that Pursuit (candidate Projects)
 - Project → Ideas on that Project (candidate Actions)
 - Action → Rejected: "That sounds like it needs its own Project. Want to
@@ -282,7 +282,7 @@ Informational, not praise-based.
 - Draw from project-file git activity (`cadence project-activity`),
   Ideas promoted/closed, project milestones, captures
 - For Pursuit narratives: include the full Idea arc — how many generated,
-  promoted, closed with reasons, moved to Wandering
+  promoted, closed with reasons, moved to the Inbox
 - For weekly narratives: feed into Reflect
 - Each generated narrative carries a frontmatter watermark
   (cadence, consumed_through_commit) — the next run resumes from there
