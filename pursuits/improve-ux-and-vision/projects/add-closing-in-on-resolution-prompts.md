@@ -1,7 +1,7 @@
 ---
 id: add-closing-in-on-resolution-prompts
 pursuit: improve-ux-and-vision
-status: active
+status: done
 created: 2026-05-01
 ---
 
