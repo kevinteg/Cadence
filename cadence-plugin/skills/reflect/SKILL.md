@@ -112,7 +112,20 @@ to land in this thread.
       for active projects in active pursuits; surface trivial items
       ("These look quick — want to clear any of them now?").
 
-   c. Walk reconciler flags interactively. **Delegate the scan to the
+   c. Walk reconciler flags interactively. **Surface a brain-tickler
+      tip first (frequency-capped):**
+      ```bash
+      cadence tip-pick --triggers moment-long-agent-run --types quote \
+        --category reflect-interjection --category-cool-down-days 14
+      ```
+      If a non-null tip is returned, render it inline before invoking
+      the subagent ("While the reconciler scans, here's a frame to
+      chew on: …"). If null, skip silently. The 14-day category
+      cool-down is intentionally longer than narrate's 7d — Reflect
+      runs weekly, so a 14d cap means at most one Reflect-interjection
+      every ~2 weeks.
+
+      Then **delegate the scan to the
       reconciler subagent** to keep bulk Ideas JSON out of this thread:
       invoke the Agent tool with `subagent_type: cadence:reconciler`
       and `prompt: scan`. The agent returns a flag list (one per line,

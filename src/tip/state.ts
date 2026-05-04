@@ -9,6 +9,14 @@ export interface TipShowRecord {
 export interface TipState {
   version: 1
   tips: Record<string, TipShowRecord>
+  /**
+   * Per-category cool-down timestamps. Used by long-running-agent
+   * interjections (and any future bulk-rate-limit case) where the cap
+   * is on a category of show events, not on individual tip IDs.
+   * Examples: "narrate-interjection" → "2026-05-04T10:00:00.000Z".
+   * Optional — older state files without this field are forward-compatible.
+   */
+  categories?: Record<string, string>
 }
 
 const STATE_FILENAME = 'tip-state.json'
@@ -20,17 +28,18 @@ function statePath(repoRoot: string): string {
 export function readTipState(repoRoot: string): TipState {
   const filePath = statePath(repoRoot)
   if (!existsSync(filePath)) {
-    return { version: 1, tips: {} }
+    return { version: 1, tips: {}, categories: {} }
   }
   try {
     const raw = readFileSync(filePath, 'utf8')
     const parsed = JSON.parse(raw) as TipState
     if (parsed.version !== 1 || typeof parsed.tips !== 'object') {
-      return { version: 1, tips: {} }
+      return { version: 1, tips: {}, categories: {} }
     }
+    if (!parsed.categories) parsed.categories = {}
     return parsed
   } catch {
-    return { version: 1, tips: {} }
+    return { version: 1, tips: {}, categories: {} }
   }
 }
 
@@ -132,4 +141,40 @@ export function resetTips(
   }
   writeTipState(repoRoot, state)
   return cleared
+}
+
+/**
+ * Returns true if the named category is eligible to fire — either it
+ * has never fired before, OR more than `cool_down_days` have passed
+ * since the last fire. Used by `tip-pick --category` to bulk-rate-limit
+ * an entire class of show events (e.g. "narrate-interjection") rather
+ * than gating per-tip.
+ */
+export function isCategoryEligible(
+  state: TipState,
+  categoryKey: string,
+  coolDownDays: number,
+  now: Date = new Date(),
+): boolean {
+  const lastShown = state.categories?.[categoryKey]
+  if (!lastShown) return true
+  const last = new Date(lastShown)
+  const elapsedMs = now.getTime() - last.getTime()
+  const requiredMs = coolDownDays * 24 * 60 * 60 * 1000
+  return elapsedMs >= requiredMs
+}
+
+/**
+ * Atomically record that a category fired at the given time. Skills
+ * call this AFTER successfully surfacing a tip from that category.
+ */
+export function recordCategoryShow(
+  repoRoot: string,
+  categoryKey: string,
+  now: Date = new Date(),
+): void {
+  const state = readTipState(repoRoot)
+  if (!state.categories) state.categories = {}
+  state.categories[categoryKey] = now.toISOString()
+  writeTipState(repoRoot, state)
 }

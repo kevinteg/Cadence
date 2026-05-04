@@ -43,7 +43,13 @@ import {
   type TipTone,
   type TipType,
 } from './tip/library.js'
-import { readTipState, recordShow, resetTips } from './tip/state.js'
+import {
+  isCategoryEligible,
+  readTipState,
+  recordCategoryShow,
+  recordShow,
+  resetTips,
+} from './tip/state.js'
 import {
   addPendingValidation,
   clearPendingValidations,
@@ -948,7 +954,7 @@ cli
 cli
   .command(
     'tip-pick',
-    'Pick one tip eligible for the given active trigger context (returns JSON or empty)',
+    'Pick one tip eligible for the given active trigger context (returns JSON or null)',
   )
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option(
@@ -967,6 +973,14 @@ cli
     '--no-record',
     'Do not update tip-state with the show (preview mode)',
   )
+  .option(
+    '--category <key>',
+    'Category cap key (e.g. narrate-interjection). When present with --category-cool-down-days, the call returns null if the category is on cool-down, otherwise picks a tip AND records the category timestamp. Used by long-running-agent interjections to enforce per-agent-type rate limits.',
+  )
+  .option(
+    '--category-cool-down-days <days>',
+    'Days a category stays on cool-down once fired (default: 7). Ignored without --category.',
+  )
   .action(
     async (opts: {
       root?: string
@@ -974,6 +988,8 @@ cli
       tones?: string
       types?: string
       record?: boolean
+      category?: string
+      categoryCoolDownDays?: string | number
     }) => {
       const repoRoot = await resolveRepoRoot(opts.root)
       if (!opts.triggers || opts.triggers.trim().length === 0) {
@@ -1002,6 +1018,19 @@ cli
       }
       const library = readLibrary()
       const state = readTipState(repoRoot)
+      // Category cap — short-circuit if the category is on cool-down.
+      if (opts.category) {
+        const coolDownDays =
+          typeof opts.categoryCoolDownDays === 'number'
+            ? opts.categoryCoolDownDays
+            : opts.categoryCoolDownDays
+              ? Number(opts.categoryCoolDownDays)
+              : 7
+        if (!isCategoryEligible(state, opts.category, coolDownDays)) {
+          process.stdout.write('null\n')
+          return
+        }
+      }
       const picked = selectTip(library, state, select)
       if (!picked) {
         process.stdout.write('null\n')
@@ -1009,6 +1038,9 @@ cli
       }
       if (opts.record !== false) {
         recordShow(repoRoot, picked.tip.id)
+        if (opts.category) {
+          recordCategoryShow(repoRoot, opts.category)
+        }
       }
       process.stdout.write(
         JSON.stringify(

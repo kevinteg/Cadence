@@ -19100,17 +19100,18 @@ function statePath(repoRoot) {
 function readTipState(repoRoot) {
   const filePath = statePath(repoRoot);
   if (!existsSync10(filePath)) {
-    return { version: 1, tips: {} };
+    return { version: 1, tips: {}, categories: {} };
   }
   try {
     const raw = readFileSync2(filePath, "utf8");
     const parsed = JSON.parse(raw);
     if (parsed.version !== 1 || typeof parsed.tips !== "object") {
-      return { version: 1, tips: {} };
+      return { version: 1, tips: {}, categories: {} };
     }
+    if (!parsed.categories) parsed.categories = {};
     return parsed;
   } catch {
-    return { version: 1, tips: {} };
+    return { version: 1, tips: {}, categories: {} };
   }
 }
 function writeTipState(repoRoot, state) {
@@ -19178,6 +19179,20 @@ function resetTips(repoRoot, predicate) {
   }
   writeTipState(repoRoot, state);
   return cleared;
+}
+function isCategoryEligible(state, categoryKey, coolDownDays, now = /* @__PURE__ */ new Date()) {
+  const lastShown = state.categories?.[categoryKey];
+  if (!lastShown) return true;
+  const last = new Date(lastShown);
+  const elapsedMs = now.getTime() - last.getTime();
+  const requiredMs = coolDownDays * 24 * 60 * 60 * 1e3;
+  return elapsedMs >= requiredMs;
+}
+function recordCategoryShow(repoRoot, categoryKey, now = /* @__PURE__ */ new Date()) {
+  const state = readTipState(repoRoot);
+  if (!state.categories) state.categories = {};
+  state.categories[categoryKey] = now.toISOString();
+  writeTipState(repoRoot, state);
 }
 
 // src/tip/library.ts
@@ -19841,7 +19856,7 @@ cli.command("tip-reset", "Clear show-state for tips matching a substring").optio
 );
 cli.command(
   "tip-pick",
-  "Pick one tip eligible for the given active trigger context (returns JSON or empty)"
+  "Pick one tip eligible for the given active trigger context (returns JSON or null)"
 ).option("--root <path>", "Repo root (default: cwd or auto-detect)").option(
   "--triggers <tags>",
   "Comma-separated active trigger tags (required, e.g., verb-resolve,state-pursuit-near-completion)"
@@ -19854,6 +19869,12 @@ cli.command(
 ).option(
   "--no-record",
   "Do not update tip-state with the show (preview mode)"
+).option(
+  "--category <key>",
+  "Category cap key (e.g. narrate-interjection). When present with --category-cool-down-days, the call returns null if the category is on cool-down, otherwise picks a tip AND records the category timestamp. Used by long-running-agent interjections to enforce per-agent-type rate limits."
+).option(
+  "--category-cool-down-days <days>",
+  "Days a category stays on cool-down once fired (default: 7). Ignored without --category."
 ).action(
   async (opts) => {
     const repoRoot = await resolveRepoRoot(opts.root);
@@ -19874,6 +19895,13 @@ cli.command(
     }
     const library = readLibrary();
     const state = readTipState(repoRoot);
+    if (opts.category) {
+      const coolDownDays = typeof opts.categoryCoolDownDays === "number" ? opts.categoryCoolDownDays : opts.categoryCoolDownDays ? Number(opts.categoryCoolDownDays) : 7;
+      if (!isCategoryEligible(state, opts.category, coolDownDays)) {
+        process.stdout.write("null\n");
+        return;
+      }
+    }
     const picked = selectTip(library, state, select);
     if (!picked) {
       process.stdout.write("null\n");
@@ -19881,6 +19909,9 @@ cli.command(
     }
     if (opts.record !== false) {
       recordShow(repoRoot, picked.tip.id);
+      if (opts.category) {
+        recordCategoryShow(repoRoot, opts.category);
+      }
     }
     process.stdout.write(
       JSON.stringify(

@@ -17,7 +17,16 @@ prompting for action.
 
 ## Steps
 
-1. **Delegate to the reconciler subagent.** Avoid pulling the full
+1. **Surface a brain-tickler tip first (frequency-capped, optional).**
+   `/reconcile` is a power-user verb that sometimes runs ad-hoc; a
+   gentle interjection here is fine but should be rare:
+   ```bash
+   cadence tip-pick --triggers moment-long-agent-run --types quote \
+     --category reconcile-interjection --category-cool-down-days 14
+   ```
+   If null, skip silently. If returned, render inline before delegating.
+
+2. **Delegate to the reconciler subagent.** Avoid pulling the full
    `cadence flags --json` and `cadence ideas --json` payloads into this
    thread; the agent runs the scans in isolation and returns a tight
    flag list.
@@ -32,11 +41,11 @@ prompting for action.
    `[severity] [kind] [pursuit/project or pursuit] — [one-line context]`,
    grouped by severity (`action_needed`, `warning`, `info`).
 
-2. **Present verbatim** under a `Reconciler Report` heading. Do not
+3. **Present verbatim** under a `Reconciler Report` heading. Do not
    reformat, summarize, or annotate the agent's output — the format is
    the contract.
 
-3. **Do not prompt for action.** The user reads the report and acts on
+4. **Do not prompt for action.** The user reads the report and acts on
    their own, or addresses flags during /reflect.
 
 ## Fallback (in-thread)

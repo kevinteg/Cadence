@@ -116,11 +116,23 @@ aside without closing, use `cadence move-pursuit --to someday`.
    The CLI moves the directory to `pursuits/_archived/` and updates the
    pursuit's `status` frontmatter to `archived`.
 
-7. Generate closure narrative — summarize the Pursuit's arc:
-   "Generated [N] Ideas — [X] became Projects, [Y] became their own
-   Pursuits, [Z] were closed with reasons, [W] moved to Inbox."
+7. **Surface a brain-tickler tip before generating the closure narrative
+   (frequency-capped):**
+   ```bash
+   cadence tip-pick --triggers moment-long-agent-run --types quote \
+     --category resolve-pursuit-interjection --category-cool-down-days 30
+   ```
+   Pursuit closures are rare — a 30-day cool-down means a tip might
+   accompany every ~3-5 closures, which is the right cadence for a
+   ritual moment. If null, skip silently.
 
-8. Save narrative to `narratives/drafts/<pursuit-id>-closure.md`.
+8. Generate closure narrative — summarize the Pursuit's arc via the
+   narrator subagent (`subagent_type: cadence:narrator`) with a
+   pursuit-arc prompt: "Generated [N] Ideas — [X] became Projects, [Y]
+   became their own Pursuits, [Z] were closed with reasons, [W] moved
+   to Inbox."
+
+9. Save narrative to `narratives/drafts/<pursuit-id>-closure.md`.
 
 ---
 

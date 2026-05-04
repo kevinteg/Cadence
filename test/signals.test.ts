@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import { strict as assert } from 'node:assert'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { computeSuggestionSignals } from '../src/render/signals.ts'
@@ -261,5 +261,46 @@ test('reflectEntryMode prefers most recent when multiple reflections exist', () 
     })
     const signals = computeSuggestionSignals(snapshot, root)
     assert.equal(signals.reflectEntryMode, 'same_week_done')
+  })
+})
+
+// ───── tip-state category cap ──────────────────────────────────────
+
+import {
+  isCategoryEligible,
+  recordCategoryShow,
+} from '../src/tip/state.ts'
+
+test('isCategoryEligible: true when category has never fired', () => {
+  withTempRoot((root) => {
+    const state = { version: 1 as const, tips: {}, categories: {} }
+    assert.equal(isCategoryEligible(state, 'narrate-interjection', 7), true)
+  })
+})
+
+test('isCategoryEligible: false within cool-down window, true after', () => {
+  withTempRoot((root) => {
+    const recent = new Date('2026-05-04T12:00:00Z').toISOString()
+    const state = {
+      version: 1 as const,
+      tips: {},
+      categories: { 'narrate-interjection': recent },
+    }
+    // 3 days later — still on cool-down (cool-down 7d).
+    const threeDays = new Date('2026-05-07T12:00:00Z')
+    assert.equal(isCategoryEligible(state, 'narrate-interjection', 7, threeDays), false)
+    // 8 days later — eligible again.
+    const eightDays = new Date('2026-05-12T12:00:00Z')
+    assert.equal(isCategoryEligible(state, 'narrate-interjection', 7, eightDays), true)
+  })
+})
+
+test('recordCategoryShow persists to tip-state.json', () => {
+  withTempRoot((root) => {
+    recordCategoryShow(root, 'reflect-interjection', new Date('2026-05-04T10:00:00Z'))
+    const path = join(root, '.cadence', 'tip-state.json')
+    assert.ok(existsSync(path))
+    const parsed = JSON.parse(readFileSync(path, 'utf8'))
+    assert.equal(parsed.categories['reflect-interjection'], '2026-05-04T10:00:00.000Z')
   })
 })

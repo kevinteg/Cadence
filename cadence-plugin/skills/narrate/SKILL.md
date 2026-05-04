@@ -39,7 +39,14 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year` are reserved
 
    If a prior file exists, read its frontmatter `consumed_through_commit`. That's the resume point. Otherwise, no resume point — the CLI defaults the window per cadence.
 
-3. **Delegate to the narrator subagent.** The whole point of this skill's design is to keep bulk activity JSON out of the main thread. The narrator agent fetches its own data via the cadence CLI in isolation and returns prose only.
+3. **Surface a brain-tickler tip (optional, frequency-capped).** Before calling the narrator subagent — which can run for tens of seconds — call:
+   ```bash
+   cadence tip-pick --triggers moment-long-agent-run --types quote \
+     --category narrate-interjection --category-cool-down-days 7
+   ```
+   If a non-null tip is returned, render its `content` and `attribution` to the user as inline status before delegating: "While the narrator works, here's a frame to chew on: …" If null is returned (the category is on cool-down or no tip is eligible), skip silently. The category cap ensures narrate-interjections fire at most once every ~7 days so they feel like a surprise gift, not wallpaper. Honors the wallpaper warning explicitly.
+
+4. **Delegate to the narrator subagent.** The whole point of this skill's design is to keep bulk activity JSON out of the main thread. The narrator agent fetches its own data via the cadence CLI in isolation and returns prose only.
 
    Invoke via the Agent tool:
    - `subagent_type: cadence:narrator`
@@ -58,7 +65,7 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year` are reserved
    Generate a daily narrative. Resume from commit abc123. Run `cadence project-activity --scope daily --since-commit abc123` to fetch commits since that point. Compose 3-5 paragraphs in McAdams structure. Return prose only.
    ```
 
-4. **Save with watermark frontmatter.**
+5. **Save with watermark frontmatter.**
 
    The agent returns prose; the skill wraps and saves it. Frontmatter shape:
 
@@ -79,7 +86,7 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year` are reserved
 
    Save the file at the resolved target path. Same-period re-runs overwrite (daily-2026-04-30.md gets written twice if /narrate today is run twice on the same day, with each subsequent run consuming the smaller slice since the prior write).
 
-5. **Present.**
+6. **Present.**
 
    Show the narrative prose to the user (not the frontmatter) under a heading like:
    - `Daily Narrative — 2026-04-30`
