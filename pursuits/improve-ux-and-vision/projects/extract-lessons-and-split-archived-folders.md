@@ -1,7 +1,7 @@
 ---
 id: extract-lessons-and-split-archived-folders
 pursuit: improve-ux-and-vision
-status: active
+status: done
 created: 2026-05-04
 ---
 
