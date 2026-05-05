@@ -10,7 +10,7 @@ lives in `cadence-reference.md` — load on demand.
 
 ## Vocabulary
 
-- **Pursuit**: An intentional commitment tied to values or a role. Has a Why. Lifecycle: active → someday → archived.
+- **Pursuit**: An intentional commitment tied to values or a role. Has a Why. Lifecycle: `active` → `someday` (set aside, may return) → `archived` (shipped — closed via the closure ritual) | `dropped` (didn't ship — closed via the drop ritual; what got learned without shipping). Archived and dropped are both terminal but distinct outcomes; the directory split (`pursuits/_archived/` vs `pursuits/_dropped/`) lets the lessons-extraction surface treat them as different signal.
 - **Project**: A scoped effort framed by an Intent narrative (motivation + felt-sense of done) and an Actions list. Status: active | on_hold | done | dropped. New projects start `on_hold`; promote to `active` on the first checked action.
 - **Action**: An atomic, concrete task. A checkbox in a project's Actions section. Every project requires at least one at creation.
 - **Idea**: A captured seed, possibly developed, not yet promoted. States: seed → developed → promoted | moved | closed.
@@ -56,8 +56,14 @@ state.
   walks the intent-feel-achieved dialogue and sets status=done.
   `--state dropped --reason "<text>"` drops with override-with-reason
   for unresolved Ideas.
-- **`/resolve <pursuit>`** walks the closure ritual (absolute Ideas
-  block + cleaning) and archives the pursuit.
+- **`/resolve <pursuit>`** walks the resolution ritual (absolute Ideas
+  block + cleaning). Default routes to `_archived/` (completed — what
+  shipped). `--state dropped --reason "<text>"` routes to `_dropped/`
+  (didn't ship — what got learned). Both paths produce a resolution
+  narrative; the framing differs (closure vs drop) but the ritual is
+  the same. If a pursuit just needs setting aside for later, use
+  `cadence move-pursuit --to someday` instead — that's a different
+  move (no ritual, no narrative).
 - **`/waiting`** records an external blocker on a project's
   `waiting_for` array.
 

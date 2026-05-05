@@ -13,6 +13,11 @@ const LIFECYCLE_ROOTS = [
   { lifecycle: 'active' as const, glob: 'pursuits/*/pursuit.md' },
   { lifecycle: 'someday' as const, glob: 'pursuits/_someday/*/pursuit.md' },
   { lifecycle: 'archived' as const, glob: 'pursuits/_archived/*/pursuit.md' },
+  // Dropped pursuits — same shape as archived but a distinct outcome.
+  // The folder split lets lessons-extraction distinguish "what shipped"
+  // from "what got learned without shipping" — different signal,
+  // different framing.
+  { lifecycle: 'dropped' as const, glob: 'pursuits/_dropped/*/pursuit.md' },
 ]
 
 export async function scanPursuits(repoRoot: string): Promise<Pursuit[]> {

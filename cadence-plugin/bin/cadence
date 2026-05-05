@@ -16538,8 +16538,18 @@ var WaitingForSchema = external_exports.object({
   flagged: external_exports.boolean().optional().default(false)
 });
 var PursuitTypeSchema = external_exports.enum(["finite", "ongoing", "someday"]);
-var PursuitStatusSchema = external_exports.enum(["active", "someday", "archived"]);
-var PursuitLifecycleSchema = external_exports.enum(["active", "someday", "archived"]);
+var PursuitStatusSchema = external_exports.enum([
+  "active",
+  "someday",
+  "archived",
+  "dropped"
+]);
+var PursuitLifecycleSchema = external_exports.enum([
+  "active",
+  "someday",
+  "archived",
+  "dropped"
+]);
 var PursuitCueSchema = external_exports.object({
   trigger: external_exports.enum(["review", "date", "seasonal"]),
   review: external_exports.string().optional(),
@@ -17282,7 +17292,12 @@ import path5 from "node:path";
 var LIFECYCLE_ROOTS = [
   { lifecycle: "active", glob: "pursuits/*/pursuit.md" },
   { lifecycle: "someday", glob: "pursuits/_someday/*/pursuit.md" },
-  { lifecycle: "archived", glob: "pursuits/_archived/*/pursuit.md" }
+  { lifecycle: "archived", glob: "pursuits/_archived/*/pursuit.md" },
+  // Dropped pursuits — same shape as archived but a distinct outcome.
+  // The folder split lets lessons-extraction distinguish "what shipped"
+  // from "what got learned without shipping" — different signal,
+  // different framing.
+  { lifecycle: "dropped", glob: "pursuits/_dropped/*/pursuit.md" }
 ];
 async function scanPursuits(repoRoot) {
   const results = [];
@@ -18462,7 +18477,8 @@ function resolvePursuitDir(repoRoot, pursuitId) {
   const candidates = [
     path11.join(repoRoot, "pursuits", pursuitId),
     path11.join(repoRoot, "pursuits/_someday", pursuitId),
-    path11.join(repoRoot, "pursuits/_archived", pursuitId)
+    path11.join(repoRoot, "pursuits/_archived", pursuitId),
+    path11.join(repoRoot, "pursuits/_dropped", pursuitId)
   ];
   for (const c of candidates) {
     if (existsSync4(path11.join(c, "pursuit.md"))) return c;
@@ -19062,7 +19078,7 @@ import { existsSync as existsSync9 } from "node:fs";
 async function movePursuit(repoRoot, opts) {
   const from = resolvePursuitDir(repoRoot, opts.id);
   if (!from) throw new Error(`pursuit not found: ${opts.id}`);
-  const targetParent = opts.to === "active" ? path17.join(repoRoot, "pursuits") : opts.to === "someday" ? path17.join(repoRoot, "pursuits/_someday") : path17.join(repoRoot, "pursuits/_archived");
+  const targetParent = opts.to === "active" ? path17.join(repoRoot, "pursuits") : opts.to === "someday" ? path17.join(repoRoot, "pursuits/_someday") : opts.to === "dropped" ? path17.join(repoRoot, "pursuits/_dropped") : path17.join(repoRoot, "pursuits/_archived");
   const to = path17.join(targetParent, opts.id);
   if (path17.resolve(from) === path17.resolve(to)) {
     return {
@@ -19748,10 +19764,17 @@ cli.command(
 );
 cli.command(
   "move-pursuit <id>",
-  "Move a pursuit between active / someday / archived"
-).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--to <lifecycle>", "active | someday | archived (required)").action(
+  "Move a pursuit between active / someday / archived / dropped"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option(
+  "--to <lifecycle>",
+  "active | someday | archived | dropped (required). archived = closure ritual outcome (what shipped); dropped = drop ritual outcome (what got learned without shipping)."
+).action(
   async (id, opts) => {
     if (!opts.to) throw new Error("--to is required");
+    const valid = ["active", "someday", "archived", "dropped"];
+    if (!valid.includes(opts.to)) {
+      throw new Error(`--to must be one of: ${valid.join(", ")}`);
+    }
     const repoRoot = await resolveRepoRoot(opts.root);
     const result = await movePursuit(repoRoot, { id, to: opts.to });
     process.stdout.write(JSON.stringify(result) + "\n");

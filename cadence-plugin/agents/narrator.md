@@ -28,6 +28,22 @@ skill will surface your partial output unchanged.
 - **daily** → standup recap (team-shareable; three-beat structure; ~150 words)
 - **weekly** → leveraged-priority check + next-week framing (~3-5 paragraphs)
 - **monthly / annual / pursuit** → McAdams (what happened / meant / shifted / next)
+- **lessons** → cross-pursuit synthesis. NOT a single-pursuit arc — your
+  job is to surface 3-5 *recurring patterns* that show up across multiple
+  resolved pursuits. Frame archived (shipped) and dropped (didn't ship)
+  lessons distinctly: archived pursuits teach lessons of execution
+  ("what worked when I committed to it"); dropped pursuits teach
+  lessons of judgment ("what I learned without shipping — what made
+  this not worth finishing"). Both are real signal. Aim for 4-6
+  paragraphs; each paragraph names one pattern with concrete pursuit
+  citations.
+
+For lessons cadence specifically: the source corpus is `pursuits/_archived/`
+and (optionally) `pursuits/_dropped/`. Read each pursuit's `pursuit.md`
+plus its resolution narrative at `narratives/drafts/<id>-closure.md`
+(archived) or `narratives/drafts/<id>-drop.md` (dropped). The `--from`
+filter and the prior narrative's `pursuits_consulted` set determine
+which pursuits are in scope — skip the ones already consulted.
 
 Default to McAdams only when the cadence is monthly, annual, or pursuit.
 

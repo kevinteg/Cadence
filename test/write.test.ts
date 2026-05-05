@@ -676,3 +676,37 @@ test('movePursuit relocates between lifecycles and updates frontmatter', async (
     await rm(dir, { recursive: true, force: true })
   }
 })
+
+test('movePursuit --to dropped routes to pursuits/_dropped/ with status=dropped', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p-drop', type: 'finite', now: NOW })
+    const result = await movePursuit(dir, { id: 'p-drop', to: 'dropped' })
+    assert.match(result.to, /pursuits\/_dropped\/p-drop$/)
+    const snapshot = await scan(dir, NOW)
+    assert.equal(snapshot.pursuits.length, 1)
+    assert.equal(snapshot.pursuits[0]?.lifecycle, 'dropped')
+    assert.equal(snapshot.pursuits[0]?.status, 'dropped')
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('scan distinguishes archived (completed) from dropped (learned-from)', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'shipped', type: 'finite', now: NOW })
+    await createPursuit(dir, { id: 'learned-from', type: 'finite', now: NOW })
+    await movePursuit(dir, { id: 'shipped', to: 'archived' })
+    await movePursuit(dir, { id: 'learned-from', to: 'dropped' })
+    const snapshot = await scan(dir, NOW)
+    const archived = snapshot.pursuits.filter((p) => p.lifecycle === 'archived')
+    const dropped = snapshot.pursuits.filter((p) => p.lifecycle === 'dropped')
+    assert.equal(archived.length, 1, 'expected 1 archived pursuit')
+    assert.equal(dropped.length, 1, 'expected 1 dropped pursuit')
+    assert.equal(archived[0]?.id, 'shipped')
+    assert.equal(dropped[0]?.id, 'learned-from')
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})

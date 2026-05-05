@@ -73,13 +73,32 @@ a one-line note: "Pursuits don't take --state — running closure ritual."
 
 ---
 
-## Pursuit Closure
+## Pursuit Resolution
 
-`/resolve <pursuit>` always means the closure ritual. There's no
-project-style `--state` for pursuits — if a pursuit needs to be set
-aside without closing, use `cadence move-pursuit --to someday`.
+`/resolve <pursuit>` resolves a pursuit. Two paths, both walk the same
+Zeigarnik-release cleaning ritual but produce different outcomes:
 
-1. Confirm intent: "Close [pursuit]?"
+- **`/resolve <pursuit>`** (default — completed/archived): closure
+  ritual + archive. The pursuit shipped; the narrative captures what
+  was done.
+- **`/resolve <pursuit> --state dropped --reason "<text>"`**: drop
+  ritual + route to `_dropped/`. The pursuit didn't ship but you
+  learned from it; the narrative captures what it taught you.
+
+Both paths require the absolute Ideas block — dropped pursuits still
+need meaning-making for their unresolved seeds; silent abandonment is
+exactly what the ritual exists to prevent.
+
+If a pursuit needs to be set aside without resolving (might come back),
+use `cadence move-pursuit --to someday` instead — that's a different
+move (no ritual, no narrative).
+
+### Steps (both paths)
+
+1. Confirm intent based on the path:
+   - completed: "Close [pursuit]?"
+   - dropped: "Drop [pursuit]? What's the reason?" (require `--reason`
+     before proceeding)
 2. Check for unresolved Ideas via the bundled CLI:
    ```bash
    cadence ideas --parent <pursuit-id> --state seed,developed --json
@@ -88,14 +107,14 @@ aside without closing, use `cadence move-pursuit --to someday`.
    query per project (or scan with no `--parent` and filter by prefix
    in the agent). Ideas in `promoted`, `moved`, or `closed` state are
    resolved. For `moved` Ideas, the move only counts as resolution if
-   the target pursuit/project is active (not archived or someday) —
-   verify by reading the Idea's `promoted_to` field and cross-checking
-   against `cadence pursuits --json`.
+   the target pursuit/project is active (not archived, dropped, or
+   someday) — verify by reading the Idea's `promoted_to` field and
+   cross-checking against `cadence pursuits --json`.
 
-3. **If unresolved Ideas exist — absolute block.** Cannot close until
-   every Idea is resolved:
+3. **If unresolved Ideas exist — absolute block.** Cannot resolve until
+   every Idea is resolved (applies to both completed AND dropped paths):
    ```
-   [pursuit] has [N] unresolved Ideas. Each needs a decision before closing.
+   [pursuit] has [N] unresolved Ideas. Each needs a decision before resolving.
    ```
 
 4. Walk each unresolved Idea. For each:
@@ -109,33 +128,46 @@ aside without closing, use `cadence move-pursuit --to someday`.
    "These projects are still open. Drop them, or resolve them first?"
    For dropping inline: `cadence set-status <project-id> --pursuit <pursuit-id> --status dropped --reason "<reason>"`
 
-6. **Archive the pursuit via the CLI:**
+6. **Move the pursuit via the CLI** — to `archived` for completed,
+   `dropped` for dropped:
    ```bash
+   # completed (default)
    cadence move-pursuit <pursuit-id> --to archived
+   # dropped (with --state dropped)
+   cadence move-pursuit <pursuit-id> --to dropped
    ```
-   The CLI moves the directory to `pursuits/_archived/` and updates the
-   pursuit's `status` frontmatter to `archived`.
+   The CLI moves the directory to `pursuits/_archived/` or
+   `pursuits/_dropped/` and updates the pursuit's `status` frontmatter.
 
-7. **Surface a brain-tickler tip before generating the closure narrative
+7. **Surface a brain-tickler tip before generating the resolution narrative
    (frequency-capped):**
    ```bash
    cadence tip-pick --triggers moment-long-agent-run --types quote \
      --category resolve-pursuit-interjection --category-cool-down-days 30
    ```
-   Pursuit closures are rare — a 30-day cool-down means a tip might
-   accompany every ~3-5 closures, which is the right cadence for a
+   Pursuit resolutions are rare — a 30-day cool-down means a tip might
+   accompany every ~3-5 resolutions, which is the right cadence for a
    ritual moment. If null, skip silently.
 
-8. Generate closure narrative — summarize the Pursuit's arc via the
-   narrator subagent (`subagent_type: cadence:narrator`) with a
-   pursuit-arc prompt: "Generated [N] Ideas — [X] became Projects, [Y]
-   became their own Pursuits, [Z] were closed with reasons, [W] moved
-   to Inbox. [Budget: 8 tool calls. If exceeded, return what you have
-   without retrying.]" — pursuit-arc narratives can take more reads
-   than daily/weekly, but should still cap. See runtime "Subagent
-   budgets" principle.
+8. Generate resolution narrative — summarize the Pursuit's arc via the
+   narrator subagent (`subagent_type: cadence:narrator`):
+   - **Completed/archived**: framing emphasizes what shipped. "Generated
+     [N] Ideas — [X] became Projects, [Y] became their own Pursuits,
+     [Z] were closed with reasons, [W] moved to Inbox."
+   - **Dropped**: framing emphasizes what was learned. "[Pursuit]
+     didn't ship — what did it teach? Reason for dropping: [reason].
+     [N] Ideas surfaced; [X] were salvaged into other pursuits, [Y]
+     were closed with their own lessons."
+   Pass `[Budget: 8 tool calls. If exceeded, return what you have
+   without retrying.]` to the narrator. See runtime "Subagent budgets"
+   principle.
 
-9. Save narrative to `narratives/drafts/<pursuit-id>-closure.md`.
+9. Save narrative to:
+   - `narratives/drafts/<pursuit-id>-closure.md` for completed/archived
+   - `narratives/drafts/<pursuit-id>-drop.md` for dropped
+   The filename suffix lets `/cadence:narrate lessons` distinguish "what
+   shipped" from "what got learned without shipping" when synthesizing
+   patterns across pursuits.
 
 ---
 

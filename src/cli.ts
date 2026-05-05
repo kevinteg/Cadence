@@ -794,16 +794,26 @@ cli
 cli
   .command(
     'move-pursuit <id>',
-    'Move a pursuit between active / someday / archived',
+    'Move a pursuit between active / someday / archived / dropped',
   )
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--to <lifecycle>', 'active | someday | archived (required)')
+  .option(
+    '--to <lifecycle>',
+    'active | someday | archived | dropped (required). archived = closure ritual outcome (what shipped); dropped = drop ritual outcome (what got learned without shipping).',
+  )
   .action(
     async (
       id: string,
-      opts: { root?: string; to?: 'active' | 'someday' | 'archived' },
+      opts: {
+        root?: string
+        to?: 'active' | 'someday' | 'archived' | 'dropped'
+      },
     ) => {
       if (!opts.to) throw new Error('--to is required')
+      const valid = ['active', 'someday', 'archived', 'dropped']
+      if (!valid.includes(opts.to)) {
+        throw new Error(`--to must be one of: ${valid.join(', ')}`)
+      }
       const repoRoot = await resolveRepoRoot(opts.root)
       const result = await movePursuit(repoRoot, { id, to: opts.to })
       process.stdout.write(JSON.stringify(result) + '\n')

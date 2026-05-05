@@ -14,8 +14,9 @@ Generate narrative from activity data — committed changes to project files in 
 - `/narrate month` — this calendar month (cadence: monthly)
 - `/narrate year` — this calendar year (cadence: annual)
 - `/narrate <pursuit>` — full arc of a pursuit (cadence: pursuit)
+- `/narrate lessons [--from completed|dropped|both]` — synthesize recurring patterns across multiple resolved pursuits (cadence: lessons)
 
-Arguments resolve via fuzzy match. `today`, `week`, `month`, `year` are reserved keywords; anything else resolves to a pursuit ID.
+Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons` are reserved keywords; anything else resolves to a pursuit ID.
 
 ## Steps
 
@@ -28,16 +29,27 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year` are reserved
    | `month` | `monthly` | `narratives/drafts/monthly-YYYY-MM.md` |
    | `year` | `annual` | `narratives/drafts/annual-YYYY.md` |
    | `<pursuit-id>` | `pursuit` | `narratives/drafts/pursuit-<id>-YYYY-MM-DD.md` |
+   | `lessons` | `lessons` | `narratives/drafts/lessons-YYYY-MM-DD.md` |
 
    For pursuit cadence, fuzzy-match the argument against `cadence pursuits --json`; ask if ambiguous.
+
+   For lessons cadence, the source corpus is resolved pursuits in
+   `pursuits/_archived/` and `pursuits/_dropped/`. The optional
+   `--from completed` / `--from dropped` / `--from both` flag selects
+   the corpus subset; default is `both`. The two folders give different
+   signal: archived = what shipped (lessons of execution); dropped =
+   what got learned without shipping (lessons of judgment).
 
 2. **Compute resume watermark.**
 
    Look for prior narratives of the same cadence:
    - daily/weekly/monthly/annual: the target filename (overwrites the same file on same-period re-runs).
    - pursuit: the most recent `pursuit-<id>-*.md` file by mtime.
+   - lessons: the most recent `lessons-*.md` file by mtime.
 
-   If a prior file exists, read its frontmatter `consumed_through_commit`. That's the resume point. Otherwise, no resume point — the CLI defaults the window per cadence.
+   If a prior file exists, read its frontmatter `consumed_through_commit` (or `pursuits_consulted` for lessons cadence — see below). That's the resume point. Otherwise, no resume point — the CLI defaults the window per cadence.
+
+   For **lessons** cadence, the watermark is set-based, not commit-based: the prior narrative's frontmatter carries `pursuits_consulted: [<list of pursuit-ids>]` and `included_dropped: <bool>`. Re-runs read the current set of resolved pursuits (in `_archived/` and `_dropped/`) minus the consulted set, and synthesize patterns only from the new material. If no new pursuits have resolved since the prior run, return null and skip generation rather than re-running over the same corpus.
 
 3. **Surface a brain-tickler tip (optional, frequency-capped).** Before calling the narrator subagent — which can run for tens of seconds — call:
    ```bash
@@ -74,22 +86,39 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year` are reserved
    [Budget: 8 tool calls. If exceeded, return what you have without retrying.]
    ```
 
+   Example prompt (lessons, multi-pursuit synthesis):
+   ```
+   Generate a lessons narrative across resolved pursuits. Read pursuit.md files in pursuits/_archived/ and pursuits/_dropped/, plus their resolution narratives in narratives/drafts/<id>-closure.md and <id>-drop.md. Synthesize 3-5 RECURRING patterns that show up across multiple pursuits — what's the lesson that keeps repeating? Frame archived (shipped) and dropped (didn't ship) lessons distinctly. Skip pursuits already in the prior narrative's pursuits_consulted list. Return prose only — no frontmatter.
+   [Budget: 8 tool calls. If exceeded, return what you have without retrying.]
+   ```
+
 5. **Save with watermark frontmatter.**
 
    The agent returns prose; the skill wraps and saves it. Frontmatter shape:
 
    ```yaml
    ---
-   cadence: daily | weekly | monthly | annual | pursuit
+   cadence: daily | weekly | monthly | annual | pursuit | lessons
    pursuit_id: <id>          # only when cadence=pursuit
    generated_at: <ISO timestamp>
-   consumed_from_commit: <hash>   # may be omitted on first run
-   consumed_through_commit: <hash>
-   projects_consulted:
+   consumed_from_commit: <hash>   # commit-watermark cadences only; omit on first run
+   consumed_through_commit: <hash>  # commit-watermark cadences only
+   projects_consulted:              # commit-watermark cadences only
      - <pursuit-id>/<project-id>
      - <pursuit-id>/<project-id>
+   # Lessons-cadence-only fields:
+   pursuits_consulted:              # set-watermark for lessons cadence
+     - <pursuit-id>
+     - <pursuit-id>
+   included_dropped: true | false   # whether _dropped/ was in scope
+   from_filter: completed | dropped | both   # the --from arg or default
    ---
    ```
+
+   Commit-watermark cadences (daily/weekly/monthly/annual/pursuit) use
+   `consumed_from_commit` + `consumed_through_commit` + `projects_consulted`.
+   Lessons cadence uses the set-watermark fields instead — pursuits in
+   the corpus are durable resolution events, not commits.
 
    To get `consumed_through_commit` and `projects_consulted` deterministically, run `cadence project-activity --scope <cadence> [--since-commit <hash>]` once with `--json` BEFORE delegating, and pass the resulting hashes to both the agent (in the prompt) and the file-write step. (Yes, this means two project-activity calls — once in the main thread for watermark metadata, once in the agent for prose generation. Acceptable since the call is cheap; alternatively, ask the agent to return the watermark fields alongside the prose.)
 

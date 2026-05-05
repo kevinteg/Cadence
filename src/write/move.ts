@@ -5,7 +5,7 @@ import { resolvePursuitDir } from './paths.js'
 
 export type MovePursuitOpts = {
   id: string
-  to: 'active' | 'someday' | 'archived'
+  to: 'active' | 'someday' | 'archived' | 'dropped'
 }
 
 export async function movePursuit(
@@ -20,7 +20,9 @@ export async function movePursuit(
       ? path.join(repoRoot, 'pursuits')
       : opts.to === 'someday'
         ? path.join(repoRoot, 'pursuits/_someday')
-        : path.join(repoRoot, 'pursuits/_archived')
+        : opts.to === 'dropped'
+          ? path.join(repoRoot, 'pursuits/_dropped')
+          : path.join(repoRoot, 'pursuits/_archived')
   const to = path.join(targetParent, opts.id)
 
   if (path.resolve(from) === path.resolve(to)) {

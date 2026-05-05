@@ -14,6 +14,7 @@ export function resolvePursuitDir(
     path.join(repoRoot, 'pursuits', pursuitId),
     path.join(repoRoot, 'pursuits/_someday', pursuitId),
     path.join(repoRoot, 'pursuits/_archived', pursuitId),
+    path.join(repoRoot, 'pursuits/_dropped', pursuitId),
   ]
   for (const c of candidates) {
     if (existsSync(path.join(c, 'pursuit.md'))) return c

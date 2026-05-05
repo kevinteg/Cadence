@@ -15,8 +15,18 @@ export const WaitingForSchema = z.object({
 export type WaitingFor = z.infer<typeof WaitingForSchema>
 
 export const PursuitTypeSchema = z.enum(['finite', 'ongoing', 'someday'])
-export const PursuitStatusSchema = z.enum(['active', 'someday', 'archived'])
-export const PursuitLifecycleSchema = z.enum(['active', 'someday', 'archived'])
+export const PursuitStatusSchema = z.enum([
+  'active',
+  'someday',
+  'archived',
+  'dropped',
+])
+export const PursuitLifecycleSchema = z.enum([
+  'active',
+  'someday',
+  'archived',
+  'dropped',
+])
 
 export const PursuitCueSchema = z.object({
   trigger: z.enum(['review', 'date', 'seasonal']),

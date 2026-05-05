@@ -114,14 +114,32 @@ markdown content. The key formats are:
   raw input. Lives in `thoughts/unprocessed/`.
 - **Reflection** (`<YYYY-MM-DD>.md`): frontmatter with date, status, phase,
   leveraged_priority; sections for Get Clear and Get Focused
-- **Narrative** (`<cadence>-<period>.md` in `narratives/drafts/`):
-  frontmatter with cadence, generated_at, consumed_from_commit,
-  consumed_through_commit, projects_consulted; body is McAdams prose.
-  The frontmatter doubles as a watermark — the next /narrate run for
-  the same cadence reads the latest narrative and resumes from its
-  consumed_through_commit. Historical session markers (legacy
-  `pursuits/*/sessions/*.md`) may exist in older repos; they are
-  preserved on disk but no longer read or written by any verb.
+- **Narrative** (in `narratives/drafts/`): per-cadence filename + body
+  shape. **Commit-watermark cadences** (`daily-YYYY-MM-DD.md`,
+  `weekly-YYYY-WNN.md`, `monthly-YYYY-MM.md`, `annual-YYYY.md`,
+  `pursuit-<id>-YYYY-MM-DD.md`) carry frontmatter with `cadence`,
+  `generated_at`, `consumed_from_commit`, `consumed_through_commit`,
+  `projects_consulted`. The watermark is git-history-based — the next
+  `/narrate` run for the same cadence reads the latest narrative and
+  resumes from its `consumed_through_commit`.
+- **Resolution narratives** (per-pursuit closure or drop): saved as
+  `<pursuit-id>-closure.md` (archived/completed) or
+  `<pursuit-id>-drop.md` (dropped). Same `narratives/drafts/` directory.
+  The filename suffix lets `/cadence:narrate lessons` distinguish "what
+  shipped" from "what got learned without shipping" when synthesizing
+  patterns across pursuits.
+- **Lessons narrative** (`lessons-YYYY-MM-DD.md`): set-watermark
+  cadence, not commit-watermark. Frontmatter carries
+  `pursuits_consulted: [<list>]`, `included_dropped: <bool>`, and
+  `from_filter: completed | dropped | both`. Re-runs read the current
+  set of resolved pursuits in `_archived/` + `_dropped/` and synthesize
+  only from pursuits NOT in the prior `pursuits_consulted` list. If no
+  new pursuits have resolved since the prior run, `/narrate lessons`
+  returns null and skips generation rather than re-running over the
+  same corpus.
+- Historical session markers (legacy `pursuits/*/sessions/*.md`) may
+  exist in older repos; they are preserved on disk but no longer read
+  or written by any verb.
 
 ## CLI Subcommand Catalog
 
@@ -207,12 +225,20 @@ the target is an active pursuit or project.
 ## Pursuit Lifecycle
 
 - **Active** pursuits live in `pursuits/<id>/`
-- **Someday** pursuits live in `pursuits/_someday/<id>/`
-- **Archived** pursuits live in `pursuits/_archived/<id>/`
+- **Someday** pursuits live in `pursuits/_someday/<id>/` (set aside, may return)
+- **Archived** pursuits live in `pursuits/_archived/<id>/` (resolved as **completed** — shipped; closed via the closure path of /resolve)
+- **Dropped** pursuits live in `pursuits/_dropped/<id>/` (resolved as **dropped** — didn't ship; closed via the drop path of /resolve with `--state dropped --reason "..."`). Same Zeigarnik-release ritual as archived; different terminal outcome.
 - **Inbox** lives in `pursuits/inbox/` — never closes
-- Moving between states is a file move (git mv)
+- Moving between states is a file move (`cadence move-pursuit <id> --to active|someday|archived|dropped`); the CLI updates the pursuit's `status` frontmatter to match.
 - Someday pursuits can have cue metadata in frontmatter for reconciler
-  surfacing
+  surfacing.
+
+The archived/dropped split matters because lessons synthesize differently
+across the two corpora: archived pursuits teach lessons of execution
+(what worked when committed to); dropped pursuits teach lessons of
+judgment (what got learned without shipping). The `/cadence:narrate
+lessons` scope reads from both folders by default; `--from completed`
+or `--from dropped` filters the corpus for targeted synthesis.
 
 ## Creating a Project
 
