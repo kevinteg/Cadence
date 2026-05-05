@@ -192,6 +192,32 @@ These two surfaces are mandatory across the verb surface. The only
 exemption is `/capture` (whose contract is silent — zero response by
 design). Every other verb's exit obeys this pattern.
 
+**Subagent budgets.** Every `Agent` tool invocation in the skill
+surface must communicate an iteration budget to the subagent in the
+prompt. The Agent tool schema does not expose a hard `max_turns`
+parameter today, so budgets are soft-enforced via prompt + agent
+contract: the skill includes a one-line `[Budget: N tool calls. If
+exceeded, return what you have without retrying.]` instruction; the
+agent system prompt (`cadence-plugin/agents/<name>.md`) carries the
+default for that agent so behavior holds even when a skill omits the
+reminder. Conservative defaults per agent type:
+
+| Agent | Default budget | Why |
+|---|---|---|
+| `cadence:reconciler` | 3 tool calls | Pure flag scan — bounded by design; ~2 CLI calls + 1 fallback |
+| `cadence:narrator` (daily/weekly/monthly/annual) | 5 tool calls | One data fetch + composition; rare to need more |
+| `cadence:narrator` (pursuit-arc / closure / lessons) | 8 tool calls | Multi-pursuit synthesis legitimately needs more |
+
+If a budget is exhausted, the agent returns what it has so far with a
+brief note ("budget exhausted; partial result") rather than retrying
+or escalating. The skill receives the partial output and surfaces it
+unchanged — runaway agents are a real failure mode, and graceful
+degradation beats silent token-spend.
+
+This is a soft-enforced guard until the Claude Code Agent tool exposes
+explicit budget parameters; once it does, we'll move enforcement
+parameter-side and remove the prompt redundancy.
+
 **Surface tips from the curated library at appropriate breakpoints.**
 Cadence ships a tip library at `cadence-plugin/tips/library.yaml`
 (schema: see `cadence-reference.md` "Tip Library" section). Three

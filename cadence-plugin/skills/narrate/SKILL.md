@@ -54,15 +54,24 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year` are reserved
      - The cadence (`daily` | `weekly` | `monthly` | `annual` | `pursuit:<id>`)
      - Resume hint if present: `since-commit <hash>`
      - Reminder of the McAdams output contract
+     - **Explicit budget line** — `[Budget: 5 tool calls for daily/weekly/monthly/annual; 8 for pursuit-arc. If exceeded, return what you have without retrying.]` — see runtime's "Subagent budgets" principle.
 
    Example prompt (daily, no resume):
    ```
    Generate a daily narrative. Run `cadence project-activity --scope daily` to fetch project-file commits since midnight. Compose 3-5 paragraphs in McAdams structure (what happened / what it meant / what shifted / what's next). Return prose only — no frontmatter, no preamble.
+   [Budget: 5 tool calls. If exceeded, return what you have without retrying.]
    ```
 
    Example prompt (daily, with resume):
    ```
    Generate a daily narrative. Resume from commit abc123. Run `cadence project-activity --scope daily --since-commit abc123` to fetch commits since that point. Compose 3-5 paragraphs in McAdams structure. Return prose only.
+   [Budget: 5 tool calls. If exceeded, return what you have without retrying.]
+   ```
+
+   Example prompt (pursuit-arc, larger budget):
+   ```
+   Generate a pursuit-arc narrative for build-cadence-v1. Run `cadence project-activity --scope pursuit --pursuit build-cadence-v1` and read closure metadata as needed. Compose 5-8 paragraphs in McAdams structure with the full Idea arc.
+   [Budget: 8 tool calls. If exceeded, return what you have without retrying.]
    ```
 
 5. **Save with watermark frontmatter.**

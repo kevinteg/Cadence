@@ -128,7 +128,9 @@ to land in this thread.
       Then **delegate the scan to the
       reconciler subagent** to keep bulk Ideas JSON out of this thread:
       invoke the Agent tool with `subagent_type: cadence:reconciler`
-      and `prompt: scan`. The agent returns a flag list (one per line,
+      and `prompt`: `scan. [Budget: 3 tool calls. If exceeded, return
+      what you have without retrying.]` (see runtime "Subagent
+      budgets" principle.) The agent returns a flag list (one per line,
       grouped by severity) covering both the in-CLI checks
       (`overdue_waiting_for`, `dormant_project`,
       `structural_active_no_open_actions`, `wip_over_limit`) and the

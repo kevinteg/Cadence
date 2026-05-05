@@ -33,8 +33,9 @@ prompting for action.
 
    Invoke via the Agent tool:
    - `subagent_type: cadence:reconciler`
-   - `prompt: scan` (the agent doesn't take parameters; it does its
-     standard pass)
+   - `prompt`: `scan. [Budget: 3 tool calls. If exceeded, return what
+     you have without retrying.]` (the agent doesn't take parameters
+     beyond the budget reminder; it does its standard pass.)
 
    The agent returns either `No flags. System is healthy.` or one flag
    per line in the form:

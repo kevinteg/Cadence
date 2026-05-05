@@ -130,7 +130,10 @@ aside without closing, use `cadence move-pursuit --to someday`.
    narrator subagent (`subagent_type: cadence:narrator`) with a
    pursuit-arc prompt: "Generated [N] Ideas — [X] became Projects, [Y]
    became their own Pursuits, [Z] were closed with reasons, [W] moved
-   to Inbox."
+   to Inbox. [Budget: 8 tool calls. If exceeded, return what you have
+   without retrying.]" — pursuit-arc narratives can take more reads
+   than daily/weekly, but should still cap. See runtime "Subagent
+   budgets" principle.
 
 9. Save narrative to `narratives/drafts/<pursuit-id>-closure.md`.
 
