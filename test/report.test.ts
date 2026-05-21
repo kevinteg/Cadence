@@ -3,6 +3,7 @@ import { strict as assert } from 'node:assert'
 import { report } from '../src/report/reconciler.ts'
 import {
   CONFIG_DEFAULTS,
+  type Idea,
   type Project,
   type Pursuit,
   type Snapshot,
@@ -314,5 +315,117 @@ test('closing_in_on_resolution does NOT fire when all projects are resolved', ()
     flags.filter((f) => f.kind === 'closing_in_on_resolution').length,
     0,
     'all-done means resolve the pursuit, not "closing in"',
+  )
+})
+
+// ───── stale_inbox_seed + inbox_overcap ────────────────────────────
+
+function makeIdea(overrides: Partial<Idea> = {}): Idea {
+  return {
+    id: 'seed-x',
+    parent: 'inbox',
+    state: 'seed',
+    created: '2026-04-01',
+    body: '',
+    path: 'pursuits/inbox/ideas/seed-x.md',
+    ageDays: 26,
+    ...overrides,
+  }
+}
+
+test('stale_inbox_seed fires per Inbox seed past the threshold', () => {
+  const snapshot = makeSnapshot({
+    pursuits: [makePursuit({ id: 'inbox' })],
+    ideas: [
+      makeIdea({ id: 'old-1', ageDays: 12 }),
+      makeIdea({ id: 'old-2', ageDays: 30 }),
+      makeIdea({ id: 'fresh', ageDays: 3 }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  const stale = flags.filter((f) => f.kind === 'stale_inbox_seed')
+  assert.equal(stale.length, 2, 'two seeds exceed the default 7d threshold')
+  const ids = stale.map((f) => (f.kind === 'stale_inbox_seed' ? f.ideaId : ''))
+  assert.deepEqual(ids.sort(), ['old-1', 'old-2'])
+})
+
+test('stale_inbox_seed only fires for parent=inbox seeds', () => {
+  const snapshot = makeSnapshot({
+    pursuits: [makePursuit({ id: 'inbox' }), makePursuit({ id: 'p1' })],
+    ideas: [
+      makeIdea({ id: 'inbox-seed', parent: 'inbox', ageDays: 20 }),
+      makeIdea({ id: 'pursuit-seed', parent: 'p1', ageDays: 99 }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  const stale = flags.filter((f) => f.kind === 'stale_inbox_seed')
+  assert.equal(stale.length, 1)
+  if (stale[0]?.kind === 'stale_inbox_seed') {
+    assert.equal(stale[0].ideaId, 'inbox-seed')
+  }
+})
+
+test('stale_inbox_seed only fires for state=seed', () => {
+  const snapshot = makeSnapshot({
+    pursuits: [makePursuit({ id: 'inbox' })],
+    ideas: [
+      makeIdea({ id: 'a', state: 'developed', ageDays: 50 }),
+      makeIdea({ id: 'b', state: 'promoted', ageDays: 50 }),
+      makeIdea({ id: 'c', state: 'closed', ageDays: 50 }),
+      makeIdea({ id: 'd', state: 'seed', ageDays: 50 }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  const stale = flags.filter((f) => f.kind === 'stale_inbox_seed')
+  assert.equal(stale.length, 1)
+})
+
+test('inbox_overcap fires once when seed count exceeds softcap', () => {
+  const ideas: Idea[] = Array.from({ length: 12 }, (_, i) =>
+    makeIdea({ id: `s${i}`, ageDays: 1 }),
+  )
+  const snapshot = makeSnapshot({
+    pursuits: [makePursuit({ id: 'inbox' })],
+    ideas,
+  })
+  const { flags } = report(snapshot)
+  const overcap = flags.filter((f) => f.kind === 'inbox_overcap')
+  assert.equal(overcap.length, 1, 'one volume flag regardless of count')
+  if (overcap[0]?.kind === 'inbox_overcap') {
+    assert.equal(overcap[0].count, 12)
+    assert.equal(overcap[0].softcap, 10)
+  }
+})
+
+test('inbox_overcap does NOT fire at or below softcap', () => {
+  const ideas: Idea[] = Array.from({ length: 10 }, (_, i) =>
+    makeIdea({ id: `s${i}`, ageDays: 1 }),
+  )
+  const snapshot = makeSnapshot({
+    pursuits: [makePursuit({ id: 'inbox' })],
+    ideas,
+  })
+  const { flags } = report(snapshot)
+  assert.equal(flags.filter((f) => f.kind === 'inbox_overcap').length, 0)
+})
+
+test('inbox_overcap counts only seeds, not other states', () => {
+  const ideas: Idea[] = [
+    ...Array.from({ length: 8 }, (_, i) =>
+      makeIdea({ id: `s${i}`, state: 'seed', ageDays: 1 }),
+    ),
+    ...Array.from({ length: 5 }, (_, i) =>
+      makeIdea({ id: `p${i}`, state: 'promoted', ageDays: 1 }),
+    ),
+  ]
+  const snapshot = makeSnapshot({
+    pursuits: [makePursuit({ id: 'inbox' })],
+    ideas,
+  })
+  const { flags } = report(snapshot)
+  assert.equal(
+    flags.filter((f) => f.kind === 'inbox_overcap').length,
+    0,
+    '8 seeds + 5 promoted = 8 against the cap, not 13',
   )
 })

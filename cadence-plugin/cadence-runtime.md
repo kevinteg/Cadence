@@ -14,7 +14,7 @@ lives in `cadence-reference.md` — load on demand.
 - **Project**: A scoped effort framed by an Intent narrative (motivation + felt-sense of done) and an Actions list. Status: active | on_hold | done | dropped. New projects start `on_hold`; promote to `active` on the first checked action.
 - **Action**: An atomic, concrete task. A checkbox in a project's Actions section. Every project requires at least one at creation.
 - **Idea**: A captured seed, possibly developed, not yet promoted. States: seed → developed → promoted | moved | closed.
-- **Inbox**: A standing pursuit that never closes. Default parent for unattached ideas. Auto-created at init.
+- **Inbox**: A standing pursuit that never closes — a *short-term triage zone* for ideas whose pursuit home isn't yet obvious. Not an organizational layer. Ideas land here only because the right home isn't visible yet; the next `/develop` or `/promote` pass should move them to a real pursuit (force-fit if needed — the pursuit owner can move them later) or kill them. A growing Inbox is a triage debt signal, not a feature. Auto-created at init.
 - **Capture**: A raw thought saved to `thoughts/unprocessed/`. Flow-safe — no agent response at capture time.
 - **Reflection**: A weekly ritual artifact in `reflections/<YYYY-MM-DD>.md`.
 - **Narrative**: Generated writing from activity data. McAdams structure: what happened / what it meant / what shifted / what's next. Each generated narrative carries a watermark in its frontmatter (cadence, consumed_through_commit) — the narrative IS the pointer into the project-file activity stream.
@@ -34,9 +34,16 @@ The user-facing verbs are: **brainstorm**, **start**, **complete**,
 **resolve**, **waiting**, **capture**, **reflect**, **narrate**.
 Internal verbs the agent invokes by chaining: **develop** (from
 brainstorm when convergence is ready) and **promote** (from develop
-or start at graduation moments). The reconciler runs as system
-behavior (SessionStart hook + during `/reflect` Get Clear) and is
-not a verb.
+or start at graduation moments). Hidden user-invoked verbs that don't
+appear on the visible catalogue: **report** (files a GitHub issue
+against the upstream Cadence repo; privacy-by-default — never
+auto-includes pursuit/project content) and **incoming**
+(maintainer-side triage of inbound issues against the upstream Cadence
+repo; routes each issue to an action, project, idea, close, or defer;
+requires `gh`). Both follow the suggest-don't-run pattern below —
+agent SUGGESTS via chat-language signals but never auto-fires. The
+reconciler runs as system behavior (SessionStart hook + during
+`/reflect` Get Clear) and is not a verb.
 
 Each verb has a no-argument path that presents a curated entry relevant
 to that verb's purpose. The user never types "select" — they invoke
@@ -168,6 +175,21 @@ and the `skill-teaching` content type — the `cadence tip-pick
 --triggers discovery,verb-<name>` call returns one cap-respecting
 teaching tooltip when eligible. The point is to make the verb surface
 self-teaching through usage rather than upfront docs.
+
+**Suggest-don't-run for hidden state-modifying verbs.** Some verbs
+(`/report`, others to come) are hidden from the visible 12-verb surface
+and gated to explicit invocation only because they write to state the
+user can't easily undo (e.g., `/report` files a public GitHub issue).
+When the user's chat language signals intent for one of these verbs —
+friction, a bug observation, a feature wish — the agent SUGGESTS the
+verb name rather than running it. Surface a one-line tip at the next
+natural breakpoint: "you can file this with `/cadence:report`."
+Frequency-cap via `cadence tip-pick --triggers intent-feedback-signal
+--types skill-teaching` (returns the report-discovery tip when
+eligible, null otherwise — render nothing on null). Skip the
+suggestion when the user already named the verb. The rule generalizes:
+hidden state-modifying verbs get suggestion surfaces, not auto-fire
+surfaces.
 
 **Verb-hint and teaching footer at exit.** Every verb's natural exit
 point ends with TWO standardized surfaces — never one or the other,

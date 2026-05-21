@@ -66,6 +66,70 @@ test('createPursuit refuses to overwrite an existing pursuit', async () => {
   }
 })
 
+test('createProject persists a github_issue origin in frontmatter; scan exposes it', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'with-origin',
+      title: 'With Origin',
+      intent: 'short intent',
+      actions: ['first'],
+      origin: {
+        kind: 'github_issue',
+        repo: 'kevinteg/Cadence',
+        number: 42,
+        url: 'https://github.com/kevinteg/Cadence/issues/42',
+      },
+      now: NOW,
+    })
+    const snapshot = await scan(dir, NOW)
+    const proj = snapshot.projects.find((p) => p.id === 'with-origin')
+    assert.ok(proj, 'project should be scanned')
+    assert.ok(proj!.origin, 'origin should be on the parsed frontmatter')
+    if (proj!.origin && proj!.origin.kind === 'github_issue') {
+      assert.equal(proj!.origin.repo, 'kevinteg/Cadence')
+      assert.equal(proj!.origin.number, 42)
+      assert.equal(
+        proj!.origin.url,
+        'https://github.com/kevinteg/Cadence/issues/42',
+      )
+    }
+    const text = await readFile(
+      path.join(dir, 'pursuits/p/projects/with-origin.md'),
+      'utf8',
+    )
+    assert.match(text, /origin:/)
+    assert.match(text, /kind: github_issue/)
+    assert.match(text, /number: 42/)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('createProject omits origin from frontmatter when not provided', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'no-origin',
+      title: 'No Origin',
+      intent: 'short intent',
+      actions: ['first'],
+      now: NOW,
+    })
+    const text = await readFile(
+      path.join(dir, 'pursuits/p/projects/no-origin.md'),
+      'utf8',
+    )
+    assert.doesNotMatch(text, /origin:/)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
 test('createProject populates Intent and Actions for new projects', async () => {
   const dir = await tempRepo()
   try {

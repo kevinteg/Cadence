@@ -275,6 +275,15 @@ function describeFlag(flag: Flag, _snapshot: Snapshot): string {
       const remaining = flag.unresolvedCount === 1 ? '1 project' : `${flag.unresolvedCount} projects`
       return `closing in: ${flag.pursuitId} (${flag.resolvedCount}/${flag.totalCount} done, ${remaining} left) — what would need to be true to close?`
     }
+    case 'inbound_issues_piling_up': {
+      const issueWord = flag.count === 1 ? 'issue' : 'issues'
+      const cachedNote = flag.fromCache ? ' (cached)' : ''
+      return `inbound: ${flag.count} untriaged ${issueWord} on ${flag.ownerRepo}${cachedNote} — /cadence:incoming to triage`
+    }
+    case 'stale_inbox_seed':
+      return `stale Inbox seed: ${flag.ideaId} (${flag.ageDays}d on Inbox; triage threshold ${flag.threshold}d) — /cadence:develop or /cadence:promote to move it to a real pursuit, or close`
+    case 'inbox_overcap':
+      return `Inbox overcap: ${flag.count} seeds (soft cap ${flag.softcap}) — schedule a triage pass via /cadence:develop`
   }
   const _exhaustive: never = flag
   return _exhaustive

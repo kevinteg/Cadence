@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { existsSync } from 'node:fs'
+import type { Origin } from '../types.js'
 import { dateString, writeFrontmatterFile } from './util.js'
 import { resolvePursuitDir } from './paths.js'
 
@@ -20,6 +21,7 @@ export type CreateProjectOpts = {
     expected: string
     flagged?: boolean
   }>
+  origin?: Origin
   created?: string
   now?: Date
 }
@@ -67,6 +69,9 @@ export async function createProject(
       expected: w.expected,
       flagged: w.flagged ?? false,
     }))
+  }
+  if (opts.origin) {
+    data['origin'] = opts.origin
   }
 
   const title = opts.title ?? toTitleCase(opts.id)

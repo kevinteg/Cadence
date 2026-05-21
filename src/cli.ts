@@ -1,7 +1,10 @@
 import { cac } from 'cac'
 import { existsSync } from 'node:fs'
+import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { scan } from './scan/repo.js'
+import { getInboundCount } from './scan/inbound.js'
 import { report } from './report/reconciler.js'
 import { renderStatus, renderFlags } from './render/status.js'
 import { computeSuggestionSignals } from './render/signals.js'
@@ -14,7 +17,7 @@ import {
   renderPursuit,
   renderPursuits,
 } from './render/drilldown.js'
-import type { Idea, IdeaState } from './types.js'
+import type { Flag, Idea, IdeaState, Snapshot } from './types.js'
 import { createPursuit } from './write/pursuit.js'
 import { createProject } from './write/project.js'
 import { createIdea } from './write/idea.js'
@@ -29,6 +32,7 @@ import {
   flagWaitingFor,
   setIdeaState,
   setProjectStatus,
+  syncProjectOrigin,
 } from './write/edits.js'
 import { movePursuit } from './write/move.js'
 import {
@@ -55,6 +59,9 @@ import {
   clearPendingValidations,
   readPendingValidations,
 } from './validation/queue.js'
+import { pullMcpServerResources } from './integrations/mcp/pull.js'
+import { McpError } from './integrations/mcp/errors.js'
+import { loadConfig } from './config.js'
 
 const cli = cac('cadence')
 
@@ -80,6 +87,8 @@ cli
     const repoRoot = await resolveRepoRoot(opts.root)
     const snapshot = await scan(repoRoot)
     const result = report(snapshot)
+    const inbound = await composeInboundFlag(repoRoot, snapshot)
+    if (inbound) result.flags.push(inbound)
     if (opts.json) {
       // Include derived signals so skills (e.g. /reflect) can branch on
       // entry mode without a second CLI call. Additive — preserves
@@ -127,6 +136,8 @@ cli
       }
       const snapshot = await scan(repoRoot)
       const result = report(snapshot)
+      const inbound = await composeInboundFlag(repoRoot, snapshot)
+      if (inbound) result.flags.push(inbound)
       if (opts.hookOutput) {
         // renderStatus now appends a "Next:" block with up to 3
         // contextual suggestions (computed via nextSteps()), so we
@@ -157,6 +168,8 @@ cli
     const repoRoot = await resolveRepoRoot(opts.root)
     const snapshot = await scan(repoRoot)
     const { flags } = report(snapshot)
+    const inbound = await composeInboundFlag(repoRoot, snapshot)
+    if (inbound) flags.push(inbound)
     if (opts.json) {
       process.stdout.write(JSON.stringify(flags, null, 2) + '\n')
     } else {
@@ -375,6 +388,7 @@ cli
   .option('--dod-checked <item>', '[legacy] DoD item already complete (repeatable). Prefer --intent for new projects.', {
     type: [String],
   })
+  .option('--origin-issue <repo#number>', 'Tag the project with a GitHub-issue origin, e.g. owner/repo#42. Recorded in frontmatter as origin.kind = github_issue.')
   .option('--created <YYYY-MM-DD>', 'Override created date (default: today)')
   .action(
     async (
@@ -390,6 +404,7 @@ cli
         dodChecked?: string[]
         action?: string[]
         actionChecked?: string[]
+        originIssue?: string
         created?: string
       },
     ) => {
@@ -401,6 +416,7 @@ cli
       const dodChecked = multistring(opts.dodChecked)
       const actions = multistring(opts.action)
       const actionsChecked = multistring(opts.actionChecked)
+      const origin = parseOriginIssue(opts.originIssue)
       const result = await createProject(repoRoot, {
         pursuit: opts.pursuit,
         id,
@@ -412,6 +428,7 @@ cli
         ...(dodChecked ? { dod_checked: dodChecked } : {}),
         ...(actions ? { actions } : {}),
         ...(actionsChecked ? { actions_checked: actionsChecked } : {}),
+        ...(origin ? { origin } : {}),
         ...(opts.created ? { created: opts.created } : {}),
       })
       process.stdout.write(JSON.stringify(result) + '\n')
@@ -531,6 +548,73 @@ cli
         ...(opts.pursuit ? { pursuit: opts.pursuit } : {}),
         ...(opts.reason ? { reason: opts.reason } : {}),
         ...(opts.includePursuit ? { include_pursuit: true } : {}),
+      })
+      process.stdout.write(JSON.stringify(result) + '\n')
+    },
+  )
+
+cli
+  .command(
+    'mcp-pull',
+    'Pull resources from a configured MCP server into thoughts/unprocessed/ as captures. Dedup by mcp.uri (fast) + content hash (precise). Use --dry-run first to preview.',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--server <name>', 'MCP server alias from cadence.yaml mcp_servers (required)')
+  .option('--filter <substring>', 'Case-insensitive substring match against name/uri/description')
+  .option('--limit <N>', 'Cap the number of resources processed (default: all after filter)', {
+    type: [Number],
+  })
+  .option('--dry-run', 'List what would be pulled without writing captures')
+  .action(
+    async (opts: {
+      root?: string
+      server?: string
+      filter?: string
+      limit?: number | number[]
+      dryRun?: boolean
+    }) => {
+      if (!opts.server) throw new Error('--server is required')
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const config = await loadConfig(repoRoot)
+      const limit = Array.isArray(opts.limit) ? opts.limit[0] : opts.limit
+      try {
+        const result = await pullMcpServerResources(repoRoot, config, {
+          serverName: opts.server,
+          ...(opts.filter ? { filter: opts.filter } : {}),
+          ...(typeof limit === 'number' ? { limit } : {}),
+          ...(opts.dryRun ? { dryRun: true } : {}),
+        })
+        process.stdout.write(JSON.stringify(result) + '\n')
+      } catch (err) {
+        if (err instanceof McpError) {
+          const payload: Record<string, unknown> = {
+            error: { kind: err.kind, message: err.message },
+          }
+          if (err.hint) (payload['error'] as Record<string, unknown>)['hint'] = err.hint
+          process.stderr.write(JSON.stringify(payload) + '\n')
+          process.exit(1)
+        }
+        throw err
+      }
+    },
+  )
+
+cli
+  .command(
+    'sync-origin <project-id>',
+    'Re-run the origin sync for a project (backfill path). For github_issue origins, closes the linked issue with a comment if it is still open. Idempotent.',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--pursuit <id>', 'Disambiguate when project IDs collide')
+  .action(
+    async (
+      projectId: string,
+      opts: { root?: string; pursuit?: string },
+    ) => {
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const result = await syncProjectOrigin(repoRoot, {
+        id: projectId,
+        ...(opts.pursuit ? { pursuit: opts.pursuit } : {}),
       })
       process.stdout.write(JSON.stringify(result) + '\n')
     },
@@ -1140,6 +1224,27 @@ cli
     },
   )
 
+cli
+  .command(
+    'plugin-info',
+    'Print plugin manifest info: repository, version, plugin dir, gh shorthand',
+  )
+  .option('--json', 'Emit as JSON')
+  .action(async (opts: { json?: boolean }) => {
+    const info = await readPluginInfo()
+    if (opts.json) {
+      process.stdout.write(JSON.stringify(info, null, 2) + '\n')
+    } else {
+      process.stdout.write(
+        `Cadence plugin\n` +
+          `  Version:    ${info.version ?? '(unknown)'}\n` +
+          `  Repository: ${info.repository ?? '(unknown)'}\n` +
+          `  Shorthand:  ${info.owner_repo ?? '(unparseable)'}\n` +
+          `  Plugin dir: ${info.plugin_dir}\n`,
+      )
+    }
+  })
+
 cli.help()
 cli.version('0.1.0')
 
@@ -1192,6 +1297,32 @@ function multistring(v: unknown): string[] | undefined {
   return cleaned.length > 0 ? cleaned : undefined
 }
 
+/**
+ * Parse `owner/repo#42` shorthand into a github_issue Origin. Returns
+ * undefined when input is missing; throws on malformed input so the
+ * caller hears about typos at the CLI boundary rather than silently
+ * persisting an unparseable origin.
+ */
+function parseOriginIssue(
+  raw: string | undefined,
+): { kind: 'github_issue'; repo: string; number: number; url: string } | undefined {
+  if (!raw) return undefined
+  const match = raw.match(/^([^/\s#]+\/[^/\s#]+)#(\d+)$/)
+  if (!match) {
+    throw new Error(
+      `--origin-issue must be "owner/repo#number" (e.g. kevinteg/Cadence#42), got: ${raw}`,
+    )
+  }
+  const repo = match[1] as string
+  const number = Number(match[2])
+  return {
+    kind: 'github_issue',
+    repo,
+    number,
+    url: `https://github.com/${repo}/issues/${number}`,
+  }
+}
+
 function firstLine(text: string): string {
   const line = text.split('\n')[0]?.trim() ?? ''
   return line.length > 200 ? line.slice(0, 197) + '...' : line
@@ -1202,5 +1333,89 @@ function formatError(err: unknown): string {
     return `cadence: ${err.message}`
   }
   return `cadence: ${String(err)}`
+}
+
+async function composeInboundFlag(
+  repoRoot: string,
+  snapshot: Snapshot,
+): Promise<Flag | null> {
+  let pluginInfo: PluginInfo
+  try {
+    pluginInfo = await readPluginInfo()
+  } catch {
+    return null
+  }
+  if (!pluginInfo.owner_repo) return null
+  const ttl = snapshot.config.incoming_queue_cache_ttl_minutes
+  const threshold = snapshot.config.incoming_queue_threshold
+  const result = await getInboundCount(repoRoot, pluginInfo.owner_repo, ttl)
+  if (result === null) return null
+  if (result.count <= threshold) return null
+  return {
+    kind: 'inbound_issues_piling_up',
+    count: result.count,
+    threshold,
+    ownerRepo: pluginInfo.owner_repo,
+    fromCache: result.fromCache,
+  }
+}
+
+interface PluginInfo {
+  plugin_dir: string
+  version: string | null
+  repository: string | null
+  owner_repo: string | null
+}
+
+async function readPluginInfo(): Promise<PluginInfo> {
+  const pluginDir = findPluginDir()
+  if (!pluginDir) {
+    throw new Error(
+      'Could not locate plugin directory — no .claude-plugin/plugin.json found above the cadence binary.',
+    )
+  }
+  const manifestPath = path.join(pluginDir, '.claude-plugin', 'plugin.json')
+  const raw = await readFile(manifestPath, 'utf-8')
+  const manifest = JSON.parse(raw) as {
+    version?: string
+    repository?: string
+    homepage?: string
+  }
+  const repository = manifest.repository ?? manifest.homepage ?? null
+  return {
+    plugin_dir: pluginDir,
+    version: manifest.version ?? null,
+    repository,
+    owner_repo: parseOwnerRepo(repository),
+  }
+}
+
+function findPluginDir(): string | null {
+  const scriptPath = fileURLToPath(import.meta.url)
+  let dir = path.dirname(scriptPath)
+  for (let i = 0; i < 6; i++) {
+    if (existsSync(path.join(dir, '.claude-plugin', 'plugin.json'))) {
+      return dir
+    }
+    const nested = path.join(dir, 'cadence-plugin', '.claude-plugin', 'plugin.json')
+    if (existsSync(nested)) {
+      return path.join(dir, 'cadence-plugin')
+    }
+    const parent = path.dirname(dir)
+    if (parent === dir) break
+    dir = parent
+  }
+  return null
+}
+
+function parseOwnerRepo(url: string | null): string | null {
+  if (!url) return null
+  const https = url.match(
+    /^https?:\/\/github\.com\/([^/]+)\/([^/.]+?)(?:\.git)?\/?$/,
+  )
+  if (https) return `${https[1]}/${https[2]}`
+  const ssh = url.match(/^git@github\.com:([^/]+)\/([^/.]+?)(?:\.git)?$/)
+  if (ssh) return `${ssh[1]}/${ssh[2]}`
+  return null
 }
 

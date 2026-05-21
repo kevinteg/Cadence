@@ -12,6 +12,10 @@ defaults:
   marker_stale_days: 7          # markers older than this get flagged
   waiting_for_grace_days: 2     # days past expected date before flagging
   dormant_days: 14              # active projects with no marker in this many days are dormant
+  incoming_queue_threshold: 5   # untriaged upstream-repo issues above this fire a flag (requires gh)
+  incoming_queue_cache_ttl_minutes: 15  # cache window for the gh issue list call (.cadence/inbound-cache.json)
+  inbox_seed_stale_days: 7      # Inbox seeds older than this fire a stale_inbox_seed flag (one Reflect cycle)
+  inbox_seed_softcap: 10        # Inbox seed count above this fires an inbox_overcap flag (triage debt signal)
 
 wip_limits:
   max_active_projects: 5        # in-progress projects (with markers) before warning

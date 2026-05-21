@@ -183,10 +183,10 @@ test('scan returns a populated Snapshot for a synthetic repo', async () => {
 test('scan against this repo matches expected counts', async () => {
   const repoRoot = path.resolve(import.meta.dirname, '..')
   const snapshot = await scan(repoRoot, new Date('2026-04-27T12:00:00Z'))
-  // Active pursuits: improve-ux-and-vision, inbox
+  // Active pursuits: improve-ux-and-vision, inbox, make-cadence-public
   const active = snapshot.pursuits.filter((p) => p.lifecycle === 'active')
-  assert.equal(active.length, 2, 'expected 2 active pursuits')
-  // Someday: make-cadence-public, expand-cadence-input-and-ingestion
+  assert.equal(active.length, 3, 'expected 3 active pursuits')
+  // Someday: expand-cadence-input-and-ingestion
   const someday = snapshot.pursuits.filter((p) => p.lifecycle === 'someday')
-  assert.equal(someday.length, 2, 'expected 2 someday pursuits')
+  assert.equal(someday.length, 1, 'expected 1 someday pursuit')
 })

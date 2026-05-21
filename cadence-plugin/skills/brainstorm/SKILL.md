@@ -19,8 +19,12 @@ Arguments resolve via fuzzy match, partial match, or natural language.
 ## Steps
 
 1. **Resolve scope:**
-   - No argument → target is the Inbox pursuit. Ideas created here are
-     candidates for future Pursuits.
+   - No argument → target is the Inbox pursuit (a *short-term triage
+     zone*, not an organizational layer). Ideas created here should be
+     moved to a real pursuit on the next `/develop` or `/promote` pass —
+     force-fit into the pursuit they most touch if no perfect home
+     exists; the pursuit owner can move them later. Don't treat the
+     Inbox as a standing collection for cross-cutting or meta ideas.
    - Pursuit specified → target is that pursuit. Ideas are candidate Projects.
    - Project specified → target is that project. Ideas are candidate Actions.
    - Action specified → reject: "An Action should be concrete enough to

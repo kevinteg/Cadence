@@ -253,6 +253,17 @@ No judgment on the decision in either direction.
 - Triggers upward-completion check on project resolution: if pursuit
   has all projects resolved, prompts "All projects in [pursuit]
   resolved. `/resolve <pursuit>` to walk the closure ritual?"
+- **Origin-sync side effect:** if the project carries an `origin`
+  frontmatter field (currently only `kind: github_issue` is wired),
+  resolving to `done` or `dropped` automatically reconciles the
+  origin. For github_issue origins: the linked issue is closed with
+  a Cadence-authored comment ("Closed by Cadence — project … resolved
+  as done" / "… was dropped. Reason: <reason>"). Idempotent (already-
+  closed → no duplicate comment) and gh-gated (silent skip on missing
+  gh — never fails the underlying state mutation). The sync result is
+  returned in the CLI response (`origin_sync.kind`); surface it in
+  the resolve exit when non-null. See `cadence-reference.md`
+  "Maintainer Labels" for label semantics.
 
 **No-argument entry:** Asks which project or pursuit. If unclear about
 entity type, lists active candidates.
@@ -430,6 +441,124 @@ Otherwise show a short list of active projects: "Which project is this for?"
 - No response to the user after capture. This is essential for flow safety.
 - No triage at capture time. Triage is a separate, explicit step.
 - No prompt for more detail. Accept whatever the user gives.
+
+**Non-interactive sources writing to the same primitive:** the CLI
+subcommand `cadence mcp-pull --server <name>` reads resources from a
+configured MCP server (see `cadence-reference.md` → "MCP Integration")
+and writes each as a capture under `thoughts/unprocessed/` with an
+`mcp:` frontmatter block. These captures appear in the standard
+triage queue alongside hand-written ones; `/reflect` Get Clear treats
+them the same. The verb `/cadence:capture` and the CLI `mcp-pull`
+write to the same parking lot — that's the integration contract.
+
+---
+
+## Report
+
+*Hidden verb — not on the visible 12-verb surface; explicit-invocation only; agent-suggested when chat language signals feedback intent.*
+
+**Purpose:** File a GitHub issue against the upstream Cadence repo so coworkers, OSS adopters, and the primary user can flag bugs, request features, or share feedback without leaving Claude Code.
+
+**Tone:** Light, welcoming, smart-colleague. One welcome line names the surface as broader than bugs ("Report a bug, request a feature, or share feedback — anything goes"). Everything else is functional.
+
+**Behavior:**
+- Reads the issue target from `cadence plugin-info --json` (`owner_repo` field). Refuses if unparseable.
+- Verifies `gh` is installed and authenticated. If not, gathers the issue anyway and dumps the final body to the terminal as a paste-into-GitHub-UI fallback — no draft persisted.
+- Gathers three fields: `kind` (one of `bug` | `enhancement` | `documentation` | `question` — GitHub default labels), `title`, `body`.
+- Auto-appends an environment footer: plugin version, plugin git SHA, Claude Code version, Node version, OS. Failed detection → `unknown`.
+- Prints the FULL final body for user confirmation, then posts via `gh issue create --repo <owner/repo> --title "..." --body "..." --label <kind>`.
+- On mid-flight `gh` failure: saves body to `.cadence/drafts/report-<timestamp>.md` and surfaces the retry command.
+
+**Privacy guard (opt-in path):**
+- Default: NO Cadence content is included (no project/pursuit IDs, no markdown body from any project file, no captures, no reflections, no conversation transcript). Just the user's text + the environment footer.
+- If the user explicitly invokes `--include-content` OR says mid-flow "include my project file" / "attach the capture" / similar:
+  1. Identify the one path or block to attach — never offer a blanket toggle.
+  2. Display the full text that would be appended.
+  3. ELI5 prompt: "This will be posted publicly to `<owner/repo>`. Anyone with internet access can read it. Confirm? [y/N]"
+  4. On `y`: append under a `<details>` block.
+  5. On `N`: drop the attachment, post without.
+
+**No-argument entry:** Interactive — kind → title → body. Positional shortcut: `/report bug "<title>"` skips the kind prompt.
+
+**Discovery (the suggest-don't-run pattern):**
+- Hidden from `/cadence:help`'s primary verb catalogue.
+- The agent SUGGESTS the verb in chat — never auto-fires — when the user's language signals feedback intent (friction, a bug observation, a feature wish). Frequency-capped via `cadence tip-pick --triggers intent-feedback-signal --types skill-teaching`. Skip the suggestion if the user already named the verb.
+
+**Guardrails:**
+- Never auto-include Cadence content. The default body is the user's text plus the environment footer, nothing more.
+- Never read files outside the plugin directory and explicitly-confirmed attachment paths.
+- No state writes outside the success path. Drafts only land on disk when `gh` was attempted and failed.
+- Mid-flow cancel is graceful — abandoned drafts evaporate.
+
+**Exit:** "Filed #<number> against <owner/repo>: <title>" + issue URL.
+
+---
+
+## Incoming
+
+*Hidden verb — not on the visible 12-verb surface; explicit-invocation only; agent-suggested when chat language signals maintainer-mode. Maintainer-side complement to `/report`.*
+
+**Purpose:** On-demand triage of open issues on the upstream Cadence repo. Each issue is walked end-to-end and routed into Cadence-shaped state (action / project / idea / close / defer) so the inbound queue never lives only in GitHub.
+
+**Tone:** Light, terse, maintainer-functional. One welcome line: `"<N> open issues to triage. First up:"`. Never editorialize the issues (no "this looks like a duplicate") — the maintainer decides.
+
+**Behavior:**
+- Reads the upstream repo from `cadence plugin-info --json`'s `owner_repo`. Refuses if unparseable.
+- Verifies `gh` is installed and authenticated. If not, prints install instructions and **exits with no fallback** — unlike `/report`, there's no useful offline mode.
+- Fetches the inbound queue:
+  ```bash
+  gh issue list --repo <owner/repo> --state open \
+    --search "-label:triaged-routed -label:triaged-deferred" \
+    --json number,title,labels,author,createdAt,url,body,comments
+  ```
+  Sorts oldest-first so stale issues bubble up.
+- For each issue, displays a compact view (number, label, age, title, body, up to 3 comments) and prompts:
+  ```
+  Triage: [r]oute / [p]romote / [i]dea / [c]lose / [d]efer / [s]kip:
+  ```
+  Accepts either single-key (`r`) or typed (`route`) answers.
+
+**Triage outcomes:**
+- **r — route-to-action:** prompts for an active project; appends an action via `cadence add-item --section action` with the issue URL embedded. Adds the `triaged-routed` label and a linking comment.
+- **p — promote-to-project:** prompts for a pursuit (default `make-cadence-public`); creates a project via `cadence create-project` with the issue title as the project name, the issue body as the Intent seed (thin Intent is acceptable — co-editable later via `/cadence:start`), and `--origin-issue <owner/repo>#<num>` so the project carries a `origin: github_issue` frontmatter field. The origin closes the loop downstream: on `/cadence:start` (auto-promotion `on_hold → active`) the `triaged-routed` label is swapped for `in-progress` with a "work started" comment; on `/cadence:resolve` (done or dropped) the issue is closed with a Cadence-authored comment. Adds `triaged-routed` label and a linking comment at promotion time.
+- **i — capture-as-idea:** prompts for a pursuit; creates an idea via `cadence create-idea` with the issue body. Adds `triaged-routed` label and a linking comment.
+- **c — close-with-comment:** prompts for a one-line comment; closes via `gh issue close --comment`.
+- **d — defer:** adds `triaged-deferred` label. No further prompt.
+- **s — skip:** moves on without changing anything. Skipped issues reappear on the next run (no `triaged-skipped` label — would create sprawl).
+
+The `triaged-routed` and `triaged-deferred` labels are symmetric — both drop the issue out of the active queue. The `inbound_issues_piling_up` reconciler flag counts only issues bearing neither label.
+
+**Defaults to highlight:**
+- Route operations do NOT close the issue. The issue stays open until the corresponding work lands; maintainer closes it manually later.
+- No fuzzy-prediction for the route target — all active projects are presented and the maintainer picks.
+
+**No-argument entry:** Walks the full queue, oldest-first, one issue at a time. End-of-queue: `"All <N> issues triaged. Done."`
+
+**With-argument entry:** `/incoming <issue-number>` jumps directly to one issue, triages it, exits.
+
+**Optional flag:** `--include-deferred` includes `triaged-deferred` issues for periodic re-check of the deferred backlog.
+
+**Discovery (suggest-don't-run):**
+- Hidden from `/cadence:help`'s primary catalogue.
+- Agent suggests the verb when chat language signals maintainer-mode ("any new issues?", "check inbound", "what should I triage?") via `cadence tip-pick --triggers intent-maintainer-triage --types skill-teaching`.
+- Already surfaced via the reconciler-flag pathway (`inbound_issues_piling_up` fires on SessionStart, `/reflect` Get Clear, and `/cadence:reconcile` when the inbound queue exceeds `cadence.yaml`'s `incoming_queue_threshold` — default 5). The flag is cached at `.cadence/inbound-cache.json` per `incoming_queue_cache_ttl_minutes` (default 15) so SessionStart doesn't pay the gh round-trip every time.
+
+**Guardrails:**
+- `gh` is a hard prerequisite — no offline mode.
+- Never auto-route. Every outcome requires explicit per-issue user choice.
+- Never silently include attribution data beyond what's already public on GitHub. The verb only **reads** public issue content and **writes** new labels/comments visible on the issue.
+
+**Exit:**
+```
+Triaged <N> issues:
+  - <M> routed to projects/actions/ideas
+  - <K> closed
+  - <D> deferred
+  - <S> skipped
+
+<inbound queue: <remaining> issues>
+```
+Then the verb-hint block + teaching footer per the universal exit convention.
 
 ---
 

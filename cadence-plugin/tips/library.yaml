@@ -1867,6 +1867,26 @@ tips:
     tone: structural
     frequency: { cool_down_days: 14, lifetime_max: 5 }
 
+  - id: report-verb-discovery-on-feedback-signal
+    type: skill-teaching
+    content: |
+      `/cadence:report` files a GitHub issue against the Cadence repo —
+      bug, feature request, or feedback. Privacy-by-default: no
+      pursuit/project content is included unless you explicitly opt in.
+    triggers: [intent-feedback-signal]
+    tone: directive
+    frequency: { cool_down_days: 7, lifetime_max: 10 }
+
+  - id: incoming-verb-discovery-on-maintainer-triage
+    type: skill-teaching
+    content: |
+      `/cadence:incoming` walks open issues on the upstream Cadence
+      repo and routes each one to an action, project, idea, close,
+      or defer. Requires `gh`; Cadence-specific.
+    triggers: [intent-maintainer-triage]
+    tone: directive
+    frequency: { cool_down_days: 7, lifetime_max: 10 }
+
   # ============================================================
   # Verb-hint next-step suggestions
   # ============================================================

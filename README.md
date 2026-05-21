@@ -6,11 +6,52 @@ A cognitive operating system that holds your context, protects your flow, separa
 
 ## Quick Start
 
+### Prerequisites
+
+For a fresh Mac. Skip the steps you already have.
+
+1. **Homebrew** — install from [brew.sh](https://brew.sh) if you don't have it.
+
+2. **Node.js (LTS) via nvm** — Cadence's plugin runs on Node. Install via nvm so future upgrades don't require a system reinstall:
+
+   ```bash
+   brew install nvm
+   ```
+
+   Follow the post-install instructions Homebrew prints to add nvm to your shell profile (typically a `source $(brew --prefix nvm)/nvm.sh` line in `~/.zshrc` or `~/.bashrc`), then open a new shell. Install and select Node LTS:
+
+   ```bash
+   nvm install --lts
+   nvm use --lts
+   ```
+
+3. **Claude Code CLI:**
+
+   ```bash
+   npm install -g @anthropic-ai/claude-code
+   ```
+
+4. **GitHub CLI (optional but recommended):** install `gh` if you want to file issues against this repo:
+
+   ```bash
+   brew install gh
+   gh auth login
+   ```
+
+### Install Cadence
+
+Clone the plugin somewhere on your machine — anywhere is fine; the path is referenced by `--plugin-dir` below.
+
 ```bash
-# In any repo where you want to run Cadence:
+git clone https://github.com/kevinteg/Cadence.git ~/code/cadence
+```
+
+### Run Cadence in a repo
+
+```bash
 cd <your-repo>
 git init  # if it's not already a git repo
-claude --plugin-dir <path-to>/cadence-plugin
+claude --plugin-dir ~/code/cadence/cadence-plugin
 ```
 
 In Claude Code, run `/cadence:init` to bootstrap, then `/cadence:start` to begin.

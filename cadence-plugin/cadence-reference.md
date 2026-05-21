@@ -103,11 +103,32 @@ markdown content. The key formats are:
   optional waiting_for, optional `domain` (`physical` | `digital` |
   `hybrid` — overrides the keyword heuristic in `src/scan/domain.ts`,
   used by `/promote` and `/complete` to adapt their prompts; leave
-  unset to use detection); sections for Intent, Actions, Notes. Older
-  project files still carry a `Definition of Done` section instead of
-  Intent — that's a historical shape, parsed but not emitted for new
-  projects. The CLI exposes `detected_domain` (heuristic) and
-  `effective_domain` (override-or-detected) on the project JSON output.
+  unset to use detection), optional `origin` (see below); sections for
+  Intent, Actions, Notes. Older project files still carry a
+  `Definition of Done` section instead of Intent — that's a historical
+  shape, parsed but not emitted for new projects. The CLI exposes
+  `detected_domain` (heuristic) and `effective_domain`
+  (override-or-detected) on the project JSON output.
+
+  The `origin` field captures where a project came from, as a
+  discriminated union by `kind`. Today only `github_issue` is wired
+  end-to-end (written by `/cadence:incoming`'s promote path; consumed
+  by `cadence set-status` and `cadence check` to close or label the
+  linked issue on lifecycle transitions). Shape:
+
+  ```yaml
+  origin:
+    kind: github_issue
+    repo: owner/name
+    number: 42
+    url: https://github.com/owner/name/issues/42
+  ```
+
+  The union is designed to extend to additional kinds (`idea`, `url`,
+  `capture`, etc.) without re-engineering the frontmatter. See
+  `src/types.ts` `OriginSchema`. The CLI shorthand
+  `cadence create-project --origin-issue owner/repo#42` constructs
+  the github_issue shape from `repo#number`; the URL is derived.
 - **Idea** (`<id>.md`): frontmatter with id, parent, state, created,
   optional developed_at, promoted_to, closed_reason
 - **Capture** (`<timestamp>.md`): frontmatter with captured, verb_context;
@@ -167,10 +188,28 @@ Supports `--scope` (daily/weekly/monthly/annual/pursuit) and
 `set-status <project-id>`, `set-idea-state <idea-id>`,
 `check <project-id>`, `add-item <project-id>`,
 `add-waiting-for <project-id>`, `flag-waiting-for <project-id>`,
-`move-pursuit <id>`. Each performs one well-formed mutation and emits
-JSON describing what was written. Use these in preference to direct
-Edit/Write — they enforce schema, generate timestamps, and keep
-frontmatter formatting consistent.
+`move-pursuit <id>`, `sync-origin <project-id>`, `mcp-pull --server <name>`.
+Each performs one well-formed mutation and emits JSON describing what
+was written. Use these in preference to direct Edit/Write — they
+enforce schema, generate timestamps, and keep frontmatter formatting
+consistent.
+
+**Origin-sync side effects** (`set-status`, `check`): when a project
+has an `origin` field and a lifecycle transition occurs, the CLI
+reconciles the origin alongside the state change. For `github_issue`
+origins:
+- transition into `done` or `dropped` → close the linked issue with a
+  Cadence-authored comment
+- transition into `active` (from `on_hold`, including auto-promotion
+  via `check`) → swap `triaged-routed` → `in-progress` label and post
+  a "work started" comment
+All sync calls are gh-gated (silent skip on missing/unauthed gh) and
+idempotent (already-closed/already-started short-circuit without
+duplicate comments). The result object includes an `origin_sync`
+field describing what happened — callers surface this to the user
+when non-null. `cadence sync-origin <project-id>` re-runs the sync
+without changing state, for the backfill case where origin was added
+after a transition.
 
 If the bin is missing, skills fall back to manual file scanning and
 direct Write per their internal fallback notes.
@@ -205,8 +244,11 @@ scan/report path tolerates both shapes.
 
 Ideas are a first-class collection adjacent to the work hierarchy. Every
 Idea has a parent — either a pursuit or a project. Ideas without a clear
-parent are placed on the Inbox with an auto-generated name. The parent
-field uses the same ID convention as projects (e.g., `parent:
+parent are placed on the Inbox with an auto-generated name; the Inbox
+is a *short-term triage zone*, not a permanent home for unattached or
+cross-cutting ideas — the expectation is that the next `/develop` or
+`/promote` pass moves them to a real pursuit (or closes them). The
+parent field uses the same ID convention as projects (e.g., `parent:
 build-cadence-v1` for a pursuit, `parent:
 build-cadence-v1/implement-reconciler` for a project).
 
@@ -228,7 +270,7 @@ the target is an active pursuit or project.
 - **Someday** pursuits live in `pursuits/_someday/<id>/` (set aside, may return)
 - **Archived** pursuits live in `pursuits/_archived/<id>/` (resolved as **completed** — shipped; closed via the closure path of /resolve)
 - **Dropped** pursuits live in `pursuits/_dropped/<id>/` (resolved as **dropped** — didn't ship; closed via the drop path of /resolve with `--state dropped --reason "..."`). Same Zeigarnik-release ritual as archived; different terminal outcome.
-- **Inbox** lives in `pursuits/inbox/` — never closes
+- **Inbox** lives in `pursuits/inbox/` — never closes; it's a short-term triage zone for ideas without an obvious home, not an organizational layer. A growing Inbox is a triage debt signal; the reconciler surfaces it.
 - Moving between states is a file move (`cadence move-pursuit <id> --to active|someday|archived|dropped`); the CLI updates the pursuit's `status` frontmatter to match.
 - Someday pursuits can have cue metadata in frontmatter for reconciler
   surfacing.
@@ -330,6 +372,125 @@ When the user dumps a raw thought mid-flow via `/capture`, save it to
 `thoughts/unprocessed/` with no response. Captures are triaged into
 Ideas or Actions at the next breakpoint or during Reflect. Flag
 uncertain routing for human review.
+
+## MCP Integration
+
+Cadence is a *client* of MCP servers — it consumes resources from
+external MCP servers (Glean, time, custom) and writes them into
+Cadence primitives. It does not host its own tools. Today the wired
+path is `cadence mcp-pull` → captures; future verbs may consume
+the same `mcp_servers` config.
+
+### Configuration
+
+Declare servers under `mcp_servers:` in `cadence.yaml`. v1 supports
+`stdio` transport; `http` is parsed-but-rejected (room left for v2).
+
+```yaml
+mcp_servers:
+  - name: glean                 # alias used by --server
+    transport: stdio
+    command: glean-mcp          # executable on PATH
+    args: ["--profile", "default"]
+    env:
+      GLEAN_TOKEN: ${env:GLEAN_TOKEN}   # ${env:NAME} expanded at config load
+    cwd: ~/.glean               # optional; ~/ expanded
+    timeout_ms: 10000           # optional per-call timeout (default 10000)
+```
+
+`${env:NAME}` expansion happens at `loadConfig` time, not lazily.
+Missing variables surface as `MCP server '<name>' references missing
+env var <NAME>` at the CLI boundary — never at first use. Duplicate
+server names raise immediately to prevent silent shadowing.
+
+### `cadence mcp-pull` (read resources → captures)
+
+```bash
+cadence mcp-pull --server <name> [--filter <substring>] [--limit <N>] [--dry-run]
+```
+
+- **`--server`** (required): alias from `mcp_servers[*].name`.
+- **`--filter`**: case-insensitive substring matched against
+  resource uri / name / description.
+- **`--limit`**: cap the post-filter set.
+- **`--dry-run`**: list what would be written without touching disk.
+
+**Behavior:** connects to the named server, lists resources, applies
+filter + limit, and for each resource: reads content, dedups against
+existing captures by `mcp.uri` (fast) and `mcp.content_hash` (precise
+across renames), writes a capture to `thoughts/unprocessed/` with an
+`mcp:` frontmatter block. Binary resources are flagged and skipped
+(the capture primitive is text-only). Connection is per-invocation —
+no pooling.
+
+**Output (JSON):**
+```json
+{
+  "server": "glean",
+  "dry_run": false,
+  "total_listed": 47,
+  "after_filter": 12,
+  "entries": [ { "kind": "written", "uri": "...", "path": "..." }, ... ],
+  "summary": { "written": 9, "skipped_existing": 2, "skipped_binary": 1, "errors": 0 }
+}
+```
+
+**Capture frontmatter** written by `mcp-pull` (extends the standard
+shape with the `mcp:` block — see "File Formats" → Capture):
+```yaml
+captured: 2026-05-22T10:00:00
+verb_context: mcp-pull:glean
+mcp:
+  server: glean
+  uri: glean://doc/abc
+  mime_type: text/markdown
+  content_hash: sha256:...
+```
+
+**Errors** (emitted to stderr as `{ error: { kind, message, hint } }`
+with exit code 1):
+- `not_configured` — `--server` doesn't match any entry in `mcp_servers`
+- `unsupported_transport` — server declared with `transport: http`
+- `spawn_failed` — stdio command not on PATH or refused to start
+- `handshake_failed` — server didn't complete the MCP initialize step
+- `timeout` — a call exceeded `timeout_ms`
+- `server_error` — MCP server returned a protocol-level error
+
+### What's deliberately out of v1
+
+- `listTools` / `callTool` — read-only consumption only. Letting an
+  MCP server mutate Cadence state is a separate trust call.
+- HTTP transport — parsed-but-rejected; revisit when a real-use need
+  surfaces.
+- Resource subscriptions — pull-only.
+- Hosting our own MCP server — Cadence is a client, not a host. If
+  that flips later, it's a separate project.
+
+## Maintainer Labels (Upstream Cadence Repo)
+
+The maintainer-side `/incoming` workflow and the origin-sync CLI use
+a small set of GitHub labels to coordinate state on the upstream
+issue tracker. Create these once via `gh label create` on any repo
+that consumes the workflow; they do not auto-create.
+
+| Label | Color | Meaning |
+|---|---|---|
+| `triaged-routed` | `#0e8a16` (green) | Issue has been triaged through `/cadence:incoming` and routed to a Cadence project, action, or idea. Filtered out of the default `/incoming` queue. |
+| `triaged-deferred` | `#fbca04` (yellow) | Issue has been deferred for later reconsideration. Filtered out of the default `/incoming` queue; surface again with `/incoming --include-deferred`. |
+| `in-progress` | `#1d76db` (blue) | Cadence: a project tied to this issue is actively being worked on. Applied automatically (replacing `triaged-routed`) when the project transitions `on_hold` → `active`. Removed implicitly when the issue closes on project resolve. |
+
+Create commands (one-time per repo):
+```bash
+gh label create triaged-routed --repo <owner>/<name> --color 0e8a16 --description "Triaged and routed to a Cadence project/action/idea"
+gh label create triaged-deferred --repo <owner>/<name> --color fbca04 --description "Triaged and deferred for later reconsideration"
+gh label create in-progress --repo <owner>/<name> --color 1d76db --description "Cadence: a project tied to this issue is actively being worked on"
+```
+
+The origin-sync side effects (label swaps + comments + issue close)
+all flow through these labels. If a maintainer renames any of them
+on the GitHub side, the sync logic in `src/write/origin-sync.ts`
+needs to be updated to match — the label names are referenced as
+string literals.
 
 ## Tip Library
 

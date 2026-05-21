@@ -22,12 +22,13 @@ Arguments resolve via fuzzy match, partial match, or natural language.
      cadence ideas --state seed --json
      ```
      Group
-     the returned ideas by `parent` (Inbox first, then other
-     pursuits) and present:
+     the returned ideas by `parent` (Inbox first — Inbox is a
+     short-term triage zone, so these need homes or kills, not
+     standing residence — then other pursuits) and present:
      ```
      Develop — Ideas ready for evaluation
 
-     **Inbox** (unattached)
+     **Inbox** (awaiting triage — move to a pursuit or close)
      1. [idea-id]: [first line of body]
 
      **[Parent Pursuit ID]**

@@ -7,10 +7,12 @@ import {
   computeProjectProgress,
   toggleChecklistItem,
 } from './checklist.js'
-import type { Progress } from '../types.js'
+import type { Origin, Progress } from '../types.js'
+import { OriginSchema } from '../types.js'
 import {
   dateString,
   isoTimestamp,
+  loadFrontmatterFile,
   mutateFrontmatter,
 } from './util.js'
 import {
@@ -19,6 +21,7 @@ import {
   resolvePursuitDir,
 } from './paths.js'
 import { parseFrontmatter } from '../parse/frontmatter.js'
+import { syncOrigin, type OriginSyncResult } from './origin-sync.js'
 
 export type SetProjectStatusOpts = {
   pursuit?: string
@@ -43,6 +46,7 @@ export type PursuitSummary = {
 export type SetProjectStatusResult = {
   path: string
   pursuit?: PursuitSummary
+  origin_sync?: OriginSyncResult
 }
 
 export async function setProjectStatus(
@@ -51,7 +55,14 @@ export async function setProjectStatus(
 ): Promise<SetProjectStatusResult> {
   const filePath = await locateProject(repoRoot, opts.id, opts.pursuit)
   const now = opts.now ?? new Date()
+  let previousStatus: string | undefined
+  let origin: Origin | undefined
+  let pursuitId: string | undefined
   await mutateFrontmatter(filePath, (data, body) => {
+    previousStatus = typeof data['status'] === 'string' ? data['status'] : undefined
+    pursuitId = typeof data['pursuit'] === 'string' ? data['pursuit'] : undefined
+    const parsedOrigin = OriginSchema.safeParse(data['origin'])
+    if (parsedOrigin.success) origin = parsedOrigin.data
     data['status'] = opts.status
     if (opts.status === 'dropped') {
       if (!opts.reason) {
@@ -68,7 +79,73 @@ export async function setProjectStatus(
   if (opts.include_pursuit) {
     result.pursuit = await summarizePursuit(repoRoot, filePath)
   }
+  // Fire origin sync on lifecycle transitions when origin is present.
+  // Idempotent re-syncs (backfill case) go through `cadence sync-origin`.
+  if (origin && pursuitId && previousStatus !== opts.status) {
+    if (opts.status === 'done' || opts.status === 'dropped') {
+      const outcome: { kind: 'done' } | { kind: 'dropped'; reason: string } =
+        opts.status === 'dropped'
+          ? { kind: 'dropped', reason: opts.reason ?? '' }
+          : { kind: 'done' }
+      result.origin_sync = await syncOrigin(origin, outcome, {
+        projectId: opts.id,
+        pursuitId,
+      })
+    } else if (opts.status === 'active') {
+      result.origin_sync = await syncOrigin(
+        origin,
+        { kind: 'started' },
+        { projectId: opts.id, pursuitId },
+      )
+    }
+  }
   return result
+}
+
+/**
+ * Re-runs origin sync against an already-resolved project. Useful for
+ * the backfill case: a project that was set to done|dropped before its
+ * origin frontmatter was added. Reads current status from the project
+ * file; refuses to sync if the project isn't actually in a terminal
+ * state. Idempotent against an already-closed issue (returns
+ * `already_closed`).
+ */
+export async function syncProjectOrigin(
+  repoRoot: string,
+  opts: { id: string; pursuit?: string },
+): Promise<{ path: string; origin_sync: OriginSyncResult }> {
+  const filePath = await locateProject(repoRoot, opts.id, opts.pursuit)
+  const { data } = await loadFrontmatterFile(filePath)
+  const status = typeof data['status'] === 'string' ? data['status'] : undefined
+  const pursuitId = typeof data['pursuit'] === 'string' ? data['pursuit'] : undefined
+  if (status !== 'done' && status !== 'dropped' && status !== 'active') {
+    throw new Error(
+      `sync-origin only runs on active or resolved projects (status active|done|dropped); ${opts.id} is currently ${status ?? 'unknown'}`,
+    )
+  }
+  if (!pursuitId) {
+    throw new Error(`project ${opts.id} is missing a pursuit field`)
+  }
+  const parsedOrigin = OriginSchema.safeParse(data['origin'])
+  if (!parsedOrigin.success) {
+    return {
+      path: path.relative(repoRoot, filePath),
+      origin_sync: { kind: 'no_origin' },
+    }
+  }
+  let outcome: import('./origin-sync.js').OriginSyncOutcome
+  if (status === 'dropped') {
+    outcome = { kind: 'dropped', reason: String(data['dropped_reason'] ?? '') }
+  } else if (status === 'done') {
+    outcome = { kind: 'done' }
+  } else {
+    outcome = { kind: 'started' }
+  }
+  const origin_sync = await syncOrigin(parsedOrigin.data, outcome, {
+    projectId: opts.id,
+    pursuitId,
+  })
+  return { path: path.relative(repoRoot, filePath), origin_sync }
 }
 
 async function summarizePursuit(
@@ -162,6 +239,7 @@ export type CheckItemResult = {
   promoted?: boolean
   dodProgress: Progress
   actionProgress: Progress
+  origin_sync?: OriginSyncResult
 }
 
 export async function checkItem(
@@ -175,6 +253,8 @@ export async function checkItem(
   let matched = ''
   let promoted = false
   let finalBody = ''
+  let origin: Origin | undefined
+  let pursuitId: string | undefined
   await mutateFrontmatter(filePath, (data, body) => {
     const result = toggleChecklistItem(body, sectionName, opts.match, checked)
     matched = result.matched
@@ -189,17 +269,29 @@ export async function checkItem(
     ) {
       data['status'] = 'active'
       promoted = true
+      pursuitId =
+        typeof data['pursuit'] === 'string' ? data['pursuit'] : undefined
+      const parsedOrigin = OriginSchema.safeParse(data['origin'])
+      if (parsedOrigin.success) origin = parsedOrigin.data
     }
     finalBody = nextBody
     return { data, body: nextBody }
   })
   const progress = computeProjectProgress(finalBody)
-  return {
+  const result: CheckItemResult = {
     path: path.relative(repoRoot, filePath),
     matched,
     ...(promoted ? { promoted: true } : {}),
     ...progress,
   }
+  if (promoted && origin && pursuitId) {
+    result.origin_sync = await syncOrigin(
+      origin,
+      { kind: 'started' },
+      { projectId: opts.project, pursuitId },
+    )
+  }
+  return result
 }
 
 export type CheckItemsOpts = {
@@ -216,6 +308,7 @@ export type CheckItemsResult = {
   promoted?: boolean
   dodProgress: Progress
   actionProgress: Progress
+  origin_sync?: OriginSyncResult
 }
 
 export async function checkItems(
@@ -229,6 +322,8 @@ export async function checkItems(
   const matched: string[] = []
   let promoted = false
   let finalBody = ''
+  let origin: Origin | undefined
+  let pursuitId: string | undefined
   await mutateFrontmatter(filePath, (data, body) => {
     let nextBody = body
     for (const match of opts.matches) {
@@ -244,17 +339,29 @@ export async function checkItems(
     ) {
       data['status'] = 'active'
       promoted = true
+      pursuitId =
+        typeof data['pursuit'] === 'string' ? data['pursuit'] : undefined
+      const parsedOrigin = OriginSchema.safeParse(data['origin'])
+      if (parsedOrigin.success) origin = parsedOrigin.data
     }
     finalBody = nextBody
     return { data, body: nextBody }
   })
   const progress = computeProjectProgress(finalBody)
-  return {
+  const result: CheckItemsResult = {
     path: path.relative(repoRoot, filePath),
     matched,
     ...(promoted ? { promoted: true } : {}),
     ...progress,
   }
+  if (promoted && origin && pursuitId) {
+    result.origin_sync = await syncOrigin(
+      origin,
+      { kind: 'started' },
+      { projectId: opts.project, pursuitId },
+    )
+  }
+  return result
 }
 
 export type AddItemOpts = {

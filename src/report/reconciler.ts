@@ -18,6 +18,8 @@ export function report(snapshot: Snapshot): { snapshot: Snapshot; flags: Flag[] 
   flagStructural(flags, activeProjects)
   flagWipOverLimit(flags, activeProjects, config)
   flagClosingInOnResolution(flags, snapshot, activePursuitIds)
+  flagStaleInboxSeeds(flags, snapshot, config)
+  flagInboxOvercap(flags, snapshot, config)
 
   return { snapshot, flags }
 }
@@ -96,6 +98,50 @@ function flagWipOverLimit(
       projectIds: inProgress.map((p) => p.id),
     })
   }
+}
+
+/**
+ * Flag Inbox seeds that have aged past the Inbox-specific threshold
+ * (default 7d — one Reflect cycle). Distinct from the general
+ * aging_seed check (14d, any pursuit): the Inbox is meant to be a
+ * short-term triage zone, so an Inbox seed surviving a Reflect is the
+ * triage-debt signal worth surfacing. One flag per stale seed.
+ */
+function flagStaleInboxSeeds(
+  flags: Flag[],
+  snapshot: Snapshot,
+  config: { inbox_seed_stale_days: number },
+): void {
+  const threshold = config.inbox_seed_stale_days
+  for (const idea of snapshot.ideas) {
+    if (idea.parent !== 'inbox') continue
+    if (idea.state !== 'seed') continue
+    if (idea.ageDays <= threshold) continue
+    flags.push({
+      kind: 'stale_inbox_seed',
+      ideaId: idea.id,
+      ageDays: idea.ageDays,
+      threshold,
+    })
+  }
+}
+
+/**
+ * Flag the Inbox when its seed count exceeds the soft cap (default
+ * 10). Volume signal, not age — even fresh seeds piling up are worth
+ * a triage pass before brainstorm-debt compounds. One flag total.
+ */
+function flagInboxOvercap(
+  flags: Flag[],
+  snapshot: Snapshot,
+  config: { inbox_seed_softcap: number },
+): void {
+  const softcap = config.inbox_seed_softcap
+  const count = snapshot.ideas.filter(
+    (i) => i.parent === 'inbox' && i.state === 'seed',
+  ).length
+  if (count <= softcap) return
+  flags.push({ kind: 'inbox_overcap', count, softcap })
 }
 
 /**

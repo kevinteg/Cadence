@@ -140,8 +140,21 @@ function flagTable(flags: Flag[]): Table {
 }
 
 function flagTarget(flag: Flag): string {
-  if (flag.kind === 'wip_over_limit') return ''
-  return `${flag.pursuitId}/${flag.projectId}`
+  switch (flag.kind) {
+    case 'overdue_waiting_for':
+    case 'dormant_project':
+    case 'structural_active_no_open_actions':
+      return `${flag.pursuitId}/${flag.projectId}`
+    case 'closing_in_on_resolution':
+      return flag.pursuitId
+    case 'wip_over_limit':
+    case 'inbox_overcap':
+      return ''
+    case 'inbound_issues_piling_up':
+      return flag.ownerRepo
+    case 'stale_inbox_seed':
+      return `inbox/${flag.ideaId}`
+  }
 }
 
 function flagDetail(flag: Flag): string {
@@ -156,6 +169,19 @@ function flagDetail(flag: Flag): string {
       return 'all actions checked — does the intent feel achieved?'
     case 'wip_over_limit':
       return `${flag.count} in-progress (limit ${flag.limit}): ${flag.projectIds.join(', ')}`
+    case 'closing_in_on_resolution': {
+      const remaining = flag.unresolvedCount === 1 ? '1 project' : `${flag.unresolvedCount} projects`
+      return `${flag.resolvedCount}/${flag.totalCount} done, ${remaining} left — what would close this?`
+    }
+    case 'inbound_issues_piling_up': {
+      const issueWord = flag.count === 1 ? 'issue' : 'issues'
+      const cachedNote = flag.fromCache ? ' (cached)' : ''
+      return `${flag.count} untriaged ${issueWord}${cachedNote}; /cadence:incoming to triage`
+    }
+    case 'stale_inbox_seed':
+      return `${flag.ageDays}d on Inbox (threshold ${flag.threshold}d) — move to a pursuit or close`
+    case 'inbox_overcap':
+      return `${flag.count} seeds (soft cap ${flag.softcap}) — schedule a triage pass`
   }
 }
 

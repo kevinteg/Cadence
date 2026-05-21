@@ -195,6 +195,34 @@ the section is parsed-but-ignored.
 Note: Idea-specific checks (6-8) surface during /reflect only, not /status.
 Long-running projects and pursuit proximity surface in both.
 
+### 11. Stale Inbox Seed
+
+**Type:** `stale_inbox_seed`
+**Severity:** `warning`
+
+**Logic:**
+1. Scan ideas with `parent: inbox` and `state: seed`
+2. Flag each whose `ageDays` exceeds `inbox_seed_stale_days` (default 7 — one Reflect cycle)
+
+**Suggestion format:** "Inbox seed `[idea]` has been sitting [N days] (threshold [M]d) — move to a pursuit, promote, or close. Inbox is a triage zone, not a home."
+
+**Distinct from `aging_seed`:** that check fires at 14d for *any* seed regardless of parent; this one is Inbox-only with a shorter horizon because Inbox is explicitly transient.
+
+**Surfaces in:** `/status`, `/reconcile`, `/reflect`. One flag per stale seed (intentional — each seed is its own triage decision).
+
+### 12. Inbox Overcap
+
+**Type:** `inbox_overcap`
+**Severity:** `info`
+
+**Logic:**
+1. Count ideas with `parent: inbox` and `state: seed`
+2. Flag once if the count exceeds `inbox_seed_softcap` (default 10)
+
+**Suggestion format:** "Inbox has [N] seeds (soft cap [M]) — schedule a triage pass via /cadence:develop."
+
+**Surfaces in:** `/status`, `/reconcile`, `/reflect`. One flag total — this is a volume signal, separate from the per-seed age signal.
+
 ---
 
 ## Thresholds
@@ -206,6 +234,8 @@ All thresholds come from `cadence.yaml` under `defaults`:
 | `waiting_for_grace_days` | 2 | Overdue waiting-for |
 | `marker_stale_days` | 7 | Stale markers |
 | `someday_review` | monthly | Someday cue surfacing |
+| `inbox_seed_stale_days` | 7 | Stale Inbox seed |
+| `inbox_seed_softcap` | 10 | Inbox overcap |
 
 Dormant project threshold is fixed at 14 days. Aging seed threshold is
 14 days. Unpromoted idea threshold is 7 days. Long-running project
