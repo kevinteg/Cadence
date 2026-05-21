@@ -107,9 +107,9 @@ var require_path = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.convertPosixPathToPattern = exports2.convertWindowsPathToPattern = exports2.convertPathToPattern = exports2.escapePosixPath = exports2.escapeWindowsPath = exports2.escape = exports2.removeLeadingDotSegment = exports2.makeAbsolute = exports2.unixify = void 0;
-    var os = __require("os");
-    var path22 = __require("path");
-    var IS_WINDOWS_PLATFORM = os.platform() === "win32";
+    var os2 = __require("os");
+    var path23 = __require("path");
+    var IS_WINDOWS_PLATFORM = os2.platform() === "win32";
     var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
     var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
     var WINDOWS_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()[\]{}]|^!|[!+@](?=\())/g;
@@ -120,7 +120,7 @@ var require_path = __commonJS({
     }
     exports2.unixify = unixify;
     function makeAbsolute(cwd, filepath) {
-      return path22.resolve(cwd, filepath);
+      return path23.resolve(cwd, filepath);
     }
     exports2.makeAbsolute = makeAbsolute;
     function removeLeadingDotSegment(entry) {
@@ -607,12 +607,12 @@ var require_to_regex_range = __commonJS({
     function filterPatterns(arr, comparison, prefix, intersection2, options2) {
       let result = [];
       for (let ele of arr) {
-        let { string: string3 } = ele;
-        if (!intersection2 && !contains(comparison, "string", string3)) {
-          result.push(prefix + string3);
+        let { string: string4 } = ele;
+        if (!intersection2 && !contains(comparison, "string", string4)) {
+          result.push(prefix + string4);
         }
-        if (intersection2 && contains(comparison, "string", string3)) {
-          result.push(prefix + string3);
+        if (intersection2 && contains(comparison, "string", string4)) {
+          result.push(prefix + string4);
         }
       }
       return result;
@@ -1417,7 +1417,7 @@ var require_braces = __commonJS({
 var require_constants2 = __commonJS({
   "node_modules/picomatch/lib/constants.js"(exports2, module2) {
     "use strict";
-    var path22 = __require("path");
+    var path23 = __require("path");
     var WIN_SLASH = "\\\\/";
     var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
     var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
@@ -1591,7 +1591,7 @@ var require_constants2 = __commonJS({
       /* | */
       CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
       /* \uFEFF */
-      SEP: path22.sep,
+      SEP: path23.sep,
       /**
        * Create EXTGLOB_CHARS
        */
@@ -1618,7 +1618,7 @@ var require_constants2 = __commonJS({
 var require_utils2 = __commonJS({
   "node_modules/picomatch/lib/utils.js"(exports2) {
     "use strict";
-    var path22 = __require("path");
+    var path23 = __require("path");
     var win32 = process.platform === "win32";
     var {
       REGEX_BACKSLASH,
@@ -1647,7 +1647,7 @@ var require_utils2 = __commonJS({
       if (options2 && typeof options2.windows === "boolean") {
         return options2.windows;
       }
-      return win32 === true || path22.sep === "\\";
+      return win32 === true || path23.sep === "\\";
     };
     exports2.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx);
@@ -3011,7 +3011,7 @@ var require_parse2 = __commonJS({
 var require_picomatch = __commonJS({
   "node_modules/picomatch/lib/picomatch.js"(exports2, module2) {
     "use strict";
-    var path22 = __require("path");
+    var path23 = __require("path");
     var scan2 = require_scan();
     var parse4 = require_parse2();
     var utils = require_utils2();
@@ -3096,7 +3096,7 @@ var require_picomatch = __commonJS({
     };
     picomatch.matchBase = (input, glob, options2, posix = utils.isWindows(options2)) => {
       const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options2);
-      return regex.test(path22.basename(input));
+      return regex.test(path23.basename(input));
     };
     picomatch.isMatch = (str3, patterns, options2) => picomatch(patterns, options2)(str3);
     picomatch.parse = (pattern, options2) => {
@@ -3323,7 +3323,7 @@ var require_pattern = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isAbsolute = exports2.partitionAbsoluteAndRelative = exports2.removeDuplicateSlashes = exports2.matchAny = exports2.convertPatternsToRe = exports2.makeRe = exports2.getPatternParts = exports2.expandBraceExpansion = exports2.expandPatternsWithBraceExpansion = exports2.isAffectDepthOfReadingPattern = exports2.endsWithSlashGlobStar = exports2.hasGlobStar = exports2.getBaseDirectory = exports2.isPatternRelatedToParentDirectory = exports2.getPatternsOutsideCurrentDirectory = exports2.getPatternsInsideCurrentDirectory = exports2.getPositivePatterns = exports2.getNegativePatterns = exports2.isPositivePattern = exports2.isNegativePattern = exports2.convertToNegativePattern = exports2.convertToPositivePattern = exports2.isDynamicPattern = exports2.isStaticPattern = void 0;
-    var path22 = __require("path");
+    var path23 = __require("path");
     var globParent = require_glob_parent();
     var micromatch = require_micromatch();
     var GLOBSTAR = "**";
@@ -3418,7 +3418,7 @@ var require_pattern = __commonJS({
     }
     exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
     function isAffectDepthOfReadingPattern(pattern) {
-      const basename = path22.basename(pattern);
+      const basename = path23.basename(pattern);
       return endsWithSlashGlobStar(pattern) || isStaticPattern(basename);
     }
     exports2.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
@@ -3476,7 +3476,7 @@ var require_pattern = __commonJS({
     }
     exports2.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative;
     function isAbsolute(pattern) {
-      return path22.isAbsolute(pattern);
+      return path23.isAbsolute(pattern);
     }
     exports2.isAbsolute = isAbsolute;
   }
@@ -3653,14 +3653,14 @@ var require_utils3 = __commonJS({
     exports2.errno = errno;
     var fs = require_fs();
     exports2.fs = fs;
-    var path22 = require_path();
-    exports2.path = path22;
+    var path23 = require_path();
+    exports2.path = path23;
     var pattern = require_pattern();
     exports2.pattern = pattern;
     var stream = require_stream();
     exports2.stream = stream;
-    var string3 = require_string();
-    exports2.string = string3;
+    var string4 = require_string();
+    exports2.string = string4;
   }
 });
 
@@ -3766,8 +3766,8 @@ var require_async = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path22, settings, callback) {
-      settings.fs.lstat(path22, (lstatError, lstat) => {
+    function read(path23, settings, callback) {
+      settings.fs.lstat(path23, (lstatError, lstat) => {
         if (lstatError !== null) {
           callFailureCallback(callback, lstatError);
           return;
@@ -3776,7 +3776,7 @@ var require_async = __commonJS({
           callSuccessCallback(callback, lstat);
           return;
         }
-        settings.fs.stat(path22, (statError, stat2) => {
+        settings.fs.stat(path23, (statError, stat2) => {
           if (statError !== null) {
             if (settings.throwErrorOnBrokenSymbolicLink) {
               callFailureCallback(callback, statError);
@@ -3808,13 +3808,13 @@ var require_sync = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path22, settings) {
-      const lstat = settings.fs.lstatSync(path22);
+    function read(path23, settings) {
+      const lstat = settings.fs.lstatSync(path23);
       if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) {
         return lstat;
       }
       try {
-        const stat2 = settings.fs.statSync(path22);
+        const stat2 = settings.fs.statSync(path23);
         if (settings.markSymbolicLink) {
           stat2.isSymbolicLink = () => true;
         }
@@ -3885,17 +3885,17 @@ var require_out = __commonJS({
     var sync = require_sync();
     var settings_1 = require_settings();
     exports2.Settings = settings_1.default;
-    function stat2(path22, optionsOrSettingsOrCallback, callback) {
+    function stat2(path23, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path22, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path23, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path22, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path23, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.stat = stat2;
-    function statSync(path22, optionsOrSettings) {
+    function statSync(path23, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path22, settings);
+      return sync.read(path23, settings);
     }
     exports2.statSync = statSync;
     function getSettings(settingsOrOptions = {}) {
@@ -4111,16 +4111,16 @@ var require_async2 = __commonJS({
           return;
         }
         const tasks = names.map((name) => {
-          const path22 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+          const path23 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
           return (done) => {
-            fsStat.stat(path22, settings.fsStatSettings, (error2, stats) => {
+            fsStat.stat(path23, settings.fsStatSettings, (error2, stats) => {
               if (error2 !== null) {
                 done(error2);
                 return;
               }
               const entry = {
                 name,
-                path: path22,
+                path: path23,
                 dirent: utils.fs.createDirentFromStats(name, stats)
               };
               if (settings.stats) {
@@ -4238,7 +4238,7 @@ var require_settings2 = __commonJS({
   "node_modules/@nodelib/fs.scandir/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path22 = __require("path");
+    var path23 = __require("path");
     var fsStat = require_out();
     var fs = require_fs4();
     var Settings = class {
@@ -4246,7 +4246,7 @@ var require_settings2 = __commonJS({
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
         this.fs = fs.createFileSystemAdapter(this._options.fs);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path22.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path23.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
         this.fsStatSettings = new fsStat.Settings({
@@ -4273,17 +4273,17 @@ var require_out2 = __commonJS({
     var sync = require_sync2();
     var settings_1 = require_settings2();
     exports2.Settings = settings_1.default;
-    function scandir(path22, optionsOrSettingsOrCallback, callback) {
+    function scandir(path23, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path22, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path23, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path22, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path23, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.scandir = scandir;
-    function scandirSync(path22, optionsOrSettings) {
+    function scandirSync(path23, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path22, settings);
+      return sync.read(path23, settings);
     }
     exports2.scandirSync = scandirSync;
     function getSettings(settingsOrOptions = {}) {
@@ -4347,8 +4347,8 @@ var require_queue = __commonJS({
       var errorHandler = null;
       var self = {
         push,
-        drain: noop,
-        saturated: noop,
+        drain: noop2,
+        saturated: noop2,
         pause,
         paused: false,
         get concurrency() {
@@ -4371,7 +4371,7 @@ var require_queue = __commonJS({
         length,
         getQueue,
         unshift,
-        empty: noop,
+        empty: noop2,
         kill,
         killAndDrain,
         error: error2,
@@ -4423,7 +4423,7 @@ var require_queue = __commonJS({
         current.context = context;
         current.release = release;
         current.value = value;
-        current.callback = done || noop;
+        current.callback = done || noop2;
         current.errorHandler = errorHandler;
         if (_running >= _concurrency || self.paused) {
           if (queueTail) {
@@ -4444,7 +4444,7 @@ var require_queue = __commonJS({
         current.context = context;
         current.release = release;
         current.value = value;
-        current.callback = done || noop;
+        current.callback = done || noop2;
         current.errorHandler = errorHandler;
         if (_running >= _concurrency || self.paused) {
           if (queueHead) {
@@ -4486,13 +4486,13 @@ var require_queue = __commonJS({
       function kill() {
         queueHead = null;
         queueTail = null;
-        self.drain = noop;
+        self.drain = noop2;
       }
       function killAndDrain() {
         queueHead = null;
         queueTail = null;
         self.drain();
-        self.drain = noop;
+        self.drain = noop2;
       }
       function abort() {
         var current = queueHead;
@@ -4505,7 +4505,7 @@ var require_queue = __commonJS({
           var val = current.value;
           var context2 = current.context;
           current.value = null;
-          current.callback = noop;
+          current.callback = noop2;
           current.errorHandler = null;
           if (errorHandler2) {
             errorHandler2(new Error("abort"), val);
@@ -4514,19 +4514,19 @@ var require_queue = __commonJS({
           current.release(current);
           current = next;
         }
-        self.drain = noop;
+        self.drain = noop2;
       }
       function error2(handler) {
         errorHandler = handler;
       }
     }
-    function noop() {
+    function noop2() {
     }
     function Task() {
       this.value = null;
-      this.callback = noop;
+      this.callback = noop2;
       this.next = null;
-      this.release = noop;
+      this.release = noop2;
       this.context = null;
       this.errorHandler = null;
       var self = this;
@@ -4535,7 +4535,7 @@ var require_queue = __commonJS({
         var errorHandler = self.errorHandler;
         var val = self.value;
         self.value = null;
-        self.callback = noop;
+        self.callback = noop2;
         if (self.errorHandler) {
           errorHandler(err, val);
         }
@@ -4571,7 +4571,7 @@ var require_queue = __commonJS({
             resolve(result);
           });
         });
-        p.catch(noop);
+        p.catch(noop2);
         return p;
       }
       function unshift(value) {
@@ -4584,7 +4584,7 @@ var require_queue = __commonJS({
             resolve(result);
           });
         });
-        p.catch(noop);
+        p.catch(noop2);
         return p;
       }
       function drained() {
@@ -4930,7 +4930,7 @@ var require_settings3 = __commonJS({
   "node_modules/@nodelib/fs.walk/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path22 = __require("path");
+    var path23 = __require("path");
     var fsScandir = require_out2();
     var Settings = class {
       constructor(_options = {}) {
@@ -4940,7 +4940,7 @@ var require_settings3 = __commonJS({
         this.deepFilter = this._getValue(this._options.deepFilter, null);
         this.entryFilter = this._getValue(this._options.entryFilter, null);
         this.errorFilter = this._getValue(this._options.errorFilter, null);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path22.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path23.sep);
         this.fsScandirSettings = new fsScandir.Settings({
           followSymbolicLinks: this._options.followSymbolicLinks,
           fs: this._options.fs,
@@ -5002,7 +5002,7 @@ var require_reader2 = __commonJS({
   "node_modules/fast-glob/out/readers/reader.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path22 = __require("path");
+    var path23 = __require("path");
     var fsStat = require_out();
     var utils = require_utils3();
     var Reader = class {
@@ -5015,7 +5015,7 @@ var require_reader2 = __commonJS({
         });
       }
       _getFullEntryPath(filepath) {
-        return path22.resolve(this._settings.cwd, filepath);
+        return path23.resolve(this._settings.cwd, filepath);
       }
       _makeEntry(stats, pattern) {
         const entry = {
@@ -5431,7 +5431,7 @@ var require_provider = __commonJS({
   "node_modules/fast-glob/out/providers/provider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path22 = __require("path");
+    var path23 = __require("path");
     var deep_1 = require_deep();
     var entry_1 = require_entry();
     var error_1 = require_error();
@@ -5445,7 +5445,7 @@ var require_provider = __commonJS({
         this.entryTransformer = new entry_2.default(this._settings);
       }
       _getRootDirectory(task) {
-        return path22.resolve(this._settings.cwd, task.base);
+        return path23.resolve(this._settings.cwd, task.base);
       }
       _getReaderOptions(task) {
         const basePath = task.base === "." ? "" : task.base;
@@ -5627,8 +5627,8 @@ var require_settings4 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = void 0;
     var fs = __require("fs");
-    var os = __require("os");
-    var CPU_COUNT = Math.max(os.cpus().length, 1);
+    var os2 = __require("os");
+    var CPU_COUNT = Math.max(os2.cpus().length, 1);
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = {
       lstat: fs.lstat,
       lstatSync: fs.lstatSync,
@@ -6076,15 +6076,15 @@ var require_common3 = __commonJS({
       }
       return target;
     }
-    function repeat2(string3, count) {
+    function repeat2(string4, count) {
       var result = "", cycle;
       for (cycle = 0; cycle < count; cycle += 1) {
-        result += string3;
+        result += string4;
       }
       return result;
     }
-    function isNegativeZero2(number3) {
-      return number3 === 0 && Number.NEGATIVE_INFINITY === 1 / number3;
+    function isNegativeZero2(number4) {
+      return number4 === 0 && Number.NEGATIVE_INFINITY === 1 / number4;
     }
     module2.exports.isNothing = isNothing2;
     module2.exports.isObject = isObject3;
@@ -6742,7 +6742,7 @@ var require_timestamp = __commonJS({
       return false;
     }
     function constructYamlTimestamp2(data) {
-      var match, year, month, day, hour, minute, second, fraction = 0, delta = null, tz_hour, tz_minute, date3;
+      var match, year, month, day, hour, minute, second, fraction = 0, delta = null, tz_hour, tz_minute, date4;
       match = YAML_DATE_REGEXP2.exec(data);
       if (match === null) match = YAML_TIMESTAMP_REGEXP2.exec(data);
       if (match === null) throw new Error("Date resolve error");
@@ -6768,9 +6768,9 @@ var require_timestamp = __commonJS({
         delta = (tz_hour * 60 + tz_minute) * 6e4;
         if (match[9] === "-") delta = -delta;
       }
-      date3 = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
-      if (delta) date3.setTime(date3.getTime() - delta);
-      return date3;
+      date4 = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
+      if (delta) date4.setTime(date4.getTime() - delta);
+      return date4;
     }
     function representYamlTimestamp2(object3) {
       return object3.toISOString();
@@ -8369,8 +8369,8 @@ var require_dumper = __commonJS({
       return result;
     }
     function encodeHex2(character) {
-      var string3, handle, length;
-      string3 = character.toString(16).toUpperCase();
+      var string4, handle, length;
+      string4 = character.toString(16).toUpperCase();
       if (character <= 255) {
         handle = "x";
         length = 2;
@@ -8383,7 +8383,7 @@ var require_dumper = __commonJS({
       } else {
         throw new YAMLException2("code point within a string may not be greater than 0xFFFFFFFF");
       }
-      return "\\" + handle + common2.repeat("0", length - string3.length) + string3;
+      return "\\" + handle + common2.repeat("0", length - string4.length) + string4;
     }
     function State2(options2) {
       this.schema = options2["schema"] || DEFAULT_FULL_SCHEMA;
@@ -8404,15 +8404,15 @@ var require_dumper = __commonJS({
       this.duplicates = [];
       this.usedDuplicates = null;
     }
-    function indentString2(string3, spaces) {
-      var ind = common2.repeat(" ", spaces), position = 0, next = -1, result = "", line, length = string3.length;
+    function indentString2(string4, spaces) {
+      var ind = common2.repeat(" ", spaces), position = 0, next = -1, result = "", line, length = string4.length;
       while (position < length) {
-        next = string3.indexOf("\n", position);
+        next = string4.indexOf("\n", position);
         if (next === -1) {
-          line = string3.slice(position);
+          line = string4.slice(position);
           position = length;
         } else {
-          line = string3.slice(position, next + 1);
+          line = string4.slice(position, next + 1);
           position = next + 1;
         }
         if (line.length && line !== "\n") result += ind;
@@ -8448,110 +8448,110 @@ var require_dumper = __commonJS({
     function isPlainSafeFirst2(c) {
       return isPrintable2(c) && c !== 65279 && !isWhitespace2(c) && c !== CHAR_MINUS2 && c !== CHAR_QUESTION2 && c !== CHAR_COLON2 && c !== CHAR_COMMA2 && c !== CHAR_LEFT_SQUARE_BRACKET2 && c !== CHAR_RIGHT_SQUARE_BRACKET2 && c !== CHAR_LEFT_CURLY_BRACKET2 && c !== CHAR_RIGHT_CURLY_BRACKET2 && c !== CHAR_SHARP2 && c !== CHAR_AMPERSAND2 && c !== CHAR_ASTERISK2 && c !== CHAR_EXCLAMATION2 && c !== CHAR_VERTICAL_LINE2 && c !== CHAR_EQUALS2 && c !== CHAR_GREATER_THAN2 && c !== CHAR_SINGLE_QUOTE2 && c !== CHAR_DOUBLE_QUOTE2 && c !== CHAR_PERCENT2 && c !== CHAR_COMMERCIAL_AT2 && c !== CHAR_GRAVE_ACCENT2;
     }
-    function needIndentIndicator2(string3) {
+    function needIndentIndicator2(string4) {
       var leadingSpaceRe = /^\n* /;
-      return leadingSpaceRe.test(string3);
+      return leadingSpaceRe.test(string4);
     }
     var STYLE_PLAIN2 = 1;
     var STYLE_SINGLE2 = 2;
     var STYLE_LITERAL2 = 3;
     var STYLE_FOLDED2 = 4;
     var STYLE_DOUBLE2 = 5;
-    function chooseScalarStyle2(string3, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType) {
+    function chooseScalarStyle2(string4, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType) {
       var i;
       var char, prev_char;
       var hasLineBreak = false;
       var hasFoldableLine = false;
       var shouldTrackWidth = lineWidth !== -1;
       var previousLineBreak = -1;
-      var plain = isPlainSafeFirst2(string3.charCodeAt(0)) && !isWhitespace2(string3.charCodeAt(string3.length - 1));
+      var plain = isPlainSafeFirst2(string4.charCodeAt(0)) && !isWhitespace2(string4.charCodeAt(string4.length - 1));
       if (singleLineOnly) {
-        for (i = 0; i < string3.length; i++) {
-          char = string3.charCodeAt(i);
+        for (i = 0; i < string4.length; i++) {
+          char = string4.charCodeAt(i);
           if (!isPrintable2(char)) {
             return STYLE_DOUBLE2;
           }
-          prev_char = i > 0 ? string3.charCodeAt(i - 1) : null;
+          prev_char = i > 0 ? string4.charCodeAt(i - 1) : null;
           plain = plain && isPlainSafe2(char, prev_char);
         }
       } else {
-        for (i = 0; i < string3.length; i++) {
-          char = string3.charCodeAt(i);
+        for (i = 0; i < string4.length; i++) {
+          char = string4.charCodeAt(i);
           if (char === CHAR_LINE_FEED2) {
             hasLineBreak = true;
             if (shouldTrackWidth) {
               hasFoldableLine = hasFoldableLine || // Foldable line = too long, and not more-indented.
-              i - previousLineBreak - 1 > lineWidth && string3[previousLineBreak + 1] !== " ";
+              i - previousLineBreak - 1 > lineWidth && string4[previousLineBreak + 1] !== " ";
               previousLineBreak = i;
             }
           } else if (!isPrintable2(char)) {
             return STYLE_DOUBLE2;
           }
-          prev_char = i > 0 ? string3.charCodeAt(i - 1) : null;
+          prev_char = i > 0 ? string4.charCodeAt(i - 1) : null;
           plain = plain && isPlainSafe2(char, prev_char);
         }
-        hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string3[previousLineBreak + 1] !== " ");
+        hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string4[previousLineBreak + 1] !== " ");
       }
       if (!hasLineBreak && !hasFoldableLine) {
-        return plain && !testAmbiguousType(string3) ? STYLE_PLAIN2 : STYLE_SINGLE2;
+        return plain && !testAmbiguousType(string4) ? STYLE_PLAIN2 : STYLE_SINGLE2;
       }
-      if (indentPerLevel > 9 && needIndentIndicator2(string3)) {
+      if (indentPerLevel > 9 && needIndentIndicator2(string4)) {
         return STYLE_DOUBLE2;
       }
       return hasFoldableLine ? STYLE_FOLDED2 : STYLE_LITERAL2;
     }
-    function writeScalar2(state, string3, level, iskey) {
+    function writeScalar2(state, string4, level, iskey) {
       state.dump = function() {
-        if (string3.length === 0) {
+        if (string4.length === 0) {
           return "''";
         }
-        if (!state.noCompatMode && DEPRECATED_BOOLEANS_SYNTAX2.indexOf(string3) !== -1) {
-          return "'" + string3 + "'";
+        if (!state.noCompatMode && DEPRECATED_BOOLEANS_SYNTAX2.indexOf(string4) !== -1) {
+          return "'" + string4 + "'";
         }
         var indent = state.indent * Math.max(1, level);
         var lineWidth = state.lineWidth === -1 ? -1 : Math.max(Math.min(state.lineWidth, 40), state.lineWidth - indent);
         var singleLineOnly = iskey || state.flowLevel > -1 && level >= state.flowLevel;
-        function testAmbiguity(string4) {
-          return testImplicitResolving2(state, string4);
+        function testAmbiguity(string5) {
+          return testImplicitResolving2(state, string5);
         }
-        switch (chooseScalarStyle2(string3, singleLineOnly, state.indent, lineWidth, testAmbiguity)) {
+        switch (chooseScalarStyle2(string4, singleLineOnly, state.indent, lineWidth, testAmbiguity)) {
           case STYLE_PLAIN2:
-            return string3;
+            return string4;
           case STYLE_SINGLE2:
-            return "'" + string3.replace(/'/g, "''") + "'";
+            return "'" + string4.replace(/'/g, "''") + "'";
           case STYLE_LITERAL2:
-            return "|" + blockHeader2(string3, state.indent) + dropEndingNewline2(indentString2(string3, indent));
+            return "|" + blockHeader2(string4, state.indent) + dropEndingNewline2(indentString2(string4, indent));
           case STYLE_FOLDED2:
-            return ">" + blockHeader2(string3, state.indent) + dropEndingNewline2(indentString2(foldString2(string3, lineWidth), indent));
+            return ">" + blockHeader2(string4, state.indent) + dropEndingNewline2(indentString2(foldString2(string4, lineWidth), indent));
           case STYLE_DOUBLE2:
-            return '"' + escapeString2(string3, lineWidth) + '"';
+            return '"' + escapeString2(string4, lineWidth) + '"';
           default:
             throw new YAMLException2("impossible error: invalid scalar style");
         }
       }();
     }
-    function blockHeader2(string3, indentPerLevel) {
-      var indentIndicator = needIndentIndicator2(string3) ? String(indentPerLevel) : "";
-      var clip = string3[string3.length - 1] === "\n";
-      var keep = clip && (string3[string3.length - 2] === "\n" || string3 === "\n");
+    function blockHeader2(string4, indentPerLevel) {
+      var indentIndicator = needIndentIndicator2(string4) ? String(indentPerLevel) : "";
+      var clip = string4[string4.length - 1] === "\n";
+      var keep = clip && (string4[string4.length - 2] === "\n" || string4 === "\n");
       var chomp = keep ? "+" : clip ? "" : "-";
       return indentIndicator + chomp + "\n";
     }
-    function dropEndingNewline2(string3) {
-      return string3[string3.length - 1] === "\n" ? string3.slice(0, -1) : string3;
+    function dropEndingNewline2(string4) {
+      return string4[string4.length - 1] === "\n" ? string4.slice(0, -1) : string4;
     }
-    function foldString2(string3, width) {
+    function foldString2(string4, width) {
       var lineRe = /(\n+)([^\n]*)/g;
       var result = function() {
-        var nextLF = string3.indexOf("\n");
-        nextLF = nextLF !== -1 ? nextLF : string3.length;
+        var nextLF = string4.indexOf("\n");
+        nextLF = nextLF !== -1 ? nextLF : string4.length;
         lineRe.lastIndex = nextLF;
-        return foldLine2(string3.slice(0, nextLF), width);
+        return foldLine2(string4.slice(0, nextLF), width);
       }();
-      var prevMoreIndented = string3[0] === "\n" || string3[0] === " ";
+      var prevMoreIndented = string4[0] === "\n" || string4[0] === " ";
       var moreIndented;
       var match;
-      while (match = lineRe.exec(string3)) {
+      while (match = lineRe.exec(string4)) {
         var prefix = match[1], line = match[2];
         moreIndented = line[0] === " ";
         result += prefix + (!prevMoreIndented && !moreIndented && line !== "" ? "\n" : "") + foldLine2(line, width);
@@ -8582,14 +8582,14 @@ var require_dumper = __commonJS({
       }
       return result.slice(1);
     }
-    function escapeString2(string3) {
+    function escapeString2(string4) {
       var result = "";
       var char, nextChar;
       var escapeSeq;
-      for (var i = 0; i < string3.length; i++) {
-        char = string3.charCodeAt(i);
+      for (var i = 0; i < string4.length; i++) {
+        char = string4.charCodeAt(i);
         if (char >= 55296 && char <= 56319) {
-          nextChar = string3.charCodeAt(i + 1);
+          nextChar = string4.charCodeAt(i + 1);
           if (nextChar >= 56320 && nextChar <= 57343) {
             result += encodeHex2((char - 55296) * 1024 + nextChar - 56320 + 65536);
             i++;
@@ -8597,7 +8597,7 @@ var require_dumper = __commonJS({
           }
         }
         escapeSeq = ESCAPE_SEQUENCES2[char];
-        result += !escapeSeq && isPrintable2(char) ? string3[i] : escapeSeq || encodeHex2(char);
+        result += !escapeSeq && isPrintable2(char) ? string4[i] : escapeSeq || encodeHex2(char);
       }
       return result;
     }
@@ -12460,8 +12460,8 @@ var require_utils6 = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path22) {
-      let input = path22;
+    function removeDotSegments(path23) {
+      let input = path23;
       const output = [];
       let nextSlash = -1;
       let len = 0;
@@ -12713,8 +12713,8 @@ var require_schemes = __commonJS({
         wsComponent.secure = void 0;
       }
       if (wsComponent.resourceName) {
-        const [path22, query] = wsComponent.resourceName.split("?");
-        wsComponent.path = path22 && path22 !== "/" ? path22 : void 0;
+        const [path23, query] = wsComponent.resourceName.split("?");
+        wsComponent.path = path23 && path23 !== "/" ? path23 : void 0;
         wsComponent.query = query;
         wsComponent.resourceName = void 0;
       }
@@ -15814,7 +15814,7 @@ var require_formats = __commonJS({
     }
     exports2.fullFormats = {
       // date: http://tools.ietf.org/html/rfc3339#section-5.6
-      date: fmtDef(date3, compareDate),
+      date: fmtDef(date4, compareDate),
       // date-time: http://tools.ietf.org/html/rfc3339#section-5.6
       time: fmtDef(getTime(true), compareTime),
       "date-time": fmtDef(getDateTime(true), compareDateTime),
@@ -15880,7 +15880,7 @@ var require_formats = __commonJS({
     }
     var DATE = /^(\d\d\d\d)-(\d\d)-(\d\d)$/;
     var DAYS = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    function date3(str3) {
+    function date4(str3) {
       const matches = DATE.exec(str3);
       if (!matches)
         return false;
@@ -15949,7 +15949,7 @@ var require_formats = __commonJS({
       const time3 = getTime(strictTimeZone);
       return function date_time(str3) {
         const dateTime = str3.split(DATE_TIME_SEPARATOR);
-        return dateTime.length === 2 && date3(dateTime[0]) && time3(dateTime[1]);
+        return dateTime.length === 2 && date4(dateTime[0]) && time3(dateTime[1]);
       };
     }
     function compareDateTime(dt1, dt2) {
@@ -16126,7 +16126,7 @@ var require_windows = __commonJS({
     module2.exports = isexe;
     isexe.sync = sync;
     var fs = __require("fs");
-    function checkPathExt(path22, options2) {
+    function checkPathExt(path23, options2) {
       var pathext = options2.pathExt !== void 0 ? options2.pathExt : process.env.PATHEXT;
       if (!pathext) {
         return true;
@@ -16137,25 +16137,25 @@ var require_windows = __commonJS({
       }
       for (var i = 0; i < pathext.length; i++) {
         var p = pathext[i].toLowerCase();
-        if (p && path22.substr(-p.length).toLowerCase() === p) {
+        if (p && path23.substr(-p.length).toLowerCase() === p) {
           return true;
         }
       }
       return false;
     }
-    function checkStat(stat2, path22, options2) {
+    function checkStat(stat2, path23, options2) {
       if (!stat2.isSymbolicLink() && !stat2.isFile()) {
         return false;
       }
-      return checkPathExt(path22, options2);
+      return checkPathExt(path23, options2);
     }
-    function isexe(path22, options2, cb) {
-      fs.stat(path22, function(er, stat2) {
-        cb(er, er ? false : checkStat(stat2, path22, options2));
+    function isexe(path23, options2, cb) {
+      fs.stat(path23, function(er, stat2) {
+        cb(er, er ? false : checkStat(stat2, path23, options2));
       });
     }
-    function sync(path22, options2) {
-      return checkStat(fs.statSync(path22), path22, options2);
+    function sync(path23, options2) {
+      return checkStat(fs.statSync(path23), path23, options2);
     }
   }
 });
@@ -16166,13 +16166,13 @@ var require_mode = __commonJS({
     module2.exports = isexe;
     isexe.sync = sync;
     var fs = __require("fs");
-    function isexe(path22, options2, cb) {
-      fs.stat(path22, function(er, stat2) {
+    function isexe(path23, options2, cb) {
+      fs.stat(path23, function(er, stat2) {
         cb(er, er ? false : checkStat(stat2, options2));
       });
     }
-    function sync(path22, options2) {
-      return checkStat(fs.statSync(path22), options2);
+    function sync(path23, options2) {
+      return checkStat(fs.statSync(path23), options2);
     }
     function checkStat(stat2, options2) {
       return stat2.isFile() && checkMode(stat2, options2);
@@ -16205,7 +16205,7 @@ var require_isexe = __commonJS({
     }
     module2.exports = isexe;
     isexe.sync = sync;
-    function isexe(path22, options2, cb) {
+    function isexe(path23, options2, cb) {
       if (typeof options2 === "function") {
         cb = options2;
         options2 = {};
@@ -16215,7 +16215,7 @@ var require_isexe = __commonJS({
           throw new TypeError("callback not provided");
         }
         return new Promise(function(resolve, reject) {
-          isexe(path22, options2 || {}, function(er, is) {
+          isexe(path23, options2 || {}, function(er, is) {
             if (er) {
               reject(er);
             } else {
@@ -16224,7 +16224,7 @@ var require_isexe = __commonJS({
           });
         });
       }
-      core2(path22, options2 || {}, function(er, is) {
+      core2(path23, options2 || {}, function(er, is) {
         if (er) {
           if (er.code === "EACCES" || options2 && options2.ignoreErrors) {
             er = null;
@@ -16234,9 +16234,9 @@ var require_isexe = __commonJS({
         cb(er, is);
       });
     }
-    function sync(path22, options2) {
+    function sync(path23, options2) {
       try {
-        return core2.sync(path22, options2 || {});
+        return core2.sync(path23, options2 || {});
       } catch (er) {
         if (options2 && options2.ignoreErrors || er.code === "EACCES") {
           return false;
@@ -16252,7 +16252,7 @@ var require_isexe = __commonJS({
 var require_which = __commonJS({
   "node_modules/which/which.js"(exports2, module2) {
     var isWindows = process.platform === "win32" || process.env.OSTYPE === "cygwin" || process.env.OSTYPE === "msys";
-    var path22 = __require("path");
+    var path23 = __require("path");
     var COLON = isWindows ? ";" : ":";
     var isexe = require_isexe();
     var getNotFoundError = (cmd) => Object.assign(new Error(`not found: ${cmd}`), { code: "ENOENT" });
@@ -16290,7 +16290,7 @@ var require_which = __commonJS({
           return opt.all && found.length ? resolve(found) : reject(getNotFoundError(cmd));
         const ppRaw = pathEnv[i];
         const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw;
-        const pCmd = path22.join(pathPart, cmd);
+        const pCmd = path23.join(pathPart, cmd);
         const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd : pCmd;
         resolve(subStep(p, i, 0));
       });
@@ -16317,7 +16317,7 @@ var require_which = __commonJS({
       for (let i = 0; i < pathEnv.length; i++) {
         const ppRaw = pathEnv[i];
         const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw;
-        const pCmd = path22.join(pathPart, cmd);
+        const pCmd = path23.join(pathPart, cmd);
         const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd : pCmd;
         for (let j = 0; j < pathExt.length; j++) {
           const cur = p + pathExt[j];
@@ -16365,7 +16365,7 @@ var require_path_key = __commonJS({
 var require_resolveCommand = __commonJS({
   "node_modules/cross-spawn/lib/util/resolveCommand.js"(exports2, module2) {
     "use strict";
-    var path22 = __require("path");
+    var path23 = __require("path");
     var which = require_which();
     var getPathKey = require_path_key();
     function resolveCommandAttempt(parsed, withoutPathExt) {
@@ -16383,7 +16383,7 @@ var require_resolveCommand = __commonJS({
       try {
         resolved = which.sync(parsed.command, {
           path: env[getPathKey({ env })],
-          pathExt: withoutPathExt ? path22.delimiter : void 0
+          pathExt: withoutPathExt ? path23.delimiter : void 0
         });
       } catch (e) {
       } finally {
@@ -16392,7 +16392,7 @@ var require_resolveCommand = __commonJS({
         }
       }
       if (resolved) {
-        resolved = path22.resolve(hasCustomCwd ? parsed.options.cwd : "", resolved);
+        resolved = path23.resolve(hasCustomCwd ? parsed.options.cwd : "", resolved);
       }
       return resolved;
     }
@@ -16441,13 +16441,13 @@ var require_shebang_command = __commonJS({
   "node_modules/shebang-command/index.js"(exports2, module2) {
     "use strict";
     var shebangRegex = require_shebang_regex();
-    module2.exports = (string3 = "") => {
-      const match = string3.match(shebangRegex);
+    module2.exports = (string4 = "") => {
+      const match = string4.match(shebangRegex);
       if (!match) {
         return null;
       }
-      const [path22, argument] = match[0].replace(/#! ?/, "").split(" ");
-      const binary2 = path22.split("/").pop();
+      const [path23, argument] = match[0].replace(/#! ?/, "").split(" ");
+      const binary2 = path23.split("/").pop();
       if (binary2 === "env") {
         return argument;
       }
@@ -16482,7 +16482,7 @@ var require_readShebang = __commonJS({
 var require_parse4 = __commonJS({
   "node_modules/cross-spawn/lib/parse.js"(exports2, module2) {
     "use strict";
-    var path22 = __require("path");
+    var path23 = __require("path");
     var resolveCommand = require_resolveCommand();
     var escape2 = require_escape();
     var readShebang = require_readShebang();
@@ -16507,7 +16507,7 @@ var require_parse4 = __commonJS({
       const needsShell = !isExecutableRegExp.test(commandFile);
       if (parsed.options.forceShell || needsShell) {
         const needsDoubleEscapeMetaChars = isCmdShimRegExp.test(commandFile);
-        parsed.command = path22.normalize(parsed.command);
+        parsed.command = path23.normalize(parsed.command);
         parsed.command = escape2.command(parsed.command);
         parsed.args = parsed.args.map((arg) => escape2.argument(arg, needsDoubleEscapeMetaChars));
         const shellCommand = [parsed.command].concat(parsed.args).join(" ");
@@ -16619,8 +16619,8 @@ var require_cross_spawn = __commonJS({
 
 // node_modules/cac/dist/index.mjs
 import { EventEmitter } from "events";
-function toArr(any) {
-  return any == null ? [] : Array.isArray(any) ? any : [any];
+function toArr(any2) {
+  return any2 == null ? [] : Array.isArray(any2) ? any2 : [any2];
 }
 function toVal(out, key, val, opts) {
   var x, old = out[key], nxt = !!~opts.string.indexOf(key) ? val == null || val === true ? "" : String(val) : typeof val === "boolean" ? val : !!~opts.boolean.indexOf(key) ? val === "false" ? false : val === "true" || (out._.push((x = +val, x * 0 === 0) ? x : val), !!val) : (x = +val, x * 0 === 0) ? x : val;
@@ -17203,18 +17203,18 @@ var CAC = class extends EventEmitter {
 var cac = (name = "") => new CAC(name);
 
 // src/cli.ts
-import { existsSync as existsSync14 } from "node:fs";
-import { readFile as readFile10 } from "node:fs/promises";
-import path21 from "node:path";
+import { existsSync as existsSync15 } from "node:fs";
+import { readFile as readFile11 } from "node:fs/promises";
+import path22 from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 
 // src/scan/repo.ts
 import { stat } from "node:fs/promises";
-import path7 from "node:path";
+import path8 from "node:path";
 
 // src/config.ts
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { readFile as readFile2 } from "node:fs/promises";
+import path2 from "node:path";
 
 // node_modules/js-yaml/dist/js-yaml.mjs
 function isNothing(subject) {
@@ -17239,15 +17239,15 @@ function extend(target, source) {
   }
   return target;
 }
-function repeat(string3, count) {
+function repeat(string4, count) {
   var result = "", cycle;
   for (cycle = 0; cycle < count; cycle += 1) {
-    result += string3;
+    result += string4;
   }
   return result;
 }
-function isNegativeZero(number3) {
-  return number3 === 0 && Number.NEGATIVE_INFINITY === 1 / number3;
+function isNegativeZero(number4) {
+  return number4 === 0 && Number.NEGATIVE_INFINITY === 1 / number4;
 }
 var isNothing_1 = isNothing;
 var isObject_1 = isObject;
@@ -17311,8 +17311,8 @@ function getLine(buffer, lineStart, lineEnd, position, maxLineLength) {
     // relative position
   };
 }
-function padStart(string3, max) {
-  return common.repeat(" ", max - string3.length) + string3;
+function padStart(string4, max) {
+  return common.repeat(" ", max - string4.length) + string4;
 }
 function makeSnippet(mark, options2) {
   options2 = Object.create(options2 || null);
@@ -17799,7 +17799,7 @@ function resolveYamlTimestamp(data) {
   return false;
 }
 function constructYamlTimestamp(data) {
-  var match, year, month, day, hour, minute, second, fraction = 0, delta = null, tz_hour, tz_minute, date3;
+  var match, year, month, day, hour, minute, second, fraction = 0, delta = null, tz_hour, tz_minute, date4;
   match = YAML_DATE_REGEXP.exec(data);
   if (match === null) match = YAML_TIMESTAMP_REGEXP.exec(data);
   if (match === null) throw new Error("Date resolve error");
@@ -17825,9 +17825,9 @@ function constructYamlTimestamp(data) {
     delta = (tz_hour * 60 + tz_minute) * 6e4;
     if (match[9] === "-") delta = -delta;
   }
-  date3 = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
-  if (delta) date3.setTime(date3.getTime() - delta);
-  return date3;
+  date4 = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
+  if (delta) date4.setTime(date4.getTime() - delta);
+  return date4;
 }
 function representYamlTimestamp(object3) {
   return object3.toISOString();
@@ -19250,8 +19250,8 @@ function compileStyleMap(schema2, map2) {
   return result;
 }
 function encodeHex(character) {
-  var string3, handle, length;
-  string3 = character.toString(16).toUpperCase();
+  var string4, handle, length;
+  string4 = character.toString(16).toUpperCase();
   if (character <= 255) {
     handle = "x";
     length = 2;
@@ -19264,7 +19264,7 @@ function encodeHex(character) {
   } else {
     throw new exception("code point within a string may not be greater than 0xFFFFFFFF");
   }
-  return "\\" + handle + common.repeat("0", length - string3.length) + string3;
+  return "\\" + handle + common.repeat("0", length - string4.length) + string4;
 }
 var QUOTING_TYPE_SINGLE = 1;
 var QUOTING_TYPE_DOUBLE = 2;
@@ -19290,15 +19290,15 @@ function State(options2) {
   this.duplicates = [];
   this.usedDuplicates = null;
 }
-function indentString(string3, spaces) {
-  var ind = common.repeat(" ", spaces), position = 0, next = -1, result = "", line, length = string3.length;
+function indentString(string4, spaces) {
+  var ind = common.repeat(" ", spaces), position = 0, next = -1, result = "", line, length = string4.length;
   while (position < length) {
-    next = string3.indexOf("\n", position);
+    next = string4.indexOf("\n", position);
     if (next === -1) {
-      line = string3.slice(position);
+      line = string4.slice(position);
       position = length;
     } else {
-      line = string3.slice(position, next + 1);
+      line = string4.slice(position, next + 1);
       position = next + 1;
     }
     if (line.length && line !== "\n") result += ind;
@@ -19345,26 +19345,26 @@ function isPlainSafeFirst(c) {
 function isPlainSafeLast(c) {
   return !isWhitespace(c) && c !== CHAR_COLON;
 }
-function codePointAt(string3, pos) {
-  var first = string3.charCodeAt(pos), second;
-  if (first >= 55296 && first <= 56319 && pos + 1 < string3.length) {
-    second = string3.charCodeAt(pos + 1);
+function codePointAt(string4, pos) {
+  var first = string4.charCodeAt(pos), second;
+  if (first >= 55296 && first <= 56319 && pos + 1 < string4.length) {
+    second = string4.charCodeAt(pos + 1);
     if (second >= 56320 && second <= 57343) {
       return (first - 55296) * 1024 + second - 56320 + 65536;
     }
   }
   return first;
 }
-function needIndentIndicator(string3) {
+function needIndentIndicator(string4) {
   var leadingSpaceRe = /^\n* /;
-  return leadingSpaceRe.test(string3);
+  return leadingSpaceRe.test(string4);
 }
 var STYLE_PLAIN = 1;
 var STYLE_SINGLE = 2;
 var STYLE_LITERAL = 3;
 var STYLE_FOLDED = 4;
 var STYLE_DOUBLE = 5;
-function chooseScalarStyle(string3, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType, quotingType, forceQuotes, inblock) {
+function chooseScalarStyle(string4, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType, quotingType, forceQuotes, inblock) {
   var i;
   var char = 0;
   var prevChar = null;
@@ -19372,10 +19372,10 @@ function chooseScalarStyle(string3, singleLineOnly, indentPerLevel, lineWidth, t
   var hasFoldableLine = false;
   var shouldTrackWidth = lineWidth !== -1;
   var previousLineBreak = -1;
-  var plain = isPlainSafeFirst(codePointAt(string3, 0)) && isPlainSafeLast(codePointAt(string3, string3.length - 1));
+  var plain = isPlainSafeFirst(codePointAt(string4, 0)) && isPlainSafeLast(codePointAt(string4, string4.length - 1));
   if (singleLineOnly || forceQuotes) {
-    for (i = 0; i < string3.length; char >= 65536 ? i += 2 : i++) {
-      char = codePointAt(string3, i);
+    for (i = 0; i < string4.length; char >= 65536 ? i += 2 : i++) {
+      char = codePointAt(string4, i);
       if (!isPrintable(char)) {
         return STYLE_DOUBLE;
       }
@@ -19383,13 +19383,13 @@ function chooseScalarStyle(string3, singleLineOnly, indentPerLevel, lineWidth, t
       prevChar = char;
     }
   } else {
-    for (i = 0; i < string3.length; char >= 65536 ? i += 2 : i++) {
-      char = codePointAt(string3, i);
+    for (i = 0; i < string4.length; char >= 65536 ? i += 2 : i++) {
+      char = codePointAt(string4, i);
       if (char === CHAR_LINE_FEED) {
         hasLineBreak = true;
         if (shouldTrackWidth) {
           hasFoldableLine = hasFoldableLine || // Foldable line = too long, and not more-indented.
-          i - previousLineBreak - 1 > lineWidth && string3[previousLineBreak + 1] !== " ";
+          i - previousLineBreak - 1 > lineWidth && string4[previousLineBreak + 1] !== " ";
           previousLineBreak = i;
         }
       } else if (!isPrintable(char)) {
@@ -19398,15 +19398,15 @@ function chooseScalarStyle(string3, singleLineOnly, indentPerLevel, lineWidth, t
       plain = plain && isPlainSafe(char, prevChar, inblock);
       prevChar = char;
     }
-    hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string3[previousLineBreak + 1] !== " ");
+    hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string4[previousLineBreak + 1] !== " ");
   }
   if (!hasLineBreak && !hasFoldableLine) {
-    if (plain && !forceQuotes && !testAmbiguousType(string3)) {
+    if (plain && !forceQuotes && !testAmbiguousType(string4)) {
       return STYLE_PLAIN;
     }
     return quotingType === QUOTING_TYPE_DOUBLE ? STYLE_DOUBLE : STYLE_SINGLE;
   }
-  if (indentPerLevel > 9 && needIndentIndicator(string3)) {
+  if (indentPerLevel > 9 && needIndentIndicator(string4)) {
     return STYLE_DOUBLE;
   }
   if (!forceQuotes) {
@@ -19414,24 +19414,24 @@ function chooseScalarStyle(string3, singleLineOnly, indentPerLevel, lineWidth, t
   }
   return quotingType === QUOTING_TYPE_DOUBLE ? STYLE_DOUBLE : STYLE_SINGLE;
 }
-function writeScalar(state, string3, level, iskey, inblock) {
+function writeScalar(state, string4, level, iskey, inblock) {
   state.dump = function() {
-    if (string3.length === 0) {
+    if (string4.length === 0) {
       return state.quotingType === QUOTING_TYPE_DOUBLE ? '""' : "''";
     }
     if (!state.noCompatMode) {
-      if (DEPRECATED_BOOLEANS_SYNTAX.indexOf(string3) !== -1 || DEPRECATED_BASE60_SYNTAX.test(string3)) {
-        return state.quotingType === QUOTING_TYPE_DOUBLE ? '"' + string3 + '"' : "'" + string3 + "'";
+      if (DEPRECATED_BOOLEANS_SYNTAX.indexOf(string4) !== -1 || DEPRECATED_BASE60_SYNTAX.test(string4)) {
+        return state.quotingType === QUOTING_TYPE_DOUBLE ? '"' + string4 + '"' : "'" + string4 + "'";
       }
     }
     var indent = state.indent * Math.max(1, level);
     var lineWidth = state.lineWidth === -1 ? -1 : Math.max(Math.min(state.lineWidth, 40), state.lineWidth - indent);
     var singleLineOnly = iskey || state.flowLevel > -1 && level >= state.flowLevel;
-    function testAmbiguity(string4) {
-      return testImplicitResolving(state, string4);
+    function testAmbiguity(string5) {
+      return testImplicitResolving(state, string5);
     }
     switch (chooseScalarStyle(
-      string3,
+      string4,
       singleLineOnly,
       state.indent,
       lineWidth,
@@ -19441,42 +19441,42 @@ function writeScalar(state, string3, level, iskey, inblock) {
       inblock
     )) {
       case STYLE_PLAIN:
-        return string3;
+        return string4;
       case STYLE_SINGLE:
-        return "'" + string3.replace(/'/g, "''") + "'";
+        return "'" + string4.replace(/'/g, "''") + "'";
       case STYLE_LITERAL:
-        return "|" + blockHeader(string3, state.indent) + dropEndingNewline(indentString(string3, indent));
+        return "|" + blockHeader(string4, state.indent) + dropEndingNewline(indentString(string4, indent));
       case STYLE_FOLDED:
-        return ">" + blockHeader(string3, state.indent) + dropEndingNewline(indentString(foldString(string3, lineWidth), indent));
+        return ">" + blockHeader(string4, state.indent) + dropEndingNewline(indentString(foldString(string4, lineWidth), indent));
       case STYLE_DOUBLE:
-        return '"' + escapeString(string3) + '"';
+        return '"' + escapeString(string4) + '"';
       default:
         throw new exception("impossible error: invalid scalar style");
     }
   }();
 }
-function blockHeader(string3, indentPerLevel) {
-  var indentIndicator = needIndentIndicator(string3) ? String(indentPerLevel) : "";
-  var clip = string3[string3.length - 1] === "\n";
-  var keep = clip && (string3[string3.length - 2] === "\n" || string3 === "\n");
+function blockHeader(string4, indentPerLevel) {
+  var indentIndicator = needIndentIndicator(string4) ? String(indentPerLevel) : "";
+  var clip = string4[string4.length - 1] === "\n";
+  var keep = clip && (string4[string4.length - 2] === "\n" || string4 === "\n");
   var chomp = keep ? "+" : clip ? "" : "-";
   return indentIndicator + chomp + "\n";
 }
-function dropEndingNewline(string3) {
-  return string3[string3.length - 1] === "\n" ? string3.slice(0, -1) : string3;
+function dropEndingNewline(string4) {
+  return string4[string4.length - 1] === "\n" ? string4.slice(0, -1) : string4;
 }
-function foldString(string3, width) {
+function foldString(string4, width) {
   var lineRe = /(\n+)([^\n]*)/g;
   var result = function() {
-    var nextLF = string3.indexOf("\n");
-    nextLF = nextLF !== -1 ? nextLF : string3.length;
+    var nextLF = string4.indexOf("\n");
+    nextLF = nextLF !== -1 ? nextLF : string4.length;
     lineRe.lastIndex = nextLF;
-    return foldLine(string3.slice(0, nextLF), width);
+    return foldLine(string4.slice(0, nextLF), width);
   }();
-  var prevMoreIndented = string3[0] === "\n" || string3[0] === " ";
+  var prevMoreIndented = string4[0] === "\n" || string4[0] === " ";
   var moreIndented;
   var match;
-  while (match = lineRe.exec(string3)) {
+  while (match = lineRe.exec(string4)) {
     var prefix = match[1], line = match[2];
     moreIndented = line[0] === " ";
     result += prefix + (!prevMoreIndented && !moreIndented && line !== "" ? "\n" : "") + foldLine(line, width);
@@ -19507,16 +19507,16 @@ function foldLine(line, width) {
   }
   return result.slice(1);
 }
-function escapeString(string3) {
+function escapeString(string4) {
   var result = "";
   var char = 0;
   var escapeSeq;
-  for (var i = 0; i < string3.length; char >= 65536 ? i += 2 : i++) {
-    char = codePointAt(string3, i);
+  for (var i = 0; i < string4.length; char >= 65536 ? i += 2 : i++) {
+    char = codePointAt(string4, i);
     escapeSeq = ESCAPE_SEQUENCES[char];
     if (!escapeSeq && isPrintable(char)) {
-      result += string3[i];
-      if (char >= 65536) result += string3[i + 1];
+      result += string4[i];
+      if (char >= 65536) result += string4[i + 1];
     } else {
       result += escapeSeq || encodeHex(char);
     }
@@ -20318,8 +20318,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path22, errorMaps, issueData } = params;
-  const fullPath = [...path22, ...issueData.path || []];
+  const { data, path: path23, errorMaps, issueData } = params;
+  const fullPath = [...path23, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -20435,11 +20435,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path22, key) {
+  constructor(parent, value, path23, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path22;
+    this._path = path23;
     this._key = key;
   }
   get path() {
@@ -24052,18 +24052,140 @@ var CONFIG_DEFAULTS = {
   mcp_servers: []
 };
 
+// src/integrations/mcp/discovery.ts
+import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import os from "node:os";
+async function discoverMcpServers(repoRoot, opts = {}) {
+  const homeDir = opts.homeDir ?? os.homedir();
+  const userServers = await readClaudeUserServers(homeDir);
+  const projectServers = await readProjectMcpServers(repoRoot);
+  return [...userServers, ...projectServers];
+}
+function mergeMcpRegistry(cadenceYamlServers, discovered) {
+  const merged = /* @__PURE__ */ new Map();
+  for (const s of discovered) {
+    merged.set(s.name, s);
+  }
+  for (const s of cadenceYamlServers) {
+    merged.set(s.name, { ...s, source: "cadence-yaml" });
+  }
+  const servers = [];
+  const sources = /* @__PURE__ */ new Map();
+  for (const [name, entry] of merged) {
+    const { source: _ignored, ...rest } = entry;
+    servers.push(rest);
+    sources.set(name, entry.source);
+  }
+  return { servers, sources };
+}
+async function readClaudeUserServers(homeDir) {
+  const candidate = path.join(homeDir, ".claude.json");
+  if (!existsSync(candidate)) return [];
+  return parseMcpServersFile(candidate, "claude-user");
+}
+async function readProjectMcpServers(repoRoot) {
+  const candidate = path.join(repoRoot, ".mcp.json");
+  if (!existsSync(candidate)) return [];
+  return parseMcpServersFile(candidate, "mcp-project");
+}
+async function parseMcpServersFile(filePath, source) {
+  let raw;
+  try {
+    raw = await readFile(filePath, "utf8");
+  } catch {
+    return [];
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  const root = parsed;
+  const entries = root["mcpServers"];
+  if (!entries || typeof entries !== "object") return [];
+  const out = [];
+  for (const [name, val] of Object.entries(entries)) {
+    const cfg = coerceEntry(name, val, source);
+    if (cfg) out.push(cfg);
+  }
+  return out;
+}
+function coerceEntry(name, raw, source) {
+  if (!raw || typeof raw !== "object") return null;
+  const entry = raw;
+  const declaredType = typeof entry["type"] === "string" ? entry["type"] : void 0;
+  const declaredTransport = typeof entry["transport"] === "string" ? entry["transport"] : void 0;
+  const kindHint = declaredType ?? declaredTransport;
+  const url2 = typeof entry["url"] === "string" ? entry["url"] : void 0;
+  const command = typeof entry["command"] === "string" ? entry["command"] : void 0;
+  const isHttp = kindHint === "http" || kindHint === "https" || kindHint === "sse" || kindHint === "streamable-http" || kindHint === void 0 && url2 !== void 0;
+  const isStdio = kindHint === "stdio" || kindHint === void 0 && command !== void 0;
+  if (isHttp && url2) {
+    return {
+      kind: "http",
+      name,
+      url: url2,
+      headers: coerceStringMap(entry["headers"]) ?? {},
+      timeoutMs: typeof entry["timeout_ms"] === "number" ? entry["timeout_ms"] : MCP_DEFAULT_TIMEOUT_MS,
+      source
+    };
+  }
+  if (isStdio && command) {
+    const args = Array.isArray(entry["args"]) ? entry["args"].filter(
+      (a) => typeof a === "string"
+    ) : [];
+    return {
+      kind: "stdio",
+      name,
+      command,
+      args,
+      env: coerceStringMap(entry["env"]) ?? {},
+      ...typeof entry["cwd"] === "string" ? { cwd: entry["cwd"] } : {},
+      timeoutMs: typeof entry["timeout_ms"] === "number" ? entry["timeout_ms"] : MCP_DEFAULT_TIMEOUT_MS,
+      source
+    };
+  }
+  return null;
+}
+function coerceStringMap(v) {
+  if (!v || typeof v !== "object") return void 0;
+  const out = {};
+  for (const [k, val] of Object.entries(v)) {
+    if (typeof val === "string") out[k] = val;
+  }
+  return out;
+}
+
 // src/config.ts
 async function loadConfig(repoRoot) {
-  const configPath = path.join(repoRoot, "cadence.yaml");
+  const configPath = path2.join(repoRoot, "cadence.yaml");
   let raw = ConfigSchema.parse({});
   try {
-    const text = await readFile(configPath, "utf8");
+    const text = await readFile2(configPath, "utf8");
     const parsed = jsYaml.load(text, { schema: jsYaml.CORE_SCHEMA }) ?? {};
     raw = ConfigSchema.parse(parsed);
   } catch (err) {
     if (err.code !== "ENOENT") throw err;
   }
-  return mergeDefaults(raw, process.env);
+  const cfg = mergeDefaults(raw, process.env);
+  const discovered = await discoverMcpServers(repoRoot);
+  const { servers } = mergeMcpRegistry(cfg.mcp_servers, discovered);
+  return { ...cfg, mcp_servers: servers };
+}
+async function loadCadenceYamlMcpServers(repoRoot) {
+  const configPath = path2.join(repoRoot, "cadence.yaml");
+  let raw = ConfigSchema.parse({});
+  try {
+    const text = await readFile2(configPath, "utf8");
+    const parsed = jsYaml.load(text, { schema: jsYaml.CORE_SCHEMA }) ?? {};
+    raw = ConfigSchema.parse(parsed);
+  } catch (err) {
+    if (err.code !== "ENOENT") throw err;
+  }
+  return normalizeMcpServers(raw.mcp_servers ?? [], process.env);
 }
 function mergeDefaults(raw, env = process.env) {
   const d = raw.defaults ?? {};
@@ -24136,15 +24258,15 @@ function expandHome(value) {
   if (value === "~") return process.env["HOME"] ?? value;
   if (value.startsWith("~/")) {
     const home = process.env["HOME"];
-    return home ? path.join(home, value.slice(2)) : value;
+    return home ? path2.join(home, value.slice(2)) : value;
   }
   return value;
 }
 
 // src/scan/captures.ts
 var import_fast_glob = __toESM(require_out4(), 1);
-import { readFile as readFile2 } from "node:fs/promises";
-import path2 from "node:path";
+import { readFile as readFile3 } from "node:fs/promises";
+import path3 from "node:path";
 
 // src/parse/frontmatter.ts
 var import_gray_matter = __toESM(require_gray_matter(), 1);
@@ -24169,13 +24291,13 @@ async function scanCaptures(repoRoot) {
   });
   const results = [];
   for (const file of files) {
-    const raw = await readFile2(file, "utf8");
+    const raw = await readFile3(file, "utf8");
     const { data, content } = parseFrontmatter(raw);
     const fm = CaptureFrontmatterSchema.parse(data);
     results.push({
       ...fm,
       body: content.trim(),
-      path: path2.relative(repoRoot, file)
+      path: path3.relative(repoRoot, file)
     });
   }
   return results;
@@ -24345,8 +24467,8 @@ async function lastActivityMap(repoRoot) {
 
 // src/scan/ideas.ts
 var import_fast_glob2 = __toESM(require_out4(), 1);
-import { readFile as readFile3 } from "node:fs/promises";
-import path3 from "node:path";
+import { readFile as readFile4 } from "node:fs/promises";
+import path4 from "node:path";
 
 // src/util/dates.ts
 function daysBetween(iso, now) {
@@ -24365,13 +24487,13 @@ async function scanIdeas(repoRoot, now) {
   });
   const results = [];
   for (const file of files) {
-    const raw = await readFile3(file, "utf8");
+    const raw = await readFile4(file, "utf8");
     const { data, content } = parseFrontmatter(raw);
     const fm = IdeaFrontmatterSchema.parse(data);
     results.push({
       ...fm,
       body: content.trim(),
-      path: path3.relative(repoRoot, file),
+      path: path4.relative(repoRoot, file),
       ageDays: daysBetween(fm.created, now)
     });
   }
@@ -24380,8 +24502,8 @@ async function scanIdeas(repoRoot, now) {
 
 // src/scan/projects.ts
 var import_fast_glob3 = __toESM(require_out4(), 1);
-import { readFile as readFile4 } from "node:fs/promises";
-import path4 from "node:path";
+import { readFile as readFile5 } from "node:fs/promises";
+import path5 from "node:path";
 
 // src/parse/checklist.ts
 var ITEM_RE = /^\s*-\s+\[([ xX])\]\s+(.+?)\s*$/;
@@ -24720,7 +24842,7 @@ async function scanProjects(repoRoot) {
   });
   const results = [];
   for (const file of files) {
-    const raw = await readFile4(file, "utf8");
+    const raw = await readFile5(file, "utf8");
     const { data, content } = parseFrontmatter(raw);
     const fm = ProjectFrontmatterSchema.parse(data);
     const sections = extractSections(content);
@@ -24734,7 +24856,7 @@ async function scanProjects(repoRoot) {
       dod,
       actions,
       description: extractDescription(content),
-      path: path4.relative(repoRoot, file),
+      path: path5.relative(repoRoot, file),
       dodProgress: progress(dod),
       actionProgress: progress(actions),
       detected_domain: detection.domain,
@@ -24752,8 +24874,8 @@ function progress(items) {
 
 // src/scan/pursuits.ts
 var import_fast_glob4 = __toESM(require_out4(), 1);
-import { readFile as readFile5 } from "node:fs/promises";
-import path5 from "node:path";
+import { readFile as readFile6 } from "node:fs/promises";
+import path6 from "node:path";
 var LIFECYCLE_ROOTS = [
   { lifecycle: "active", glob: "pursuits/*/pursuit.md" },
   { lifecycle: "someday", glob: "pursuits/_someday/*/pursuit.md" },
@@ -24776,14 +24898,14 @@ async function scanPursuits(repoRoot) {
       ...lifecycle === "active" ? { ignore: ["pursuits/_*/**"] } : {}
     });
     for (const file of files) {
-      const raw = await readFile5(file, "utf8");
+      const raw = await readFile6(file, "utf8");
       const { data, content } = parseFrontmatter(raw);
       const fm = PursuitFrontmatterSchema.parse(data);
       results.push({
         ...fm,
         lifecycle: PursuitLifecycleSchema.parse(lifecycle),
         description: extractDescription(content),
-        path: path5.relative(repoRoot, file)
+        path: path6.relative(repoRoot, file)
       });
     }
   }
@@ -24792,8 +24914,8 @@ async function scanPursuits(repoRoot) {
 
 // src/scan/reflections.ts
 var import_fast_glob5 = __toESM(require_out4(), 1);
-import { readFile as readFile6 } from "node:fs/promises";
-import path6 from "node:path";
+import { readFile as readFile7 } from "node:fs/promises";
+import path7 from "node:path";
 async function scanReflections(repoRoot) {
   const files = await (0, import_fast_glob5.default)("reflections/*.md", {
     cwd: repoRoot,
@@ -24802,13 +24924,13 @@ async function scanReflections(repoRoot) {
   });
   const results = [];
   for (const file of files) {
-    const raw = await readFile6(file, "utf8");
+    const raw = await readFile7(file, "utf8");
     const { data, content } = parseFrontmatter(raw);
     const fm = ReflectionFrontmatterSchema.parse(data);
     results.push({
       ...fm,
       body: content.trim(),
-      path: path6.relative(repoRoot, file)
+      path: path7.relative(repoRoot, file)
     });
   }
   return results;
@@ -24843,7 +24965,7 @@ async function annotateLastActivity(project, repoRoot, activityMap) {
   const gitTs = activityMap.get(project.path);
   let fsTs;
   try {
-    const s = await stat(path7.join(repoRoot, project.path));
+    const s = await stat(path8.join(repoRoot, project.path));
     fsTs = s.mtime.toISOString();
   } catch {
     fsTs = void 0;
@@ -24857,9 +24979,9 @@ async function annotateLastActivity(project, repoRoot, activityMap) {
 
 // src/scan/inbound.ts
 import { execFile as execFile2 } from "node:child_process";
-import { existsSync, mkdirSync } from "node:fs";
-import { readFile as readFile7, writeFile } from "node:fs/promises";
-import path8 from "node:path";
+import { existsSync as existsSync2, mkdirSync } from "node:fs";
+import { readFile as readFile8, writeFile } from "node:fs/promises";
+import path9 from "node:path";
 import { promisify as promisify2 } from "node:util";
 var execFileP2 = promisify2(execFile2);
 var CACHE_PATH_SEGMENTS = [".cadence", "inbound-cache.json"];
@@ -24903,10 +25025,10 @@ async function fetchInboundCount(ownerRepo) {
   }
 }
 async function readCache(repoRoot, ownerRepo) {
-  const filePath = path8.join(repoRoot, ...CACHE_PATH_SEGMENTS);
-  if (!existsSync(filePath)) return null;
+  const filePath = path9.join(repoRoot, ...CACHE_PATH_SEGMENTS);
+  if (!existsSync2(filePath)) return null;
   try {
-    const raw = await readFile7(filePath, "utf8");
+    const raw = await readFile8(filePath, "utf8");
     const parsed = JSON.parse(raw);
     if (parsed.owner_repo !== ownerRepo) return null;
     return parsed;
@@ -24915,9 +25037,9 @@ async function readCache(repoRoot, ownerRepo) {
   }
 }
 async function writeCache(repoRoot, data) {
-  const dir = path8.join(repoRoot, ".cadence");
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-  const filePath = path8.join(dir, "inbound-cache.json");
+  const dir = path9.join(repoRoot, ".cadence");
+  if (!existsSync2(dir)) mkdirSync(dir, { recursive: true });
+  const filePath = path9.join(dir, "inbound-cache.json");
   await writeFile(filePath, JSON.stringify(data, null, 2) + "\n", "utf8");
 }
 function isFresh(ts, ttlMinutes) {
@@ -25051,7 +25173,7 @@ function flagClosingInOnResolution(flags, snapshot, activePursuitIds) {
 }
 
 // src/render/signals.ts
-import { existsSync as existsSync2 } from "node:fs";
+import { existsSync as existsSync3 } from "node:fs";
 import { join } from "node:path";
 var LONG_GAP_DAYS = 14;
 var NO_SIGNALS = {
@@ -25090,7 +25212,7 @@ function detectNarrateTodayStale(snapshot, repoRoot, now) {
   );
   if (!activityToday) return false;
   const draftPath = join(repoRoot, "narratives", "drafts", `daily-${todayKey}.md`);
-  return !existsSync2(draftPath);
+  return !existsSync3(draftPath);
 }
 function detectWeeklyPreviewDue(reflections, now) {
   const dow = mondayBasedDowLocal(now);
@@ -25129,8 +25251,8 @@ function daysBetweenLocal(from, to) {
 }
 
 // src/validation/queue.ts
-import { existsSync as existsSync3, mkdirSync as mkdirSync2, readFileSync, writeFileSync } from "node:fs";
-import path9 from "node:path";
+import { existsSync as existsSync4, mkdirSync as mkdirSync2, readFileSync, writeFileSync } from "node:fs";
+import path10 from "node:path";
 var QUEUE_DIR = "validations";
 var QUEUE_FILENAME = "pending.md";
 var HEADER = `# Pending Validations
@@ -25144,11 +25266,11 @@ verification in a fresh session.
 `;
 var ENTRY_RE = /^-\s+(\S+)\s+—\s+(.+?)\s*$/u;
 function queuePath(repoRoot) {
-  return path9.join(repoRoot, QUEUE_DIR, QUEUE_FILENAME);
+  return path10.join(repoRoot, QUEUE_DIR, QUEUE_FILENAME);
 }
 function readPendingValidations(repoRoot) {
   const filePath = queuePath(repoRoot);
-  if (!existsSync3(filePath)) {
+  if (!existsSync4(filePath)) {
     return [];
   }
   const raw = readFileSync(filePath, "utf8");
@@ -25163,8 +25285,8 @@ function readPendingValidations(repoRoot) {
   return entries;
 }
 function writeQueue(repoRoot, entries) {
-  const dir = path9.join(repoRoot, QUEUE_DIR);
-  if (!existsSync3(dir)) {
+  const dir = path10.join(repoRoot, QUEUE_DIR);
+  if (!existsSync4(dir)) {
     mkdirSync2(dir, { recursive: true });
   }
   const filePath = queuePath(repoRoot);
@@ -25967,12 +26089,12 @@ function projectMenu(_projectId, status) {
 }
 
 // src/write/pursuit.ts
-import path11 from "node:path";
-import { existsSync as existsSync4 } from "node:fs";
+import path12 from "node:path";
+import { existsSync as existsSync5 } from "node:fs";
 
 // src/write/util.ts
-import { mkdir, readFile as readFile8, rename, writeFile as writeFile2 } from "node:fs/promises";
-import path10 from "node:path";
+import { mkdir, readFile as readFile9, rename, writeFile as writeFile2 } from "node:fs/promises";
+import path11 from "node:path";
 
 // src/write/yaml.ts
 function dumpYaml(data) {
@@ -25999,11 +26121,11 @@ async function ensureDir(dir) {
   await mkdir(dir, { recursive: true });
 }
 async function writeFrontmatterFile(filePath, data, body) {
-  await ensureDir(path10.dirname(filePath));
+  await ensureDir(path11.dirname(filePath));
   await writeFile2(filePath, formatFrontmatterFile(data, body), "utf8");
 }
 async function loadFrontmatterFile(filePath) {
-  const text = await readFile8(filePath, "utf8");
+  const text = await readFile9(filePath, "utf8");
   return parseFrontmatter(text);
 }
 async function mutateFrontmatter(filePath, mutate) {
@@ -26012,20 +26134,20 @@ async function mutateFrontmatter(filePath, mutate) {
   await writeFrontmatterFile(filePath, next.data, next.body);
 }
 async function moveDir(from, to) {
-  await ensureDir(path10.dirname(to));
+  await ensureDir(path11.dirname(to));
   await rename(from, to);
 }
-function timestampSlug(date3) {
+function timestampSlug(date4) {
   const pad2 = (n) => String(n).padStart(2, "0");
-  return `${date3.getFullYear()}-${pad2(date3.getMonth() + 1)}-${pad2(date3.getDate())}T${pad2(date3.getHours())}-${pad2(date3.getMinutes())}`;
+  return `${date4.getFullYear()}-${pad2(date4.getMonth() + 1)}-${pad2(date4.getDate())}T${pad2(date4.getHours())}-${pad2(date4.getMinutes())}`;
 }
-function isoTimestamp(date3) {
+function isoTimestamp(date4) {
   const pad2 = (n) => String(n).padStart(2, "0");
-  return `${date3.getFullYear()}-${pad2(date3.getMonth() + 1)}-${pad2(date3.getDate())}T${pad2(date3.getHours())}:${pad2(date3.getMinutes())}:${pad2(date3.getSeconds())}`;
+  return `${date4.getFullYear()}-${pad2(date4.getMonth() + 1)}-${pad2(date4.getDate())}T${pad2(date4.getHours())}:${pad2(date4.getMinutes())}:${pad2(date4.getSeconds())}`;
 }
-function dateString(date3) {
+function dateString(date4) {
   const pad2 = (n) => String(n).padStart(2, "0");
-  return `${date3.getFullYear()}-${pad2(date3.getMonth() + 1)}-${pad2(date3.getDate())}`;
+  return `${date4.getFullYear()}-${pad2(date4.getMonth() + 1)}-${pad2(date4.getDate())}`;
 }
 
 // src/write/pursuit.ts
@@ -26033,12 +26155,12 @@ async function createPursuit(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const status = opts.status ?? (opts.type === "someday" ? "someday" : "active");
   const lifecycleDir = status === "someday" ? "pursuits/_someday" : status === "archived" ? "pursuits/_archived" : "pursuits";
-  const pursuitDir = path11.join(repoRoot, lifecycleDir, opts.id);
-  if (existsSync4(pursuitDir)) {
+  const pursuitDir = path12.join(repoRoot, lifecycleDir, opts.id);
+  if (existsSync5(pursuitDir)) {
     throw new Error(`pursuit already exists: ${opts.id}`);
   }
-  await ensureDir(path11.join(pursuitDir, "projects"));
-  await ensureDir(path11.join(pursuitDir, "ideas"));
+  await ensureDir(path12.join(pursuitDir, "projects"));
+  await ensureDir(path12.join(pursuitDir, "ideas"));
   const data = {
     id: opts.id,
     type: opts.type,
@@ -26052,46 +26174,46 @@ async function createPursuit(repoRoot, opts) {
   const body = `# ${title}` + (opts.description ? `
 
 ${opts.description}` : "");
-  const filePath = path11.join(pursuitDir, "pursuit.md");
+  const filePath = path12.join(pursuitDir, "pursuit.md");
   await writeFrontmatterFile(filePath, data, body);
-  return { path: path11.relative(repoRoot, filePath) };
+  return { path: path12.relative(repoRoot, filePath) };
 }
 function toTitleCase(id) {
   return id.split("-").map((w) => w[0] ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
 }
 
 // src/write/project.ts
-import path13 from "node:path";
-import { existsSync as existsSync6 } from "node:fs";
+import path14 from "node:path";
+import { existsSync as existsSync7 } from "node:fs";
 
 // src/write/paths.ts
-import { existsSync as existsSync5 } from "node:fs";
-import path12 from "node:path";
+import { existsSync as existsSync6 } from "node:fs";
+import path13 from "node:path";
 function resolvePursuitDir(repoRoot, pursuitId) {
   const candidates = [
-    path12.join(repoRoot, "pursuits", pursuitId),
-    path12.join(repoRoot, "pursuits/_someday", pursuitId),
-    path12.join(repoRoot, "pursuits/_archived", pursuitId),
-    path12.join(repoRoot, "pursuits/_dropped", pursuitId)
+    path13.join(repoRoot, "pursuits", pursuitId),
+    path13.join(repoRoot, "pursuits/_someday", pursuitId),
+    path13.join(repoRoot, "pursuits/_archived", pursuitId),
+    path13.join(repoRoot, "pursuits/_dropped", pursuitId)
   ];
   for (const c of candidates) {
-    if (existsSync5(path12.join(c, "pursuit.md"))) return c;
+    if (existsSync6(path13.join(c, "pursuit.md"))) return c;
   }
   return null;
 }
 function resolveProjectFile(repoRoot, pursuitId, projectId) {
   const dir = resolvePursuitDir(repoRoot, pursuitId);
   if (!dir) return null;
-  const file = path12.join(dir, "projects", `${projectId}.md`);
-  if (!existsSync5(file)) return null;
+  const file = path13.join(dir, "projects", `${projectId}.md`);
+  if (!existsSync6(file)) return null;
   return file;
 }
 function resolveIdeaFile(repoRoot, parent, ideaId) {
   const pursuitId = parent.split("/")[0] ?? parent;
   const dir = resolvePursuitDir(repoRoot, pursuitId);
   if (!dir) return null;
-  const file = path12.join(dir, "ideas", `${ideaId}.md`);
-  if (!existsSync5(file)) return null;
+  const file = path13.join(dir, "ideas", `${ideaId}.md`);
+  if (!existsSync6(file)) return null;
   return file;
 }
 
@@ -26103,8 +26225,8 @@ async function createProject(repoRoot, opts) {
   if (!pursuitDir) {
     throw new Error(`pursuit not found: ${opts.pursuit}`);
   }
-  const filePath = path13.join(pursuitDir, "projects", `${opts.id}.md`);
-  if (existsSync6(filePath)) {
+  const filePath = path14.join(pursuitDir, "projects", `${opts.id}.md`);
+  if (existsSync7(filePath)) {
     throw new Error(`project already exists: ${opts.pursuit}/${opts.id}`);
   }
   const cleanList = (xs) => Array.isArray(xs) ? xs.filter((x) => typeof x === "string" && x.length > 0) : [];
@@ -26155,15 +26277,15 @@ async function createProject(repoRoot, opts) {
   if (actionLines.length > 0) sections.push(actionLines.join("\n"));
   const body = sections.join("\n\n");
   await writeFrontmatterFile(filePath, data, body);
-  return { path: path13.relative(repoRoot, filePath) };
+  return { path: path14.relative(repoRoot, filePath) };
 }
 function toTitleCase2(id) {
   return id.split("-").map((w) => w[0] ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
 }
 
 // src/write/idea.ts
-import path14 from "node:path";
-import { existsSync as existsSync7 } from "node:fs";
+import path15 from "node:path";
+import { existsSync as existsSync8 } from "node:fs";
 async function createIdea(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const pursuitId = opts.parent.split("/")[0] ?? opts.parent;
@@ -26171,8 +26293,8 @@ async function createIdea(repoRoot, opts) {
   if (!pursuitDir) {
     throw new Error(`pursuit not found for idea parent: ${opts.parent}`);
   }
-  const filePath = path14.join(pursuitDir, "ideas", `${opts.id}.md`);
-  if (existsSync7(filePath)) {
+  const filePath = path15.join(pursuitDir, "ideas", `${opts.id}.md`);
+  if (existsSync8(filePath)) {
     throw new Error(`idea already exists: ${opts.parent}/${opts.id}`);
   }
   const state = opts.state ?? "seed";
@@ -26186,15 +26308,15 @@ async function createIdea(repoRoot, opts) {
   if (opts.promoted_to) data["promoted_to"] = opts.promoted_to;
   if (opts.closed_reason) data["closed_reason"] = opts.closed_reason;
   await writeFrontmatterFile(filePath, data, opts.body ?? "");
-  return { path: path14.relative(repoRoot, filePath) };
+  return { path: path15.relative(repoRoot, filePath) };
 }
 
 // src/write/capture.ts
-import path15 from "node:path";
-import { existsSync as existsSync8 } from "node:fs";
+import path16 from "node:path";
+import { existsSync as existsSync9 } from "node:fs";
 async function writeCapture(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
-  const dir = path15.join(repoRoot, "thoughts/unprocessed");
+  const dir = path16.join(repoRoot, "thoughts/unprocessed");
   await ensureDir(dir);
   const data = {
     captured: opts.captured ?? isoTimestamp(now)
@@ -26204,44 +26326,44 @@ async function writeCapture(repoRoot, opts) {
   const baseSlug = opts.slug ?? timestampSlug(now);
   const filePath = uniqueCapturePath(dir, baseSlug);
   await writeFrontmatterFile(filePath, data, opts.body);
-  return { path: path15.relative(repoRoot, filePath) };
+  return { path: path16.relative(repoRoot, filePath) };
 }
 function uniqueCapturePath(dir, slug) {
-  let candidate = path15.join(dir, `${slug}.md`);
+  let candidate = path16.join(dir, `${slug}.md`);
   let n = 2;
-  while (existsSync8(candidate)) {
-    candidate = path15.join(dir, `${slug}-${n}.md`);
+  while (existsSync9(candidate)) {
+    candidate = path16.join(dir, `${slug}-${n}.md`);
     n += 1;
   }
   return candidate;
 }
 
 // src/write/reflection.ts
-import path16 from "node:path";
-import { existsSync as existsSync9 } from "node:fs";
+import path17 from "node:path";
+import { existsSync as existsSync10 } from "node:fs";
 async function writeReflection(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
-  const date3 = opts.date ?? dateString(now);
-  const dir = path16.join(repoRoot, "reflections");
+  const date4 = opts.date ?? dateString(now);
+  const dir = path17.join(repoRoot, "reflections");
   await ensureDir(dir);
-  const filePath = path16.join(dir, `${date3}.md`);
-  const existing = existsSync9(filePath) ? await loadFrontmatterFile(filePath) : null;
+  const filePath = path17.join(dir, `${date4}.md`);
+  const existing = existsSync10(filePath) ? await loadFrontmatterFile(filePath) : null;
   const data = existing ? { ...existing.data } : {};
-  data["date"] = date3;
+  data["date"] = date4;
   data["status"] = opts.status;
   if (opts.phase) data["phase"] = opts.phase;
   if (opts.leveraged_priority) {
     data["leveraged_priority"] = opts.leveraged_priority;
   }
-  const body = opts.body ?? existing?.content ?? `# Reflection \u2014 ${date3}`;
+  const body = opts.body ?? existing?.content ?? `# Reflection \u2014 ${date4}`;
   await writeFrontmatterFile(filePath, data, body);
-  return { path: path16.relative(repoRoot, filePath) };
+  return { path: path17.relative(repoRoot, filePath) };
 }
 
 // src/write/edits.ts
-import path17 from "node:path";
-import { readdir, readFile as readFile9 } from "node:fs/promises";
-import { existsSync as existsSync10 } from "node:fs";
+import path18 from "node:path";
+import { readdir, readFile as readFile10 } from "node:fs/promises";
+import { existsSync as existsSync11 } from "node:fs";
 
 // src/write/checklist.ts
 var ITEM_RE2 = /^(\s*-\s+\[)([ xX])(\]\s+)(.+?)(\s*)$/;
@@ -26393,30 +26515,30 @@ var execFileP3 = promisify3(execFile3);
 async function syncOrigin(origin, outcome, context) {
   if (!origin) return { kind: "no_origin" };
   if (origin.kind !== "github_issue") return { kind: "no_origin" };
-  const { repo, number: number3, url } = origin;
+  const { repo, number: number4, url: url2 } = origin;
   if (outcome.kind === "started") {
-    return syncStarted(repo, number3, url, context);
+    return syncStarted(repo, number4, url2, context);
   }
-  return syncClosed(repo, number3, url, outcome, context);
+  return syncClosed(repo, number4, url2, outcome, context);
 }
-async function syncClosed(repo, number3, url, outcome, context) {
-  const state = await ghIssueState(repo, number3);
+async function syncClosed(repo, number4, url2, outcome, context) {
+  const state = await ghIssueState(repo, number4);
   if (state === "gh_unavailable") return { kind: "gh_unavailable" };
   if (state === "error") {
     return { kind: "error", message: "gh issue view failed" };
   }
   if (state === "CLOSED") {
-    return { kind: "already_closed", issue_number: number3, repo, url };
+    return { kind: "already_closed", issue_number: number4, repo, url: url2 };
   }
   const tag = `project \`${context.pursuitId}/${context.projectId}\``;
   const comment = outcome.kind === "done" ? `Closed by Cadence \u2014 ${tag} resolved as done.` : `Closed by Cadence \u2014 ${tag} was dropped. Reason: ${outcome.reason}`;
   try {
     await execFileP3(
       "gh",
-      ["issue", "close", String(number3), "--repo", repo, "--comment", comment],
+      ["issue", "close", String(number4), "--repo", repo, "--comment", comment],
       { timeout: 8e3 }
     );
-    return { kind: "closed", issue_number: number3, repo, url };
+    return { kind: "closed", issue_number: number4, repo, url: url2 };
   } catch (err) {
     return {
       kind: "error",
@@ -26424,15 +26546,15 @@ async function syncClosed(repo, number3, url, outcome, context) {
     };
   }
 }
-async function syncStarted(repo, number3, url, context) {
-  const meta = await ghIssueMeta(repo, number3);
+async function syncStarted(repo, number4, url2, context) {
+  const meta = await ghIssueMeta(repo, number4);
   if (meta === "gh_unavailable") return { kind: "gh_unavailable" };
   if (meta === "error") {
     return { kind: "error", message: "gh issue view failed" };
   }
   const hasInProgress = meta.labels.includes("in-progress");
   if (hasInProgress) {
-    return { kind: "already_started", issue_number: number3, repo, url };
+    return { kind: "already_started", issue_number: number4, repo, url: url2 };
   }
   const tag = `project \`${context.pursuitId}/${context.projectId}\``;
   const comment = `Work started by Cadence on ${tag}.`;
@@ -26443,15 +26565,15 @@ async function syncStarted(repo, number3, url, context) {
     }
     await execFileP3(
       "gh",
-      ["issue", "edit", String(number3), "--repo", repo, ...labelArgs],
+      ["issue", "edit", String(number4), "--repo", repo, ...labelArgs],
       { timeout: 8e3 }
     );
     await execFileP3(
       "gh",
-      ["issue", "comment", String(number3), "--repo", repo, "--body", comment],
+      ["issue", "comment", String(number4), "--repo", repo, "--body", comment],
       { timeout: 8e3 }
     );
-    return { kind: "started", issue_number: number3, repo, url };
+    return { kind: "started", issue_number: number4, repo, url: url2 };
   } catch (err) {
     return {
       kind: "error",
@@ -26459,11 +26581,11 @@ async function syncStarted(repo, number3, url, context) {
     };
   }
 }
-async function ghIssueState(repo, number3) {
+async function ghIssueState(repo, number4) {
   try {
     const { stdout } = await execFileP3(
       "gh",
-      ["issue", "view", String(number3), "--repo", repo, "--json", "state"],
+      ["issue", "view", String(number4), "--repo", repo, "--json", "state"],
       { timeout: 5e3 }
     );
     const parsed = JSON.parse(stdout);
@@ -26474,14 +26596,14 @@ async function ghIssueState(repo, number3) {
     return "error";
   }
 }
-async function ghIssueMeta(repo, number3) {
+async function ghIssueMeta(repo, number4) {
   try {
     const { stdout } = await execFileP3(
       "gh",
       [
         "issue",
         "view",
-        String(number3),
+        String(number4),
         "--repo",
         repo,
         "--json",
@@ -26526,7 +26648,7 @@ async function setProjectStatus(repoRoot, opts) {
     return { data, body };
   });
   const result = {
-    path: path17.relative(repoRoot, filePath)
+    path: path18.relative(repoRoot, filePath)
   };
   if (opts.include_pursuit) {
     result.pursuit = await summarizePursuit(repoRoot, filePath);
@@ -26564,7 +26686,7 @@ async function syncProjectOrigin(repoRoot, opts) {
   const parsedOrigin = OriginSchema.safeParse(data["origin"]);
   if (!parsedOrigin.success) {
     return {
-      path: path17.relative(repoRoot, filePath),
+      path: path18.relative(repoRoot, filePath),
       origin_sync: { kind: "no_origin" }
     };
   }
@@ -26580,18 +26702,18 @@ async function syncProjectOrigin(repoRoot, opts) {
     projectId: opts.id,
     pursuitId
   });
-  return { path: path17.relative(repoRoot, filePath), origin_sync };
+  return { path: path18.relative(repoRoot, filePath), origin_sync };
 }
 async function summarizePursuit(repoRoot, projectFilePath) {
-  const projectsDir = path17.dirname(projectFilePath);
-  const pursuitDir = path17.dirname(projectsDir);
-  const pursuitId = path17.basename(pursuitDir);
+  const projectsDir = path18.dirname(projectFilePath);
+  const pursuitDir = path18.dirname(projectsDir);
+  const pursuitId = path18.basename(pursuitDir);
   const projects = [];
-  if (existsSync10(projectsDir)) {
+  if (existsSync11(projectsDir)) {
     for (const entry of await readdir(projectsDir, { withFileTypes: true })) {
       if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
-      const file = path17.join(projectsDir, entry.name);
-      const text = await readFile9(file, "utf8");
+      const file = path18.join(projectsDir, entry.name);
+      const text = await readFile10(file, "utf8");
       const { data } = parseFrontmatter(text);
       const id = String(data["id"] ?? entry.name.replace(/\.md$/, ""));
       const status = String(data["status"] ?? "active");
@@ -26632,7 +26754,7 @@ async function setIdeaState(repoRoot, opts) {
     }
     return { data, body };
   });
-  return { path: path17.relative(repoRoot, filePath) };
+  return { path: path18.relative(repoRoot, filePath) };
 }
 async function checkItem(repoRoot, opts) {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
@@ -26662,7 +26784,7 @@ async function checkItem(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   const result = {
-    path: path17.relative(repoRoot, filePath),
+    path: path18.relative(repoRoot, filePath),
     matched,
     ...promoted ? { promoted: true } : {},
     ...progress2
@@ -26704,7 +26826,7 @@ async function checkItems(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   const result = {
-    path: path17.relative(repoRoot, filePath),
+    path: path18.relative(repoRoot, filePath),
     matched,
     ...promoted ? { promoted: true } : {},
     ...progress2
@@ -26729,7 +26851,7 @@ async function addItem(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   return {
-    path: path17.relative(repoRoot, filePath),
+    path: path18.relative(repoRoot, filePath),
     ...progress2
   };
 }
@@ -26752,7 +26874,7 @@ async function addItems(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   return {
-    path: path17.relative(repoRoot, filePath),
+    path: path18.relative(repoRoot, filePath),
     added: opts.texts.length,
     ...progress2
   };
@@ -26770,7 +26892,7 @@ async function addWaitingFor(repoRoot, opts) {
     data["waiting_for"] = list;
     return { data, body };
   });
-  return { path: path17.relative(repoRoot, filePath) };
+  return { path: path18.relative(repoRoot, filePath) };
 }
 async function flagWaitingFor(repoRoot, opts) {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
@@ -26802,7 +26924,7 @@ async function flagWaitingFor(repoRoot, opts) {
     data["waiting_for"] = list;
     return { data, body };
   });
-  return { path: path17.relative(repoRoot, filePath), matched };
+  return { path: path18.relative(repoRoot, filePath), matched };
 }
 async function locateProject(repoRoot, projectId, pursuitHint) {
   if (pursuitHint) {
@@ -26814,17 +26936,17 @@ async function locateProject(repoRoot, projectId, pursuitHint) {
   }
   const roots = ["pursuits", "pursuits/_someday", "pursuits/_archived"];
   for (const root of roots) {
-    const absRoot = path17.join(repoRoot, root);
-    if (!existsSync10(absRoot)) continue;
+    const absRoot = path18.join(repoRoot, root);
+    if (!existsSync11(absRoot)) continue;
     for (const pursuit of await readdir(absRoot, { withFileTypes: true })) {
       if (!pursuit.isDirectory()) continue;
-      const candidate = path17.join(
+      const candidate = path18.join(
         absRoot,
         pursuit.name,
         "projects",
         `${projectId}.md`
       );
-      if (existsSync10(candidate)) return candidate;
+      if (existsSync11(candidate)) return candidate;
     }
   }
   throw new Error(
@@ -26839,17 +26961,17 @@ async function locateIdea(repoRoot, ideaId, parentHint) {
   }
   const roots = ["pursuits", "pursuits/_someday", "pursuits/_archived"];
   for (const root of roots) {
-    const absRoot = path17.join(repoRoot, root);
-    if (!existsSync10(absRoot)) continue;
+    const absRoot = path18.join(repoRoot, root);
+    if (!existsSync11(absRoot)) continue;
     for (const pursuit of await readdir(absRoot, { withFileTypes: true })) {
       if (!pursuit.isDirectory()) continue;
-      const candidate = path17.join(
+      const candidate = path18.join(
         absRoot,
         pursuit.name,
         "ideas",
         `${ideaId}.md`
       );
-      if (existsSync10(candidate)) return candidate;
+      if (existsSync11(candidate)) return candidate;
     }
   }
   throw new Error(
@@ -26881,48 +27003,48 @@ function escapeRe(s) {
 }
 
 // src/write/move.ts
-import path18 from "node:path";
-import { existsSync as existsSync11 } from "node:fs";
+import path19 from "node:path";
+import { existsSync as existsSync12 } from "node:fs";
 async function movePursuit(repoRoot, opts) {
   const from = resolvePursuitDir(repoRoot, opts.id);
   if (!from) throw new Error(`pursuit not found: ${opts.id}`);
-  const targetParent = opts.to === "active" ? path18.join(repoRoot, "pursuits") : opts.to === "someday" ? path18.join(repoRoot, "pursuits/_someday") : opts.to === "dropped" ? path18.join(repoRoot, "pursuits/_dropped") : path18.join(repoRoot, "pursuits/_archived");
-  const to = path18.join(targetParent, opts.id);
-  if (path18.resolve(from) === path18.resolve(to)) {
+  const targetParent = opts.to === "active" ? path19.join(repoRoot, "pursuits") : opts.to === "someday" ? path19.join(repoRoot, "pursuits/_someday") : opts.to === "dropped" ? path19.join(repoRoot, "pursuits/_dropped") : path19.join(repoRoot, "pursuits/_archived");
+  const to = path19.join(targetParent, opts.id);
+  if (path19.resolve(from) === path19.resolve(to)) {
     return {
-      from: path18.relative(repoRoot, from),
-      to: path18.relative(repoRoot, to)
+      from: path19.relative(repoRoot, from),
+      to: path19.relative(repoRoot, to)
     };
   }
-  if (existsSync11(to)) {
-    throw new Error(`destination already exists: ${path18.relative(repoRoot, to)}`);
+  if (existsSync12(to)) {
+    throw new Error(`destination already exists: ${path19.relative(repoRoot, to)}`);
   }
   await moveDir(from, to);
-  await mutateFrontmatter(path18.join(to, "pursuit.md"), (data, body) => {
+  await mutateFrontmatter(path19.join(to, "pursuit.md"), (data, body) => {
     data["status"] = opts.to;
     return { data, body };
   });
   return {
-    from: path18.relative(repoRoot, from),
-    to: path18.relative(repoRoot, to)
+    from: path19.relative(repoRoot, from),
+    to: path19.relative(repoRoot, to)
   };
 }
 
 // src/tip/library.ts
-import { existsSync as existsSync13, readFileSync as readFileSync3 } from "node:fs";
-import path20 from "node:path";
+import { existsSync as existsSync14, readFileSync as readFileSync3 } from "node:fs";
+import path21 from "node:path";
 import { fileURLToPath } from "node:url";
 
 // src/tip/state.ts
-import { existsSync as existsSync12, readFileSync as readFileSync2, mkdirSync as mkdirSync3, writeFileSync as writeFileSync2 } from "node:fs";
-import path19 from "node:path";
+import { existsSync as existsSync13, readFileSync as readFileSync2, mkdirSync as mkdirSync3, writeFileSync as writeFileSync2 } from "node:fs";
+import path20 from "node:path";
 var STATE_FILENAME = "tip-state.json";
 function statePath(repoRoot) {
-  return path19.join(repoRoot, ".cadence", STATE_FILENAME);
+  return path20.join(repoRoot, ".cadence", STATE_FILENAME);
 }
 function readTipState(repoRoot) {
   const filePath = statePath(repoRoot);
-  if (!existsSync12(filePath)) {
+  if (!existsSync13(filePath)) {
     return { version: 1, tips: {}, categories: {} };
   }
   try {
@@ -26938,8 +27060,8 @@ function readTipState(repoRoot) {
   }
 }
 function writeTipState(repoRoot, state) {
-  const dir = path19.join(repoRoot, ".cadence");
-  if (!existsSync12(dir)) {
+  const dir = path20.join(repoRoot, ".cadence");
+  if (!existsSync13(dir)) {
     mkdirSync3(dir, { recursive: true });
   }
   writeFileSync2(statePath(repoRoot), JSON.stringify(state, null, 2) + "\n");
@@ -27036,11 +27158,11 @@ function asString(v) {
 }
 function libraryPath() {
   const here = fileURLToPath(import.meta.url);
-  return path20.resolve(path20.dirname(here), "..", "tips", "library.yaml");
+  return path21.resolve(path21.dirname(here), "..", "tips", "library.yaml");
 }
 function readLibrary(libPath) {
   const filePath = libPath ?? libraryPath();
-  if (!existsSync13(filePath)) {
+  if (!existsSync14(filePath)) {
     return { version: 1, tips: [] };
   }
   const raw = readFileSync3(filePath, "utf8");
@@ -27343,10 +27465,10 @@ function assignProp(target, prop, value) {
     configurable: true
   });
 }
-function getElementAtPath(obj, path22) {
-  if (!path22)
+function getElementAtPath(obj, path23) {
+  if (!path23)
     return obj;
-  return path22.reduce((acc, key) => acc?.[key], obj);
+  return path23.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -27666,11 +27788,11 @@ function aborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path22, issues) {
+function prefixIssues(path23, issues) {
   return issues.map((iss) => {
     var _a;
     (_a = iss).path ?? (_a.path = []);
-    iss.path.unshift(path22);
+    iss.path.unshift(path23);
     return iss;
   });
 }
@@ -27904,6 +28026,7 @@ var string = (params) => {
   const regex = params ? `[\\s\\S]{${params?.minimum ?? 0},${params?.maximum ?? ""}}` : `[\\s\\S]*`;
   return new RegExp(`^${regex}$`);
 };
+var bigint = /^\d+n?$/;
 var integer = /^\d+$/;
 var number = /^-?\d+(?:\.\d+)?/i;
 var boolean = /true|false/i;
@@ -28481,11 +28604,11 @@ var $ZodURL = /* @__PURE__ */ $constructor("$ZodURL", (inst, def) => {
   inst._zod.check = (payload) => {
     try {
       const orig = payload.value;
-      const url = new URL(orig);
-      const href = url.href;
+      const url2 = new URL(orig);
+      const href = url2.href;
       if (def.hostname) {
         def.hostname.lastIndex = 0;
-        if (!def.hostname.test(url.hostname)) {
+        if (!def.hostname.test(url2.hostname)) {
           payload.issues.push({
             code: "invalid_format",
             format: "url",
@@ -28499,7 +28622,7 @@ var $ZodURL = /* @__PURE__ */ $constructor("$ZodURL", (inst, def) => {
       }
       if (def.protocol) {
         def.protocol.lastIndex = 0;
-        if (!def.protocol.test(url.protocol.endsWith(":") ? url.protocol.slice(0, -1) : url.protocol)) {
+        if (!def.protocol.test(url2.protocol.endsWith(":") ? url2.protocol.slice(0, -1) : url2.protocol)) {
           payload.issues.push({
             code: "invalid_format",
             format: "url",
@@ -28772,6 +28895,26 @@ var $ZodBoolean = /* @__PURE__ */ $constructor("$ZodBoolean", (inst, def) => {
     return payload;
   };
 });
+var $ZodBigInt = /* @__PURE__ */ $constructor("$ZodBigInt", (inst, def) => {
+  $ZodType.init(inst, def);
+  inst._zod.pattern = bigint;
+  inst._zod.parse = (payload, _ctx) => {
+    if (def.coerce)
+      try {
+        payload.value = BigInt(payload.value);
+      } catch (_) {
+      }
+    if (typeof payload.value === "bigint")
+      return payload;
+    payload.issues.push({
+      expected: "bigint",
+      code: "invalid_type",
+      input: payload.value,
+      inst
+    });
+    return payload;
+  };
+});
 var $ZodNull = /* @__PURE__ */ $constructor("$ZodNull", (inst, def) => {
   $ZodType.init(inst, def);
   inst._zod.pattern = _null2;
@@ -28789,6 +28932,10 @@ var $ZodNull = /* @__PURE__ */ $constructor("$ZodNull", (inst, def) => {
     return payload;
   };
 });
+var $ZodAny = /* @__PURE__ */ $constructor("$ZodAny", (inst, def) => {
+  $ZodType.init(inst, def);
+  inst._zod.parse = (payload) => payload;
+});
 var $ZodUnknown = /* @__PURE__ */ $constructor("$ZodUnknown", (inst, def) => {
   $ZodType.init(inst, def);
   inst._zod.parse = (payload) => payload;
@@ -28800,6 +28947,30 @@ var $ZodNever = /* @__PURE__ */ $constructor("$ZodNever", (inst, def) => {
       expected: "never",
       code: "invalid_type",
       input: payload.value,
+      inst
+    });
+    return payload;
+  };
+});
+var $ZodDate = /* @__PURE__ */ $constructor("$ZodDate", (inst, def) => {
+  $ZodType.init(inst, def);
+  inst._zod.parse = (payload, _ctx) => {
+    if (def.coerce) {
+      try {
+        payload.value = new Date(payload.value);
+      } catch (_err) {
+      }
+    }
+    const input = payload.value;
+    const isDate = input instanceof Date;
+    const isValidDate = isDate && !Number.isNaN(input.getTime());
+    if (isValidDate)
+      return payload;
+    payload.issues.push({
+      expected: "date",
+      code: "invalid_type",
+      input,
+      ...isDate ? { received: "Invalid Date" } : {},
       inst
     });
     return payload;
@@ -29752,6 +29923,13 @@ function _string(Class2, params) {
     ...normalizeParams(params)
   });
 }
+function _coercedString(Class2, params) {
+  return new Class2({
+    type: "string",
+    coerce: true,
+    ...normalizeParams(params)
+  });
+}
 function _email(Class2, params) {
   return new Class2({
     type: "string",
@@ -29996,6 +30174,14 @@ function _number(Class2, params) {
     ...normalizeParams(params)
   });
 }
+function _coercedNumber(Class2, params) {
+  return new Class2({
+    type: "number",
+    coerce: true,
+    checks: [],
+    ...normalizeParams(params)
+  });
+}
 function _int(Class2, params) {
   return new Class2({
     type: "number",
@@ -30011,10 +30197,29 @@ function _boolean(Class2, params) {
     ...normalizeParams(params)
   });
 }
+function _coercedBoolean(Class2, params) {
+  return new Class2({
+    type: "boolean",
+    coerce: true,
+    ...normalizeParams(params)
+  });
+}
+function _coercedBigint(Class2, params) {
+  return new Class2({
+    type: "bigint",
+    coerce: true,
+    ...normalizeParams(params)
+  });
+}
 function _null3(Class2, params) {
   return new Class2({
     type: "null",
     ...normalizeParams(params)
+  });
+}
+function _any(Class2) {
+  return new Class2({
+    type: "any"
   });
 }
 function _unknown(Class2) {
@@ -30025,6 +30230,13 @@ function _unknown(Class2) {
 function _never(Class2, params) {
   return new Class2({
     type: "never",
+    ...normalizeParams(params)
+  });
+}
+function _coercedDate(Class2, params) {
+  return new Class2({
+    type: "date",
+    coerce: true,
     ...normalizeParams(params)
   });
 }
@@ -30471,6 +30683,9 @@ var ZodURL = /* @__PURE__ */ $constructor("ZodURL", (inst, def) => {
   $ZodURL.init(inst, def);
   ZodStringFormat.init(inst, def);
 });
+function url(params) {
+  return _url(ZodURL, params);
+}
 var ZodEmoji = /* @__PURE__ */ $constructor("ZodEmoji", (inst, def) => {
   $ZodEmoji.init(inst, def);
   ZodStringFormat.init(inst, def);
@@ -30573,12 +30788,40 @@ var ZodBoolean2 = /* @__PURE__ */ $constructor("ZodBoolean", (inst, def) => {
 function boolean2(params) {
   return _boolean(ZodBoolean2, params);
 }
+var ZodBigInt2 = /* @__PURE__ */ $constructor("ZodBigInt", (inst, def) => {
+  $ZodBigInt.init(inst, def);
+  ZodType2.init(inst, def);
+  inst.gte = (value, params) => inst.check(_gte(value, params));
+  inst.min = (value, params) => inst.check(_gte(value, params));
+  inst.gt = (value, params) => inst.check(_gt(value, params));
+  inst.gte = (value, params) => inst.check(_gte(value, params));
+  inst.min = (value, params) => inst.check(_gte(value, params));
+  inst.lt = (value, params) => inst.check(_lt(value, params));
+  inst.lte = (value, params) => inst.check(_lte(value, params));
+  inst.max = (value, params) => inst.check(_lte(value, params));
+  inst.positive = (params) => inst.check(_gt(BigInt(0), params));
+  inst.negative = (params) => inst.check(_lt(BigInt(0), params));
+  inst.nonpositive = (params) => inst.check(_lte(BigInt(0), params));
+  inst.nonnegative = (params) => inst.check(_gte(BigInt(0), params));
+  inst.multipleOf = (value, params) => inst.check(_multipleOf(value, params));
+  const bag = inst._zod.bag;
+  inst.minValue = bag.minimum ?? null;
+  inst.maxValue = bag.maximum ?? null;
+  inst.format = bag.format ?? null;
+});
 var ZodNull2 = /* @__PURE__ */ $constructor("ZodNull", (inst, def) => {
   $ZodNull.init(inst, def);
   ZodType2.init(inst, def);
 });
 function _null4(params) {
   return _null3(ZodNull2, params);
+}
+var ZodAny2 = /* @__PURE__ */ $constructor("ZodAny", (inst, def) => {
+  $ZodAny.init(inst, def);
+  ZodType2.init(inst, def);
+});
+function any() {
+  return _any(ZodAny2);
 }
 var ZodUnknown2 = /* @__PURE__ */ $constructor("ZodUnknown", (inst, def) => {
   $ZodUnknown.init(inst, def);
@@ -30594,6 +30837,15 @@ var ZodNever2 = /* @__PURE__ */ $constructor("ZodNever", (inst, def) => {
 function never(params) {
   return _never(ZodNever2, params);
 }
+var ZodDate2 = /* @__PURE__ */ $constructor("ZodDate", (inst, def) => {
+  $ZodDate.init(inst, def);
+  ZodType2.init(inst, def);
+  inst.min = (value, params) => inst.check(_gte(value, params));
+  inst.max = (value, params) => inst.check(_lte(value, params));
+  const c = inst._zod.bag;
+  inst.minDate = c.minimum ? new Date(c.minimum) : null;
+  inst.maxDate = c.maximum ? new Date(c.maximum) : null;
+});
 var ZodArray2 = /* @__PURE__ */ $constructor("ZodArray", (inst, def) => {
   $ZodArray.init(inst, def);
   ZodType2.init(inst, def);
@@ -30937,6 +31189,46 @@ function superRefine(fn) {
 }
 function preprocess(fn, schema2) {
   return pipe(transform(fn), schema2);
+}
+
+// node_modules/zod/v4/classic/compat.js
+var ZodIssueCode2 = {
+  invalid_type: "invalid_type",
+  too_big: "too_big",
+  too_small: "too_small",
+  invalid_format: "invalid_format",
+  not_multiple_of: "not_multiple_of",
+  unrecognized_keys: "unrecognized_keys",
+  invalid_union: "invalid_union",
+  invalid_key: "invalid_key",
+  invalid_element: "invalid_element",
+  invalid_value: "invalid_value",
+  custom: "custom"
+};
+
+// node_modules/zod/v4/classic/coerce.js
+var coerce_exports = {};
+__export(coerce_exports, {
+  bigint: () => bigint2,
+  boolean: () => boolean3,
+  date: () => date3,
+  number: () => number3,
+  string: () => string3
+});
+function string3(params) {
+  return _coercedString(ZodString2, params);
+}
+function number3(params) {
+  return _coercedNumber(ZodNumber2, params);
+}
+function boolean3(params) {
+  return _coercedBoolean(ZodBoolean2, params);
+}
+function bigint2(params) {
+  return _coercedBigint(ZodBigInt2, params);
+}
+function date3(params) {
+  return _coercedDate(ZodDate2, params);
 }
 
 // node_modules/zod/v4/classic/external.js
@@ -31343,6 +31635,7 @@ var InitializedNotificationSchema = NotificationSchema.extend({
   method: literal("notifications/initialized"),
   params: NotificationsParamsSchema.optional()
 });
+var isInitializedNotification = (value) => InitializedNotificationSchema.safeParse(value).success;
 var PingRequestSchema = RequestSchema.extend({
   method: literal("ping"),
   params: BaseRequestParamsSchema.optional()
@@ -34422,6 +34715,1461 @@ var StdioClientTransport = class {
   }
 };
 
+// node_modules/@modelcontextprotocol/sdk/dist/esm/shared/transport.js
+function normalizeHeaders(headers) {
+  if (!headers)
+    return {};
+  if (headers instanceof Headers) {
+    return Object.fromEntries(headers.entries());
+  }
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+  return { ...headers };
+}
+function createFetchWithInit(baseFetch = fetch, baseInit) {
+  if (!baseInit) {
+    return baseFetch;
+  }
+  return async (url2, init) => {
+    const mergedInit = {
+      ...baseInit,
+      ...init,
+      // Headers need special handling - merge instead of replace
+      headers: init?.headers ? { ...normalizeHeaders(baseInit.headers), ...normalizeHeaders(init.headers) } : baseInit.headers
+    };
+    return baseFetch(url2, mergedInit);
+  };
+}
+
+// node_modules/pkce-challenge/dist/index.node.js
+var crypto;
+crypto = globalThis.crypto?.webcrypto ?? // Node.js [18-16] REPL
+globalThis.crypto ?? // Node.js >18
+import("node:crypto").then((m) => m.webcrypto);
+async function getRandomValues(size) {
+  return (await crypto).getRandomValues(new Uint8Array(size));
+}
+async function random(size) {
+  const mask = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
+  const evenDistCutoff = Math.pow(2, 8) - Math.pow(2, 8) % mask.length;
+  let result = "";
+  while (result.length < size) {
+    const randomBytes = await getRandomValues(size - result.length);
+    for (const randomByte of randomBytes) {
+      if (randomByte < evenDistCutoff) {
+        result += mask[randomByte % mask.length];
+      }
+    }
+  }
+  return result;
+}
+async function generateVerifier(length) {
+  return await random(length);
+}
+async function generateChallenge(code_verifier) {
+  const buffer = await (await crypto).subtle.digest("SHA-256", new TextEncoder().encode(code_verifier));
+  return btoa(String.fromCharCode(...new Uint8Array(buffer))).replace(/\//g, "_").replace(/\+/g, "-").replace(/=/g, "");
+}
+async function pkceChallenge(length) {
+  if (!length)
+    length = 43;
+  if (length < 43 || length > 128) {
+    throw `Expected a length between 43 and 128. Received ${length}.`;
+  }
+  const verifier = await generateVerifier(length);
+  const challenge = await generateChallenge(verifier);
+  return {
+    code_verifier: verifier,
+    code_challenge: challenge
+  };
+}
+
+// node_modules/@modelcontextprotocol/sdk/dist/esm/shared/auth.js
+var SafeUrlSchema = url().superRefine((val, ctx) => {
+  if (!URL.canParse(val)) {
+    ctx.addIssue({
+      code: ZodIssueCode2.custom,
+      message: "URL must be parseable",
+      fatal: true
+    });
+    return NEVER2;
+  }
+}).refine((url2) => {
+  const u = new URL(url2);
+  return u.protocol !== "javascript:" && u.protocol !== "data:" && u.protocol !== "vbscript:";
+}, { message: "URL cannot use javascript:, data:, or vbscript: scheme" });
+var OAuthProtectedResourceMetadataSchema = looseObject({
+  resource: string2().url(),
+  authorization_servers: array(SafeUrlSchema).optional(),
+  jwks_uri: string2().url().optional(),
+  scopes_supported: array(string2()).optional(),
+  bearer_methods_supported: array(string2()).optional(),
+  resource_signing_alg_values_supported: array(string2()).optional(),
+  resource_name: string2().optional(),
+  resource_documentation: string2().optional(),
+  resource_policy_uri: string2().url().optional(),
+  resource_tos_uri: string2().url().optional(),
+  tls_client_certificate_bound_access_tokens: boolean2().optional(),
+  authorization_details_types_supported: array(string2()).optional(),
+  dpop_signing_alg_values_supported: array(string2()).optional(),
+  dpop_bound_access_tokens_required: boolean2().optional()
+});
+var OAuthMetadataSchema = looseObject({
+  issuer: string2(),
+  authorization_endpoint: SafeUrlSchema,
+  token_endpoint: SafeUrlSchema,
+  registration_endpoint: SafeUrlSchema.optional(),
+  scopes_supported: array(string2()).optional(),
+  response_types_supported: array(string2()),
+  response_modes_supported: array(string2()).optional(),
+  grant_types_supported: array(string2()).optional(),
+  token_endpoint_auth_methods_supported: array(string2()).optional(),
+  token_endpoint_auth_signing_alg_values_supported: array(string2()).optional(),
+  service_documentation: SafeUrlSchema.optional(),
+  revocation_endpoint: SafeUrlSchema.optional(),
+  revocation_endpoint_auth_methods_supported: array(string2()).optional(),
+  revocation_endpoint_auth_signing_alg_values_supported: array(string2()).optional(),
+  introspection_endpoint: string2().optional(),
+  introspection_endpoint_auth_methods_supported: array(string2()).optional(),
+  introspection_endpoint_auth_signing_alg_values_supported: array(string2()).optional(),
+  code_challenge_methods_supported: array(string2()).optional(),
+  client_id_metadata_document_supported: boolean2().optional()
+});
+var OpenIdProviderMetadataSchema = looseObject({
+  issuer: string2(),
+  authorization_endpoint: SafeUrlSchema,
+  token_endpoint: SafeUrlSchema,
+  userinfo_endpoint: SafeUrlSchema.optional(),
+  jwks_uri: SafeUrlSchema,
+  registration_endpoint: SafeUrlSchema.optional(),
+  scopes_supported: array(string2()).optional(),
+  response_types_supported: array(string2()),
+  response_modes_supported: array(string2()).optional(),
+  grant_types_supported: array(string2()).optional(),
+  acr_values_supported: array(string2()).optional(),
+  subject_types_supported: array(string2()),
+  id_token_signing_alg_values_supported: array(string2()),
+  id_token_encryption_alg_values_supported: array(string2()).optional(),
+  id_token_encryption_enc_values_supported: array(string2()).optional(),
+  userinfo_signing_alg_values_supported: array(string2()).optional(),
+  userinfo_encryption_alg_values_supported: array(string2()).optional(),
+  userinfo_encryption_enc_values_supported: array(string2()).optional(),
+  request_object_signing_alg_values_supported: array(string2()).optional(),
+  request_object_encryption_alg_values_supported: array(string2()).optional(),
+  request_object_encryption_enc_values_supported: array(string2()).optional(),
+  token_endpoint_auth_methods_supported: array(string2()).optional(),
+  token_endpoint_auth_signing_alg_values_supported: array(string2()).optional(),
+  display_values_supported: array(string2()).optional(),
+  claim_types_supported: array(string2()).optional(),
+  claims_supported: array(string2()).optional(),
+  service_documentation: string2().optional(),
+  claims_locales_supported: array(string2()).optional(),
+  ui_locales_supported: array(string2()).optional(),
+  claims_parameter_supported: boolean2().optional(),
+  request_parameter_supported: boolean2().optional(),
+  request_uri_parameter_supported: boolean2().optional(),
+  require_request_uri_registration: boolean2().optional(),
+  op_policy_uri: SafeUrlSchema.optional(),
+  op_tos_uri: SafeUrlSchema.optional(),
+  client_id_metadata_document_supported: boolean2().optional()
+});
+var OpenIdProviderDiscoveryMetadataSchema = object2({
+  ...OpenIdProviderMetadataSchema.shape,
+  ...OAuthMetadataSchema.pick({
+    code_challenge_methods_supported: true
+  }).shape
+});
+var OAuthTokensSchema = object2({
+  access_token: string2(),
+  id_token: string2().optional(),
+  // Optional for OAuth 2.1, but necessary in OpenID Connect
+  token_type: string2(),
+  expires_in: coerce_exports.number().optional(),
+  scope: string2().optional(),
+  refresh_token: string2().optional()
+}).strip();
+var OAuthErrorResponseSchema = object2({
+  error: string2(),
+  error_description: string2().optional(),
+  error_uri: string2().optional()
+});
+var OptionalSafeUrlSchema = SafeUrlSchema.optional().or(literal("").transform(() => void 0));
+var OAuthClientMetadataSchema = object2({
+  redirect_uris: array(SafeUrlSchema),
+  token_endpoint_auth_method: string2().optional(),
+  grant_types: array(string2()).optional(),
+  response_types: array(string2()).optional(),
+  client_name: string2().optional(),
+  client_uri: SafeUrlSchema.optional(),
+  logo_uri: OptionalSafeUrlSchema,
+  scope: string2().optional(),
+  contacts: array(string2()).optional(),
+  tos_uri: OptionalSafeUrlSchema,
+  policy_uri: string2().optional(),
+  jwks_uri: SafeUrlSchema.optional(),
+  jwks: any().optional(),
+  software_id: string2().optional(),
+  software_version: string2().optional(),
+  software_statement: string2().optional()
+}).strip();
+var OAuthClientInformationSchema = object2({
+  client_id: string2(),
+  client_secret: string2().optional(),
+  client_id_issued_at: number2().optional(),
+  client_secret_expires_at: number2().optional()
+}).strip();
+var OAuthClientInformationFullSchema = OAuthClientMetadataSchema.merge(OAuthClientInformationSchema);
+var OAuthClientRegistrationErrorSchema = object2({
+  error: string2(),
+  error_description: string2().optional()
+}).strip();
+var OAuthTokenRevocationRequestSchema = object2({
+  token: string2(),
+  token_type_hint: string2().optional()
+}).strip();
+
+// node_modules/@modelcontextprotocol/sdk/dist/esm/shared/auth-utils.js
+function resourceUrlFromServerUrl(url2) {
+  const resourceURL = typeof url2 === "string" ? new URL(url2) : new URL(url2.href);
+  resourceURL.hash = "";
+  return resourceURL;
+}
+function checkResourceAllowed({ requestedResource, configuredResource }) {
+  const requested = typeof requestedResource === "string" ? new URL(requestedResource) : new URL(requestedResource.href);
+  const configured = typeof configuredResource === "string" ? new URL(configuredResource) : new URL(configuredResource.href);
+  if (requested.origin !== configured.origin) {
+    return false;
+  }
+  if (requested.pathname.length < configured.pathname.length) {
+    return false;
+  }
+  const requestedPath = requested.pathname.endsWith("/") ? requested.pathname : requested.pathname + "/";
+  const configuredPath = configured.pathname.endsWith("/") ? configured.pathname : configured.pathname + "/";
+  return requestedPath.startsWith(configuredPath);
+}
+
+// node_modules/@modelcontextprotocol/sdk/dist/esm/server/auth/errors.js
+var OAuthError = class extends Error {
+  constructor(message, errorUri) {
+    super(message);
+    this.errorUri = errorUri;
+    this.name = this.constructor.name;
+  }
+  /**
+   * Converts the error to a standard OAuth error response object
+   */
+  toResponseObject() {
+    const response = {
+      error: this.errorCode,
+      error_description: this.message
+    };
+    if (this.errorUri) {
+      response.error_uri = this.errorUri;
+    }
+    return response;
+  }
+  get errorCode() {
+    return this.constructor.errorCode;
+  }
+};
+var InvalidRequestError = class extends OAuthError {
+};
+InvalidRequestError.errorCode = "invalid_request";
+var InvalidClientError = class extends OAuthError {
+};
+InvalidClientError.errorCode = "invalid_client";
+var InvalidGrantError = class extends OAuthError {
+};
+InvalidGrantError.errorCode = "invalid_grant";
+var UnauthorizedClientError = class extends OAuthError {
+};
+UnauthorizedClientError.errorCode = "unauthorized_client";
+var UnsupportedGrantTypeError = class extends OAuthError {
+};
+UnsupportedGrantTypeError.errorCode = "unsupported_grant_type";
+var InvalidScopeError = class extends OAuthError {
+};
+InvalidScopeError.errorCode = "invalid_scope";
+var AccessDeniedError = class extends OAuthError {
+};
+AccessDeniedError.errorCode = "access_denied";
+var ServerError = class extends OAuthError {
+};
+ServerError.errorCode = "server_error";
+var TemporarilyUnavailableError = class extends OAuthError {
+};
+TemporarilyUnavailableError.errorCode = "temporarily_unavailable";
+var UnsupportedResponseTypeError = class extends OAuthError {
+};
+UnsupportedResponseTypeError.errorCode = "unsupported_response_type";
+var UnsupportedTokenTypeError = class extends OAuthError {
+};
+UnsupportedTokenTypeError.errorCode = "unsupported_token_type";
+var InvalidTokenError = class extends OAuthError {
+};
+InvalidTokenError.errorCode = "invalid_token";
+var MethodNotAllowedError = class extends OAuthError {
+};
+MethodNotAllowedError.errorCode = "method_not_allowed";
+var TooManyRequestsError = class extends OAuthError {
+};
+TooManyRequestsError.errorCode = "too_many_requests";
+var InvalidClientMetadataError = class extends OAuthError {
+};
+InvalidClientMetadataError.errorCode = "invalid_client_metadata";
+var InsufficientScopeError = class extends OAuthError {
+};
+InsufficientScopeError.errorCode = "insufficient_scope";
+var InvalidTargetError = class extends OAuthError {
+};
+InvalidTargetError.errorCode = "invalid_target";
+var OAUTH_ERRORS = {
+  [InvalidRequestError.errorCode]: InvalidRequestError,
+  [InvalidClientError.errorCode]: InvalidClientError,
+  [InvalidGrantError.errorCode]: InvalidGrantError,
+  [UnauthorizedClientError.errorCode]: UnauthorizedClientError,
+  [UnsupportedGrantTypeError.errorCode]: UnsupportedGrantTypeError,
+  [InvalidScopeError.errorCode]: InvalidScopeError,
+  [AccessDeniedError.errorCode]: AccessDeniedError,
+  [ServerError.errorCode]: ServerError,
+  [TemporarilyUnavailableError.errorCode]: TemporarilyUnavailableError,
+  [UnsupportedResponseTypeError.errorCode]: UnsupportedResponseTypeError,
+  [UnsupportedTokenTypeError.errorCode]: UnsupportedTokenTypeError,
+  [InvalidTokenError.errorCode]: InvalidTokenError,
+  [MethodNotAllowedError.errorCode]: MethodNotAllowedError,
+  [TooManyRequestsError.errorCode]: TooManyRequestsError,
+  [InvalidClientMetadataError.errorCode]: InvalidClientMetadataError,
+  [InsufficientScopeError.errorCode]: InsufficientScopeError,
+  [InvalidTargetError.errorCode]: InvalidTargetError
+};
+
+// node_modules/@modelcontextprotocol/sdk/dist/esm/client/auth.js
+var UnauthorizedError = class extends Error {
+  constructor(message) {
+    super(message ?? "Unauthorized");
+  }
+};
+function isClientAuthMethod(method) {
+  return ["client_secret_basic", "client_secret_post", "none"].includes(method);
+}
+var AUTHORIZATION_CODE_RESPONSE_TYPE = "code";
+var AUTHORIZATION_CODE_CHALLENGE_METHOD = "S256";
+function selectClientAuthMethod(clientInformation, supportedMethods) {
+  const hasClientSecret = clientInformation.client_secret !== void 0;
+  if ("token_endpoint_auth_method" in clientInformation && clientInformation.token_endpoint_auth_method && isClientAuthMethod(clientInformation.token_endpoint_auth_method) && (supportedMethods.length === 0 || supportedMethods.includes(clientInformation.token_endpoint_auth_method))) {
+    return clientInformation.token_endpoint_auth_method;
+  }
+  if (supportedMethods.length === 0) {
+    return hasClientSecret ? "client_secret_basic" : "none";
+  }
+  if (hasClientSecret && supportedMethods.includes("client_secret_basic")) {
+    return "client_secret_basic";
+  }
+  if (hasClientSecret && supportedMethods.includes("client_secret_post")) {
+    return "client_secret_post";
+  }
+  if (supportedMethods.includes("none")) {
+    return "none";
+  }
+  return hasClientSecret ? "client_secret_post" : "none";
+}
+function applyClientAuthentication(method, clientInformation, headers, params) {
+  const { client_id, client_secret } = clientInformation;
+  switch (method) {
+    case "client_secret_basic":
+      applyBasicAuth(client_id, client_secret, headers);
+      return;
+    case "client_secret_post":
+      applyPostAuth(client_id, client_secret, params);
+      return;
+    case "none":
+      applyPublicAuth(client_id, params);
+      return;
+    default:
+      throw new Error(`Unsupported client authentication method: ${method}`);
+  }
+}
+function applyBasicAuth(clientId, clientSecret, headers) {
+  if (!clientSecret) {
+    throw new Error("client_secret_basic authentication requires a client_secret");
+  }
+  const credentials = btoa(`${clientId}:${clientSecret}`);
+  headers.set("Authorization", `Basic ${credentials}`);
+}
+function applyPostAuth(clientId, clientSecret, params) {
+  params.set("client_id", clientId);
+  if (clientSecret) {
+    params.set("client_secret", clientSecret);
+  }
+}
+function applyPublicAuth(clientId, params) {
+  params.set("client_id", clientId);
+}
+async function parseErrorResponse(input) {
+  const statusCode = input instanceof Response ? input.status : void 0;
+  const body = input instanceof Response ? await input.text() : input;
+  try {
+    const result = OAuthErrorResponseSchema.parse(JSON.parse(body));
+    const { error: error2, error_description, error_uri } = result;
+    const errorClass = OAUTH_ERRORS[error2] || ServerError;
+    return new errorClass(error_description || "", error_uri);
+  } catch (error2) {
+    const errorMessage = `${statusCode ? `HTTP ${statusCode}: ` : ""}Invalid OAuth error response: ${error2}. Raw body: ${body}`;
+    return new ServerError(errorMessage);
+  }
+}
+async function auth(provider, options2) {
+  try {
+    return await authInternal(provider, options2);
+  } catch (error2) {
+    if (error2 instanceof InvalidClientError || error2 instanceof UnauthorizedClientError) {
+      await provider.invalidateCredentials?.("all");
+      return await authInternal(provider, options2);
+    } else if (error2 instanceof InvalidGrantError) {
+      await provider.invalidateCredentials?.("tokens");
+      return await authInternal(provider, options2);
+    }
+    throw error2;
+  }
+}
+async function authInternal(provider, { serverUrl, authorizationCode, scope, resourceMetadataUrl, fetchFn }) {
+  const cachedState = await provider.discoveryState?.();
+  let resourceMetadata;
+  let authorizationServerUrl;
+  let metadata;
+  let effectiveResourceMetadataUrl = resourceMetadataUrl;
+  if (!effectiveResourceMetadataUrl && cachedState?.resourceMetadataUrl) {
+    effectiveResourceMetadataUrl = new URL(cachedState.resourceMetadataUrl);
+  }
+  if (cachedState?.authorizationServerUrl) {
+    authorizationServerUrl = cachedState.authorizationServerUrl;
+    resourceMetadata = cachedState.resourceMetadata;
+    metadata = cachedState.authorizationServerMetadata ?? await discoverAuthorizationServerMetadata(authorizationServerUrl, { fetchFn });
+    if (!resourceMetadata) {
+      try {
+        resourceMetadata = await discoverOAuthProtectedResourceMetadata(serverUrl, { resourceMetadataUrl: effectiveResourceMetadataUrl }, fetchFn);
+      } catch {
+      }
+    }
+    if (metadata !== cachedState.authorizationServerMetadata || resourceMetadata !== cachedState.resourceMetadata) {
+      await provider.saveDiscoveryState?.({
+        authorizationServerUrl: String(authorizationServerUrl),
+        resourceMetadataUrl: effectiveResourceMetadataUrl?.toString(),
+        resourceMetadata,
+        authorizationServerMetadata: metadata
+      });
+    }
+  } else {
+    const serverInfo = await discoverOAuthServerInfo(serverUrl, { resourceMetadataUrl: effectiveResourceMetadataUrl, fetchFn });
+    authorizationServerUrl = serverInfo.authorizationServerUrl;
+    metadata = serverInfo.authorizationServerMetadata;
+    resourceMetadata = serverInfo.resourceMetadata;
+    await provider.saveDiscoveryState?.({
+      authorizationServerUrl: String(authorizationServerUrl),
+      resourceMetadataUrl: effectiveResourceMetadataUrl?.toString(),
+      resourceMetadata,
+      authorizationServerMetadata: metadata
+    });
+  }
+  const resource = await selectResourceURL(serverUrl, provider, resourceMetadata);
+  const resolvedScope = scope || resourceMetadata?.scopes_supported?.join(" ") || provider.clientMetadata.scope;
+  let clientInformation = await Promise.resolve(provider.clientInformation());
+  if (!clientInformation) {
+    if (authorizationCode !== void 0) {
+      throw new Error("Existing OAuth client information is required when exchanging an authorization code");
+    }
+    const supportsUrlBasedClientId = metadata?.client_id_metadata_document_supported === true;
+    const clientMetadataUrl = provider.clientMetadataUrl;
+    if (clientMetadataUrl && !isHttpsUrl(clientMetadataUrl)) {
+      throw new InvalidClientMetadataError(`clientMetadataUrl must be a valid HTTPS URL with a non-root pathname, got: ${clientMetadataUrl}`);
+    }
+    const shouldUseUrlBasedClientId = supportsUrlBasedClientId && clientMetadataUrl;
+    if (shouldUseUrlBasedClientId) {
+      clientInformation = {
+        client_id: clientMetadataUrl
+      };
+      await provider.saveClientInformation?.(clientInformation);
+    } else {
+      if (!provider.saveClientInformation) {
+        throw new Error("OAuth client information must be saveable for dynamic registration");
+      }
+      const fullInformation = await registerClient(authorizationServerUrl, {
+        metadata,
+        clientMetadata: provider.clientMetadata,
+        scope: resolvedScope,
+        fetchFn
+      });
+      await provider.saveClientInformation(fullInformation);
+      clientInformation = fullInformation;
+    }
+  }
+  const nonInteractiveFlow = !provider.redirectUrl;
+  if (authorizationCode !== void 0 || nonInteractiveFlow) {
+    const tokens2 = await fetchToken(provider, authorizationServerUrl, {
+      metadata,
+      resource,
+      authorizationCode,
+      fetchFn
+    });
+    await provider.saveTokens(tokens2);
+    return "AUTHORIZED";
+  }
+  const tokens = await provider.tokens();
+  if (tokens?.refresh_token) {
+    try {
+      const newTokens = await refreshAuthorization(authorizationServerUrl, {
+        metadata,
+        clientInformation,
+        refreshToken: tokens.refresh_token,
+        resource,
+        addClientAuthentication: provider.addClientAuthentication,
+        fetchFn
+      });
+      await provider.saveTokens(newTokens);
+      return "AUTHORIZED";
+    } catch (error2) {
+      if (!(error2 instanceof OAuthError) || error2 instanceof ServerError) {
+      } else {
+        throw error2;
+      }
+    }
+  }
+  const state = provider.state ? await provider.state() : void 0;
+  const { authorizationUrl, codeVerifier } = await startAuthorization(authorizationServerUrl, {
+    metadata,
+    clientInformation,
+    state,
+    redirectUrl: provider.redirectUrl,
+    scope: resolvedScope,
+    resource
+  });
+  await provider.saveCodeVerifier(codeVerifier);
+  await provider.redirectToAuthorization(authorizationUrl);
+  return "REDIRECT";
+}
+function isHttpsUrl(value) {
+  if (!value)
+    return false;
+  try {
+    const url2 = new URL(value);
+    return url2.protocol === "https:" && url2.pathname !== "/";
+  } catch {
+    return false;
+  }
+}
+async function selectResourceURL(serverUrl, provider, resourceMetadata) {
+  const defaultResource = resourceUrlFromServerUrl(serverUrl);
+  if (provider.validateResourceURL) {
+    return await provider.validateResourceURL(defaultResource, resourceMetadata?.resource);
+  }
+  if (!resourceMetadata) {
+    return void 0;
+  }
+  if (!checkResourceAllowed({ requestedResource: defaultResource, configuredResource: resourceMetadata.resource })) {
+    throw new Error(`Protected resource ${resourceMetadata.resource} does not match expected ${defaultResource} (or origin)`);
+  }
+  return new URL(resourceMetadata.resource);
+}
+function extractWWWAuthenticateParams(res) {
+  const authenticateHeader = res.headers.get("WWW-Authenticate");
+  if (!authenticateHeader) {
+    return {};
+  }
+  const [type2, scheme] = authenticateHeader.split(" ");
+  if (type2.toLowerCase() !== "bearer" || !scheme) {
+    return {};
+  }
+  const resourceMetadataMatch = extractFieldFromWwwAuth(res, "resource_metadata") || void 0;
+  let resourceMetadataUrl;
+  if (resourceMetadataMatch) {
+    try {
+      resourceMetadataUrl = new URL(resourceMetadataMatch);
+    } catch {
+    }
+  }
+  const scope = extractFieldFromWwwAuth(res, "scope") || void 0;
+  const error2 = extractFieldFromWwwAuth(res, "error") || void 0;
+  return {
+    resourceMetadataUrl,
+    scope,
+    error: error2
+  };
+}
+function extractFieldFromWwwAuth(response, fieldName) {
+  const wwwAuthHeader = response.headers.get("WWW-Authenticate");
+  if (!wwwAuthHeader) {
+    return null;
+  }
+  const pattern = new RegExp(`${fieldName}=(?:"([^"]+)"|([^\\s,]+))`);
+  const match = wwwAuthHeader.match(pattern);
+  if (match) {
+    return match[1] || match[2];
+  }
+  return null;
+}
+async function discoverOAuthProtectedResourceMetadata(serverUrl, opts, fetchFn = fetch) {
+  const response = await discoverMetadataWithFallback(serverUrl, "oauth-protected-resource", fetchFn, {
+    protocolVersion: opts?.protocolVersion,
+    metadataUrl: opts?.resourceMetadataUrl
+  });
+  if (!response || response.status === 404) {
+    await response?.body?.cancel();
+    throw new Error(`Resource server does not implement OAuth 2.0 Protected Resource Metadata.`);
+  }
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new Error(`HTTP ${response.status} trying to load well-known OAuth protected resource metadata.`);
+  }
+  return OAuthProtectedResourceMetadataSchema.parse(await response.json());
+}
+async function fetchWithCorsRetry(url2, headers, fetchFn = fetch) {
+  try {
+    return await fetchFn(url2, { headers });
+  } catch (error2) {
+    if (error2 instanceof TypeError) {
+      if (headers) {
+        return fetchWithCorsRetry(url2, void 0, fetchFn);
+      } else {
+        return void 0;
+      }
+    }
+    throw error2;
+  }
+}
+function buildWellKnownPath(wellKnownPrefix, pathname = "", options2 = {}) {
+  if (pathname.endsWith("/")) {
+    pathname = pathname.slice(0, -1);
+  }
+  return options2.prependPathname ? `${pathname}/.well-known/${wellKnownPrefix}` : `/.well-known/${wellKnownPrefix}${pathname}`;
+}
+async function tryMetadataDiscovery(url2, protocolVersion, fetchFn = fetch) {
+  const headers = {
+    "MCP-Protocol-Version": protocolVersion
+  };
+  return await fetchWithCorsRetry(url2, headers, fetchFn);
+}
+function shouldAttemptFallback(response, pathname) {
+  return !response || response.status >= 400 && response.status < 500 && pathname !== "/";
+}
+async function discoverMetadataWithFallback(serverUrl, wellKnownType, fetchFn, opts) {
+  const issuer = new URL(serverUrl);
+  const protocolVersion = opts?.protocolVersion ?? LATEST_PROTOCOL_VERSION;
+  let url2;
+  if (opts?.metadataUrl) {
+    url2 = new URL(opts.metadataUrl);
+  } else {
+    const wellKnownPath = buildWellKnownPath(wellKnownType, issuer.pathname);
+    url2 = new URL(wellKnownPath, opts?.metadataServerUrl ?? issuer);
+    url2.search = issuer.search;
+  }
+  let response = await tryMetadataDiscovery(url2, protocolVersion, fetchFn);
+  if (!opts?.metadataUrl && shouldAttemptFallback(response, issuer.pathname)) {
+    const rootUrl = new URL(`/.well-known/${wellKnownType}`, issuer);
+    response = await tryMetadataDiscovery(rootUrl, protocolVersion, fetchFn);
+  }
+  return response;
+}
+function buildDiscoveryUrls(authorizationServerUrl) {
+  const url2 = typeof authorizationServerUrl === "string" ? new URL(authorizationServerUrl) : authorizationServerUrl;
+  const hasPath = url2.pathname !== "/";
+  const urlsToTry = [];
+  if (!hasPath) {
+    urlsToTry.push({
+      url: new URL("/.well-known/oauth-authorization-server", url2.origin),
+      type: "oauth"
+    });
+    urlsToTry.push({
+      url: new URL(`/.well-known/openid-configuration`, url2.origin),
+      type: "oidc"
+    });
+    return urlsToTry;
+  }
+  let pathname = url2.pathname;
+  if (pathname.endsWith("/")) {
+    pathname = pathname.slice(0, -1);
+  }
+  urlsToTry.push({
+    url: new URL(`/.well-known/oauth-authorization-server${pathname}`, url2.origin),
+    type: "oauth"
+  });
+  urlsToTry.push({
+    url: new URL(`/.well-known/openid-configuration${pathname}`, url2.origin),
+    type: "oidc"
+  });
+  urlsToTry.push({
+    url: new URL(`${pathname}/.well-known/openid-configuration`, url2.origin),
+    type: "oidc"
+  });
+  return urlsToTry;
+}
+async function discoverAuthorizationServerMetadata(authorizationServerUrl, { fetchFn = fetch, protocolVersion = LATEST_PROTOCOL_VERSION } = {}) {
+  const headers = {
+    "MCP-Protocol-Version": protocolVersion,
+    Accept: "application/json"
+  };
+  const urlsToTry = buildDiscoveryUrls(authorizationServerUrl);
+  for (const { url: endpointUrl, type: type2 } of urlsToTry) {
+    const response = await fetchWithCorsRetry(endpointUrl, headers, fetchFn);
+    if (!response) {
+      continue;
+    }
+    if (!response.ok) {
+      await response.body?.cancel();
+      if (response.status >= 400 && response.status < 500) {
+        continue;
+      }
+      throw new Error(`HTTP ${response.status} trying to load ${type2 === "oauth" ? "OAuth" : "OpenID provider"} metadata from ${endpointUrl}`);
+    }
+    if (type2 === "oauth") {
+      return OAuthMetadataSchema.parse(await response.json());
+    } else {
+      return OpenIdProviderDiscoveryMetadataSchema.parse(await response.json());
+    }
+  }
+  return void 0;
+}
+async function discoverOAuthServerInfo(serverUrl, opts) {
+  let resourceMetadata;
+  let authorizationServerUrl;
+  try {
+    resourceMetadata = await discoverOAuthProtectedResourceMetadata(serverUrl, { resourceMetadataUrl: opts?.resourceMetadataUrl }, opts?.fetchFn);
+    if (resourceMetadata.authorization_servers && resourceMetadata.authorization_servers.length > 0) {
+      authorizationServerUrl = resourceMetadata.authorization_servers[0];
+    }
+  } catch {
+  }
+  if (!authorizationServerUrl) {
+    authorizationServerUrl = String(new URL("/", serverUrl));
+  }
+  const authorizationServerMetadata = await discoverAuthorizationServerMetadata(authorizationServerUrl, { fetchFn: opts?.fetchFn });
+  return {
+    authorizationServerUrl,
+    authorizationServerMetadata,
+    resourceMetadata
+  };
+}
+async function startAuthorization(authorizationServerUrl, { metadata, clientInformation, redirectUrl, scope, state, resource }) {
+  let authorizationUrl;
+  if (metadata) {
+    authorizationUrl = new URL(metadata.authorization_endpoint);
+    if (!metadata.response_types_supported.includes(AUTHORIZATION_CODE_RESPONSE_TYPE)) {
+      throw new Error(`Incompatible auth server: does not support response type ${AUTHORIZATION_CODE_RESPONSE_TYPE}`);
+    }
+    if (metadata.code_challenge_methods_supported && !metadata.code_challenge_methods_supported.includes(AUTHORIZATION_CODE_CHALLENGE_METHOD)) {
+      throw new Error(`Incompatible auth server: does not support code challenge method ${AUTHORIZATION_CODE_CHALLENGE_METHOD}`);
+    }
+  } else {
+    authorizationUrl = new URL("/authorize", authorizationServerUrl);
+  }
+  const challenge = await pkceChallenge();
+  const codeVerifier = challenge.code_verifier;
+  const codeChallenge = challenge.code_challenge;
+  authorizationUrl.searchParams.set("response_type", AUTHORIZATION_CODE_RESPONSE_TYPE);
+  authorizationUrl.searchParams.set("client_id", clientInformation.client_id);
+  authorizationUrl.searchParams.set("code_challenge", codeChallenge);
+  authorizationUrl.searchParams.set("code_challenge_method", AUTHORIZATION_CODE_CHALLENGE_METHOD);
+  authorizationUrl.searchParams.set("redirect_uri", String(redirectUrl));
+  if (state) {
+    authorizationUrl.searchParams.set("state", state);
+  }
+  if (scope) {
+    authorizationUrl.searchParams.set("scope", scope);
+  }
+  if (scope?.includes("offline_access")) {
+    authorizationUrl.searchParams.append("prompt", "consent");
+  }
+  if (resource) {
+    authorizationUrl.searchParams.set("resource", resource.href);
+  }
+  return { authorizationUrl, codeVerifier };
+}
+function prepareAuthorizationCodeRequest(authorizationCode, codeVerifier, redirectUri) {
+  return new URLSearchParams({
+    grant_type: "authorization_code",
+    code: authorizationCode,
+    code_verifier: codeVerifier,
+    redirect_uri: String(redirectUri)
+  });
+}
+async function executeTokenRequest(authorizationServerUrl, { metadata, tokenRequestParams, clientInformation, addClientAuthentication, resource, fetchFn }) {
+  const tokenUrl = metadata?.token_endpoint ? new URL(metadata.token_endpoint) : new URL("/token", authorizationServerUrl);
+  const headers = new Headers({
+    "Content-Type": "application/x-www-form-urlencoded",
+    Accept: "application/json"
+  });
+  if (resource) {
+    tokenRequestParams.set("resource", resource.href);
+  }
+  if (addClientAuthentication) {
+    await addClientAuthentication(headers, tokenRequestParams, tokenUrl, metadata);
+  } else if (clientInformation) {
+    const supportedMethods = metadata?.token_endpoint_auth_methods_supported ?? [];
+    const authMethod = selectClientAuthMethod(clientInformation, supportedMethods);
+    applyClientAuthentication(authMethod, clientInformation, headers, tokenRequestParams);
+  }
+  const response = await (fetchFn ?? fetch)(tokenUrl, {
+    method: "POST",
+    headers,
+    body: tokenRequestParams
+  });
+  if (!response.ok) {
+    throw await parseErrorResponse(response);
+  }
+  return OAuthTokensSchema.parse(await response.json());
+}
+async function refreshAuthorization(authorizationServerUrl, { metadata, clientInformation, refreshToken, resource, addClientAuthentication, fetchFn }) {
+  const tokenRequestParams = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: refreshToken
+  });
+  const tokens = await executeTokenRequest(authorizationServerUrl, {
+    metadata,
+    tokenRequestParams,
+    clientInformation,
+    addClientAuthentication,
+    resource,
+    fetchFn
+  });
+  return { refresh_token: refreshToken, ...tokens };
+}
+async function fetchToken(provider, authorizationServerUrl, { metadata, resource, authorizationCode, fetchFn } = {}) {
+  const scope = provider.clientMetadata.scope;
+  let tokenRequestParams;
+  if (provider.prepareTokenRequest) {
+    tokenRequestParams = await provider.prepareTokenRequest(scope);
+  }
+  if (!tokenRequestParams) {
+    if (!authorizationCode) {
+      throw new Error("Either provider.prepareTokenRequest() or authorizationCode is required");
+    }
+    if (!provider.redirectUrl) {
+      throw new Error("redirectUrl is required for authorization_code flow");
+    }
+    const codeVerifier = await provider.codeVerifier();
+    tokenRequestParams = prepareAuthorizationCodeRequest(authorizationCode, codeVerifier, provider.redirectUrl);
+  }
+  const clientInformation = await provider.clientInformation();
+  return executeTokenRequest(authorizationServerUrl, {
+    metadata,
+    tokenRequestParams,
+    clientInformation: clientInformation ?? void 0,
+    addClientAuthentication: provider.addClientAuthentication,
+    resource,
+    fetchFn
+  });
+}
+async function registerClient(authorizationServerUrl, { metadata, clientMetadata, scope, fetchFn }) {
+  let registrationUrl;
+  if (metadata) {
+    if (!metadata.registration_endpoint) {
+      throw new Error("Incompatible auth server: does not support dynamic client registration");
+    }
+    registrationUrl = new URL(metadata.registration_endpoint);
+  } else {
+    registrationUrl = new URL("/register", authorizationServerUrl);
+  }
+  const response = await (fetchFn ?? fetch)(registrationUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      ...clientMetadata,
+      ...scope !== void 0 ? { scope } : {}
+    })
+  });
+  if (!response.ok) {
+    throw await parseErrorResponse(response);
+  }
+  return OAuthClientInformationFullSchema.parse(await response.json());
+}
+
+// node_modules/eventsource-parser/dist/index.js
+var ParseError = class extends Error {
+  constructor(message, options2) {
+    super(message), this.name = "ParseError", this.type = options2.type, this.field = options2.field, this.value = options2.value, this.line = options2.line;
+  }
+};
+var LF = 10;
+var CR = 13;
+var SPACE = 32;
+function noop(_arg) {
+}
+function createParser(callbacks) {
+  if (typeof callbacks == "function")
+    throw new TypeError(
+      "`callbacks` must be an object, got a function instead. Did you mean `{onEvent: fn}`?"
+    );
+  const { onEvent = noop, onError = noop, onRetry = noop, onComment } = callbacks, pendingFragments = [];
+  let isFirstChunk = true, id, data = "", dataLines = 0, eventType;
+  function feed(chunk) {
+    if (isFirstChunk && (isFirstChunk = false, chunk.charCodeAt(0) === 239 && chunk.charCodeAt(1) === 187 && chunk.charCodeAt(2) === 191 && (chunk = chunk.slice(3))), pendingFragments.length === 0) {
+      const trailing2 = processLines(chunk);
+      trailing2 !== "" && pendingFragments.push(trailing2);
+      return;
+    }
+    if (chunk.indexOf(`
+`) === -1 && chunk.indexOf("\r") === -1) {
+      pendingFragments.push(chunk);
+      return;
+    }
+    pendingFragments.push(chunk);
+    const input = pendingFragments.join("");
+    pendingFragments.length = 0;
+    const trailing = processLines(input);
+    trailing !== "" && pendingFragments.push(trailing);
+  }
+  function processLines(chunk) {
+    let searchIndex = 0;
+    if (chunk.indexOf("\r") === -1) {
+      let lfIndex = chunk.indexOf(`
+`, searchIndex);
+      for (; lfIndex !== -1; ) {
+        if (searchIndex === lfIndex) {
+          dataLines > 0 && onEvent({ id, event: eventType, data }), id = void 0, data = "", dataLines = 0, eventType = void 0, searchIndex = lfIndex + 1, lfIndex = chunk.indexOf(`
+`, searchIndex);
+          continue;
+        }
+        const firstCharCode = chunk.charCodeAt(searchIndex);
+        if (isDataPrefix(chunk, searchIndex, firstCharCode)) {
+          const valueStart = chunk.charCodeAt(searchIndex + 5) === SPACE ? searchIndex + 6 : searchIndex + 5, value = chunk.slice(valueStart, lfIndex);
+          if (dataLines === 0 && chunk.charCodeAt(lfIndex + 1) === LF) {
+            onEvent({ id, event: eventType, data: value }), id = void 0, data = "", eventType = void 0, searchIndex = lfIndex + 2, lfIndex = chunk.indexOf(`
+`, searchIndex);
+            continue;
+          }
+          data = dataLines === 0 ? value : `${data}
+${value}`, dataLines++;
+        } else isEventPrefix(chunk, searchIndex, firstCharCode) ? eventType = chunk.slice(
+          chunk.charCodeAt(searchIndex + 6) === SPACE ? searchIndex + 7 : searchIndex + 6,
+          lfIndex
+        ) || void 0 : parseLine(chunk, searchIndex, lfIndex);
+        searchIndex = lfIndex + 1, lfIndex = chunk.indexOf(`
+`, searchIndex);
+      }
+      return chunk.slice(searchIndex);
+    }
+    for (; searchIndex < chunk.length; ) {
+      const crIndex = chunk.indexOf("\r", searchIndex), lfIndex = chunk.indexOf(`
+`, searchIndex);
+      let lineEnd = -1;
+      if (crIndex !== -1 && lfIndex !== -1 ? lineEnd = crIndex < lfIndex ? crIndex : lfIndex : crIndex !== -1 ? crIndex === chunk.length - 1 ? lineEnd = -1 : lineEnd = crIndex : lfIndex !== -1 && (lineEnd = lfIndex), lineEnd === -1)
+        break;
+      parseLine(chunk, searchIndex, lineEnd), searchIndex = lineEnd + 1, chunk.charCodeAt(searchIndex - 1) === CR && chunk.charCodeAt(searchIndex) === LF && searchIndex++;
+    }
+    return chunk.slice(searchIndex);
+  }
+  function parseLine(chunk, start, end) {
+    if (start === end) {
+      dispatchEvent();
+      return;
+    }
+    const firstCharCode = chunk.charCodeAt(start);
+    if (isDataPrefix(chunk, start, firstCharCode)) {
+      const valueStart = chunk.charCodeAt(start + 5) === SPACE ? start + 6 : start + 5, value2 = chunk.slice(valueStart, end);
+      data = dataLines === 0 ? value2 : `${data}
+${value2}`, dataLines++;
+      return;
+    }
+    if (isEventPrefix(chunk, start, firstCharCode)) {
+      eventType = chunk.slice(chunk.charCodeAt(start + 6) === SPACE ? start + 7 : start + 6, end) || void 0;
+      return;
+    }
+    if (firstCharCode === 105 && chunk.charCodeAt(start + 1) === 100 && chunk.charCodeAt(start + 2) === 58) {
+      const value2 = chunk.slice(chunk.charCodeAt(start + 3) === SPACE ? start + 4 : start + 3, end);
+      id = value2.includes("\0") ? void 0 : value2;
+      return;
+    }
+    if (firstCharCode === 58) {
+      if (onComment) {
+        const line2 = chunk.slice(start, end);
+        onComment(line2.slice(chunk.charCodeAt(start + 1) === SPACE ? 2 : 1));
+      }
+      return;
+    }
+    const line = chunk.slice(start, end), fieldSeparatorIndex = line.indexOf(":");
+    if (fieldSeparatorIndex === -1) {
+      processField(line, "", line);
+      return;
+    }
+    const field = line.slice(0, fieldSeparatorIndex), offset = line.charCodeAt(fieldSeparatorIndex + 1) === SPACE ? 2 : 1, value = line.slice(fieldSeparatorIndex + offset);
+    processField(field, value, line);
+  }
+  function processField(field, value, line) {
+    switch (field) {
+      case "event":
+        eventType = value || void 0;
+        break;
+      case "data":
+        data = dataLines === 0 ? value : `${data}
+${value}`, dataLines++;
+        break;
+      case "id":
+        id = value.includes("\0") ? void 0 : value;
+        break;
+      case "retry":
+        /^\d+$/.test(value) ? onRetry(parseInt(value, 10)) : onError(
+          new ParseError(`Invalid \`retry\` value: "${value}"`, {
+            type: "invalid-retry",
+            value,
+            line
+          })
+        );
+        break;
+      default:
+        onError(
+          new ParseError(
+            `Unknown field "${field.length > 20 ? `${field.slice(0, 20)}\u2026` : field}"`,
+            { type: "unknown-field", field, value, line }
+          )
+        );
+        break;
+    }
+  }
+  function dispatchEvent() {
+    dataLines > 0 && onEvent({
+      id,
+      event: eventType,
+      data
+    }), id = void 0, data = "", dataLines = 0, eventType = void 0;
+  }
+  function reset(options2 = {}) {
+    if (options2.consume && pendingFragments.length > 0) {
+      const incompleteLine = pendingFragments.join("");
+      parseLine(incompleteLine, 0, incompleteLine.length);
+    }
+    isFirstChunk = true, id = void 0, data = "", dataLines = 0, eventType = void 0, pendingFragments.length = 0;
+  }
+  return { feed, reset };
+}
+function isDataPrefix(chunk, i, firstCharCode) {
+  return firstCharCode === 100 && chunk.charCodeAt(i + 1) === 97 && chunk.charCodeAt(i + 2) === 116 && chunk.charCodeAt(i + 3) === 97 && chunk.charCodeAt(i + 4) === 58;
+}
+function isEventPrefix(chunk, i, firstCharCode) {
+  return firstCharCode === 101 && chunk.charCodeAt(i + 1) === 118 && chunk.charCodeAt(i + 2) === 101 && chunk.charCodeAt(i + 3) === 110 && chunk.charCodeAt(i + 4) === 116 && chunk.charCodeAt(i + 5) === 58;
+}
+
+// node_modules/eventsource-parser/dist/stream.js
+var EventSourceParserStream = class extends TransformStream {
+  constructor({ onError, onRetry, onComment } = {}) {
+    let parser;
+    super({
+      start(controller) {
+        parser = createParser({
+          onEvent: (event) => {
+            controller.enqueue(event);
+          },
+          onError(error2) {
+            onError === "terminate" ? controller.error(error2) : typeof onError == "function" && onError(error2);
+          },
+          onRetry,
+          onComment
+        });
+      },
+      transform(chunk) {
+        parser.feed(chunk);
+      }
+    });
+  }
+};
+
+// node_modules/@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.js
+var DEFAULT_STREAMABLE_HTTP_RECONNECTION_OPTIONS = {
+  initialReconnectionDelay: 1e3,
+  maxReconnectionDelay: 3e4,
+  reconnectionDelayGrowFactor: 1.5,
+  maxRetries: 2
+};
+var StreamableHTTPError = class extends Error {
+  constructor(code, message) {
+    super(`Streamable HTTP error: ${message}`);
+    this.code = code;
+  }
+};
+var StreamableHTTPClientTransport = class {
+  constructor(url2, opts) {
+    this._hasCompletedAuthFlow = false;
+    this._url = url2;
+    this._resourceMetadataUrl = void 0;
+    this._scope = void 0;
+    this._requestInit = opts?.requestInit;
+    this._authProvider = opts?.authProvider;
+    this._fetch = opts?.fetch;
+    this._fetchWithInit = createFetchWithInit(opts?.fetch, opts?.requestInit);
+    this._sessionId = opts?.sessionId;
+    this._reconnectionOptions = opts?.reconnectionOptions ?? DEFAULT_STREAMABLE_HTTP_RECONNECTION_OPTIONS;
+  }
+  async _authThenStart() {
+    if (!this._authProvider) {
+      throw new UnauthorizedError("No auth provider");
+    }
+    let result;
+    try {
+      result = await auth(this._authProvider, {
+        serverUrl: this._url,
+        resourceMetadataUrl: this._resourceMetadataUrl,
+        scope: this._scope,
+        fetchFn: this._fetchWithInit
+      });
+    } catch (error2) {
+      this.onerror?.(error2);
+      throw error2;
+    }
+    if (result !== "AUTHORIZED") {
+      throw new UnauthorizedError();
+    }
+    return await this._startOrAuthSse({ resumptionToken: void 0 });
+  }
+  async _commonHeaders() {
+    const headers = {};
+    if (this._authProvider) {
+      const tokens = await this._authProvider.tokens();
+      if (tokens) {
+        headers["Authorization"] = `Bearer ${tokens.access_token}`;
+      }
+    }
+    if (this._sessionId) {
+      headers["mcp-session-id"] = this._sessionId;
+    }
+    if (this._protocolVersion) {
+      headers["mcp-protocol-version"] = this._protocolVersion;
+    }
+    const extraHeaders = normalizeHeaders(this._requestInit?.headers);
+    return new Headers({
+      ...headers,
+      ...extraHeaders
+    });
+  }
+  async _startOrAuthSse(options2) {
+    const { resumptionToken } = options2;
+    try {
+      const headers = await this._commonHeaders();
+      headers.set("Accept", "text/event-stream");
+      if (resumptionToken) {
+        headers.set("last-event-id", resumptionToken);
+      }
+      const response = await (this._fetch ?? fetch)(this._url, {
+        method: "GET",
+        headers,
+        signal: this._abortController?.signal
+      });
+      if (!response.ok) {
+        await response.body?.cancel();
+        if (response.status === 401 && this._authProvider) {
+          return await this._authThenStart();
+        }
+        if (response.status === 405) {
+          return;
+        }
+        throw new StreamableHTTPError(response.status, `Failed to open SSE stream: ${response.statusText}`);
+      }
+      this._handleSseStream(response.body, options2, true);
+    } catch (error2) {
+      this.onerror?.(error2);
+      throw error2;
+    }
+  }
+  /**
+   * Calculates the next reconnection delay using  backoff algorithm
+   *
+   * @param attempt Current reconnection attempt count for the specific stream
+   * @returns Time to wait in milliseconds before next reconnection attempt
+   */
+  _getNextReconnectionDelay(attempt) {
+    if (this._serverRetryMs !== void 0) {
+      return this._serverRetryMs;
+    }
+    const initialDelay = this._reconnectionOptions.initialReconnectionDelay;
+    const growFactor = this._reconnectionOptions.reconnectionDelayGrowFactor;
+    const maxDelay = this._reconnectionOptions.maxReconnectionDelay;
+    return Math.min(initialDelay * Math.pow(growFactor, attempt), maxDelay);
+  }
+  /**
+   * Schedule a reconnection attempt using server-provided retry interval or backoff
+   *
+   * @param lastEventId The ID of the last received event for resumability
+   * @param attemptCount Current reconnection attempt count for this specific stream
+   */
+  _scheduleReconnection(options2, attemptCount = 0) {
+    const maxRetries = this._reconnectionOptions.maxRetries;
+    if (attemptCount >= maxRetries) {
+      this.onerror?.(new Error(`Maximum reconnection attempts (${maxRetries}) exceeded.`));
+      return;
+    }
+    const delay = this._getNextReconnectionDelay(attemptCount);
+    this._reconnectionTimeout = setTimeout(() => {
+      this._startOrAuthSse(options2).catch((error2) => {
+        this.onerror?.(new Error(`Failed to reconnect SSE stream: ${error2 instanceof Error ? error2.message : String(error2)}`));
+        this._scheduleReconnection(options2, attemptCount + 1);
+      });
+    }, delay);
+  }
+  _handleSseStream(stream, options2, isReconnectable) {
+    if (!stream) {
+      return;
+    }
+    const { onresumptiontoken, replayMessageId } = options2;
+    let lastEventId;
+    let hasPrimingEvent = false;
+    let receivedResponse = false;
+    const processStream = async () => {
+      try {
+        const reader = stream.pipeThrough(new TextDecoderStream()).pipeThrough(new EventSourceParserStream({
+          onRetry: (retryMs) => {
+            this._serverRetryMs = retryMs;
+          }
+        })).getReader();
+        while (true) {
+          const { value: event, done } = await reader.read();
+          if (done) {
+            break;
+          }
+          if (event.id) {
+            lastEventId = event.id;
+            hasPrimingEvent = true;
+            onresumptiontoken?.(event.id);
+          }
+          if (!event.data) {
+            continue;
+          }
+          if (!event.event || event.event === "message") {
+            try {
+              const message = JSONRPCMessageSchema.parse(JSON.parse(event.data));
+              if (isJSONRPCResultResponse(message)) {
+                receivedResponse = true;
+                if (replayMessageId !== void 0) {
+                  message.id = replayMessageId;
+                }
+              }
+              this.onmessage?.(message);
+            } catch (error2) {
+              this.onerror?.(error2);
+            }
+          }
+        }
+        const canResume = isReconnectable || hasPrimingEvent;
+        const needsReconnect = canResume && !receivedResponse;
+        if (needsReconnect && this._abortController && !this._abortController.signal.aborted) {
+          this._scheduleReconnection({
+            resumptionToken: lastEventId,
+            onresumptiontoken,
+            replayMessageId
+          }, 0);
+        }
+      } catch (error2) {
+        this.onerror?.(new Error(`SSE stream disconnected: ${error2}`));
+        const canResume = isReconnectable || hasPrimingEvent;
+        const needsReconnect = canResume && !receivedResponse;
+        if (needsReconnect && this._abortController && !this._abortController.signal.aborted) {
+          try {
+            this._scheduleReconnection({
+              resumptionToken: lastEventId,
+              onresumptiontoken,
+              replayMessageId
+            }, 0);
+          } catch (error3) {
+            this.onerror?.(new Error(`Failed to reconnect: ${error3 instanceof Error ? error3.message : String(error3)}`));
+          }
+        }
+      }
+    };
+    processStream();
+  }
+  async start() {
+    if (this._abortController) {
+      throw new Error("StreamableHTTPClientTransport already started! If using Client class, note that connect() calls start() automatically.");
+    }
+    this._abortController = new AbortController();
+  }
+  /**
+   * Call this method after the user has finished authorizing via their user agent and is redirected back to the MCP client application. This will exchange the authorization code for an access token, enabling the next connection attempt to successfully auth.
+   */
+  async finishAuth(authorizationCode) {
+    if (!this._authProvider) {
+      throw new UnauthorizedError("No auth provider");
+    }
+    const result = await auth(this._authProvider, {
+      serverUrl: this._url,
+      authorizationCode,
+      resourceMetadataUrl: this._resourceMetadataUrl,
+      scope: this._scope,
+      fetchFn: this._fetchWithInit
+    });
+    if (result !== "AUTHORIZED") {
+      throw new UnauthorizedError("Failed to authorize");
+    }
+  }
+  async close() {
+    if (this._reconnectionTimeout) {
+      clearTimeout(this._reconnectionTimeout);
+      this._reconnectionTimeout = void 0;
+    }
+    this._abortController?.abort();
+    this.onclose?.();
+  }
+  async send(message, options2) {
+    try {
+      const { resumptionToken, onresumptiontoken } = options2 || {};
+      if (resumptionToken) {
+        this._startOrAuthSse({ resumptionToken, replayMessageId: isJSONRPCRequest(message) ? message.id : void 0 }).catch((err) => this.onerror?.(err));
+        return;
+      }
+      const headers = await this._commonHeaders();
+      headers.set("content-type", "application/json");
+      headers.set("accept", "application/json, text/event-stream");
+      const init = {
+        ...this._requestInit,
+        method: "POST",
+        headers,
+        body: JSON.stringify(message),
+        signal: this._abortController?.signal
+      };
+      const response = await (this._fetch ?? fetch)(this._url, init);
+      const sessionId = response.headers.get("mcp-session-id");
+      if (sessionId) {
+        this._sessionId = sessionId;
+      }
+      if (!response.ok) {
+        const text = await response.text().catch(() => null);
+        if (response.status === 401 && this._authProvider) {
+          if (this._hasCompletedAuthFlow) {
+            throw new StreamableHTTPError(401, "Server returned 401 after successful authentication");
+          }
+          const { resourceMetadataUrl, scope } = extractWWWAuthenticateParams(response);
+          this._resourceMetadataUrl = resourceMetadataUrl;
+          this._scope = scope;
+          const result = await auth(this._authProvider, {
+            serverUrl: this._url,
+            resourceMetadataUrl: this._resourceMetadataUrl,
+            scope: this._scope,
+            fetchFn: this._fetchWithInit
+          });
+          if (result !== "AUTHORIZED") {
+            throw new UnauthorizedError();
+          }
+          this._hasCompletedAuthFlow = true;
+          return this.send(message);
+        }
+        if (response.status === 403 && this._authProvider) {
+          const { resourceMetadataUrl, scope, error: error2 } = extractWWWAuthenticateParams(response);
+          if (error2 === "insufficient_scope") {
+            const wwwAuthHeader = response.headers.get("WWW-Authenticate");
+            if (this._lastUpscopingHeader === wwwAuthHeader) {
+              throw new StreamableHTTPError(403, "Server returned 403 after trying upscoping");
+            }
+            if (scope) {
+              this._scope = scope;
+            }
+            if (resourceMetadataUrl) {
+              this._resourceMetadataUrl = resourceMetadataUrl;
+            }
+            this._lastUpscopingHeader = wwwAuthHeader ?? void 0;
+            const result = await auth(this._authProvider, {
+              serverUrl: this._url,
+              resourceMetadataUrl: this._resourceMetadataUrl,
+              scope: this._scope,
+              fetchFn: this._fetch
+            });
+            if (result !== "AUTHORIZED") {
+              throw new UnauthorizedError();
+            }
+            return this.send(message);
+          }
+        }
+        throw new StreamableHTTPError(response.status, `Error POSTing to endpoint: ${text}`);
+      }
+      this._hasCompletedAuthFlow = false;
+      this._lastUpscopingHeader = void 0;
+      if (response.status === 202) {
+        await response.body?.cancel();
+        if (isInitializedNotification(message)) {
+          this._startOrAuthSse({ resumptionToken: void 0 }).catch((err) => this.onerror?.(err));
+        }
+        return;
+      }
+      const messages = Array.isArray(message) ? message : [message];
+      const hasRequests = messages.filter((msg) => "method" in msg && "id" in msg && msg.id !== void 0).length > 0;
+      const contentType = response.headers.get("content-type");
+      if (hasRequests) {
+        if (contentType?.includes("text/event-stream")) {
+          this._handleSseStream(response.body, { onresumptiontoken }, false);
+        } else if (contentType?.includes("application/json")) {
+          const data = await response.json();
+          const responseMessages = Array.isArray(data) ? data.map((msg) => JSONRPCMessageSchema.parse(msg)) : [JSONRPCMessageSchema.parse(data)];
+          for (const msg of responseMessages) {
+            this.onmessage?.(msg);
+          }
+        } else {
+          await response.body?.cancel();
+          throw new StreamableHTTPError(-1, `Unexpected content type: ${contentType}`);
+        }
+      } else {
+        await response.body?.cancel();
+      }
+    } catch (error2) {
+      this.onerror?.(error2);
+      throw error2;
+    }
+  }
+  get sessionId() {
+    return this._sessionId;
+  }
+  /**
+   * Terminates the current session by sending a DELETE request to the server.
+   *
+   * Clients that no longer need a particular session
+   * (e.g., because the user is leaving the client application) SHOULD send an
+   * HTTP DELETE to the MCP endpoint with the Mcp-Session-Id header to explicitly
+   * terminate the session.
+   *
+   * The server MAY respond with HTTP 405 Method Not Allowed, indicating that
+   * the server does not allow clients to terminate sessions.
+   */
+  async terminateSession() {
+    if (!this._sessionId) {
+      return;
+    }
+    try {
+      const headers = await this._commonHeaders();
+      const init = {
+        ...this._requestInit,
+        method: "DELETE",
+        headers,
+        signal: this._abortController?.signal
+      };
+      const response = await (this._fetch ?? fetch)(this._url, init);
+      await response.body?.cancel();
+      if (!response.ok && response.status !== 405) {
+        throw new StreamableHTTPError(response.status, `Failed to terminate session: ${response.statusText}`);
+      }
+      this._sessionId = void 0;
+    } catch (error2) {
+      this.onerror?.(error2);
+      throw error2;
+    }
+  }
+  setProtocolVersion(version2) {
+    this._protocolVersion = version2;
+  }
+  get protocolVersion() {
+    return this._protocolVersion;
+  }
+  /**
+   * Resume an SSE stream from a previous event ID.
+   * Opens a GET SSE connection with Last-Event-ID header to replay missed events.
+   *
+   * @param lastEventId The event ID to resume from
+   * @param options Optional callback to receive new resumption tokens
+   */
+  async resumeStream(lastEventId, options2) {
+    await this._startOrAuthSse({
+      resumptionToken: lastEventId,
+      onresumptiontoken: options2?.onresumptiontoken
+    });
+  }
+};
+
 // src/integrations/mcp/errors.ts
 var McpError2 = class extends Error {
   kind;
@@ -34439,13 +36187,6 @@ function notConfigured(name, available) {
     "not_configured",
     `MCP server '${name}' is not declared in cadence.yaml`,
     `Available: ${list}. Add an entry under mcp_servers: in cadence.yaml.`
-  );
-}
-function unsupportedTransport(name, transport) {
-  return new McpError2(
-    "unsupported_transport",
-    `MCP server '${name}' uses transport '${transport}', which the v1 adapter does not support`,
-    "Only stdio is wired today. HTTP support is parked behind a real-use need."
   );
 }
 function spawnFailed(name, command, cause) {
@@ -34476,19 +36217,28 @@ function serverError(name, cause) {
 
 // src/integrations/mcp/client.ts
 async function connectMcpServer(cfg) {
-  if (cfg.kind !== "stdio") {
-    throw unsupportedTransport(cfg.name, cfg.kind);
-  }
   let transport;
-  try {
-    transport = new StdioClientTransport({
-      command: cfg.command,
-      args: cfg.args,
-      env: { ...process.env, ...cfg.env },
-      ...cfg.cwd ? { cwd: cfg.cwd } : {}
-    });
-  } catch (cause) {
-    throw spawnFailed(cfg.name, cfg.command, cause);
+  if (cfg.kind === "stdio") {
+    try {
+      transport = new StdioClientTransport({
+        command: cfg.command,
+        args: cfg.args,
+        env: { ...process.env, ...cfg.env },
+        ...cfg.cwd ? { cwd: cfg.cwd } : {}
+      });
+    } catch (cause) {
+      throw spawnFailed(cfg.name, cfg.command, cause);
+    }
+  } else {
+    try {
+      transport = new StreamableHTTPClientTransport(new URL(cfg.url), {
+        requestInit: {
+          headers: cfg.headers
+        }
+      });
+    } catch (cause) {
+      throw spawnFailed(cfg.name, cfg.url, cause);
+    }
   }
   return createMcpClient(transport, cfg.name, cfg.timeoutMs);
 }
@@ -35024,6 +36774,37 @@ cli.command("set-status <project-id>", "Update a project status").option("--root
   }
 );
 cli.command(
+  "mcp-list",
+  "List MCP servers visible to Cadence \u2014 discovered from .mcp.json, ~/.claude.json, and cadence.yaml. Shows the source of each entry so you can tell which file owns it."
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--json", "Emit JSON instead of the human-readable table").action(async (opts) => {
+  const repoRoot = await resolveRepoRoot(opts.root);
+  const fromYaml = await loadCadenceYamlMcpServers(repoRoot);
+  const discovered = await discoverMcpServers(repoRoot);
+  const { servers, sources } = mergeMcpRegistry(fromYaml, discovered);
+  if (opts.json) {
+    process.stdout.write(
+      JSON.stringify({
+        servers: servers.map((s) => ({
+          ...s,
+          source: sources.get(s.name)
+        }))
+      }) + "\n"
+    );
+    return;
+  }
+  if (servers.length === 0) {
+    process.stdout.write("No MCP servers configured.\n");
+    return;
+  }
+  const rows = [];
+  rows.push(["NAME", "KIND", "TARGET", "SOURCE"].join("	"));
+  for (const s of servers) {
+    const target = s.kind === "stdio" ? `${s.command} ${s.args.join(" ")}`.trim() : s.url;
+    rows.push([s.name, s.kind, target, sources.get(s.name) ?? "?"].join("	"));
+  }
+  process.stdout.write(rows.join("\n") + "\n");
+});
+cli.command(
   "mcp-pull",
   "Pull resources from a configured MCP server into thoughts/unprocessed/ as captures. Dedup by mcp.uri (fast) + content hash (precise). Use --dry-run first to preview."
 ).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--server <name>", "MCP server alias from cadence.yaml mcp_servers (required)").option("--filter <substring>", "Case-insensitive substring match against name/uri/description").option("--limit <N>", "Cap the number of resources processed (default: all after filter)", {
@@ -35475,22 +37256,22 @@ if (cli.matchedCommand) {
   cli.outputHelp();
 }
 async function resolveRepoRoot(explicit) {
-  if (explicit) return path21.resolve(explicit);
+  if (explicit) return path22.resolve(explicit);
   return findRepoRoot(process.cwd());
 }
 function findRepoRoot(start) {
-  let dir = path21.resolve(start);
+  let dir = path22.resolve(start);
   for (; ; ) {
-    if (existsSync14(path21.join(dir, "cadence.yaml"))) return dir;
-    if (existsSync14(path21.join(dir, "pursuits"))) return dir;
-    const parent = path21.dirname(dir);
+    if (existsSync15(path22.join(dir, "cadence.yaml"))) return dir;
+    if (existsSync15(path22.join(dir, "pursuits"))) return dir;
+    const parent = path22.dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
-  return path21.resolve(start);
+  return path22.resolve(start);
 }
 function isCadenceRepo(root) {
-  return existsSync14(path21.join(root, "cadence.yaml")) || existsSync14(path21.join(root, "pursuits"));
+  return existsSync15(path22.join(root, "cadence.yaml")) || existsSync15(path22.join(root, "pursuits"));
 }
 function multistring(v) {
   if (!Array.isArray(v)) return void 0;
@@ -35508,12 +37289,12 @@ function parseOriginIssue(raw) {
     );
   }
   const repo = match[1];
-  const number3 = Number(match[2]);
+  const number4 = Number(match[2]);
   return {
     kind: "github_issue",
     repo,
-    number: number3,
-    url: `https://github.com/${repo}/issues/${number3}`
+    number: number4,
+    url: `https://github.com/${repo}/issues/${number4}`
   };
 }
 function firstLine3(text) {
@@ -35554,8 +37335,8 @@ async function readPluginInfo() {
       "Could not locate plugin directory \u2014 no .claude-plugin/plugin.json found above the cadence binary."
     );
   }
-  const manifestPath = path21.join(pluginDir, ".claude-plugin", "plugin.json");
-  const raw = await readFile10(manifestPath, "utf-8");
+  const manifestPath = path22.join(pluginDir, ".claude-plugin", "plugin.json");
+  const raw = await readFile11(manifestPath, "utf-8");
   const manifest = JSON.parse(raw);
   const repository = manifest.repository ?? manifest.homepage ?? null;
   return {
@@ -35567,28 +37348,28 @@ async function readPluginInfo() {
 }
 function findPluginDir() {
   const scriptPath = fileURLToPath2(import.meta.url);
-  let dir = path21.dirname(scriptPath);
+  let dir = path22.dirname(scriptPath);
   for (let i = 0; i < 6; i++) {
-    if (existsSync14(path21.join(dir, ".claude-plugin", "plugin.json"))) {
+    if (existsSync15(path22.join(dir, ".claude-plugin", "plugin.json"))) {
       return dir;
     }
-    const nested = path21.join(dir, "cadence-plugin", ".claude-plugin", "plugin.json");
-    if (existsSync14(nested)) {
-      return path21.join(dir, "cadence-plugin");
+    const nested = path22.join(dir, "cadence-plugin", ".claude-plugin", "plugin.json");
+    if (existsSync15(nested)) {
+      return path22.join(dir, "cadence-plugin");
     }
-    const parent = path21.dirname(dir);
+    const parent = path22.dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
   return null;
 }
-function parseOwnerRepo(url) {
-  if (!url) return null;
-  const https = url.match(
+function parseOwnerRepo(url2) {
+  if (!url2) return null;
+  const https = url2.match(
     /^https?:\/\/github\.com\/([^/]+)\/([^/.]+?)(?:\.git)?\/?$/
   );
   if (https) return `${https[1]}/${https[2]}`;
-  const ssh = url.match(/^git@github\.com:([^/]+)\/([^/.]+?)(?:\.git)?$/);
+  const ssh = url2.match(/^git@github\.com:([^/]+)\/([^/.]+?)(?:\.git)?$/);
   if (ssh) return `${ssh[1]}/${ssh[2]}`;
   return null;
 }

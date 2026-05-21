@@ -9,10 +9,17 @@ import {
   type McpServerConfig,
   type RawConfig,
 } from './types.js'
+import { discoverMcpServers, mergeMcpRegistry } from './integrations/mcp/discovery.js'
 
 /**
  * Reads cadence.yaml from the repo root, applies defaults, and returns a
  * flat Config object. Missing file is fine — defaults apply.
+ *
+ * MCP servers in the returned Config are the *merged* registry:
+ * `cadence.yaml mcp_servers` + `.mcp.json` (project) + `~/.claude.json`
+ * (user), with cadence.yaml winning on name collision. Callers that
+ * need source provenance use `discoverMcpServers` + `mergeMcpRegistry`
+ * directly (the `cadence mcp-list` subcommand does this).
  */
 export async function loadConfig(repoRoot: string): Promise<Config> {
   const configPath = path.join(repoRoot, 'cadence.yaml')
@@ -24,7 +31,32 @@ export async function loadConfig(repoRoot: string): Promise<Config> {
   } catch (err: unknown) {
     if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err
   }
-  return mergeDefaults(raw, process.env)
+  const cfg = mergeDefaults(raw, process.env)
+  const discovered = await discoverMcpServers(repoRoot)
+  const { servers } = mergeMcpRegistry(cfg.mcp_servers, discovered)
+  return { ...cfg, mcp_servers: servers }
+}
+
+/**
+ * Returns just the cadence.yaml `mcp_servers` entries (without the
+ * discovery merge). Used by `cadence mcp-list` to tell the user which
+ * servers come from cadence.yaml vs from discovered files. Regular
+ * consumers should call `loadConfig` and read `cfg.mcp_servers` for
+ * the merged live registry.
+ */
+export async function loadCadenceYamlMcpServers(
+  repoRoot: string,
+): Promise<McpServerConfig[]> {
+  const configPath = path.join(repoRoot, 'cadence.yaml')
+  let raw: RawConfig = ConfigSchema.parse({})
+  try {
+    const text = await readFile(configPath, 'utf8')
+    const parsed = yaml.load(text, { schema: yaml.CORE_SCHEMA }) ?? {}
+    raw = ConfigSchema.parse(parsed)
+  } catch (err: unknown) {
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err
+  }
+  return normalizeMcpServers(raw.mcp_servers ?? [], process.env)
 }
 
 function mergeDefaults(

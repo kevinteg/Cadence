@@ -6,7 +6,6 @@
  */
 export type McpErrorKind =
   | 'not_configured'
-  | 'unsupported_transport'
   | 'spawn_failed'
   | 'handshake_failed'
   | 'timeout'
@@ -29,14 +28,6 @@ export function notConfigured(name: string, available: string[]): McpError {
     'not_configured',
     `MCP server '${name}' is not declared in cadence.yaml`,
     `Available: ${list}. Add an entry under mcp_servers: in cadence.yaml.`,
-  )
-}
-
-export function unsupportedTransport(name: string, transport: string): McpError {
-  return new McpError(
-    'unsupported_transport',
-    `MCP server '${name}' uses transport '${transport}', which the v1 adapter does not support`,
-    'Only stdio is wired today. HTTP support is parked behind a real-use need.',
   )
 }
 

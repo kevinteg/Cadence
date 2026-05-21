@@ -1,5 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
 import type { McpServerConfig } from '../../types.js'
 import {
@@ -8,7 +9,6 @@ import {
   serverError,
   spawnFailed,
   timeout,
-  unsupportedTransport,
 } from './errors.js'
 
 /**
@@ -45,27 +45,42 @@ export interface McpClient {
 }
 
 /**
- * Connects to a configured MCP server. Today only `kind: 'stdio'` is
- * wired; HTTP throws `unsupportedTransport`. The returned client is
- * single-use: open → list/read → close. No connection pooling.
+ * Connects to a configured MCP server. Both stdio and HTTP transports
+ * are wired; the returned client is single-use (open → list/read →
+ * close). No connection pooling.
  *
  * All adapter-level failures surface as McpError; SDK-level failures
  * are wrapped so callers never see the raw SDK types.
  */
 export async function connectMcpServer(cfg: McpServerConfig): Promise<McpClient> {
-  if (cfg.kind !== 'stdio') {
-    throw unsupportedTransport(cfg.name, cfg.kind)
-  }
-  let transport: StdioClientTransport
-  try {
-    transport = new StdioClientTransport({
-      command: cfg.command,
-      args: cfg.args,
-      env: { ...process.env, ...cfg.env } as Record<string, string>,
-      ...(cfg.cwd ? { cwd: cfg.cwd } : {}),
-    })
-  } catch (cause) {
-    throw spawnFailed(cfg.name, cfg.command, cause)
+  let transport: Transport
+  if (cfg.kind === 'stdio') {
+    try {
+      transport = new StdioClientTransport({
+        command: cfg.command,
+        args: cfg.args,
+        env: { ...process.env, ...cfg.env } as Record<string, string>,
+        ...(cfg.cwd ? { cwd: cfg.cwd } : {}),
+      })
+    } catch (cause) {
+      throw spawnFailed(cfg.name, cfg.command, cause)
+    }
+  } else {
+    // kind === 'http'. SDK's StreamableHTTPClientTransport handles
+    // both Streamable HTTP and SSE flavors against the same URL; auth
+    // headers ride on requestInit.
+    try {
+      transport = new StreamableHTTPClientTransport(new URL(cfg.url), {
+        requestInit: {
+          headers: cfg.headers,
+        },
+      })
+    } catch (cause) {
+      // URL parsing throws synchronously; treat as a config error
+      // surfaced under spawn_failed since the failure shape (can't
+      // open the transport) is analogous to a missing stdio command.
+      throw spawnFailed(cfg.name, cfg.url, cause)
+    }
   }
   return createMcpClient(transport, cfg.name, cfg.timeoutMs)
 }

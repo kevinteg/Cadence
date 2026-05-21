@@ -172,9 +172,10 @@ list.
 
 `scan`, `report`, `status`, `flags`, `pursuits`, `pursuit <id>`,
 `project <id>`, `ideas`, `captures`, `find <query>`,
-`project-activity`. All accept `--json` for structured output. Skills
-consume `--json` and reason over the typed result; the human-readable
-default is for the user invoking the CLI directly during an AI outage.
+`project-activity`, `mcp-list`. All accept `--json` for structured
+output. Skills consume `--json` and reason over the typed result; the
+human-readable default is for the user invoking the CLI directly
+during an AI outage.
 
 `project-activity` is the stream `/narrate` consumes — git log of
 `pursuits/**/projects/*.md` rendered as a per-project event list.
@@ -188,7 +189,8 @@ Supports `--scope` (daily/weekly/monthly/annual/pursuit) and
 `set-status <project-id>`, `set-idea-state <idea-id>`,
 `check <project-id>`, `add-item <project-id>`,
 `add-waiting-for <project-id>`, `flag-waiting-for <project-id>`,
-`move-pursuit <id>`, `sync-origin <project-id>`, `mcp-pull --server <name>`.
+`move-pursuit <id>`, `sync-origin <project-id>`,
+`mcp-pull --server <name>`.
 Each performs one well-formed mutation and emits JSON describing what
 was written. Use these in preference to direct Edit/Write — they
 enforce schema, generate timestamps, and keep frontmatter formatting
@@ -377,31 +379,75 @@ uncertain routing for human review.
 
 Cadence is a *client* of MCP servers — it consumes resources from
 external MCP servers (Glean, time, custom) and writes them into
-Cadence primitives. It does not host its own tools. Today the wired
-path is `cadence mcp-pull` → captures; future verbs may consume
-the same `mcp_servers` config.
+Cadence primitives. It does not host its own tools. Both stdio and
+HTTP (Streamable HTTP / SSE) transports are wired.
 
-### Configuration
+### Discovery is the primary mechanism
 
-Declare servers under `mcp_servers:` in `cadence.yaml`. v1 supports
-`stdio` transport; `http` is parsed-but-rejected (room left for v2).
+If you've already declared an MCP server elsewhere (Claude Code's
+`claude mcp add ...`, or a project-scope `.mcp.json`), Cadence sees it
+automatically — no need to re-declare in `cadence.yaml`. Discovery
+walks two locations:
+
+| Source | File | Tag |
+|---|---|---|
+| User scope | `~/.claude.json` `mcpServers` | `claude-user` |
+| Project scope | `<repoRoot>/.mcp.json` `mcpServers` | `mcp-project` |
+| Local override | `cadence.yaml` `mcp_servers` | `cadence-yaml` |
+
+**Precedence (most-local wins):** `cadence-yaml` > `mcp-project` >
+`claude-user`. Name collisions resolve to the higher-priority source.
+
+The discovery parser is tolerant — entries without an explicit `type`
+field are inferred (`command` → stdio, `url` → http). `transport: sse`
+maps to the same http kind since SDK's StreamableHTTPClientTransport
+handles both flavors. Malformed entries are skipped silently rather
+than throwing.
+
+Run `cadence mcp-list` to verify what Cadence sees and which file each
+entry comes from.
+
+### Configuration (optional override / local-only servers)
+
+`cadence.yaml mcp_servers` is the override path — use it when you want
+to add a repo-only server, or pin specific config that should win over
+what Claude Code or `.mcp.json` declares.
 
 ```yaml
 mcp_servers:
   - name: glean                 # alias used by --server
-    transport: stdio
-    command: glean-mcp          # executable on PATH
+    transport: stdio            # stdio | http
+    command: glean-mcp          # stdio: executable on PATH
     args: ["--profile", "default"]
     env:
       GLEAN_TOKEN: ${env:GLEAN_TOKEN}   # ${env:NAME} expanded at config load
     cwd: ~/.glean               # optional; ~/ expanded
     timeout_ms: 10000           # optional per-call timeout (default 10000)
+
+  - name: remote-glean
+    transport: http
+    url: https://glean.example.com/mcp
+    headers:
+      Authorization: Bearer ${env:GLEAN_TOKEN}
 ```
 
-`${env:NAME}` expansion happens at `loadConfig` time, not lazily.
-Missing variables surface as `MCP server '<name>' references missing
-env var <NAME>` at the CLI boundary — never at first use. Duplicate
-server names raise immediately to prevent silent shadowing.
+`${env:NAME}` expansion happens at `loadConfig` time for cadence.yaml
+entries (discovered entries don't expand — they ride whatever the
+source file declared). Missing variables surface as `MCP server
+'<name>' references missing env var <NAME>` at the CLI boundary —
+never at first use. Duplicate server names raise immediately to
+prevent silent shadowing.
+
+### `cadence mcp-list` (verify the merged registry)
+
+```bash
+cadence mcp-list           # human table
+cadence mcp-list --json    # structured output
+```
+
+Shows the merged registry across `cadence.yaml`, `.mcp.json`, and
+`~/.claude.json` with a `source` column. Use this before `mcp-pull` to
+confirm the server name + target + source.
 
 ### `cadence mcp-pull` (read resources → captures)
 
@@ -449,20 +495,29 @@ mcp:
 
 **Errors** (emitted to stderr as `{ error: { kind, message, hint } }`
 with exit code 1):
-- `not_configured` — `--server` doesn't match any entry in `mcp_servers`
-- `unsupported_transport` — server declared with `transport: http`
-- `spawn_failed` — stdio command not on PATH or refused to start
+- `not_configured` — `--server` doesn't match any entry in the merged
+  registry (cadence.yaml + discovered)
+- `spawn_failed` — stdio command not on PATH, stdio process refused to
+  start, or http URL was unparseable
 - `handshake_failed` — server didn't complete the MCP initialize step
 - `timeout` — a call exceeded `timeout_ms`
 - `server_error` — MCP server returned a protocol-level error
 
+### CLI subcommand catalog (mcp- prefix)
+
+| Command | Purpose |
+|---|---|
+| `cadence mcp-list` | Verify merged registry across cadence.yaml + .mcp.json + ~/.claude.json |
+| `cadence mcp-pull --server <name>` | Read resources from a server into thoughts/unprocessed/ as captures |
+
 ### What's deliberately out of v1
 
 - `listTools` / `callTool` — read-only consumption only. Letting an
-  MCP server mutate Cadence state is a separate trust call.
-- HTTP transport — parsed-but-rejected; revisit when a real-use need
-  surfaces.
+  MCP server mutate Cadence state is a separate trust call (would
+  warrant its own warn-and-confirm surface like `/report`).
 - Resource subscriptions — pull-only.
+- OAuth flows for HTTP transport — bearer-token headers only. OAuth
+  added when a server demands it.
 - Hosting our own MCP server — Cadence is a client, not a host. If
   that flips later, it's a separate project.
 
