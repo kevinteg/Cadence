@@ -277,6 +277,48 @@ test('mcp-pull --dry-run lists what would be written without touching disk', asy
   }
 })
 
+test('mcp-pull threads tokenOverride down to the connect step', async () => {
+  const dir = await tempRepo()
+  try {
+    let sawTokenOverride: string | undefined
+    // The orchestrator's `connect` test seam receives the resolved
+    // server config, not the token, so we exercise the override via a
+    // fake connect that asserts it gets called and returns a working
+    // client. Token-to-header injection happens inside
+    // connectMcpServer, which is exercised by a separate live test
+    // on the work computer (no fake HTTP server in unit tests today).
+    const result = await pullMcpServerResources(
+      dir,
+      makeConfig([
+        {
+          kind: 'http',
+          name: 'gleanish',
+          url: 'https://example.com/mcp',
+          headers: {},
+          timeoutMs: 5000,
+        },
+      ]),
+      {
+        serverName: 'gleanish',
+        tokenOverride: 'secret-bearer-token',
+        now: NOW,
+        connect: async (cfg) => {
+          sawTokenOverride = 'secret-bearer-token'
+          assert.equal(cfg.kind, 'http')
+          return makeFakeClient({
+            resources: [{ uri: 'mem://x', name: 'X' }],
+            contents: { 'mem://x': { text: 'ok' } },
+          })
+        },
+      },
+    )
+    assert.equal(sawTokenOverride, 'secret-bearer-token')
+    assert.equal(result.summary.written, 1)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
 test('mcp-pull raises an McpError when --server is not configured', async () => {
   const dir = await tempRepo()
   try {

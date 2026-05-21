@@ -15,6 +15,12 @@ export type PullOpts = {
   filter?: string
   limit?: number
   dryRun?: boolean
+  /**
+   * Bearer-token override for HTTP transports. When set, threaded
+   * into the connect call as opts.tokenOverride. Sourced upstream
+   * from --token or CADENCE_MCP_TOKEN_<SERVER>.
+   */
+  tokenOverride?: string
   now?: Date
   /**
    * Test seam — overrides the real stdio connect with an injected
@@ -56,7 +62,8 @@ export async function pullMcpServerResources(
   opts: PullOpts,
 ): Promise<PullResult> {
   const serverCfg = resolveMcpServer(config.mcp_servers, opts.serverName)
-  const connector = opts.connect ?? connectMcpServer
+  const connector = opts.connect ?? ((c) =>
+    connectMcpServer(c, opts.tokenOverride ? { tokenOverride: opts.tokenOverride } : {}))
   const client = await connector(serverCfg)
 
   const result: PullResult = {

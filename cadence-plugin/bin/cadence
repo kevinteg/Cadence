@@ -36199,9 +36199,12 @@ function spawnFailed(name, command, cause) {
 }
 function handshakeFailed(name, cause) {
   const msg = cause instanceof Error ? cause.message : String(cause);
+  const looksLikeAuth = /401|403|unauthor|forbidden|oauth/i.test(msg) || /unexpected status/i.test(msg);
+  const hint = looksLikeAuth ? `Server may require OAuth. Supply a bearer token via --token <value> or set CADENCE_MCP_TOKEN_${name.toUpperCase().replace(/[^A-Z0-9]/g, "_")}=<value>.` : void 0;
   return new McpError2(
     "handshake_failed",
-    `MCP server '${name}' refused the initialize handshake: ${msg}`
+    `MCP server '${name}' refused the initialize handshake: ${msg}`,
+    hint
   );
 }
 function timeout(name, op, ms) {
@@ -36216,7 +36219,7 @@ function serverError(name, cause) {
 }
 
 // src/integrations/mcp/client.ts
-async function connectMcpServer(cfg) {
+async function connectMcpServer(cfg, opts = {}) {
   let transport;
   if (cfg.kind === "stdio") {
     try {
@@ -36230,11 +36233,13 @@ async function connectMcpServer(cfg) {
       throw spawnFailed(cfg.name, cfg.command, cause);
     }
   } else {
+    const headers = { ...cfg.headers };
+    if (opts.tokenOverride) {
+      headers["Authorization"] = `Bearer ${opts.tokenOverride}`;
+    }
     try {
       transport = new StreamableHTTPClientTransport(new URL(cfg.url), {
-        requestInit: {
-          headers: cfg.headers
-        }
+        requestInit: { headers }
       });
     } catch (cause) {
       throw spawnFailed(cfg.name, cfg.url, cause);
@@ -36346,7 +36351,7 @@ async function withTimeout(promise, ms, serverName, op) {
 // src/integrations/mcp/pull.ts
 async function pullMcpServerResources(repoRoot, config2, opts) {
   const serverCfg = resolveMcpServer(config2.mcp_servers, opts.serverName);
-  const connector = opts.connect ?? connectMcpServer;
+  const connector = opts.connect ?? ((c) => connectMcpServer(c, opts.tokenOverride ? { tokenOverride: opts.tokenOverride } : {}));
   const client = await connector(serverCfg);
   const result = {
     server: opts.serverName,
@@ -36807,20 +36812,22 @@ cli.command(
 cli.command(
   "mcp-pull",
   "Pull resources from a configured MCP server into thoughts/unprocessed/ as captures. Dedup by mcp.uri (fast) + content hash (precise). Use --dry-run first to preview."
-).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--server <name>", "MCP server alias from cadence.yaml mcp_servers (required)").option("--filter <substring>", "Case-insensitive substring match against name/uri/description").option("--limit <N>", "Cap the number of resources processed (default: all after filter)", {
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--server <name>", "MCP server alias from the merged registry (required)").option("--filter <substring>", "Case-insensitive substring match against name/uri/description").option("--limit <N>", "Cap the number of resources processed (default: all after filter)", {
   type: [Number]
-}).option("--dry-run", "List what would be pulled without writing captures").action(
+}).option("--dry-run", "List what would be pulled without writing captures").option("--token <value>", "Bearer token for HTTP MCP servers. Overrides Authorization header from discovered config. CADENCE_MCP_TOKEN_<SERVER> env var (uppercased, non-alphanumeric \u2192 _) is the persistent equivalent.").action(
   async (opts) => {
     if (!opts.server) throw new Error("--server is required");
     const repoRoot = await resolveRepoRoot(opts.root);
     const config2 = await loadConfig(repoRoot);
     const limit = Array.isArray(opts.limit) ? opts.limit[0] : opts.limit;
+    const tokenOverride = opts.token ?? readMcpTokenEnv(opts.server);
     try {
       const result = await pullMcpServerResources(repoRoot, config2, {
         serverName: opts.server,
         ...opts.filter ? { filter: opts.filter } : {},
         ...typeof limit === "number" ? { limit } : {},
-        ...opts.dryRun ? { dryRun: true } : {}
+        ...opts.dryRun ? { dryRun: true } : {},
+        ...tokenOverride ? { tokenOverride } : {}
       });
       process.stdout.write(JSON.stringify(result) + "\n");
     } catch (err) {
@@ -37279,6 +37286,11 @@ function multistring(v) {
     (x) => typeof x === "string" && x !== "undefined" && x.length > 0
   );
   return cleaned.length > 0 ? cleaned : void 0;
+}
+function readMcpTokenEnv(serverName) {
+  const key = `CADENCE_MCP_TOKEN_${serverName.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`;
+  const v = process.env[key];
+  return v && v.length > 0 ? v : void 0;
 }
 function parseOriginIssue(raw) {
   if (!raw) return void 0;

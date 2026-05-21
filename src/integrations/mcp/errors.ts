@@ -42,9 +42,19 @@ export function spawnFailed(name: string, command: string, cause: unknown): McpE
 
 export function handshakeFailed(name: string, cause: unknown): McpError {
   const msg = cause instanceof Error ? cause.message : String(cause)
+  // OAuth-gated HTTP servers commonly fail handshake with 401/403.
+  // Suggest the --token / env-var override so users have a path
+  // forward without needing to read source.
+  const looksLikeAuth =
+    /401|403|unauthor|forbidden|oauth/i.test(msg) ||
+    /unexpected status/i.test(msg)
+  const hint = looksLikeAuth
+    ? `Server may require OAuth. Supply a bearer token via --token <value> or set CADENCE_MCP_TOKEN_${name.toUpperCase().replace(/[^A-Z0-9]/g, '_')}=<value>.`
+    : undefined
   return new McpError(
     'handshake_failed',
     `MCP server '${name}' refused the initialize handshake: ${msg}`,
+    hint,
   )
 }
 

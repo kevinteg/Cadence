@@ -44,6 +44,17 @@ export interface McpClient {
   close(): Promise<void>
 }
 
+export type ConnectOpts = {
+  /**
+   * Bearer token override for HTTP transports. When set, the value is
+   * threaded into the request as `Authorization: Bearer <token>`,
+   * replacing any Authorization header already on cfg.headers.
+   * Sourced upstream from --token / CADENCE_MCP_TOKEN_<NAME>. Ignored
+   * for stdio configs.
+   */
+  tokenOverride?: string
+}
+
 /**
  * Connects to a configured MCP server. Both stdio and HTTP transports
  * are wired; the returned client is single-use (open → list/read →
@@ -52,7 +63,10 @@ export interface McpClient {
  * All adapter-level failures surface as McpError; SDK-level failures
  * are wrapped so callers never see the raw SDK types.
  */
-export async function connectMcpServer(cfg: McpServerConfig): Promise<McpClient> {
+export async function connectMcpServer(
+  cfg: McpServerConfig,
+  opts: ConnectOpts = {},
+): Promise<McpClient> {
   let transport: Transport
   if (cfg.kind === 'stdio') {
     try {
@@ -69,11 +83,13 @@ export async function connectMcpServer(cfg: McpServerConfig): Promise<McpClient>
     // kind === 'http'. SDK's StreamableHTTPClientTransport handles
     // both Streamable HTTP and SSE flavors against the same URL; auth
     // headers ride on requestInit.
+    const headers: Record<string, string> = { ...cfg.headers }
+    if (opts.tokenOverride) {
+      headers['Authorization'] = `Bearer ${opts.tokenOverride}`
+    }
     try {
       transport = new StreamableHTTPClientTransport(new URL(cfg.url), {
-        requestInit: {
-          headers: cfg.headers,
-        },
+        requestInit: { headers },
       })
     } catch (cause) {
       // URL parsing throws synchronously; treat as a config error

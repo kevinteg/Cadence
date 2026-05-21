@@ -455,11 +455,18 @@ confirm the server name + target + source.
 cadence mcp-pull --server <name> [--filter <substring>] [--limit <N>] [--dry-run]
 ```
 
-- **`--server`** (required): alias from `mcp_servers[*].name`.
+- **`--server`** (required): alias from the merged registry.
 - **`--filter`**: case-insensitive substring matched against
   resource uri / name / description.
 - **`--limit`**: cap the post-filter set.
 - **`--dry-run`**: list what would be written without touching disk.
+- **`--token <value>`**: bearer-token override for HTTP servers
+  requiring OAuth. Replaces any Authorization header from the
+  discovered config for this call only — never persisted.
+  Equivalent env var: `CADENCE_MCP_TOKEN_<SERVER>` (server name
+  uppercased; non-alphanumeric chars become `_`, e.g.
+  `glean_default` → `CADENCE_MCP_TOKEN_GLEAN_DEFAULT`). Ignored for
+  stdio servers.
 
 **Behavior:** connects to the named server, lists resources, applies
 filter + limit, and for each resource: reads content, dedups against
@@ -510,14 +517,37 @@ with exit code 1):
 | `cadence mcp-list` | Verify merged registry across cadence.yaml + .mcp.json + ~/.claude.json |
 | `cadence mcp-pull --server <name>` | Read resources from a server into thoughts/unprocessed/ as captures |
 
+### OAuth on HTTP servers (current workaround)
+
+Some HTTP MCP servers (Glean and other enterprise endpoints) require
+OAuth that Cadence doesn't yet handle directly. Claude Code already
+holds a valid token for these servers when you've registered them via
+`claude mcp add ...`. Until Cadence can read that token store
+automatically (tracked as an open action on `mcp-integration-story`),
+the workaround is to thread the bearer token in manually:
+
+```bash
+# One-off:
+cadence mcp-pull --server glean_default --token "$(extract-token-somehow)" --dry-run
+
+# Persistent for the shell session:
+export CADENCE_MCP_TOKEN_GLEAN_DEFAULT="<token>"
+cadence mcp-pull --server glean_default --dry-run
+```
+
+The handshake_failed error message includes this hint automatically
+when the failure looks auth-shaped (401 / 403 / "unauthorized" in
+the response).
+
 ### What's deliberately out of v1
 
 - `listTools` / `callTool` — read-only consumption only. Letting an
   MCP server mutate Cadence state is a separate trust call (would
   warrant its own warn-and-confirm surface like `/report`).
 - Resource subscriptions — pull-only.
-- OAuth flows for HTTP transport — bearer-token headers only. OAuth
-  added when a server demands it.
+- Automatic Claude-Code OAuth token reuse — see "OAuth on HTTP servers"
+  above for the current workaround; full delegation is tracked as an
+  open action.
 - Hosting our own MCP server — Cadence is a client, not a host. If
   that flips later, it's a separate project.
 

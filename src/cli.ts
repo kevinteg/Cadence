@@ -599,12 +599,13 @@ cli
     'Pull resources from a configured MCP server into thoughts/unprocessed/ as captures. Dedup by mcp.uri (fast) + content hash (precise). Use --dry-run first to preview.',
   )
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--server <name>', 'MCP server alias from cadence.yaml mcp_servers (required)')
+  .option('--server <name>', 'MCP server alias from the merged registry (required)')
   .option('--filter <substring>', 'Case-insensitive substring match against name/uri/description')
   .option('--limit <N>', 'Cap the number of resources processed (default: all after filter)', {
     type: [Number],
   })
   .option('--dry-run', 'List what would be pulled without writing captures')
+  .option('--token <value>', 'Bearer token for HTTP MCP servers. Overrides Authorization header from discovered config. CADENCE_MCP_TOKEN_<SERVER> env var (uppercased, non-alphanumeric → _) is the persistent equivalent.')
   .action(
     async (opts: {
       root?: string
@@ -612,17 +613,21 @@ cli
       filter?: string
       limit?: number | number[]
       dryRun?: boolean
+      token?: string
     }) => {
       if (!opts.server) throw new Error('--server is required')
       const repoRoot = await resolveRepoRoot(opts.root)
       const config = await loadConfig(repoRoot)
       const limit = Array.isArray(opts.limit) ? opts.limit[0] : opts.limit
+      const tokenOverride =
+        opts.token ?? readMcpTokenEnv(opts.server)
       try {
         const result = await pullMcpServerResources(repoRoot, config, {
           serverName: opts.server,
           ...(opts.filter ? { filter: opts.filter } : {}),
           ...(typeof limit === 'number' ? { limit } : {}),
           ...(opts.dryRun ? { dryRun: true } : {}),
+          ...(tokenOverride ? { tokenOverride } : {}),
         })
         process.stdout.write(JSON.stringify(result) + '\n')
       } catch (err) {
@@ -1335,6 +1340,18 @@ function multistring(v: unknown): string[] | undefined {
       typeof x === 'string' && x !== 'undefined' && x.length > 0,
   )
   return cleaned.length > 0 ? cleaned : undefined
+}
+
+/**
+ * Looks up CADENCE_MCP_TOKEN_<SERVER> for the given server name. The
+ * env-var key uppercases the name and replaces non-alphanumeric chars
+ * with underscores so `glean_default` → `GLEAN_DEFAULT`,
+ * `my-mcp.example` → `MY_MCP_EXAMPLE`. Returns undefined if unset.
+ */
+function readMcpTokenEnv(serverName: string): string | undefined {
+  const key = `CADENCE_MCP_TOKEN_${serverName.toUpperCase().replace(/[^A-Z0-9]/g, '_')}`
+  const v = process.env[key]
+  return v && v.length > 0 ? v : undefined
 }
 
 /**
