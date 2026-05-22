@@ -562,6 +562,46 @@ Then the verb-hint block + teaching footer per the universal exit convention.
 
 ---
 
+## MCP-Pull
+
+*Hidden verb — not on the visible 12-verb surface; explicit-invocation only. Skill-driven, not CLI-driven.*
+
+**Purpose:** Pull resources from a Claude-Code-registered MCP server (Glean, time, custom) into `thoughts/unprocessed/` as captures. The agent does the network work via its `mcp__<server>__*` tool surface (Claude Code owns transport + OAuth); Cadence does the file write via `cadence write-capture --mcp-*`.
+
+**Tone:** Light, factual. Show what's about to be pulled before writing — the user should be able to cancel before any capture file is touched.
+
+**Behavior:**
+- Resolve the named server via `cadence mcp-list --json`. If the registry is empty: surface install hint and exit.
+- Use `ToolSearch` to find the server's tools under the `mcp__<server>__` namespace. Adapt to what's available: `list_resources` + `read_resource` if standard, otherwise a `search`-style flow with a user-supplied query.
+- Apply the optional filter (case-insensitive substring against name/uri/description). With a search-style flow the filter is redundant — the query did the filtering.
+- ELI5 the candidate list to the user before writing. Accept `y` / `n` / `limit:<N>`.
+- For each text resource, call `cadence write-capture --mcp-server <name> --mcp-uri <uri> --mcp-mime-type <type>`. The CLI auto-computes `content_hash` and auto-dedups (by uri, then by content hash). Skip binary resources without writing.
+- Summarize at the end: written / skipped_existing / skipped_binary / errors.
+
+**Architectural anchor:** No client code in Cadence. Don't shell out to a Cadence-owned MCP transport; don't carry credentials through Cadence. Claude Code is the MCP host; Cadence is a downstream consumer through the agent. If `cadence mcp-list` doesn't show a server that `claude mcp add` registered, debug discovery — don't paper over with manual config.
+
+**Discovery (suggest-don't-run):**
+- Hidden from `/cadence:help`'s primary catalogue.
+- Agent suggests the verb when chat language signals MCP-pull intent ("pull from glean", "ingest the corpus", "save these MCP results") — surface a one-line tip, never auto-fire. Frequency-cap via `cadence tip-pick --triggers intent-mcp-pull --types skill-teaching`.
+
+**Guardrails:**
+- ELI5 before any write — show the candidate list and ask before touching disk.
+- Binary resources skipped, not transformed. Capture is a text primitive.
+- Read-only — never invoke write-flavored MCP tools on the remote server.
+- One server per invocation. Multi-server orchestration would warrant its own surface.
+
+**Exit:**
+```
+Pulled <N> resources from <server>:
+  - <W> written
+  - <S> skipped (existing)
+  - <B> skipped (binary)
+  - <E> errors
+```
+Then the verb-hint block + teaching footer per the universal exit convention.
+
+---
+
 ## Exit Conventions
 
 Every verb's natural exit point ends with two standardized surfaces.

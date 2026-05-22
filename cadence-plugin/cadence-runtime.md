@@ -37,11 +37,15 @@ brainstorm when convergence is ready) and **promote** (from develop
 or start at graduation moments). Hidden user-invoked verbs that don't
 appear on the visible catalogue: **report** (files a GitHub issue
 against the upstream Cadence repo; privacy-by-default — never
-auto-includes pursuit/project content) and **incoming**
+auto-includes pursuit/project content), **incoming**
 (maintainer-side triage of inbound issues against the upstream Cadence
 repo; routes each issue to an action, project, idea, close, or defer;
-requires `gh`). Both follow the suggest-don't-run pattern below —
-agent SUGGESTS via chat-language signals but never auto-fires. The
+requires `gh`), and **mcp-pull** (pulls resources from a
+Claude-Code-registered MCP server into `thoughts/unprocessed/` as
+captures via the agent's `mcp__<server>__*` tool surface; Claude Code
+owns transport + OAuth, Cadence owns the file write through `cadence
+write-capture --mcp-*`). All three follow the suggest-don't-run pattern
+below — agent SUGGESTS via chat-language signals but never auto-fires. The
 reconciler runs as system behavior (SessionStart hook + during
 `/reflect` Get Clear) and is not a verb.
 

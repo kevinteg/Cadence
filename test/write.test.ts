@@ -208,16 +208,104 @@ test('createIdea round-trip with body', async () => {
 test('writeCapture produces a parseable capture', async () => {
   const dir = await tempRepo()
   try {
-    await writeCapture(dir, {
+    const result = await writeCapture(dir, {
       body: 'a stray thought',
       verb_context: 'note',
       now: NOW,
     })
+    assert.equal(result.kind, 'written')
     const snapshot = await scan(dir, NOW)
     assert.equal(snapshot.captures.length, 1)
     const c = snapshot.captures[0]!
     assert.equal(c.body, 'a stray thought')
     assert.equal(c.verb_context, 'note')
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('writeCapture with mcp: stamps frontmatter and auto-computes content_hash', async () => {
+  const dir = await tempRepo()
+  try {
+    const result = await writeCapture(dir, {
+      body: 'mcp body',
+      verb_context: 'mcp-pull:demo',
+      mcp: { server: 'demo', uri: 'mem://x' },
+      now: NOW,
+    })
+    assert.equal(result.kind, 'written')
+    const snapshot = await scan(dir, NOW)
+    const c = snapshot.captures[0]!
+    assert.equal(c.mcp?.server, 'demo')
+    assert.equal(c.mcp?.uri, 'mem://x')
+    assert.match(c.mcp?.content_hash ?? '', /^sha256:[0-9a-f]{64}$/)
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('writeCapture with mcp: skips when same uri already captured', async () => {
+  const dir = await tempRepo()
+  try {
+    const first = await writeCapture(dir, {
+      body: 'first body',
+      mcp: { server: 'demo', uri: 'mem://dup' },
+      now: NOW,
+    })
+    assert.equal(first.kind, 'written')
+    const second = await writeCapture(dir, {
+      body: 'different body, same uri',
+      mcp: { server: 'demo', uri: 'mem://dup' },
+      now: NOW,
+    })
+    assert.equal(second.kind, 'skipped_existing')
+    if (second.kind === 'skipped_existing') {
+      assert.equal(second.reason, 'uri_seen')
+    }
+    const snapshot = await scan(dir, NOW)
+    assert.equal(snapshot.captures.length, 1, 'no second file written')
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('writeCapture with mcp: skips when same content body already captured at a different uri', async () => {
+  const dir = await tempRepo()
+  try {
+    const sharedBody = 'identical content'
+    const first = await writeCapture(dir, {
+      body: sharedBody,
+      mcp: { server: 'demo', uri: 'mem://uri-a' },
+      now: NOW,
+    })
+    assert.equal(first.kind, 'written')
+    const second = await writeCapture(dir, {
+      body: sharedBody,
+      mcp: { server: 'demo', uri: 'mem://uri-b' },
+      now: NOW,
+    })
+    assert.equal(second.kind, 'skipped_existing')
+    if (second.kind === 'skipped_existing') {
+      assert.equal(second.reason, 'content_hash_seen')
+    }
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('writeCapture without mcp: never dedups', async () => {
+  const dir = await tempRepo()
+  try {
+    const first = await writeCapture(dir, { body: 'same body', now: NOW })
+    assert.equal(first.kind, 'written')
+    const second = await writeCapture(dir, {
+      body: 'same body',
+      slug: 'second',
+      now: NOW,
+    })
+    assert.equal(second.kind, 'written', 'no mcp ref means no dedup')
+    const snapshot = await scan(dir, NOW)
+    assert.equal(snapshot.captures.length, 2)
   } finally {
     await rm(dir, { recursive: true, force: true })
   }

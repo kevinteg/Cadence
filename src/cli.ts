@@ -59,8 +59,6 @@ import {
   clearPendingValidations,
   readPendingValidations,
 } from './validation/queue.js'
-import { pullMcpServerResources } from './integrations/mcp/pull.js'
-import { McpError } from './integrations/mcp/errors.js'
 import { loadCadenceYamlMcpServers, loadConfig } from './config.js'
 import {
   discoverMcpServers,
@@ -471,21 +469,42 @@ cli
   )
 
 cli
-  .command('write-capture', 'Write a thought to thoughts/unprocessed/')
+  .command('write-capture', 'Write a thought to thoughts/unprocessed/. When --mcp-server + --mcp-uri are supplied, the capture is stamped with an mcp: frontmatter block, content_hash is auto-computed (sha256 of body), and the write auto-dedups against existing captures by uri and by content hash.')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--body <text>', 'Capture body (required)')
-  .option('--verb-context <ctx>', 'Verb context (note | seed | concern | ...)')
+  .option('--verb-context <ctx>', 'Verb context (note | seed | concern | mcp-pull:<server> | ...)')
+  .option('--mcp-server <name>', 'MCP server name that sourced this capture. Requires --mcp-uri.')
+  .option('--mcp-uri <uri>', 'MCP resource URI. Requires --mcp-server. Enables auto-dedup.')
+  .option('--mcp-mime-type <type>', 'Optional MIME type of the source resource.')
+  .option('--slug <slug>', 'Override the timestamp-based filename slug (batch writers pass per-item discriminators).')
   .action(
     async (opts: {
       root?: string
       body?: string
       verbContext?: string
+      mcpServer?: string
+      mcpUri?: string
+      mcpMimeType?: string
+      slug?: string
     }) => {
       if (!opts.body) throw new Error('--body is required')
+      if ((opts.mcpServer && !opts.mcpUri) || (opts.mcpUri && !opts.mcpServer)) {
+        throw new Error('--mcp-server and --mcp-uri must be supplied together')
+      }
       const repoRoot = await resolveRepoRoot(opts.root)
+      const mcp =
+        opts.mcpServer && opts.mcpUri
+          ? {
+              server: opts.mcpServer,
+              uri: opts.mcpUri,
+              ...(opts.mcpMimeType ? { mime_type: opts.mcpMimeType } : {}),
+            }
+          : undefined
       const result = await writeCapture(repoRoot, {
         body: opts.body,
         ...(opts.verbContext ? { verb_context: opts.verbContext } : {}),
+        ...(mcp ? { mcp } : {}),
+        ...(opts.slug ? { slug: opts.slug } : {}),
       })
       process.stdout.write(JSON.stringify(result) + '\n')
     },
@@ -592,57 +611,6 @@ cli
     }
     process.stdout.write(rows.join('\n') + '\n')
   })
-
-cli
-  .command(
-    'mcp-pull',
-    'Pull resources from a configured MCP server into thoughts/unprocessed/ as captures. Dedup by mcp.uri (fast) + content hash (precise). Use --dry-run first to preview.',
-  )
-  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--server <name>', 'MCP server alias from the merged registry (required)')
-  .option('--filter <substring>', 'Case-insensitive substring match against name/uri/description')
-  .option('--limit <N>', 'Cap the number of resources processed (default: all after filter)', {
-    type: [Number],
-  })
-  .option('--dry-run', 'List what would be pulled without writing captures')
-  .option('--token <value>', 'Bearer token for HTTP MCP servers. Overrides Authorization header from discovered config. CADENCE_MCP_TOKEN_<SERVER> env var (uppercased, non-alphanumeric → _) is the persistent equivalent.')
-  .action(
-    async (opts: {
-      root?: string
-      server?: string
-      filter?: string
-      limit?: number | number[]
-      dryRun?: boolean
-      token?: string
-    }) => {
-      if (!opts.server) throw new Error('--server is required')
-      const repoRoot = await resolveRepoRoot(opts.root)
-      const config = await loadConfig(repoRoot)
-      const limit = Array.isArray(opts.limit) ? opts.limit[0] : opts.limit
-      const tokenOverride =
-        opts.token ?? readMcpTokenEnv(opts.server)
-      try {
-        const result = await pullMcpServerResources(repoRoot, config, {
-          serverName: opts.server,
-          ...(opts.filter ? { filter: opts.filter } : {}),
-          ...(typeof limit === 'number' ? { limit } : {}),
-          ...(opts.dryRun ? { dryRun: true } : {}),
-          ...(tokenOverride ? { tokenOverride } : {}),
-        })
-        process.stdout.write(JSON.stringify(result) + '\n')
-      } catch (err) {
-        if (err instanceof McpError) {
-          const payload: Record<string, unknown> = {
-            error: { kind: err.kind, message: err.message },
-          }
-          if (err.hint) (payload['error'] as Record<string, unknown>)['hint'] = err.hint
-          process.stderr.write(JSON.stringify(payload) + '\n')
-          process.exit(1)
-        }
-        throw err
-      }
-    },
-  )
 
 cli
   .command(
@@ -1340,18 +1308,6 @@ function multistring(v: unknown): string[] | undefined {
       typeof x === 'string' && x !== 'undefined' && x.length > 0,
   )
   return cleaned.length > 0 ? cleaned : undefined
-}
-
-/**
- * Looks up CADENCE_MCP_TOKEN_<SERVER> for the given server name. The
- * env-var key uppercases the name and replaces non-alphanumeric chars
- * with underscores so `glean_default` → `GLEAN_DEFAULT`,
- * `my-mcp.example` → `MY_MCP_EXAMPLE`. Returns undefined if unset.
- */
-function readMcpTokenEnv(serverName: string): string | undefined {
-  const key = `CADENCE_MCP_TOKEN_${serverName.toUpperCase().replace(/[^A-Z0-9]/g, '_')}`
-  const v = process.env[key]
-  return v && v.length > 0 ? v : undefined
 }
 
 /**

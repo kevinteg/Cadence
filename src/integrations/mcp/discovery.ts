@@ -145,8 +145,9 @@ function coerceEntry(
 
   // Infer kind: explicit declaration wins; otherwise `url` → http,
   // `command` → stdio. http-style hints (http, https, sse, websocket)
-  // all map to our single http kind since StreamableHTTPClientTransport
-  // handles both Streamable HTTP and SSE.
+  // all map to our single http kind — the underlying transport is
+  // owned by Claude Code (the MCP host), not by Cadence; we just
+  // surface the registry shape via `cadence mcp-list`.
   const isHttp =
     kindHint === 'http' ||
     kindHint === 'https' ||

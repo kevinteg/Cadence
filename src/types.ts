@@ -165,9 +165,10 @@ export const CaptureFrontmatterSchema = z.object({
   captured: z.string(),
   verb_context: z.string().optional(),
   /**
-   * Set on captures synthesized by `cadence mcp-pull` so dedup logic
-   * can match against the source URI without re-reading the body.
-   * Optional — hand-written captures never have it.
+   * Set on captures synthesized through MCP (via `cadence
+   * write-capture --mcp-*`, driven by the `/cadence:mcp-pull` skill)
+   * so dedup logic can match against the source URI without re-
+   * reading the body. Optional — hand-written captures never have it.
    */
   mcp: CaptureMcpRefSchema.optional(),
 })

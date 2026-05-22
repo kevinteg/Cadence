@@ -189,8 +189,7 @@ Supports `--scope` (daily/weekly/monthly/annual/pursuit) and
 `set-status <project-id>`, `set-idea-state <idea-id>`,
 `check <project-id>`, `add-item <project-id>`,
 `add-waiting-for <project-id>`, `flag-waiting-for <project-id>`,
-`move-pursuit <id>`, `sync-origin <project-id>`,
-`mcp-pull --server <name>`.
+`move-pursuit <id>`, `sync-origin <project-id>`.
 Each performs one well-formed mutation and emits JSON describing what
 was written. Use these in preference to direct Edit/Write — they
 enforce schema, generate timestamps, and keep frontmatter formatting
@@ -377,17 +376,24 @@ uncertain routing for human review.
 
 ## MCP Integration
 
-Cadence is a *client* of MCP servers — it consumes resources from
-external MCP servers (Glean, time, custom) and writes them into
-Cadence primitives. It does not host its own tools. Both stdio and
-HTTP (Streamable HTTP / SSE) transports are wired.
+Cadence consumes resources from MCP servers (Glean, time, custom) and
+writes them into Cadence primitives (captures, today). The integration
+is **skill-driven, not CLI-driven**: Cadence does not contain its own
+MCP client. Claude Code is the MCP host; it owns the transport, OAuth,
+token storage, and session lifecycle. Cadence skills consume MCP
+through the agent's normal tool-call surface (`mcp__<server>__<tool>`).
+The Cadence CLI owns the *file write*, not the network call.
 
-### Discovery is the primary mechanism
+Architectural rationale: an earlier prototype shipped a standalone MCP
+client inside the cadence CLI. It hit OAuth at first contact with a
+real HTTP MCP server (Glean) and required a `--token` workaround. The
+right answer was to stop duplicating Claude Code's responsibilities —
+see `mcp-integration-story` project Notes for the pivot record.
 
-If you've already declared an MCP server elsewhere (Claude Code's
-`claude mcp add ...`, or a project-scope `.mcp.json`), Cadence sees it
-automatically — no need to re-declare in `cadence.yaml`. Discovery
-walks two locations:
+### Discovery (registry visibility)
+
+Cadence reads the same `mcpServers` registries Claude Code does, so
+servers added via `claude mcp add ...` are visible without re-declaration:
 
 | Source | File | Tag |
 |---|---|---|
@@ -396,47 +402,27 @@ walks two locations:
 | Local override | `cadence.yaml` `mcp_servers` | `cadence-yaml` |
 
 **Precedence (most-local wins):** `cadence-yaml` > `mcp-project` >
-`claude-user`. Name collisions resolve to the higher-priority source.
+`claude-user`. The parser is tolerant — entries without an explicit
+`type` field are inferred (`command` → stdio, `url` → http);
+`transport: sse` maps to the same http kind; malformed entries are
+skipped silently.
 
-The discovery parser is tolerant — entries without an explicit `type`
-field are inferred (`command` → stdio, `url` → http). `transport: sse`
-maps to the same http kind since SDK's StreamableHTTPClientTransport
-handles both flavors. Malformed entries are skipped silently rather
-than throwing.
-
-Run `cadence mcp-list` to verify what Cadence sees and which file each
-entry comes from.
-
-### Configuration (optional override / local-only servers)
-
-`cadence.yaml mcp_servers` is the override path — use it when you want
-to add a repo-only server, or pin specific config that should win over
-what Claude Code or `.mcp.json` declares.
+`cadence.yaml mcp_servers` is the override path — use it for local-only
+servers or to pin config that should win over Claude Code's registry.
+`${env:NAME}` expansion happens at `loadConfig` time for cadence.yaml
+entries (discovered entries ride their source file's values).
+Duplicate server names raise immediately to prevent silent shadowing.
 
 ```yaml
+# cadence.yaml (optional — local overrides only)
 mcp_servers:
-  - name: glean                 # alias used by --server
-    transport: stdio            # stdio | http
-    command: glean-mcp          # stdio: executable on PATH
-    args: ["--profile", "default"]
+  - name: local-only-server
+    transport: stdio
+    command: my-server
+    args: ["--mode", "demo"]
     env:
-      GLEAN_TOKEN: ${env:GLEAN_TOKEN}   # ${env:NAME} expanded at config load
-    cwd: ~/.glean               # optional; ~/ expanded
-    timeout_ms: 10000           # optional per-call timeout (default 10000)
-
-  - name: remote-glean
-    transport: http
-    url: https://glean.example.com/mcp
-    headers:
-      Authorization: Bearer ${env:GLEAN_TOKEN}
+      TOKEN: ${env:LOCAL_TOKEN}
 ```
-
-`${env:NAME}` expansion happens at `loadConfig` time for cadence.yaml
-entries (discovered entries don't expand — they ride whatever the
-source file declared). Missing variables surface as `MCP server
-'<name>' references missing env var <NAME>` at the CLI boundary —
-never at first use. Duplicate server names raise immediately to
-prevent silent shadowing.
 
 ### `cadence mcp-list` (verify the merged registry)
 
@@ -445,111 +431,83 @@ cadence mcp-list           # human table
 cadence mcp-list --json    # structured output
 ```
 
-Shows the merged registry across `cadence.yaml`, `.mcp.json`, and
-`~/.claude.json` with a `source` column. Use this before `mcp-pull` to
-confirm the server name + target + source.
+Shows the merged registry across all three sources with a `source`
+column. The only client-side MCP surface in the CLI — used by the
+`/cadence:mcp-pull` skill at step 1 to resolve server names, and by
+users to confirm what's visible before invoking the skill.
 
-### `cadence mcp-pull` (read resources → captures)
+### `/cadence:mcp-pull` (skill, hidden verb)
+
+The user-facing surface for pulling MCP resources into captures.
+Hidden from `/cadence:help`'s primary catalogue; explicit-invocation
+only (analogous to `/incoming` and `/report`). Flow:
+
+1. Resolve the named server via `cadence mcp-list --json`.
+2. Use `ToolSearch` to find the server's exposed tools (the agent has
+   `mcp__<server>__*` tools through Claude Code's MCP host surface).
+3. Adapt to the server's shape — `list_resources` if available,
+   otherwise a `search`-style query path.
+4. ELI5-confirm the candidate list with the user before any write.
+5. Read each resource via the server's `read_resource` (or
+   equivalent) tool.
+6. For each text result, call `cadence write-capture --mcp-server
+   <name> --mcp-uri <uri> --mcp-mime-type <type> --body <header+body>
+   --verb-context "mcp-pull:<server>"`. The CLI auto-computes
+   `content_hash` (sha256 of body) and auto-dedups against existing
+   captures (by uri, then by content hash).
+7. Summarize: written / skipped_existing / skipped_binary / errors.
+
+See `cadence-plugin/skills/mcp-pull/SKILL.md` for the full contract.
+
+### `cadence write-capture` MCP flags
 
 ```bash
-cadence mcp-pull --server <name> [--filter <substring>] [--limit <N>] [--dry-run]
+cadence write-capture \
+  --body "<text>" \
+  --verb-context "mcp-pull:<server>" \
+  --mcp-server <name> \
+  --mcp-uri <uri> \
+  --mcp-mime-type <mime>     # optional
 ```
 
-- **`--server`** (required): alias from the merged registry.
-- **`--filter`**: case-insensitive substring matched against
-  resource uri / name / description.
-- **`--limit`**: cap the post-filter set.
-- **`--dry-run`**: list what would be written without touching disk.
-- **`--token <value>`**: bearer-token override for HTTP servers
-  requiring OAuth. Replaces any Authorization header from the
-  discovered config for this call only — never persisted.
-  Equivalent env var: `CADENCE_MCP_TOKEN_<SERVER>` (server name
-  uppercased; non-alphanumeric chars become `_`, e.g.
-  `glean_default` → `CADENCE_MCP_TOKEN_GLEAN_DEFAULT`). Ignored for
-  stdio servers.
+When `--mcp-server` + `--mcp-uri` are present (must be supplied
+together), the write:
+- Stamps `mcp:` frontmatter on the capture
+- Computes `mcp.content_hash` as `sha256:<hex>` of the body
+- Dedups against existing captures — returns
+  `{kind: "skipped_existing", reason: "uri_seen", path}` or
+  `{kind: "skipped_existing", reason: "content_hash_seen", path}`
+  instead of writing when a match exists
+- Returns `{kind: "written", path}` on success
 
-**Behavior:** connects to the named server, lists resources, applies
-filter + limit, and for each resource: reads content, dedups against
-existing captures by `mcp.uri` (fast) and `mcp.content_hash` (precise
-across renames), writes a capture to `thoughts/unprocessed/` with an
-`mcp:` frontmatter block. Binary resources are flagged and skipped
-(the capture primitive is text-only). Connection is per-invocation —
-no pooling.
+The dedup logic is owned by the CLI so the skill stays simple — it
+calls write-capture for each resource and trusts the result.
 
-**Output (JSON):**
-```json
-{
-  "server": "glean",
-  "dry_run": false,
-  "total_listed": 47,
-  "after_filter": 12,
-  "entries": [ { "kind": "written", "uri": "...", "path": "..." }, ... ],
-  "summary": { "written": 9, "skipped_existing": 2, "skipped_binary": 1, "errors": 0 }
-}
-```
+### Capture frontmatter shape (mcp:)
 
-**Capture frontmatter** written by `mcp-pull` (extends the standard
-shape with the `mcp:` block — see "File Formats" → Capture):
 ```yaml
 captured: 2026-05-22T10:00:00
-verb_context: mcp-pull:glean
+verb_context: mcp-pull:glean_default
 mcp:
-  server: glean
+  server: glean_default
   uri: glean://doc/abc
   mime_type: text/markdown
-  content_hash: sha256:...
+  content_hash: sha256:abc123...
 ```
 
-**Errors** (emitted to stderr as `{ error: { kind, message, hint } }`
-with exit code 1):
-- `not_configured` — `--server` doesn't match any entry in the merged
-  registry (cadence.yaml + discovered)
-- `spawn_failed` — stdio command not on PATH, stdio process refused to
-  start, or http URL was unparseable
-- `handshake_failed` — server didn't complete the MCP initialize step
-- `timeout` — a call exceeded `timeout_ms`
-- `server_error` — MCP server returned a protocol-level error
+### What's deliberately out of scope
 
-### CLI subcommand catalog (mcp- prefix)
-
-| Command | Purpose |
-|---|---|
-| `cadence mcp-list` | Verify merged registry across cadence.yaml + .mcp.json + ~/.claude.json |
-| `cadence mcp-pull --server <name>` | Read resources from a server into thoughts/unprocessed/ as captures |
-
-### OAuth on HTTP servers (current workaround)
-
-Some HTTP MCP servers (Glean and other enterprise endpoints) require
-OAuth that Cadence doesn't yet handle directly. Claude Code already
-holds a valid token for these servers when you've registered them via
-`claude mcp add ...`. Until Cadence can read that token store
-automatically (tracked as an open action on `mcp-integration-story`),
-the workaround is to thread the bearer token in manually:
-
-```bash
-# One-off:
-cadence mcp-pull --server glean_default --token "$(extract-token-somehow)" --dry-run
-
-# Persistent for the shell session:
-export CADENCE_MCP_TOKEN_GLEAN_DEFAULT="<token>"
-cadence mcp-pull --server glean_default --dry-run
-```
-
-The handshake_failed error message includes this hint automatically
-when the failure looks auth-shaped (401 / 403 / "unauthorized" in
-the response).
-
-### What's deliberately out of v1
-
-- `listTools` / `callTool` — read-only consumption only. Letting an
-  MCP server mutate Cadence state is a separate trust call (would
-  warrant its own warn-and-confirm surface like `/report`).
-- Resource subscriptions — pull-only.
-- Automatic Claude-Code OAuth token reuse — see "OAuth on HTTP servers"
-  above for the current workaround; full delegation is tracked as an
-  open action.
-- Hosting our own MCP server — Cadence is a client, not a host. If
-  that flips later, it's a separate project.
+- **Hosting our own MCP server.** Cadence is a consumer, not a host.
+- **`callTool` from inside Cadence.** v1 is read-only consumption.
+  Letting an MCP server mutate Cadence state is a separate trust
+  decision; would warrant its own warn-and-confirm surface like
+  `/report` if revisited.
+- **Resource subscriptions.** Pull-only model. Subscription needs a
+  long-lived process that doesn't match Cadence's CLI shape.
+- **A Cadence-owned MCP client / transport.** Removed in the
+  architecture pivot. If Cadence ever needs to talk to MCP outside
+  of a Claude Code agent (e.g., a non-Claude-Code consumer), that's a
+  separate project with its own design pass.
 
 ## Maintainer Labels (Upstream Cadence Repo)
 
