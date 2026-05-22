@@ -368,36 +368,43 @@ Hard rules across all verbs:
 
 ## External Tool Discipline
 
-Cadence integrates with external systems through *explicit verbs*:
-MCP servers via `/cadence:mcp-pull`, GitHub via `/cadence:report` and
-`/cadence:incoming`, the local `gh` CLI via origin-sync. Outside of
-those explicit invocations, do not proactively reach for external
-tools — even when they appear available and topically related to
-what the user is working on.
+Cadence environments often expose ambient tools beyond the local
+repo — MCP servers (e.g., Glean enterprise search registered via
+`claude mcp add`), web search, IDE features, and so on. These are
+useful **on user direction** and disruptive **on agent initiative**.
+The discipline is one rule:
 
-The concrete case that motivated this rule: Claude Code exposes MCP
-servers (e.g., a Glean enterprise-search server registered via
-`claude mcp add`) as `mcp__<server>__*` tools to every conversation
-in the environment. The agent's default instinct is to use available
-tools when they seem helpful — so during `/cadence:start`,
-`/cadence:complete`, `/cadence:brainstorm`, etc., it can drift toward
-"let me Glean-search for related context before answering." Don't.
-Cadence is a *local* cognitive operating system. Its work happens
-against the repo's files. MCP-sourced content enters through the
-explicit `/cadence:mcp-pull` verb (which writes captures into
-`thoughts/unprocessed/`); from there it joins the standard triage
-flow. Outside that verb, MCP is invisible.
+> **External tools require explicit user direction. Don't suggest
+> or invoke them on agent initiative just because they look
+> topically relevant.**
 
-The general principle: stay inside Cadence's local primitives during
-Cadence verbs. External tools have their own opt-in surface (verb or
-skill). Don't bleed external surfaces into everyday verb flows even
-if they would technically be valid tool calls. The user's invocation
-of a verb is consent to *that verb's* scope, not to every tool
-Claude Code happens to expose.
+Concretely:
 
-This also applies to web search, IDE features, and any other ambient
-tool Claude Code surfaces — if it isn't part of the invoked verb's
-contract, leave it alone.
+- ❌ **Agent-initiated:** the user is running `/cadence:brainstorm`
+  on an onboarding pursuit; the agent thinks "Glean might have
+  related context" and offers a search. Don't. Tool availability is
+  not a license to use.
+- ✓ **User-directed:** the user says "search my google drive for
+  onboarding docs," "check Glean for our hiring policy," "look up Y
+  on the web." Execute the request. The user's direction IS the
+  consent — no need to interpret it as out-of-scope just because the
+  active verb is `/cadence:brainstorm` or `/cadence:start`.
+
+The `/cadence:mcp-pull` verb is the dedicated *bulk-ingestion* path
+— pull many MCP resources at once and stamp them as captures for
+later triage in `/cadence:reflect` Get Clear. It's the right surface
+when the user wants the parking-lot flow. It is **not** the only
+path: small ad-hoc MCP lookups during other verbs are fine when the
+user asks for them; the answers feed directly into the current verb
+flow (e.g., "search drive for onboarding docs" during
+`/cadence:start onboarding` → read the surfaced docs → propose
+project actions from what they contain). No captures necessary for
+the lightweight case.
+
+The principle generalizes beyond MCP. Web search, IDE features, and
+any other ambient tool follow the same rule: user direction is
+required to reach for them; agent instinct is not. The verb the user
+invoked sets the conversational register, not the tool gate.
 
 ## Scope
 

@@ -149,13 +149,17 @@ Building a separate MCP client inside the cadence CLI was solving a problem Clau
 
 This solves the OAuth problem for free: the agent's tool calls go through Claude Code, which already holds the token. It also restores Cadence CLI's single responsibility (manipulate local file state) and aligns with how Claude Code plugins normally integrate.
 
-### First finding from work-computer validation: tool discipline
+### First finding from work-computer validation: tool discipline (iterated)
 
-After the full pivot landed, initial work-computer testing surfaced a second-order issue *separate from* the MCP-pull flow: registering `glean_default` via `claude mcp add` makes Glean's tools (`mcp__glean_default__*`) visible to the agent in *every* conversation in that environment. The agent's default instinct is to use available tools when they seem topically helpful — so during ordinary Cadence verbs (`/cadence:start`, `/cadence:complete`, `/cadence:brainstorm`), the agent would offer to run a Glean search "to surface related context." Nothing in Cadence asked for it; the agent was reasoning from tool availability.
+After the full pivot landed, initial work-computer testing surfaced two related issues that took two passes to get right:
 
-This isn't a Cadence bug per se — it's an agent-behavior consequence of MCP tools being globally visible — but the *fix* lives in Cadence, because Cadence is the only place that can declare "MCP is opt-in via `/cadence:mcp-pull`, invisible elsewhere." Added to `cadence-runtime.md` as a new "External Tool Discipline" section. The rule generalizes beyond MCP: web search, IDE features, and any other ambient Claude Code tool also stay out of verb flows unless the verb's contract opts in.
+**First pass (overshot):** registering `glean_default` via `claude mcp add` makes Glean's tools (`mcp__glean_default__*`) visible to the agent in *every* conversation in that environment. The agent's default instinct is to use available tools when they seem topically helpful — so during ordinary Cadence verbs (`/cadence:start`, `/cadence:complete`, `/cadence:brainstorm`), the agent would offer to run a Glean search "to surface related context." Nothing in Cadence asked for it; the agent was reasoning from tool availability. The first fix added a runtime rule that effectively said "MCP is invisible outside `/cadence:mcp-pull`."
 
-Lesson: when the integration architecture is right (Claude Code hosts MCP, Cadence consumes via the agent), the new failure mode isn't *can we reach the server* — it's *does the agent stay scoped to the user's invocation*. The runtime has to name that scope explicitly.
+**Second pass (corrected by the user):** that was too restrictive. The user *does* want to use Glean during verb flows — just on user direction, not on agent initiative. Concrete use case: "search my google drive for onboarding docs" during `/cadence:start onboarding`, then propose project actions from what's surfaced. That's exactly the integration the project was designed for — Glean as ad-hoc lookup during work-shaping, with `/cadence:mcp-pull` as the dedicated bulk-ingestion-to-captures path.
+
+The corrected rule: **external tools require explicit user direction. Don't suggest or invoke them on agent initiative just because they look topically relevant. Do execute them when the user asks.** This applies to MCP, web search, IDE features — anything ambient that Claude Code surfaces. The verb the user invoked sets the conversational register, not the tool gate.
+
+Lesson: when the integration architecture is right (Claude Code hosts MCP, Cadence consumes via the agent), the new failure modes are about *agent restraint*, not *can we reach the server*. The line worth defending isn't "external tools only inside a special verb" — that's too coarse. It's "agent initiative" vs "user direction." The runtime now names that distinction explicitly, with the onboarding-docs workflow as the canonical user-directed example.
 
 ## Actions
 

@@ -1,13 +1,19 @@
 ---
-description: Pull resources from an MCP server into thoughts/unprocessed/ as captures. Uses the agent's MCP tool surface (Claude Code handles transport + OAuth) and stamps each capture with mcp: frontmatter via cadence write-capture. Hidden verb — not on the 12-verb surface. TRIGGER ONLY when the user explicitly invokes /cadence:mcp-pull. SKIP all natural-language equivalents — never auto-fire from "pull from glean", "ingest the corpus", or similar; surface the verb name as a suggestion when such language appears.
+description: Bulk-pull resources from an MCP server into thoughts/unprocessed/ as captures for later triage. Uses the agent's MCP tool surface (Claude Code handles transport + OAuth) and stamps each capture with mcp: frontmatter via cadence write-capture. Hidden verb — not on the 12-verb surface. This is the dedicated bulk-ingestion path; ad-hoc MCP lookups during other verbs are also legal when the user explicitly directs them (see cadence-runtime.md "External Tool Discipline"). TRIGGER ONLY when the user explicitly invokes /cadence:mcp-pull. SKIP all natural-language equivalents — never auto-fire from "pull from glean", "ingest the corpus", or similar; surface the verb name as a suggestion when such language appears.
 ---
 
 # /mcp-pull
 
 Hidden verb — not in the visible 12-verb catalogue; explicit
-invocation only. Drives MCP integration through the agent's normal
-tool-call surface so Claude Code (the MCP host) owns the transport
-and OAuth; Cadence owns the file write.
+invocation only. The *bulk-ingestion* path for MCP resources →
+captures. (Ad-hoc lookups during other verbs are fine when the user
+explicitly directs them — see `cadence-runtime.md` "External Tool
+Discipline." Use this verb when you want many resources captured
+to the parking lot for later triage in `/cadence:reflect`.)
+
+Drives MCP integration through the agent's normal tool-call surface
+so Claude Code (the MCP host) owns the transport and OAuth; Cadence
+owns the file write.
 
 Reference `workflows/verb-contracts.md` for the mcp-pull register.
 
