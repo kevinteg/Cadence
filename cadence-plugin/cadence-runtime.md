@@ -366,6 +366,39 @@ Hard rules across all verbs:
   scope without giving anything back. Frame any necessary date as a
   constraint inside the Intent narrative, not as a target field.
 
+## External Tool Discipline
+
+Cadence integrates with external systems through *explicit verbs*:
+MCP servers via `/cadence:mcp-pull`, GitHub via `/cadence:report` and
+`/cadence:incoming`, the local `gh` CLI via origin-sync. Outside of
+those explicit invocations, do not proactively reach for external
+tools — even when they appear available and topically related to
+what the user is working on.
+
+The concrete case that motivated this rule: Claude Code exposes MCP
+servers (e.g., a Glean enterprise-search server registered via
+`claude mcp add`) as `mcp__<server>__*` tools to every conversation
+in the environment. The agent's default instinct is to use available
+tools when they seem helpful — so during `/cadence:start`,
+`/cadence:complete`, `/cadence:brainstorm`, etc., it can drift toward
+"let me Glean-search for related context before answering." Don't.
+Cadence is a *local* cognitive operating system. Its work happens
+against the repo's files. MCP-sourced content enters through the
+explicit `/cadence:mcp-pull` verb (which writes captures into
+`thoughts/unprocessed/`); from there it joins the standard triage
+flow. Outside that verb, MCP is invisible.
+
+The general principle: stay inside Cadence's local primitives during
+Cadence verbs. External tools have their own opt-in surface (verb or
+skill). Don't bleed external surfaces into everyday verb flows even
+if they would technically be valid tool calls. The user's invocation
+of a verb is consent to *that verb's* scope, not to every tool
+Claude Code happens to expose.
+
+This also applies to web search, IDE features, and any other ambient
+tool Claude Code surfaces — if it isn't part of the invoked verb's
+contract, leave it alone.
+
 ## Scope
 
 All data lives within this repository. Do not read files outside the
