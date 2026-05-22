@@ -161,6 +161,25 @@ The corrected rule: **external tools require explicit user direction. Don't sugg
 
 Lesson: when the integration architecture is right (Claude Code hosts MCP, Cadence consumes via the agent), the new failure modes are about *agent restraint*, not *can we reach the server*. The line worth defending isn't "external tools only inside a special verb" — that's too coarse. It's "agent initiative" vs "user direction." The runtime now names that distinction explicitly, with the onboarding-docs workflow as the canonical user-directed example.
 
+### Second finding from work-computer validation: MCP latency makes inline lookups painful
+
+After the runtime correction, the user tried the canonical inline flow ("read this file by name during work") through Glean's MCP. Reading a single file by name took **10+ minutes** end-to-end, while the same query in Glean's own chatbot returned instantly.
+
+Two likely causes stacking:
+
+1. **Agent round-trips.** Reading a file by name requires the agent to call MCP tools multiple times — search-by-name, parse results, pick one, read by URI. Each `mcp__glean_default__*` call hops through Claude Code → Glean's HTTP MCP server → Glean's backend → back. 3-5 calls at ~30-60s each → 5-10 minutes.
+2. **MCP wrapper vs. direct path.** Glean's chatbot has direct access to Glean's optimized retrieval; the MCP server is a thinner wrapper exposing generic primitives that don't compose the way Glean's UI composes its own search+rank+rerank+summarize. Same backend, more layers, more latency. Not something Cadence can fix.
+
+This reshapes the workflow recommendation:
+
+- **Inline real-time lookups during `/cadence:start` etc. are not currently viable** with Glean MCP at this latency. The "user-directed" path is legal but practically painful unless the agent can satisfy the request in 1-2 calls.
+- **`/cadence:mcp-pull` (bulk batch ingestion) is the right fit** for content like the onboarding-docs workflow. Pull once, get N captures, triage during `/reflect`. Latency amortizes over a single batched operation rather than blocking every interaction.
+- **The Glean chatbot remains the fast path** for one-off lookups. The user copies findings into Cadence as a manual `/cadence:capture` — loses the automation but the chatbot's UX is doing real retrieval work that the MCP wrapper isn't.
+
+Two diagnostic questions still worth answering to tell whether this is fundamental or fixable: how many tool calls did the agent make per file read (if 5-10, the agent is composing badly; if 1-2, Glean's MCP is just slow), and does the server expose a combined search+read tool (if so, the agent should learn to prefer it).
+
+Lesson: integration correctness is necessary but not sufficient — once the architecture works, real-world latency determines which *flows* are viable. The runtime guidance that "user direction is legal in any verb" stays correct as a principle, but practical recommendations need to acknowledge that "real-time inline MCP lookups" and "batch ingestion via `/cadence:mcp-pull`" have very different latency profiles.
+
 ## Actions
 
 - [x] Read the issue thread and decide first concrete move.

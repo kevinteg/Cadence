@@ -394,12 +394,31 @@ The `/cadence:mcp-pull` verb is the dedicated *bulk-ingestion* path
 — pull many MCP resources at once and stamp them as captures for
 later triage in `/cadence:reflect` Get Clear. It's the right surface
 when the user wants the parking-lot flow. It is **not** the only
-path: small ad-hoc MCP lookups during other verbs are fine when the
-user asks for them; the answers feed directly into the current verb
-flow (e.g., "search drive for onboarding docs" during
-`/cadence:start onboarding` → read the surfaced docs → propose
-project actions from what they contain). No captures necessary for
-the lightweight case.
+path: small ad-hoc MCP lookups during other verbs are also legal
+when the user asks for them; the answers feed directly into the
+current verb flow (e.g., "search drive for onboarding docs" during
+`/cadence:start onboarding`).
+
+**Practical latency note.** MCP tool calls hop through Claude Code →
+the MCP server → its backend, often requiring multiple round-trips
+to satisfy one logical request (search-then-read, list-then-filter).
+Some MCP servers add significant latency on top — observed in
+testing: a single "read this file by name" request through Glean's
+HTTP MCP took 10+ minutes vs. instant in Glean's own chatbot,
+because the agent composed several tool calls and each MCP hop was
+slow. The runtime principle (user direction is legal in any verb)
+doesn't change, but the practical recommendation does:
+
+- **Inline real-time lookups** are viable only when the underlying
+  MCP server is fast and the agent can satisfy the request in 1-2
+  calls. When latency makes inline painful, prefer `/cadence:mcp-pull`
+  (one slow batched op, captures land for later triage) or push the
+  lookup to the server's native UI (e.g., Glean's chatbot) and
+  capture the result manually via `/cadence:capture`.
+- **The agent should compose MCP calls efficiently** — if a server
+  exposes a combined search+read tool, prefer it over separate calls;
+  read by known URI rather than re-searching when the URI is already
+  in hand.
 
 The principle generalizes beyond MCP. Web search, IDE features, and
 any other ambient tool follow the same rule: user direction is
