@@ -571,14 +571,13 @@ Then the verb-hint block + teaching footer per the universal exit convention.
 **Tone:** Light, factual. Show what's about to be pulled before writing — the user should be able to cancel before any capture file is touched.
 
 **Behavior:**
-- Resolve the named server via `cadence mcp-list --json`. If the registry is empty: surface install hint and exit.
-- Use `ToolSearch` to find the server's tools under the `mcp__<server>__` namespace. Adapt to what's available: `list_resources` + `read_resource` if standard, otherwise a `search`-style flow with a user-supplied query.
+- Use `ToolSearch` to find tools under the `mcp__<server>__` namespace. If none match, surface a hint to register the server via `claude mcp add ...` and exit — Cadence keeps no parallel registry; the agent's tool surface is the only source of truth. Adapt to what's available: `list_resources` + `read_resource` if standard, otherwise a `search`-style flow with a user-supplied query.
 - Apply the optional filter (case-insensitive substring against name/uri/description). With a search-style flow the filter is redundant — the query did the filtering.
 - ELI5 the candidate list to the user before writing. Accept `y` / `n` / `limit:<N>`.
 - For each text resource, call `cadence write-capture --mcp-server <name> --mcp-uri <uri> --mcp-mime-type <type>`. The CLI auto-computes `content_hash` and auto-dedups (by uri, then by content hash). Skip binary resources without writing.
 - Summarize at the end: written / skipped_existing / skipped_binary / errors.
 
-**Architectural anchor:** No client code in Cadence. Don't shell out to a Cadence-owned MCP transport; don't carry credentials through Cadence. Claude Code is the MCP host; Cadence is a downstream consumer through the agent. If `cadence mcp-list` doesn't show a server that `claude mcp add` registered, debug discovery — don't paper over with manual config.
+**Architectural anchor:** No client code in Cadence, no parallel registry. Don't shell out to a Cadence-owned MCP transport; don't carry credentials through Cadence; don't maintain a separate view of `mcpServers`. Claude Code is the MCP host; Cadence is a downstream consumer through the agent. To check what's reachable, use `claude mcp list` — Cadence intentionally has no equivalent.
 
 **Discovery (suggest-don't-run):**
 - Hidden from `/cadence:help`'s primary catalogue.

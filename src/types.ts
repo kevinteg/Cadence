@@ -192,27 +192,6 @@ export type Reflection = ReflectionFrontmatter & {
   path: string
 }
 
-export const McpServerStdioRawSchema = z.object({
-  name: z.string(),
-  transport: z.literal('stdio'),
-  command: z.string(),
-  args: z.array(z.string()).optional().default([]),
-  env: z.record(z.string(), z.string()).optional().default({}),
-  cwd: z.string().optional(),
-  timeout_ms: z.number().optional(),
-})
-export const McpServerHttpRawSchema = z.object({
-  name: z.string(),
-  transport: z.literal('http'),
-  url: z.string(),
-  headers: z.record(z.string(), z.string()).optional().default({}),
-  timeout_ms: z.number().optional(),
-})
-export const McpServerRawSchema = z.discriminatedUnion('transport', [
-  McpServerStdioRawSchema,
-  McpServerHttpRawSchema,
-])
-
 export const ConfigSchema = z.object({
   version: z.number().optional().default(1),
   win_cycles: z
@@ -245,27 +224,8 @@ export const ConfigSchema = z.object({
       duration_minutes: z.number().optional(),
     })
     .optional(),
-  mcp_servers: z.array(McpServerRawSchema).optional().default([]),
 })
 export type RawConfig = z.infer<typeof ConfigSchema>
-
-export type McpServerConfig =
-  | {
-      kind: 'stdio'
-      name: string
-      command: string
-      args: string[]
-      env: Record<string, string>
-      cwd?: string
-      timeoutMs: number
-    }
-  | {
-      kind: 'http'
-      name: string
-      url: string
-      headers: Record<string, string>
-      timeoutMs: number
-    }
 
 export type Config = {
   waiting_for_grace_days: number
@@ -278,14 +238,11 @@ export type Config = {
   incoming_queue_cache_ttl_minutes: number
   inbox_seed_stale_days: number
   inbox_seed_softcap: number
-  mcp_servers: McpServerConfig[]
   win_cycle_current?: string
   win_cycle_start?: string
   win_cycle_end?: string
   win_cycle_mid_check?: string
 }
-
-export const MCP_DEFAULT_TIMEOUT_MS = 10000
 
 export const CONFIG_DEFAULTS: Config = {
   waiting_for_grace_days: 2,
@@ -298,7 +255,6 @@ export const CONFIG_DEFAULTS: Config = {
   incoming_queue_cache_ttl_minutes: 15,
   inbox_seed_stale_days: 7,
   inbox_seed_softcap: 10,
-  mcp_servers: [],
 }
 
 export type Snapshot = {

@@ -59,12 +59,6 @@ import {
   clearPendingValidations,
   readPendingValidations,
 } from './validation/queue.js'
-import { loadCadenceYamlMcpServers, loadConfig } from './config.js'
-import {
-  discoverMcpServers,
-  mergeMcpRegistry,
-} from './integrations/mcp/discovery.js'
-
 const cli = cac('cadence')
 
 cli
@@ -575,42 +569,6 @@ cli
       process.stdout.write(JSON.stringify(result) + '\n')
     },
   )
-
-cli
-  .command(
-    'mcp-list',
-    'List MCP servers visible to Cadence — discovered from .mcp.json, ~/.claude.json, and cadence.yaml. Shows the source of each entry so you can tell which file owns it.',
-  )
-  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--json', 'Emit JSON instead of the human-readable table')
-  .action(async (opts: { root?: string; json?: boolean }) => {
-    const repoRoot = await resolveRepoRoot(opts.root)
-    const fromYaml = await loadCadenceYamlMcpServers(repoRoot)
-    const discovered = await discoverMcpServers(repoRoot)
-    const { servers, sources } = mergeMcpRegistry(fromYaml, discovered)
-    if (opts.json) {
-      process.stdout.write(
-        JSON.stringify({
-          servers: servers.map((s) => ({
-            ...s,
-            source: sources.get(s.name),
-          })),
-        }) + '\n',
-      )
-      return
-    }
-    if (servers.length === 0) {
-      process.stdout.write('No MCP servers configured.\n')
-      return
-    }
-    const rows: string[] = []
-    rows.push(['NAME', 'KIND', 'TARGET', 'SOURCE'].join('\t'))
-    for (const s of servers) {
-      const target = s.kind === 'stdio' ? `${s.command} ${s.args.join(' ')}`.trim() : s.url
-      rows.push([s.name, s.kind, target, sources.get(s.name) ?? '?'].join('\t'))
-    }
-    process.stdout.write(rows.join('\n') + '\n')
-  })
 
 cli
   .command(

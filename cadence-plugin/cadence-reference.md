@@ -172,10 +172,9 @@ list.
 
 `scan`, `report`, `status`, `flags`, `pursuits`, `pursuit <id>`,
 `project <id>`, `ideas`, `captures`, `find <query>`,
-`project-activity`, `mcp-list`. All accept `--json` for structured
-output. Skills consume `--json` and reason over the typed result; the
-human-readable default is for the user invoking the CLI directly
-during an AI outage.
+`project-activity`. All accept `--json` for structured output. Skills
+consume `--json` and reason over the typed result; the human-readable
+default is for the user invoking the CLI directly during an AI outage.
 
 `project-activity` is the stream `/narrate` consumes — git log of
 `pursuits/**/projects/*.md` rendered as a per-project event list.
@@ -378,63 +377,21 @@ uncertain routing for human review.
 
 Cadence consumes resources from MCP servers (Glean, time, custom) and
 writes them into Cadence primitives (captures, today). The integration
-is **skill-driven, not CLI-driven**: Cadence does not contain its own
-MCP client. Claude Code is the MCP host; it owns the transport, OAuth,
-token storage, and session lifecycle. Cadence skills consume MCP
-through the agent's normal tool-call surface (`mcp__<server>__<tool>`).
-The Cadence CLI owns the *file write*, not the network call.
+is **skill-driven** — Cadence keeps no MCP client, no MCP transport,
+no parallel registry view of `mcpServers`. Claude Code is the MCP
+host; it owns transport, OAuth, token storage, lifecycle. Cadence
+skills consume MCP through the agent's normal tool-call surface
+(`mcp__<server>__<tool>`). The Cadence CLI owns the *file write*, not
+the network call.
 
 Architectural rationale: an earlier prototype shipped a standalone MCP
 client inside the cadence CLI. It hit OAuth at first contact with a
-real HTTP MCP server (Glean) and required a `--token` workaround. The
-right answer was to stop duplicating Claude Code's responsibilities —
-see `mcp-integration-story` project Notes for the pivot record.
-
-### Discovery (registry visibility)
-
-Cadence reads the same `mcpServers` registries Claude Code does, so
-servers added via `claude mcp add ...` are visible without re-declaration:
-
-| Source | File | Tag |
-|---|---|---|
-| User scope | `~/.claude.json` `mcpServers` | `claude-user` |
-| Project scope | `<repoRoot>/.mcp.json` `mcpServers` | `mcp-project` |
-| Local override | `cadence.yaml` `mcp_servers` | `cadence-yaml` |
-
-**Precedence (most-local wins):** `cadence-yaml` > `mcp-project` >
-`claude-user`. The parser is tolerant — entries without an explicit
-`type` field are inferred (`command` → stdio, `url` → http);
-`transport: sse` maps to the same http kind; malformed entries are
-skipped silently.
-
-`cadence.yaml mcp_servers` is the override path — use it for local-only
-servers or to pin config that should win over Claude Code's registry.
-`${env:NAME}` expansion happens at `loadConfig` time for cadence.yaml
-entries (discovered entries ride their source file's values).
-Duplicate server names raise immediately to prevent silent shadowing.
-
-```yaml
-# cadence.yaml (optional — local overrides only)
-mcp_servers:
-  - name: local-only-server
-    transport: stdio
-    command: my-server
-    args: ["--mode", "demo"]
-    env:
-      TOKEN: ${env:LOCAL_TOKEN}
-```
-
-### `cadence mcp-list` (verify the merged registry)
-
-```bash
-cadence mcp-list           # human table
-cadence mcp-list --json    # structured output
-```
-
-Shows the merged registry across all three sources with a `source`
-column. The only client-side MCP surface in the CLI — used by the
-`/cadence:mcp-pull` skill at step 1 to resolve server names, and by
-users to confirm what's visible before invoking the skill.
+real HTTP MCP server (Glean) and required a `--token` workaround.
+After a half-pivot, a parallel discovery layer + `cadence mcp-list`
+also lingered, which was still duplicating Claude Code's authority.
+The full pivot removed both — see `mcp-integration-story` project
+Notes for the record. The agent's tool surface is the only source of
+truth for which servers are reachable.
 
 ### `/cadence:mcp-pull` (skill, hidden verb)
 
@@ -442,22 +399,27 @@ The user-facing surface for pulling MCP resources into captures.
 Hidden from `/cadence:help`'s primary catalogue; explicit-invocation
 only (analogous to `/incoming` and `/report`). Flow:
 
-1. Resolve the named server via `cadence mcp-list --json`.
-2. Use `ToolSearch` to find the server's exposed tools (the agent has
-   `mcp__<server>__*` tools through Claude Code's MCP host surface).
-3. Adapt to the server's shape — `list_resources` if available,
+1. Use `ToolSearch` to find `mcp__<server>__*` tools — if none match,
+   surface a hint to register the server via `claude mcp add ...`
+   and exit. (If the user supplied no `<server>`, group the matched
+   tools by server segment and ask which to pull from.)
+2. Adapt to the server's tool shape — `list_resources` if available,
    otherwise a `search`-style query path.
-4. ELI5-confirm the candidate list with the user before any write.
-5. Read each resource via the server's `read_resource` (or
+3. ELI5-confirm the candidate list with the user before any write.
+4. Read each resource via the server's `read_resource` (or
    equivalent) tool.
-6. For each text result, call `cadence write-capture --mcp-server
+5. For each text result, call `cadence write-capture --mcp-server
    <name> --mcp-uri <uri> --mcp-mime-type <type> --body <header+body>
    --verb-context "mcp-pull:<server>"`. The CLI auto-computes
    `content_hash` (sha256 of body) and auto-dedups against existing
    captures (by uri, then by content hash).
-7. Summarize: written / skipped_existing / skipped_binary / errors.
+6. Summarize: written / skipped_existing / skipped_binary / errors.
 
 See `cadence-plugin/skills/mcp-pull/SKILL.md` for the full contract.
+
+To verify which MCP servers the agent can reach, use `claude mcp list`
+(Claude Code's native command) — Cadence intentionally doesn't ship
+its own equivalent.
 
 ### `cadence write-capture` MCP flags
 
@@ -498,16 +460,19 @@ mcp:
 ### What's deliberately out of scope
 
 - **Hosting our own MCP server.** Cadence is a consumer, not a host.
-- **`callTool` from inside Cadence.** v1 is read-only consumption.
-  Letting an MCP server mutate Cadence state is a separate trust
-  decision; would warrant its own warn-and-confirm surface like
-  `/report` if revisited.
+- **`callTool` from inside Cadence.** Read-only consumption. Letting
+  an MCP server mutate Cadence state is a separate trust decision;
+  would warrant its own warn-and-confirm surface like `/report` if
+  revisited.
 - **Resource subscriptions.** Pull-only model. Subscription needs a
   long-lived process that doesn't match Cadence's CLI shape.
-- **A Cadence-owned MCP client / transport.** Removed in the
-  architecture pivot. If Cadence ever needs to talk to MCP outside
-  of a Claude Code agent (e.g., a non-Claude-Code consumer), that's a
-  separate project with its own design pass.
+- **A Cadence-owned MCP client / transport / registry.** Removed in
+  the architecture pivot. If Cadence ever needs to talk to MCP
+  outside of a Claude Code agent (e.g., a non-Claude-Code consumer),
+  that's a separate project with its own design pass.
+- **`cadence.yaml mcp_servers` config.** Removed in the full pivot —
+  it can't contribute a server to the agent's tool surface, so it was
+  dead config. Register MCP servers via `claude mcp add ...`.
 
 ## Maintainer Labels (Upstream Cadence Repo)
 

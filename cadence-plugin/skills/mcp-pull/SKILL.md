@@ -19,29 +19,35 @@ Reference `workflows/verb-contracts.md` for the mcp-pull register.
 
 ## Steps
 
-### 1. Resolve the server
+### 1. Find the server's tool surface
 
-Run `cadence mcp-list --json`. If the user supplied a server name, fuzzy-match against the result. If no match: print the available list and exit. If the user supplied no argument: present the list and ask which to use.
-
-If the merged registry is empty: `"No MCP servers configured. Register one with 'claude mcp add ...' or add it to cadence.yaml mcp_servers."` and exit.
-
-### 2. Discover the server's tool surface
-
-The named server is registered with Claude Code, so its tools are exposed to the agent under the `mcp__<server>__<tool>` naming convention. Use `ToolSearch` to find them:
+MCP servers registered with Claude Code expose tools to the agent under the `mcp__<server>__<tool>` naming convention. Cadence does not maintain its own registry view — Claude Code's tool surface is the only source of truth. Use `ToolSearch` to enumerate:
 
 ```
 ToolSearch with query "+mcp__<server>__"
 ```
 
-Resolve which tools are available. MCP servers vary — some expose `list_resources` + `read_resource` (standard MCP surface), others expose only `search` + a per-result read (e.g., enterprise search like Glean). Adapt:
+- **No tools matched:** the server isn't registered (or isn't named what the user typed). Surface the install hint and exit:
 
-- **If `list_resources` is available:** call it to enumerate.
-- **If only `search` (or equivalent) is available:** ask the user for a query, call search, take the top N results as candidates.
-- **If neither is obvious:** show the tool list to the user and ask which to use.
+  ```
+  No MCP server named "<server>" is available to the agent. Register
+  one with `claude mcp add <name> <url-or-command> [--transport http]`
+  and start a new Claude Code session so the tools are loaded.
+  ```
+
+- **Tools matched but the user supplied no `<server>`:** group the matched tool names by their `<server>` segment and ask which to pull from.
+
+### 2. Adapt to what the server exposes
+
+MCP servers vary. Some expose `list_resources` + `read_resource` (the standard MCP surface), others only expose `search` + a per-result read (e.g., enterprise search like Glean). Decide from the matched tool names:
+
+- **If `list_resources` (or similar — `list_documents`, `list_files`) is available:** call it to enumerate candidates.
+- **If only `search` (or `query`, etc.) is available:** ask the user for a query, call it, take the top N results as candidates.
+- **If neither is obvious:** show the matched tool list to the user and ask which to use as the enumeration surface.
 
 ### 3. Apply the filter (if provided)
 
-When the user supplied a filter argument, narrow the resource list to entries whose name / uri / description contain the substring (case-insensitive). When the source was a `search` rather than a `list`, the filter is redundant — the query already filtered. Skip the substring narrow in that case.
+When the user supplied a filter argument and the enumeration came from a `list`-style call, narrow the candidates to entries whose name / uri / description contain the substring (case-insensitive). When the enumeration came from `search`, the filter is redundant — the query already filtered. Skip the substring narrow in that case.
 
 ### 4. Show the user what's about to be pulled
 
@@ -94,10 +100,9 @@ End with the verb-hint block + teaching footer per the universal exit convention
 
 ## Guardrails
 
-- **No client code in Cadence.** Don't shell out to a Cadence-owned MCP transport; use the agent's `mcp__<server>__*` tools directly. Claude Code owns the host responsibilities (transport, OAuth, lifecycle).
+- **No client code in Cadence.** Don't shell out to a Cadence-owned MCP transport; use the agent's `mcp__<server>__*` tools directly. Claude Code owns the host responsibilities (transport, OAuth, lifecycle). Cadence keeps no parallel registry — the agent's tool surface is the only source of truth.
 - **No auto-fire from natural language.** A user saying "pull from glean" or "let's ingest the corpus" gets a suggestion, not an execution: "you can run `/cadence:mcp-pull glean`". Hidden state-modifying verbs are explicit-only (see runtime "Suggest-don't-run for hidden state-modifying verbs").
 - **No fuzzy guess on resource selection.** When the server exposes thousands of resources, ask for a filter or query rather than pulling everything. Don't drown the parking lot.
 - **Always show what will be written before writing.** ELI5 surface in step 4 is mandatory — the user should be able to cancel before any file is touched.
 - **Binary resources are skipped, not transformed.** Capture is a text primitive. A future skill might handle binary (saved to `pursuits/.../media/`), but `/mcp-pull` writes captures only.
 - **Tool calls are read-only.** `/mcp-pull` reads resources; it never invokes write-flavored MCP tools on the remote server. If a server exposes mutation tools, those are out of scope here.
-- **Discovery (`cadence mcp-list`) is the only source of truth** for which servers are visible. If `claude mcp add` added a server but `cadence mcp-list` doesn't show it, the bug is in discovery — debug there, don't paper over with manual config.
