@@ -20,19 +20,19 @@ It runs inside agentic coding tools like Claude Code, meeting you where you alre
   Why?       Intent?     Concrete?
 ```
 
-**Ideas** are adjacent to the work hierarchy, not part of the linear flow. They enter via three graduation gates enforced by `/promote`: **Idea → Pursuit** requires a *Why*; **Idea → Project** requires an *Intent narrative*; **Idea → Action** requires *concreteness*.
+Divergent exploration happens in **brainstorm workspaces** that run a phase machine — `diverging → converging → crystallized | archived`. A crystallized brainstorm materializes into a Pursuit or Project; an archived brainstorm preserves the exploration as a decided-but-shelved artifact. Raw seeds and unsorted material live in the **Inbox** — a *view*, not a directory, that unions untriaged captures with brainstorms still in `diverging`.
 
 **The user-facing surface is 12 verbs**, grouped by cognitive mode:
 
 | Mode | Verbs |
 |---|---|
-| **Diverge** — find what to build | `brainstorm` (chains internally into `develop` and `promote`) |
+| **Diverge** — find what to build | `brainstorm` (owns the phase machine; `--crystallize` materializes a Pursuit/Project) |
 | **Execute** — do the work | `start`, `complete`, `resolve`, `waiting`, `capture` |
 | **Reflect** — see meaning, check state | `reflect`, `narrate` |
 | **Setup** — one-off | `init` |
 | **Browse** — navigation | `status`, `find`, `help` |
 
-`develop` and `promote` exist as internal verbs the agent invokes by chaining; users typically don't type them. The reconciler runs as system behavior (SessionStart hook + during `/reflect` Get Clear), not a verb.
+The reconciler runs as system behavior (SessionStart hook + during `/reflect` Get Clear), not a verb. The earlier `develop` and `promote` verbs are retired — their work folds into brainstorm-workspace mechanics, which match the user's mental model better than three separate verbs ever did.
 
 **One voice, verb-defined contracts.** The agent is a single voice; the verb determines its register. During `brainstorm` it's non-judgmental and quantity-seeking. During `start` it's silent and protects flow. During `narrate` it's reflective without being evaluative. During `reflect` it's structured and forward-looking. The register matches your cognitive mode so the system stays out of your way.
 
@@ -74,9 +74,7 @@ None of them play the role of a skilled companion who holds your whole context a
 
 Cadence is one voice whose register is set by the activity. You invoke verbs; the voice adapts.
 
-**During `brainstorm`** — non-judgmental, quantity-seeking, deals provocation cards from a curated Oblique/SCAMPER deck, refuses to evaluate mid-stream, pushes through the creative cliff ("you're at 12 — the original ones usually come after 15"). It parks any evaluative concern that surfaces and promises to return to it in the next phase. *This is the voice that helps you find what the Pursuit is.*
-
-**During `develop`** (chained from `brainstorm`) — structured-critical. Runs PPCo (Praise, Potentials, Concerns, Overcome), criteria matrices, pre-mortems across clusters of Ideas. Allowed to kill an Idea respectfully, with a reason worth remembering. *This is the voice that helps you decide what to commit to.*
+**During `brainstorm`** — non-judgmental and quantity-seeking in the `diverging` phase; structured-critical in the `converging` phase. Deals provocation cards from a curated Oblique/SCAMPER deck during divergent work, refuses to evaluate mid-stream, pushes through the creative cliff. When the user signals "I have candidate solutions," the workspace shifts to `converging` and the voice runs PPCo (Praise, Potentials, Concerns, Overcome), criteria matrices, pre-mortems across candidates. `--crystallize` materializes the chosen solution as a Pursuit or Project, lifting the workspace's notes into Intent + initial Actions. *This is the voice that helps you find what the Pursuit is — and then helps you decide what to commit to.*
 
 **During `start`** — silent during flow. Terse at breakpoints. Surfaces captures only at breakpoints. Hands you the ready-to-resume plan when you return. *This is the voice that protects your attention.*
 
@@ -84,7 +82,7 @@ Cadence is one voice whose register is set by the activity. You invoke verbs; th
 
 **During `reflect`** — what moved, what's the Leveraged Priority, what's the outside-view estimate. Phase 1 (Get Clear) processes captures, surfaces reconciler flags, confirms project relevance. Phase 2 (Get Focused) is interactive: open questions first, follow-ups to deepen, agent observations only after the user has answered, and the canonical Leveraged Priority question asked verbatim ("What is the one thing you will do that will make you feel like you won the week?"). *This is the voice that helps you focus.*
 
-**In the background** — the Reconciler. Quiet. Watches for stalled waiting-fors, aging Seeds, dormant Projects, Ideas piling up faster than they resolve, near-completion pursuits. Surfaces what needs attention at SessionStart and during Reflect, never mid-flow.
+**In the background** — the Reconciler. Quiet. Watches for stalled waiting-fors, dormant Projects, Inbox pressure (untriaged material above the soft threshold), near-completion pursuits, and structural inconsistencies (active projects with no open actions). Surfaces what needs attention at SessionStart and during Reflect, never mid-flow.
 
 One voice. Five registers (the verbs that change tone) plus the silent reconciler. The register matches what you're doing.
 
@@ -94,7 +92,7 @@ One voice. Five registers (the verbs that change tone) plus the silent reconcile
 
 ### The Work Hierarchy
 
-**Pursuit** → **Project** → **Action**, with **Ideas** as a first-class adjacent collection.
+**Pursuit** → **Project** → **Action**.
 
 A **Pursuit** is something you've intentionally chosen to accomplish or maintain, anchored to your values and identity. Pursuits carry a Why. They are the things you'd mention in a performance review, share with neighbors, or write about in a year-in-review. They carry a verb and an outcome as a guideline: "Improve UX and Vision," "Be a Present Father," "Sustain Operations at Nexthop." Pursuits come in three flavors (same data model): *finite* (has an end state), *ongoing* (maintains a standard), *someday* (aspirational, not yet active).
 
@@ -106,31 +104,42 @@ A **Project** is a scoped effort framed by an **Intent** narrative. It's the fam
 
 An **Action** is the atomic unit of doing. Concrete, GTD-native. Actions can be tagged as *Active* (ready to be done by you), *Waiting* (delegated to or dependent on someone else, with an expected resolution date — Reconciler watches these), or *Done*.
 
-An **Idea** is a captured seed, possibly developed, not yet promoted.
+### Brainstorm Workspaces
 
-### Ideas and Inbox
+A brainstorm is a first-class workspace at `brainstorms/<slug>/`. It carries `meta.yaml: phase: diverging | converging | crystallized | archived`, a workspace file for divergent notes, `solutions/<name>.md` files for each candidate as the workspace converges, and `decision.md` written on crystallize. The phase machine reflects the cognitive mode:
 
-Ideas are a first-class section adjacent to the Pursuit/Project/Action stack. Every Idea has a parent. The default parent for unattached Ideas is **Inbox** — a standing pursuit that never closes, whose purpose is to hold seeds that don't yet belong, so nothing is lost and everything gets decided eventually.
+- **`diverging`** — non-judgmental ideation; provocation cards from the deck; quantity over quality; no killing.
+- **`converging`** — candidates are surfaced as solutions, run through PPCo, criteria, pre-mortems.
+- **`crystallized`** — `--crystallize` materialized the chosen solution into a Pursuit or Project. The workspace is preserved as the lineage record (what was considered, why this won, what got let go).
+- **`archived`** — the exploration is complete but didn't produce a commitment. Preserved as a learning artifact.
 
-**States:** *Seed* (raw, captured during brainstorm) → *Developed* (has been through `develop`: PPCo notes, criteria, maybe a pre-mortem) → *Promoted* (advanced to Pursuit, Project, or Action; origin link persists), *Moved* (reattached to a different parent), or *Closed* (killed with a reason — what did this Idea teach us?).
+**Why workspaces rather than free-floating Ideas?** The earlier model treated each idea as a separate entity with its own lifecycle (Seed → Developed → Promoted). In practice users think in *clusters* — "I'm exploring how to do X, and here are the four shapes that came out of that exploration." Workspaces match that mental model; they hold the cluster's notes, candidates, and decision together, and they survive as a coherent artifact when crystallized.
 
-**No WIP limit on Ideas.** The incubation research is clear that sitting on seeds is productive. Visibility is high instead: the Reconciler surfaces aging Seeds, unpromoted Developed Ideas, backlogs growing faster than they resolve.
+### Inbox
+
+The **Inbox** is a *view*, not a directory or pursuit. It unions two surfaces: untriaged captures in `thoughts/unprocessed/` and brainstorms still in the `diverging` phase. One number — "Inbox: 4 items" — across the SessionStart hook, the `/status` dashboard, the capture exit menu, and the `/reflect` Get Clear walk.
+
+**A growing Inbox is a triage debt signal, not an organizational layer.** The Reconciler surfaces an `inbox_pressure` flag once the count exceeds a soft threshold (default 10), with a forward-pointing suggestion. The signal is descriptive ("above soft cap"), never scolding. Triage means moving material *out* of the Inbox — onto a Pursuit as an action, into a Project, crystallizing a brainstorm, or closing with a reason. The Inbox is meant to shrink toward empty, not to be browsed.
 
 ### Closure as a Zeigarnik-Release Event
 
-A Pursuit cannot close while it has unresolved Ideas. **Absolute block.**
+A Pursuit cannot close while it has unresolved exploration. **Absolute block.** "Unresolved" means open projects (status `active` or `on_hold`) or active brainstorms (`diverging` or `converging`). Each open item is a cognitive loop the user is still rehearsing; closing the pursuit while leaving them open is what the ritual exists to prevent.
 
-`/resolve <pursuit>` invokes a **cleaning ritual** that walks each unresolved Idea. For each: **Move** (reattach), **Close** (with a reason — what did this teach?), **Promote** (if it still has life), or **Develop first** (if it's a raw Seed). Projects use **override-with-reason** closure — friction-sensitive at their frequency.
+`/resolve <pursuit>` walks the cleaning ritual. For each open brainstorm: crystallize (it earned a Pursuit/Project), archive (decided not to pursue — what was learned?), or move (reattach to another pursuit if it belongs there). For each open project: resolve as complete or drop with a reason. Projects themselves use **override-with-reason** closure — friction-sensitive at their frequency.
 
-The closure ritual turns ending into meaning-making. A completed Pursuit's narrative reads like: *"Generated 23 Ideas — 4 became Projects, 2 became their own Pursuits, 11 were closed with reasons (notably: rejected synthetic-traffic approach because capture-replay matched operational reality), 6 moved to Inbox for later."* That is the Pursuit's story.
+The closure ritual turns ending into meaning-making. A completed Pursuit's narrative reads like: *"Ran three brainstorms — `capture-redesign` crystallized into the v1.1 ingestion surface, `inbox-as-pursuit` archived once we saw Inbox should be a view, `outcome-menu-shapes` crystallized into the post-capture menu. Five projects shipped; one was dropped with the reason that the SQLite index wasn't yet load-bearing."* That is the Pursuit's story.
 
 ### The 2-Minute Rule
 
 When a thought is captured or an action is identified that could be completed in under two minutes, Cadence surfaces it immediately rather than filing it. During the Reflect ritual, any remaining sub-two-minute items are called out first for rapid clearance. The goal: trivial items never accumulate into a drag on the system.
 
-### Captures (Flow-Safe)
+### Captures (Flow-Safe Audit Trail)
 
-A **capture** is raw input saved on the go — a thought during dinner, an idea in the shower, a task that occurs to you mid-Session. Captures are silent: a single keystroke appends a typed thought to `thoughts/unprocessed/` with no agent response, no acknowledgment, no elaboration request. The thought is reconciled at the next breakpoint or during Reflect. This is essential — half the attention-fragmentation problem is self-interruption; flow-safe capture addresses that half.
+A **capture** is raw input saved on the go. Inline `/capture "..."` is silent: a single keystroke appends a typed thought to `thoughts/unprocessed/` with no agent response, no acknowledgment, no elaboration request. Half the attention-fragmentation problem is self-interruption; flow-safe capture addresses that half.
+
+v1.1 expanded capture into a five-path ingestion surface — inline text, stdin (`--`), local file or URL (`--from <path|url>`), named MCP query (`--source <name>`), and long-form brain dump (`--dump` opens `$EDITOR`). Every non-inline path dispatches a **capture-ingest subagent** for context isolation: the raw payload lands at `thoughts/_raw/<id>.raw.md` and never bloats the main conversation; the agent distills per the `--prompt` into `thoughts/<id>.md`; and it returns suggested outcomes per item — `two_minute_action`, `action`, `project`, `brainstorm_seed`, or `note`. The capture SKILL surfaces a small outcome menu after distillation. The user can route any item out into a real outcome immediately, or leave it in the Inbox.
+
+**Capture is the audit trail; the outcome menu lets material exit the Inbox immediately when the user has clarity.** Inline silent capture's contract is unchanged — flow safety beats everything.
 
 ### Pending Validations
 
@@ -164,11 +173,10 @@ The Reconciler is a system behavior (not a verb) that monitors the health of the
 
 - **Stalled waiting-for items** — past their expected date by the grace window
 - **Dormant Projects** — no activity in a configurable period
-- **Aging Seeds** — Ideas captured but never developed, past a threshold
-- **Unpromoted Developed Ideas** — went through `develop` but never got moved into the pipeline
-- **Growing backlog ratio** — Pursuits whose Idea generation outpaces resolution
+- **Inbox pressure** — untriaged Inbox count exceeds the soft threshold (default 10); the flag carries the bucket breakdown (overdue/aged/fresh)
 - **Pursuit near-completion** — only 1–2 projects left; time to think about closure
 - **Structural** — projects with all actions checked but status still active (does the Intent feel achieved?)
+- **Inbound issues** — open upstream issues piling up against the Cadence repo (maintainer-mode surface)
 
 The Reconciler runs at SessionStart and during `/reflect` Get Clear. The CLI subcommand `cadence flags` is available for power users who want to query on demand.
 
@@ -199,29 +207,33 @@ Cadence is a cognitive operating system, not a dev tool. Most users work on non-
 ## The Command Surface
 
 ```
-cadence brainstorm                   # free-floating ideation → seeds on Inbox
-cadence brainstorm <pursuit>         # ideation attached to a Pursuit → candidate Projects
-cadence brainstorm <project>         # ideation on a Project → candidate Actions
+cadence brainstorm <topic>           # open or resume a workspace at brainstorms/<slug>/
+cadence brainstorm                   # list active brainstorms, offer to open one
+cadence brainstorm --crystallize     # in converging: materialize selected solution as Pursuit/Project
+cadence brainstorm --archive         # close out (decided not to pursue — preserves the artifact)
 cadence start                        # curated selection; Leveraged Priority surfaced
 cadence start <project>              # protected flow on that Project
 cadence complete <action>            # mark an action done; trigger upward completion prompt
 cadence resolve <project>            # wrap up a project (--state complete | dropped)
-cadence resolve <pursuit>            # walk the closure ritual (absolute Ideas block + archive)
+cadence resolve <pursuit>            # walk the closure ritual (absolute block on unresolved work)
 cadence waiting <project>            # record an external blocker
-cadence capture "..."                # silent parking lot, no agent response
+cadence capture "..."                # silent inline capture
+cadence capture --from <path|url>    # ingest a doc; dispatches capture-ingest subagent
+cadence capture --source <name>      # named MCP-driven pull (resolved from ingest_sources)
+cadence capture --dump               # long-form brain dump in $EDITOR
 cadence reflect                      # full ritual: Get Clear + Get Focused
 cadence narrate                      # today's activity (cadence: daily)
 cadence narrate week                 # this ISO week
 cadence narrate <pursuit>            # full arc of the Pursuit
 cadence status                       # system dashboard or drill into a pursuit/project
-cadence find <query>                 # search across projects, ideas, captures, pursuits
+cadence find <query>                 # search across projects, brainstorms, captures, pursuits
 cadence help                         # render the verb catalogue
 cadence init                         # bootstrap a new repo
 ```
 
 Inside Claude Code these are invoked as `/cadence:<verb>` via the Cadence plugin.
 
-Internal verbs the agent invokes by chaining: `develop` (from brainstorm), `promote` (from develop or start). Reconciler runs as system behavior. The CLI also exposes power-user subcommands (`cadence flags`, `cadence project-activity`, `cadence pending-validation-*`, `cadence tip-*`, etc.) for direct use outside the slimmed verb surface.
+Hidden verbs (not on the visible 12-verb surface; explicit-invocation only): `/report` files an issue against the upstream Cadence repo, `/incoming` runs maintainer-side triage of inbound issues, `/mcp-pull` is the bulk-ingest path for pulling many MCP resources at once. The reconciler runs as system behavior. The CLI also exposes power-user subcommands (`cadence flags`, `cadence project-activity`, `cadence pending-validation-*`, `cadence tip-*`, `cadence dismiss-splash`, `cadence stop-hook`, etc.) for direct use outside the slimmed verb surface.
 
 ---
 
@@ -238,9 +250,9 @@ Internal verbs the agent invokes by chaining: `develop` (from brainstorm), `prom
 
 ### What the Voice Measures
 
-- **Progress.** Projects advanced, Pursuits closed, Ideas resolved. (Amabile's Progress Principle: visible forward motion in meaningful work is the strongest predictor of inner work life.)
-- **Drift.** Aging Seeds, stalled waiting-fors, near-completion pursuits.
-- **Cleanliness.** Unresolved Ideas on open Pursuits, dormant Projects.
+- **Progress.** Projects advanced, Pursuits closed, brainstorms crystallized into commitments. (Amabile's Progress Principle: visible forward motion in meaningful work is the strongest predictor of inner work life.)
+- **Drift.** Stalled waiting-fors, near-completion pursuits, Inbox above its soft cap.
+- **Cleanliness.** Open brainstorms on closing-in pursuits, dormant Projects, active projects with no open actions.
 
 Full research foundations and citations: `docs/research-references.md`.
 
@@ -279,10 +291,12 @@ Cadence is for people who:
 
 These are aspirational features the implementation does not yet provide. They live here so the vision is honest about what's built versus what's planned.
 
+- **Cadence Console — the Marimo notebook.** A live dashboard view over your Cadence repo that surfaces active pursuits, pending validations, the Inbox, active brainstorms, and the most recent reflection in one place, with cells that trigger `cadence:narrate` regenerations and `cadence:capture` quick-writes. Design distilled at `docs/marimo-console-design.md`: the "notebook references, Claude Code owns sidecars" pattern (the agent writes `narratives/console/*.cc.md`; Marimo cells render them via `mo.watch.file`), subprocess to `claude -p` as the default invocation path, with the Agent Client Protocol path documented for power users.
 - **Outside-view estimation.** Vision originally claimed reference-class lookup at Action creation. Real implementation requires actuals tracking, which requires time tracking — neither of which Cadence has. A possible later addition is Pomodoro-style 90-minute work-windows for dev/study contexts only, where session-duration tracking would be a natural primitive. Not a first-class feature for now.
-- **Nudges as if-then plans, expanded.** Today the SessionStart hook surfaces a small "Next:" block with heuristic suggestions and contextual tip-library content. The richer Nudges system originally specified — categorized (wellbeing, awareness, quick-wins, WIP warnings, oblique provocation) and Gollwitzer-formatted — splits into two future paths: dev-specific session/progress nudges (water, stretch, deep-work timers — opt-in for coding contexts) and domain-neutral calendar nudges (review-due, week-closing — extension of what's already in the splash).
+- **Nudges as if-then plans, expanded.** Today the SessionStart hook surfaces a small "Next:" block with heuristic suggestions, contextual tip-library content, an Inbox line, an active-brainstorms line, and an idle-time prompt. The richer Nudges system originally specified — categorized (wellbeing, awareness, quick-wins, WIP warnings, oblique provocation) and Gollwitzer-formatted — splits into two future paths: dev-specific session/progress nudges (water, stretch, deep-work timers — opt-in for coding contexts) and domain-neutral calendar nudges (review-due, week-closing — extension of what's already in the splash).
 - **Derived contexts.** GTD-style `@home`/`@errands`/`@computer` tags derived automatically from signals. Not built; the pursuit IS the context in current Cadence.
-- **SQLite/embedding index.** The architecture originally promised a SQLite hybrid for cross-cutting queries. Today the deterministic CLI scans markdown directly and returns in well under a second. The `build-indexer` project is parked on hold until performance actually hurts; an embedding index is a stronger move once enough scale exists to justify it (semantic find, idea de-duplication, retrieval-augmented narratives).
+- **SQLite/embedding index.** The architecture originally promised a SQLite hybrid for cross-cutting queries. Today the deterministic CLI scans markdown directly and returns in well under a second. The `build-indexer` project is parked on hold until performance actually hurts; an embedding index is a stronger move once enough scale exists to justify it (semantic find, brainstorm de-duplication, retrieval-augmented narratives).
+- **`claude-agent-sdk` (Python) integration.** Once Cadence Console is in real use, Pattern B from the Console design — in-cell SDK calls with `setting_sources=["project"]` — opens richer programmatic surfaces: a Marimo cell that exposes a custom in-process MCP tool the agent can call back into during the same query. Deferred until subprocess UX feels heavy in practice.
 
 ## Someday
 
