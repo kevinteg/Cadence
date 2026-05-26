@@ -1,7 +1,7 @@
 ---
 id: write-quickstart-and-demo-guide
 pursuit: improve-ux-and-vision
-status: active
+status: done
 created: 2026-05-01
 ---
 
