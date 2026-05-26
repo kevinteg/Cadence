@@ -127,30 +127,28 @@ export type Project = ProjectFrontmatter & {
   effective_domain: 'physical' | 'digital' | 'hybrid' | 'unknown'
 }
 
-export const IdeaStateSchema = z.enum([
-  'seed',
-  'developed',
-  'promoted',
-  'moved',
-  'closed',
+export const BrainstormPhaseSchema = z.enum([
+  'diverging',
+  'converging',
+  'crystallized',
+  'archived',
 ])
-export type IdeaState = z.infer<typeof IdeaStateSchema>
+export type BrainstormPhase = z.infer<typeof BrainstormPhaseSchema>
 
-export const IdeaFrontmatterSchema = z.object({
-  id: z.string(),
-  parent: z.string(),
-  state: IdeaStateSchema,
-  created: z.string(),
-  developed_at: z.string().optional(),
-  promoted_to: z.string().optional(),
-  closed_reason: z.string().optional(),
+export const BrainstormMetaSchema = z.object({
+  slug: z.string(),
+  created_at: z.string(),
+  last_touched: z.string(),
+  phase: BrainstormPhaseSchema,
+  source_thoughts: z.array(z.string()).optional().default([]),
+  candidate_solutions: z.array(z.string()).optional().default([]),
+  selected_solution: z.string().nullable().optional().default(null),
+  target_pursuit: z.string().nullable().optional().default(null),
 })
-export type IdeaFrontmatter = z.infer<typeof IdeaFrontmatterSchema>
+export type BrainstormMeta = z.infer<typeof BrainstormMetaSchema>
 
-export type Idea = IdeaFrontmatter & {
-  body: string
+export type Brainstorm = BrainstormMeta & {
   path: string
-  ageDays: number
 }
 
 export const CaptureMcpRefSchema = z.object({
@@ -209,8 +207,6 @@ export const ConfigSchema = z.object({
       dormant_days: z.number().optional(),
       incoming_queue_threshold: z.number().optional(),
       incoming_queue_cache_ttl_minutes: z.number().optional(),
-      inbox_seed_stale_days: z.number().optional(),
-      inbox_seed_softcap: z.number().optional(),
     })
     .optional(),
   wip_limits: z
@@ -236,8 +232,6 @@ export type Config = {
   reflect_duration_minutes: number
   incoming_queue_threshold: number
   incoming_queue_cache_ttl_minutes: number
-  inbox_seed_stale_days: number
-  inbox_seed_softcap: number
   win_cycle_current?: string
   win_cycle_start?: string
   win_cycle_end?: string
@@ -253,15 +247,13 @@ export const CONFIG_DEFAULTS: Config = {
   reflect_duration_minutes: 30,
   incoming_queue_threshold: 5,
   incoming_queue_cache_ttl_minutes: 15,
-  inbox_seed_stale_days: 7,
-  inbox_seed_softcap: 10,
 }
 
 export type Snapshot = {
   config: Config
   pursuits: Pursuit[]
   projects: Project[]
-  ideas: Idea[]
+  brainstorms: Brainstorm[]
   captures: Capture[]
   reflections: Reflection[]
   generatedAt: string
@@ -312,24 +304,6 @@ export type Flag =
       threshold: number
       ownerRepo: string
       fromCache: boolean
-    }
-  | {
-      // A seed on the Inbox pursuit has aged past the configured
-      // threshold. Inbox is meant to be a short-term triage zone, so
-      // this threshold is shorter than the general aging_seed check
-      // (default 7d vs 14d). One flag per stale Inbox seed.
-      kind: 'stale_inbox_seed'
-      ideaId: string
-      ageDays: number
-      threshold: number
-    }
-  | {
-      // Inbox seed count has grown past the soft cap. Fires once,
-      // regardless of how many seeds are stale individually. Surfaces
-      // a triage-debt signal rather than a per-idea concern.
-      kind: 'inbox_overcap'
-      count: number
-      softcap: number
     }
 
 export type Report = {

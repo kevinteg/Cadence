@@ -1,5 +1,4 @@
 import type {
-  Idea,
   Project,
   Pursuit,
   Snapshot,
@@ -139,18 +138,6 @@ export function renderProject(
     out.push('  ' + line)
   }
   return out.join('\n').trimEnd()
-}
-
-export function renderIdeas(ideas: Idea[]): string {
-  if (ideas.length === 0) return 'No ideas match.'
-  const out: string[] = []
-  for (const i of ideas) {
-    out.push(
-      `- ${i.id} [${i.state}] parent=${i.parent} age=${i.ageDays}d` +
-        (i.closed_reason ? `\n    closed: ${i.closed_reason}` : ''),
-    )
-  }
-  return out.join('\n')
 }
 
 function projectCounts(snapshot: Snapshot, pursuitId: string) {

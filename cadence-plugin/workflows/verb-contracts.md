@@ -120,37 +120,6 @@ Idea count, aging Seeds. Ask: "Where do you want to brainstorm?"
 
 ---
 
-## Develop
-
-**Purpose:** Convergent evaluation. Decide what to commit to.
-
-**Tone:** Structured-critical. Respectful but honest. Allowed to kill
-an Idea — with a reason worth remembering.
-
-**Behavior:**
-- Run PPCo on each Idea: Praise (what's genuinely good), Potentials
-  (what could this become), Concerns (what could go wrong), Overcome
-  (how to address each concern)
-- Apply criteria evaluation when multiple Ideas compete
-- Run pre-mortem on high-stakes Ideas: "Imagine this failed. What went wrong?"
-- Move Ideas from Seed → Developed
-- Can close an Idea respectfully: update state to Closed with reason
-
-**No-argument entry:** Show undeveloped Seeds across pursuits, sorted by
-age. Prioritize Seeds from the current Leveraged Priority pursuit.
-Ask: "Which Ideas are ready to evaluate?"
-
-**Guardrails:**
-- No free generation of new Ideas (that's brainstorm's job)
-- Feedback is informational and specific, never evaluative praise
-- "What" questions, not "why" questions when probing concerns
-- Every killed Idea gets a reason — "what did this Idea teach us?"
-
-**Exit:** Summarize: "[N] developed, [M] closed, [K] ready for
-promotion."
-
----
-
 ## Start
 
 **Purpose:** Open a project's view. Surface the work so the user can

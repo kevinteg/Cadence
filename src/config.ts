@@ -45,10 +45,6 @@ function mergeDefaults(raw: RawConfig): Config {
     incoming_queue_cache_ttl_minutes:
       d.incoming_queue_cache_ttl_minutes ??
       CONFIG_DEFAULTS.incoming_queue_cache_ttl_minutes,
-    inbox_seed_stale_days:
-      d.inbox_seed_stale_days ?? CONFIG_DEFAULTS.inbox_seed_stale_days,
-    inbox_seed_softcap:
-      d.inbox_seed_softcap ?? CONFIG_DEFAULTS.inbox_seed_softcap,
     win_cycle_current: wc.current,
     win_cycle_start: wc.start,
     win_cycle_end: wc.end,

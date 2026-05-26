@@ -2,9 +2,9 @@ import { stat } from 'node:fs/promises'
 import path from 'node:path'
 import { loadConfig } from '../config.js'
 import type { Project, Snapshot } from '../types.js'
+import { scanBrainstorms } from './brainstorms.js'
 import { scanCaptures } from './captures.js'
 import { lastActivityMap } from './git-activity.js'
-import { scanIdeas } from './ideas.js'
 import { scanProjects } from './projects.js'
 import { scanPursuits } from './pursuits.js'
 import { scanReflections } from './reflections.js'
@@ -13,12 +13,12 @@ export async function scan(
   repoRoot: string,
   now: Date = new Date(),
 ): Promise<Snapshot> {
-  const [config, pursuits, projects, ideas, captures, reflections] =
+  const [config, pursuits, projects, brainstorms, captures, reflections] =
     await Promise.all([
       loadConfig(repoRoot),
       scanPursuits(repoRoot),
       scanProjects(repoRoot),
-      scanIdeas(repoRoot, now),
+      scanBrainstorms(repoRoot),
       scanCaptures(repoRoot),
       scanReflections(repoRoot),
     ])
@@ -32,7 +32,7 @@ export async function scan(
     config,
     pursuits,
     projects,
-    ideas,
+    brainstorms,
     captures,
     reflections,
     generatedAt: now.toISOString(),

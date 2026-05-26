@@ -5,7 +5,6 @@ import path from 'node:path'
 import os from 'node:os'
 import { createPursuit } from '../src/write/pursuit.ts'
 import { createProject } from '../src/write/project.ts'
-import { createIdea } from '../src/write/idea.ts'
 import { writeCapture } from '../src/write/capture.ts'
 import { writeReflection } from '../src/write/reflection.ts'
 import {
@@ -15,7 +14,6 @@ import {
   checkItem,
   checkItems,
   flagWaitingFor,
-  setIdeaState,
   setProjectStatus,
 } from '../src/write/edits.ts'
 import { movePursuit } from '../src/write/move.ts'
@@ -184,26 +182,6 @@ test('createProject still emits legacy DoD section when --dod opts provided', as
   }
 })
 
-test('createIdea round-trip with body', async () => {
-  const dir = await tempRepo()
-  try {
-    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
-    await createIdea(dir, {
-      parent: 'p',
-      id: 'spark',
-      body: 'A neat idea worth exploring.',
-      now: NOW,
-    })
-    const snapshot = await scan(dir, NOW)
-    assert.equal(snapshot.ideas.length, 1)
-    const idea = snapshot.ideas[0]!
-    assert.equal(idea.id, 'spark')
-    assert.equal(idea.state, 'seed')
-    assert.match(idea.body, /worth exploring/)
-  } finally {
-    await rm(dir, { recursive: true, force: true })
-  }
-})
 
 test('writeCapture produces a parseable capture', async () => {
   const dir = await tempRepo()
@@ -359,35 +337,6 @@ test('setProjectStatus dropped requires reason and stamps frontmatter', async ()
     assert.match(text, /status: dropped/)
     assert.match(text, /dropped_reason: no longer relevant/)
     assert.match(text, /dropped_at:/)
-  } finally {
-    await rm(dir, { recursive: true, force: true })
-  }
-})
-
-test('setIdeaState closed requires reason; developed stamps developed_at', async () => {
-  const dir = await tempRepo()
-  try {
-    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
-    await createIdea(dir, { parent: 'p', id: 'i1', body: 'one', now: NOW })
-    await createIdea(dir, { parent: 'p', id: 'i2', body: 'two', now: NOW })
-    await setIdeaState(dir, { id: 'i1', state: 'developed', now: NOW })
-    await setIdeaState(dir, {
-      id: 'i2',
-      state: 'closed',
-      reason: 'duplicate',
-    })
-    const t1 = await readFile(
-      path.join(dir, 'pursuits/p/ideas/i1.md'),
-      'utf8',
-    )
-    const t2 = await readFile(
-      path.join(dir, 'pursuits/p/ideas/i2.md'),
-      'utf8',
-    )
-    assert.match(t1, /state: developed/)
-    assert.match(t1, /developed_at: 2026-04-27/)
-    assert.match(t2, /state: closed/)
-    assert.match(t2, /closed_reason: duplicate/)
   } finally {
     await rm(dir, { recursive: true, force: true })
   }

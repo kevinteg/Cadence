@@ -16,7 +16,7 @@ contract.
 
 | Verb | Purpose |
 |---|---|
-| `brainstorm` | Divergent ideation. Generate quantity. Find what the Pursuit is. Chains internally into `develop` when the user is ready to converge, and `promote` when an Idea is ready to graduate. |
+| `brainstorm` | Divergent ideation. Generate quantity. Find what the Pursuit is. (v1.1: rebuild in progress — see `rebuild-brainstorm-as-workspace-with-phase-machine` project.) |
 
 ### Execute — do the work
 
@@ -46,31 +46,14 @@ contract.
 | Verb | Purpose |
 |---|---|
 | `status` | System dashboard with contextual next-step hints, or drill into pursuits / projects / actions. Each drill ends with an action menu showing the verbs applicable to the viewed entity. |
-| `find` | Search across projects, ideas, captures, and pursuits by case-insensitive substring. Results grouped by kind with per-group verb hints so any result is directly actionable. |
+| `find` | Search across projects, captures, and pursuits by case-insensitive substring. Results grouped by kind with per-group verb hints so any result is directly actionable. |
 | `help` | Render this catalogue inline, or a single verb's contract. |
-
-### Internal verbs (chained, not user-facing)
-
-These are real verbs the agent invokes internally; users typically
-don't type them. They appear in the catalog only when chained from
-another verb's flow.
-
-| Verb | Chained from |
-|---|---|
-| `develop` | `brainstorm` (when convergence is ready: PPCo, criteria, pre-mortems on Ideas) |
-| `promote` | `develop` or `start` (when an Idea is ready to graduate to Pursuit / Project / Action — enforces the appropriate gate) |
-
-Users CAN invoke `develop` and `promote` explicitly, but the design
-target is conversational discovery: the agent surfaces "running
-`/cadence:promote` — this advances an Idea to a Project" as a teaching
-moment when the chain fires (see the natural-language-to-verb teaching
-principle in `cadence-runtime.md`).
 
 ### System behavior (not a verb)
 
 | Behavior | When it runs |
 |---|---|
-| `reconciler` | Automatically at SessionStart hook (every fresh session); during `/reflect` Get Clear; on demand via the `cadence flags` CLI subcommand for power users. Surfaces stale state, aging Ideas, dormant projects, structural issues — no longer a user-facing verb. |
+| `reconciler` | Automatically at SessionStart hook (every fresh session); during `/reflect` Get Clear; on demand via the `cadence flags` CLI subcommand for power users. Surfaces stale state, dormant projects, structural issues — no longer a user-facing verb. |
 
 ### Discovery flow
 
@@ -102,7 +85,7 @@ markdown content. The key formats are:
 - **Project** (`<id>.md`): frontmatter with id, pursuit, status, created,
   optional waiting_for, optional `domain` (`physical` | `digital` |
   `hybrid` — overrides the keyword heuristic in `src/scan/domain.ts`,
-  used by `/promote` and `/complete` to adapt their prompts; leave
+  used by `/brainstorm` (crystallize) and `/complete` to adapt their prompts; leave
   unset to use detection), optional `origin` (see below); sections for
   Intent, Actions, Notes. Older project files still carry a
   `Definition of Done` section instead of Intent — that's a historical
@@ -124,13 +107,11 @@ markdown content. The key formats are:
     url: https://github.com/owner/name/issues/42
   ```
 
-  The union is designed to extend to additional kinds (`idea`, `url`,
-  `capture`, etc.) without re-engineering the frontmatter. See
-  `src/types.ts` `OriginSchema`. The CLI shorthand
+  The union is designed to extend to additional kinds (`url`,
+  `capture`, `brainstorm`, etc.) without re-engineering the
+  frontmatter. See `src/types.ts` `OriginSchema`. The CLI shorthand
   `cadence create-project --origin-issue owner/repo#42` constructs
   the github_issue shape from `repo#number`; the URL is derived.
-- **Idea** (`<id>.md`): frontmatter with id, parent, state, created,
-  optional developed_at, promoted_to, closed_reason
 - **Capture** (`<timestamp>.md`): frontmatter with captured, verb_context;
   raw input. Lives in `thoughts/unprocessed/`.
 - **Reflection** (`<YYYY-MM-DD>.md`): frontmatter with date, status, phase,
@@ -240,29 +221,123 @@ Existing project files keep their `## Definition of Done` sections as
 historical record. New projects emit `## Intent` instead. The CLI's
 scan/report path tolerates both shapes.
 
-## Idea Lifecycle
+## Idea Lifecycle (removed in v1.1)
 
-Ideas are a first-class collection adjacent to the work hierarchy. Every
-Idea has a parent — either a pursuit or a project. Ideas without a clear
-parent are placed on the Inbox with an auto-generated name; the Inbox
-is a *short-term triage zone*, not a permanent home for unattached or
-cross-cutting ideas — the expectation is that the next `/develop` or
-`/promote` pass moves them to a real pursuit (or closes them). The
-parent field uses the same ID convention as projects (e.g., `parent:
-build-cadence-v1` for a pursuit, `parent:
-build-cadence-v1/implement-reconciler` for a project).
+The Idea entity (with its seed → developed → promoted | moved | closed
+state machine, walked by the chained internal `/develop` and `/promote`
+verbs) was removed in v1.1. New ideation flows write brainstorm
+workspaces with `solutions/<name>.md` candidates instead — see
+"Brainstorm Workspaces" below. `cadence ideas`, `cadence create-idea`,
+and `cadence set-idea-state` are gone; no `pursuits/<id>/ideas/`
+directories on disk; no `aging_seed`, `unpromoted_idea`,
+`growing_backlog`, `stale_inbox_seed`, or `inbox_overcap` flags.
 
-**States:**
-- **seed** — raw, captured during brainstorm, unevaluated
-- **developed** — has been through `/develop` (PPCo, criteria, pre-mortem)
-- **promoted** — advanced to Pursuit, Project, or Action (origin link persists)
-- **moved** — reattached to a different parent (resolved — the idea found its home)
-- **closed** — killed with a reason (what did this idea teach us?)
+## Brainstorm Workspaces
 
-**Closure rules:** A pursuit or project can be closed when it has no
-ideas in `seed` or `developed` state. Ideas in `promoted`, `moved`, or
-`closed` state are resolved. Moving an idea counts as resolution only if
-the target is an active pursuit or project.
+A **brainstorm** is a top-level working directory at
+`brainstorms/<slug>/` that holds the artifacts of a single ideation →
+convergence → crystallization arc. It is the replacement for the v1
+Idea entity. Workspaces are first-class WIP — they appear in
+`/cadence:status`, are blockers for pursuit closure when in
+diverging/converging phase, and can crystallize into a real pursuit
+or archive into the narrative record.
+
+The top-level `brainstorms/` directory is created **lazily** on the
+first `/cadence:brainstorm <topic>` invocation (matching the existing
+pattern for `thoughts/processed/` and `validations/` — present only
+when needed).
+
+### Directory layout
+
+```
+brainstorms/
+  <slug>/
+    workspace.md              # main scratch / divergent notes (free-form prose)
+    meta.yaml                 # state machine + provenance — see schema below
+    refs/                     # optional — pulled-in thought references
+      <thought-id>.md         #   (copy or symlink of thoughts/<id>.md)
+    solutions/                # populated during the converging phase
+      <name>.md               # one candidate solution per file
+    decision.md               # populated on /brainstorm --crystallize
+```
+
+`<slug>` is kebab-case derived from the topic the user named at
+`/cadence:brainstorm <topic>`. Same id convention as projects: lowercase,
+hyphens, no special characters.
+
+### `meta.yaml` schema
+
+```yaml
+slug: <kebab-case-slug>                   # required; matches the directory name
+created_at: <ISO-8601 timestamp>          # required; set at create-brainstorm time
+last_touched: <ISO-8601 timestamp>        # required; bumped by any state mutation
+phase: diverging | converging | crystallized | archived   # required
+source_thoughts: [<thought-id>, ...]      # optional; thoughts/<id>.md captures this brainstorm grew out of
+candidate_solutions: [<name>, ...]        # populated when phase moves to converging; matches solutions/<name>.md files
+selected_solution: <name> | null          # populated on --crystallize; one of candidate_solutions
+target_pursuit: <pursuit-id> | null       # populated on --crystallize; the pursuit that materialized
+```
+
+**Phase semantics:**
+
+- **`diverging`** — initial state. The agent facilitates open ideation;
+  raw notes accumulate in `workspace.md`. No `solutions/` files yet.
+- **`converging`** — the user signals readiness ("I have three candidate
+  solutions" / "let me pick between these"). The agent writes
+  `solutions/<name>.md` files and updates `candidate_solutions` in
+  `meta.yaml`. `workspace.md` stays as history; `solutions/<name>.md`
+  files become the artifacts to iterate on.
+- **`crystallized`** — `/cadence:brainstorm --crystallize` has fired.
+  `selected_solution` and `target_pursuit` are set; `decision.md` is
+  written; a new pursuit exists at `pursuits/<target_pursuit>/`. The
+  brainstorm directory persists as a narrative artifact pointing at the
+  pursuit it produced.
+- **`archived`** — `/cadence:brainstorm --archive` has fired. The
+  workspace was either moved to `narratives/brainstorms/<slug>/` (kept
+  for the record) or deleted (per user choice at archive time).
+
+### `solutions/<name>.md` convention
+
+Each candidate solution file follows a fixed shape so that
+`/cadence:brainstorm --crystallize` can parse it deterministically:
+
+```markdown
+# <H1 → becomes the new project's title>
+
+<prose preamble → becomes the new project's Intent (motivation,
+scope, felt-sense of done)>
+
+## Next steps
+
+- [ ] <first concrete action>
+- [ ] <second concrete action>
+- [ ] <...>
+```
+
+The `## Next steps` H2 with `- [ ]` lines is mandatory — `crystallize`
+parses these as the new project's Actions. Solutions without a
+`## Next steps` section get rejected by `crystallize` until the user
+adds one. Other H2s in the file are preserved as part of the Intent
+preamble.
+
+### `decision.md` shape (written on crystallize)
+
+```markdown
+# <brainstorm slug>: chose <selected_solution>
+
+<one or two paragraphs from the user explaining what was chosen and why>
+
+Crystallized at <timestamp> → pursuits/<target_pursuit>/
+```
+
+### Closure dependency
+
+The pursuit-closure ritual in `/cadence:resolve <pursuit>` blocks on
+any brainstorm with `phase: diverging | converging` whose
+`source_thoughts` or context references the pursuit. Each must be
+crystallized (`/cadence:brainstorm --crystallize`) or archived
+(`/cadence:brainstorm --archive`) before the pursuit can resolve. This
+is the absolute block that replaces the v1 "unresolved Ideas" check.
 
 ## Pursuit Lifecycle
 

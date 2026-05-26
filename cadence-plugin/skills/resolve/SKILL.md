@@ -12,7 +12,7 @@ the old `/close` and `/cancel` verbs.
 - `/resolve <project>` — same as `--state complete`
 - `/resolve <project> --state complete` — finish the project; walks the intent-feel-achieved dialogue
 - `/resolve <project> --state dropped --reason "<text>"` — drop with override-with-reason
-- `/resolve <pursuit>` — walk the closure ritual (absolute block on unresolved Ideas), then archive
+- `/resolve <pursuit>` — walk the closure ritual (absolute block on unresolved brainstorms in `phase: diverging | converging`), then archive
 
 Arguments resolve via fuzzy match. State defaults to `complete` for
 projects. Pursuits don't take a state — they always mean closure.
@@ -57,14 +57,7 @@ a one-line note: "Pursuits don't take --state — running closure ritual."
 
 1. Require a reason: if `--reason` was not supplied, ask: "What's the
    reason for dropping?" Store as required field.
-2. Walk the override-with-reason path for unresolved Ideas:
-   ```bash
-   cadence ideas --parent <pursuit-id>/<project-id> --state seed,developed --json
-   ```
-   If any are returned: "[Project] has [N] unresolved Ideas. You can
-   drop anyway, but let's walk them." For each: move (to another
-   parent or to inbox), close-with-reason, promote, or develop-first.
-   The user can skip with a logged reason.
+2. (Placeholder until `rebuild-brainstorm-as-workspace-with-phase-machine` lands: walk the override-with-reason path for unresolved brainstorms tied to this project. The post-P2 check will scan `brainstorms/<slug>/meta.yaml` for entries with `phase: diverging | converging` whose `source_thoughts` or context links reference this project, and prompt to archive or crystallize each one before dropping.)
 3. Drop the project:
    ```bash
    cadence set-status <project-id> --pursuit <pursuit-id> --status dropped --reason "<reason>"
@@ -85,8 +78,9 @@ Zeigarnik-release cleaning ritual but produce different outcomes:
   ritual + route to `_dropped/`. The pursuit didn't ship but you
   learned from it; the narrative captures what it taught you.
 
-Both paths require the absolute Ideas block — dropped pursuits still
-need meaning-making for their unresolved seeds; silent abandonment is
+Both paths require the absolute block on unresolved brainstorms (in
+`phase: diverging | converging`) — dropped pursuits still need
+meaning-making for their open workspaces; silent abandonment is
 exactly what the ritual exists to prevent.
 
 If a pursuit needs to be set aside without resolving (might come back),
@@ -99,31 +93,31 @@ move (no ritual, no narrative).
    - completed: "Close [pursuit]?"
    - dropped: "Drop [pursuit]? What's the reason?" (require `--reason`
      before proceeding)
-2. Check for unresolved Ideas via the bundled CLI:
+2. **Check for unresolved brainstorms via the bundled CLI:**
    ```bash
-   cadence ideas --parent <pursuit-id> --state seed,developed --json
+   cadence scan --json
    ```
-   For ideas whose parent is `<pursuit-id>/<project-id>`, run a second
-   query per project (or scan with no `--parent` and filter by prefix
-   in the agent). Ideas in `promoted`, `moved`, or `closed` state are
-   resolved. For `moved` Ideas, the move only counts as resolution if
-   the target pursuit/project is active (not archived, dropped, or
-   someday) — verify by reading the Idea's `promoted_to` field and
-   cross-checking against `cadence pursuits --json`.
+   Read `snapshot.brainstorms` and filter to entries with
+   `phase: diverging | converging` whose `source_thoughts` or
+   `target_pursuit` references this pursuit. (Without an explicit
+   tie, treat any active brainstorm whose `source_thoughts` traces
+   back to a capture inside this pursuit as a candidate.) Each must
+   be archived (`/cadence:brainstorm --archive`) or crystallized
+   (`/cadence:brainstorm --crystallize`) before the pursuit can
+   resolve.
 
-3. **If unresolved Ideas exist — absolute block.** Cannot resolve until
-   every Idea is resolved (applies to both completed AND dropped paths):
+3. **If unresolved brainstorms exist — absolute block.** Cannot
+   resolve until every workspace is archived or crystallized (applies
+   to both completed AND dropped paths):
    ```
-   [pursuit] has [N] unresolved Ideas. Each needs a decision before resolving.
+   [pursuit] has [N] unresolved brainstorms. Each needs a decision before resolving.
    ```
 
-4. Walk each unresolved Idea. For each:
-   - **Move** — reattach to another Pursuit or to Inbox (the standing pursuit for unattached Ideas)
-   - **Close** — with a reason. Ask: "What did this Idea teach you?"
-   - **Promote** — advance to Pursuit/Project/Action (run /promote flow)
-   - **Develop first** — if it's a raw Seed, run /develop before deciding
+4. Walk each unresolved brainstorm. For each:
+   - **Archive** — close the workspace via `/cadence:brainstorm --archive` (keep in narratives/ or delete)
+   - **Crystallize** — materialize one of its solutions as a new pursuit via `/cadence:brainstorm --crystallize`
 
-5. Once all Ideas are resolved, check that all Projects are done or
+5. Once all brainstorms are resolved, check that all Projects are done or
    dropped. If active/on_hold projects remain, ask:
    "These projects are still open. Drop them, or resolve them first?"
    For dropping inline: `cadence set-status <project-id> --pursuit <pursuit-id> --status dropped --reason "<reason>"`
@@ -152,12 +146,11 @@ move (no ritual, no narrative).
 8. Generate resolution narrative — summarize the Pursuit's arc via the
    narrator subagent (`subagent_type: cadence:narrator`):
    - **Completed/archived**: framing emphasizes what shipped. "Generated
-     [N] Ideas — [X] became Projects, [Y] became their own Pursuits,
-     [Z] were closed with reasons, [W] moved to Inbox."
+     [N] brainstorms — [X] crystallized into projects, [Y] archived."
    - **Dropped**: framing emphasizes what was learned. "[Pursuit]
      didn't ship — what did it teach? Reason for dropping: [reason].
-     [N] Ideas surfaced; [X] were salvaged into other pursuits, [Y]
-     were closed with their own lessons."
+     [N] brainstorms surfaced; [X] were crystallized into other
+     pursuits, [Y] were archived with their own lessons."
    Pass `[Budget: 8 tool calls. If exceeded, return what you have
    without retrying.]` to the narrator. See runtime "Subagent budgets"
    principle.
@@ -174,15 +167,15 @@ move (no ritual, no narrative).
 ## Cancellation mid-ritual
 
 If the user cancels mid-ritual ("actually, never mind"):
-- Walk the ritual anyway for any Ideas already reviewed
-- Save progress — partially resolved Ideas stay resolved
+- Walk the ritual anyway for any brainstorms already reviewed
+- Save progress — partially resolved brainstorms stay resolved
 - Don't update the pursuit/project status
 
 ## Guardrails
 
-- Pursuit closure is an absolute block on unresolved Ideas. No override.
-- Project closure with `--state dropped` uses override-with-reason for Ideas.
-- Every closed Idea must have a reason — "what did this teach us?"
+- Pursuit closure is an absolute block on unresolved brainstorms. No override.
+- Project closure with `--state dropped` uses override-with-reason for brainstorms tied to the project (post-P2).
+- Every archived brainstorm should carry a reason in its decision.md — "what did this teach us?"
 - Closure narratives are generated from activity data. The user reviews but doesn't write.
 - Resolving a project as `complete` with unchecked actions requires explicit override (the agent surfaces the count and asks).
 - `--state` is a project-only argument. Surfacing it on a pursuit request gets a one-line note and falls through to closure.

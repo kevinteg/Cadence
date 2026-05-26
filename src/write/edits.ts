@@ -16,7 +16,6 @@ import {
   mutateFrontmatter,
 } from './util.js'
 import {
-  resolveIdeaFile,
   resolveProjectFile,
   resolvePursuitDir,
 } from './paths.js'
@@ -184,44 +183,6 @@ async function summarizePursuit(
     total,
     allResolved: total > 0 && done === total,
   }
-}
-
-export type SetIdeaStateOpts = {
-  parent?: string
-  id: string
-  state: 'seed' | 'developed' | 'promoted' | 'moved' | 'closed'
-  reason?: string
-  promoted_to?: string
-  new_parent?: string
-  now?: Date
-}
-
-export async function setIdeaState(
-  repoRoot: string,
-  opts: SetIdeaStateOpts,
-): Promise<{ path: string }> {
-  const filePath = await locateIdea(repoRoot, opts.id, opts.parent)
-  const now = opts.now ?? new Date()
-  await mutateFrontmatter(filePath, (data, body) => {
-    data['state'] = opts.state
-    if (opts.state === 'developed') {
-      if (!data['developed_at']) data['developed_at'] = dateString(now)
-    } else if (opts.state === 'promoted') {
-      if (!opts.promoted_to) {
-        throw new Error('promoting an idea requires --promoted-to')
-      }
-      data['promoted_to'] = opts.promoted_to
-    } else if (opts.state === 'closed') {
-      if (!opts.reason) {
-        throw new Error('closing an idea requires a reason')
-      }
-      data['closed_reason'] = opts.reason
-    } else if (opts.state === 'moved') {
-      if (opts.new_parent) data['parent'] = opts.new_parent
-    }
-    return { data, body }
-  })
-  return { path: path.relative(repoRoot, filePath) }
 }
 
 export type CheckItemOpts = {
@@ -561,36 +522,6 @@ async function locateProject(
   )
 }
 
-async function locateIdea(
-  repoRoot: string,
-  ideaId: string,
-  parentHint?: string,
-): Promise<string> {
-  if (parentHint) {
-    const file = resolveIdeaFile(repoRoot, parentHint, ideaId)
-    if (!file) throw new Error(`idea not found: ${parentHint}/${ideaId}`)
-    return file
-  }
-  // Search any pursuit's ideas dir.
-  const roots = ['pursuits', 'pursuits/_someday', 'pursuits/_archived']
-  for (const root of roots) {
-    const absRoot = path.join(repoRoot, root)
-    if (!existsSync(absRoot)) continue
-    for (const pursuit of await readdir(absRoot, { withFileTypes: true })) {
-      if (!pursuit.isDirectory()) continue
-      const candidate = path.join(
-        absRoot,
-        pursuit.name,
-        'ideas',
-        `${ideaId}.md`,
-      )
-      if (existsSync(candidate)) return candidate
-    }
-  }
-  throw new Error(
-    `idea not found: ${ideaId} (pass --parent to disambiguate)`,
-  )
-}
 
 function appendNote(
   body: string,

@@ -14,9 +14,17 @@ argument resolution and number-shortcut tracking.
 
 - `/status` — system dashboard with counts and flags
 - `/status pursuits` — list all pursuits grouped by lifecycle
-- `/status <pursuit>` — list projects in a pursuit
+- `/status <pursuit>` — list projects in a pursuit (active brainstorms surface here too — phase + last_touched)
 - `/status <project>` — show Intent and actions for a project
 - `/status 1`, `/status 2` — numbered shortcut from the last list shown
+
+Active brainstorms (workspaces with `phase: diverging | converging`)
+are first-class entries in the dashboard and pursuit drill-down —
+they surface alongside on_hold/active projects so the user can resume
+ideation without hunting. See `cadence-reference.md` "Brainstorm
+Workspaces" for the underlying shape. The full Next:-block reshape
+that surfaces them in priority order lands in
+`reshape-status-output-for-navigation`.
 
 Arguments resolve via fuzzy match, partial match, or natural language.
 `/status build` matches `build-cadence-v1`. `/status the plugin project`

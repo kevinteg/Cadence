@@ -125,25 +125,22 @@ to land in this thread.
       runs weekly, so a 14d cap means at most one Reflect-interjection
       every ~2 weeks.
 
-      Then **delegate the scan to the
-      reconciler subagent** to keep bulk Ideas JSON out of this thread:
-      invoke the Agent tool with `subagent_type: cadence:reconciler`
-      and `prompt`: `scan. [Budget: 3 tool calls. If exceeded, return
+      Then **delegate the scan to the reconciler subagent**: invoke
+      the Agent tool with `subagent_type: cadence:reconciler` and
+      `prompt`: `scan. [Budget: 3 tool calls. If exceeded, return
       what you have without retrying.]` (see runtime "Subagent
-      budgets" principle.) The agent returns a flag list (one per line,
-      grouped by severity) covering both the in-CLI checks
-      (`overdue_waiting_for`, `dormant_project`,
-      `structural_active_no_open_actions`, `wip_over_limit`) and the
-      idea-specific checks (`aging_seed`, `unpromoted_idea`,
-      `growing_backlog`). For each flag, present and ask: act on it,
-      defer, or dismiss. Finally check someday cues by iterating
-      `snapshot.pursuits` filtered to `lifecycle: someday` — evaluate
-      each `cue.trigger` against the current date.
+      budgets" principle.) The agent returns a flag list (one per
+      line, grouped by severity) covering `overdue_waiting_for`,
+      `dormant_project`, `structural_active_no_open_actions`,
+      `wip_over_limit`, `closing_in_on_resolution`, and
+      `inbound_issues_piling_up`. For each flag, present and ask:
+      act on it, defer, or dismiss. Finally check someday cues by
+      iterating `snapshot.pursuits` filtered to `lifecycle: someday`
+      — evaluate each `cue.trigger` against the current date.
 
       **Fallback:** if the reconciler subagent invocation fails, run
-      the scans inline using `cadence flags --json` plus
-      `cadence ideas --json` with the thresholds from
-      `workflows/reconciler.md`.
+      the scans inline using `cadence flags --json` with the
+      thresholds from `workflows/reconciler.md`.
 
    d. Project relevance check: iterate active projects from
       `snapshot.projects`. For each, ask "Still relevant?" If the user

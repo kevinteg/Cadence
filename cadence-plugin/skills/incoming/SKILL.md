@@ -1,5 +1,5 @@
 ---
-description: Maintainer-side triage of open GitHub issues on the upstream Cadence repo. Walks each issue and routes to a project action, a new project, an idea, a close, or a defer. Cadence-specific (operates against plugin-info's owner_repo). TRIGGER ONLY when the user explicitly invokes /cadence:incoming or /incoming. SKIP all natural-language equivalents — never auto-fire from "any new issues?", "what should I triage?", "check inbound", or similar; instead surface the verb name as a suggestion when such language appears.
+description: Maintainer-side triage of open GitHub issues on the upstream Cadence repo. Walks each issue and routes to a project action, a new project, a capture, a close, or a defer. Cadence-specific (operates against plugin-info's owner_repo). TRIGGER ONLY when the user explicitly invokes /cadence:incoming or /incoming. SKIP all natural-language equivalents — never auto-fire from "any new issues?", "what should I triage?", "check inbound", or similar; instead surface the verb name as a suggestion when such language appears.
 ---
 
 # /incoming
@@ -103,22 +103,19 @@ Reference `workflows/verb-contracts.md` for the incoming register.
         --body "Promoted to project \`<project-id>\` under pursuit \`<pursuit-id>\`."
       ```
 
-   ### i — capture-as-idea
+   ### i — capture-as-thought
 
-   1. List active pursuits. Prompt: `Which pursuit? (1-N or pursuit-id)`
-   2. Derive idea ID from issue title (same convention as project).
-   3. Create the idea:
+   1. Write the issue as a capture in `thoughts/unprocessed/` for later triage:
       ```bash
-      cadence create-idea <idea-id> \
-        --parent <pursuit-id> \
-        --state seed \
-        --body "<issue title>\n\n<issue body>\n\nFrom #<num>: <url>"
+      cadence write-capture \
+        --body "<issue title>\n\n<issue body>\n\nFrom #<num>: <url>" \
+        --verb-context "incoming:capture"
       ```
-   4. Mark issue triaged:
+   2. Mark issue triaged:
       ```bash
       gh issue edit <num> --repo <owner_repo> --add-label triaged-routed
       gh issue comment <num> --repo <owner_repo> \
-        --body "Captured as idea \`<idea-id>\` on pursuit \`<pursuit-id>\`."
+        --body "Captured to thoughts/unprocessed/ for triage."
       ```
 
    ### c — close-with-comment
@@ -144,7 +141,7 @@ Reference `workflows/verb-contracts.md` for the incoming register.
 
    ```
    Triaged <N> issues:
-     - <M> routed to projects/actions/ideas
+     - <M> routed to projects/actions/captures
      - <K> closed
      - <D> deferred
      - <S> skipped

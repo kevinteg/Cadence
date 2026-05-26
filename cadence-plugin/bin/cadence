@@ -4055,7 +4055,7 @@ var require_async2 = __commonJS({
         readdirWithFileTypes(directory, settings, callback);
         return;
       }
-      readdir2(directory, settings, callback);
+      readdir4(directory, settings, callback);
     }
     exports2.read = read;
     function readdirWithFileTypes(directory, settings, callback) {
@@ -4104,7 +4104,7 @@ var require_async2 = __commonJS({
         });
       };
     }
-    function readdir2(directory, settings, callback) {
+    function readdir4(directory, settings, callback) {
       settings.fs.readdir(directory, (readdirError, names) => {
         if (readdirError !== null) {
           callFailureCallback(callback, readdirError);
@@ -4139,7 +4139,7 @@ var require_async2 = __commonJS({
         });
       });
     }
-    exports2.readdir = readdir2;
+    exports2.readdir = readdir4;
     function callFailureCallback(callback, error) {
       callback(error);
     }
@@ -4163,7 +4163,7 @@ var require_sync2 = __commonJS({
       if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
         return readdirWithFileTypes(directory, settings);
       }
-      return readdir2(directory, settings);
+      return readdir4(directory, settings);
     }
     exports2.read = read;
     function readdirWithFileTypes(directory, settings) {
@@ -4188,7 +4188,7 @@ var require_sync2 = __commonJS({
       });
     }
     exports2.readdirWithFileTypes = readdirWithFileTypes;
-    function readdir2(directory, settings) {
+    function readdir4(directory, settings) {
       const names = settings.fs.readdirSync(directory);
       return names.map((name) => {
         const entryPath = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
@@ -4204,7 +4204,7 @@ var require_sync2 = __commonJS({
         return entry;
       });
     }
-    exports2.readdir = readdir2;
+    exports2.readdir = readdir4;
   }
 });
 
@@ -9850,8 +9850,8 @@ var CAC = class extends EventEmitter {
 var cac = (name = "") => new CAC(name);
 
 // src/cli.ts
-import { existsSync as existsSync14 } from "node:fs";
-import { readFile as readFile10 } from "node:fs/promises";
+import { existsSync as existsSync15 } from "node:fs";
+import { readFile as readFile11 } from "node:fs/promises";
 import path21 from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 
@@ -16600,21 +16600,21 @@ var ProjectFrontmatterSchema = external_exports.object({
   domain: DomainSchema.optional(),
   origin: OriginSchema.optional()
 });
-var IdeaStateSchema = external_exports.enum([
-  "seed",
-  "developed",
-  "promoted",
-  "moved",
-  "closed"
+var BrainstormPhaseSchema = external_exports.enum([
+  "diverging",
+  "converging",
+  "crystallized",
+  "archived"
 ]);
-var IdeaFrontmatterSchema = external_exports.object({
-  id: external_exports.string(),
-  parent: external_exports.string(),
-  state: IdeaStateSchema,
-  created: external_exports.string(),
-  developed_at: external_exports.string().optional(),
-  promoted_to: external_exports.string().optional(),
-  closed_reason: external_exports.string().optional()
+var BrainstormMetaSchema = external_exports.object({
+  slug: external_exports.string(),
+  created_at: external_exports.string(),
+  last_touched: external_exports.string(),
+  phase: BrainstormPhaseSchema,
+  source_thoughts: external_exports.array(external_exports.string()).optional().default([]),
+  candidate_solutions: external_exports.array(external_exports.string()).optional().default([]),
+  selected_solution: external_exports.string().nullable().optional().default(null),
+  target_pursuit: external_exports.string().nullable().optional().default(null)
 });
 var CaptureMcpRefSchema = external_exports.object({
   server: external_exports.string(),
@@ -16652,9 +16652,7 @@ var ConfigSchema = external_exports.object({
     waiting_for_grace_days: external_exports.number().optional(),
     dormant_days: external_exports.number().optional(),
     incoming_queue_threshold: external_exports.number().optional(),
-    incoming_queue_cache_ttl_minutes: external_exports.number().optional(),
-    inbox_seed_stale_days: external_exports.number().optional(),
-    inbox_seed_softcap: external_exports.number().optional()
+    incoming_queue_cache_ttl_minutes: external_exports.number().optional()
   }).optional(),
   wip_limits: external_exports.object({
     max_active_projects: external_exports.number().optional()
@@ -16672,9 +16670,7 @@ var CONFIG_DEFAULTS = {
   reflect_day: "sunday",
   reflect_duration_minutes: 30,
   incoming_queue_threshold: 5,
-  incoming_queue_cache_ttl_minutes: 15,
-  inbox_seed_stale_days: 7,
-  inbox_seed_softcap: 10
+  incoming_queue_cache_ttl_minutes: 15
 };
 
 // src/config.ts
@@ -16704,8 +16700,6 @@ function mergeDefaults(raw) {
     reflect_duration_minutes: reflect.duration_minutes ?? CONFIG_DEFAULTS.reflect_duration_minutes,
     incoming_queue_threshold: d.incoming_queue_threshold ?? CONFIG_DEFAULTS.incoming_queue_threshold,
     incoming_queue_cache_ttl_minutes: d.incoming_queue_cache_ttl_minutes ?? CONFIG_DEFAULTS.incoming_queue_cache_ttl_minutes,
-    inbox_seed_stale_days: d.inbox_seed_stale_days ?? CONFIG_DEFAULTS.inbox_seed_stale_days,
-    inbox_seed_softcap: d.inbox_seed_softcap ?? CONFIG_DEFAULTS.inbox_seed_softcap,
     win_cycle_current: wc.current,
     win_cycle_start: wc.start,
     win_cycle_end: wc.end,
@@ -16713,10 +16707,39 @@ function mergeDefaults(raw) {
   };
 }
 
+// src/scan/brainstorms.ts
+import { existsSync } from "node:fs";
+import { readFile as readFile2, readdir } from "node:fs/promises";
+import path2 from "node:path";
+async function scanBrainstorms(repoRoot) {
+  const root = path2.join(repoRoot, "brainstorms");
+  if (!existsSync(root)) return [];
+  const out = [];
+  for (const entry of await readdir(root, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const metaPath = path2.join(root, entry.name, "meta.yaml");
+    if (!existsSync(metaPath)) continue;
+    let raw;
+    try {
+      const text = await readFile2(metaPath, "utf8");
+      raw = jsYaml.load(text, { schema: jsYaml.CORE_SCHEMA });
+    } catch {
+      continue;
+    }
+    const parsed = BrainstormMetaSchema.safeParse(raw);
+    if (!parsed.success) continue;
+    out.push({
+      ...parsed.data,
+      path: path2.relative(repoRoot, path2.join(root, entry.name))
+    });
+  }
+  return out;
+}
+
 // src/scan/captures.ts
 var import_fast_glob = __toESM(require_out4(), 1);
-import { readFile as readFile2 } from "node:fs/promises";
-import path2 from "node:path";
+import { readFile as readFile3 } from "node:fs/promises";
+import path3 from "node:path";
 
 // src/parse/frontmatter.ts
 var import_gray_matter = __toESM(require_gray_matter(), 1);
@@ -16741,13 +16764,13 @@ async function scanCaptures(repoRoot) {
   });
   const results = [];
   for (const file of files) {
-    const raw = await readFile2(file, "utf8");
+    const raw = await readFile3(file, "utf8");
     const { data, content } = parseFrontmatter(raw);
     const fm = CaptureFrontmatterSchema.parse(data);
     results.push({
       ...fm,
       body: content.trim(),
-      path: path2.relative(repoRoot, file)
+      path: path3.relative(repoRoot, file)
     });
   }
   return results;
@@ -16915,43 +16938,8 @@ async function lastActivityMap(repoRoot) {
   return map2;
 }
 
-// src/scan/ideas.ts
-var import_fast_glob2 = __toESM(require_out4(), 1);
-import { readFile as readFile3 } from "node:fs/promises";
-import path3 from "node:path";
-
-// src/util/dates.ts
-function daysBetween(iso, now) {
-  const then = new Date(iso);
-  if (Number.isNaN(then.getTime())) return 0;
-  const ms = now.getTime() - then.getTime();
-  return Math.floor(ms / (1e3 * 60 * 60 * 24));
-}
-
-// src/scan/ideas.ts
-async function scanIdeas(repoRoot, now) {
-  const files = await (0, import_fast_glob2.default)("pursuits/**/ideas/*.md", {
-    cwd: repoRoot,
-    absolute: true,
-    onlyFiles: true
-  });
-  const results = [];
-  for (const file of files) {
-    const raw = await readFile3(file, "utf8");
-    const { data, content } = parseFrontmatter(raw);
-    const fm = IdeaFrontmatterSchema.parse(data);
-    results.push({
-      ...fm,
-      body: content.trim(),
-      path: path3.relative(repoRoot, file),
-      ageDays: daysBetween(fm.created, now)
-    });
-  }
-  return results;
-}
-
 // src/scan/projects.ts
-var import_fast_glob3 = __toESM(require_out4(), 1);
+var import_fast_glob2 = __toESM(require_out4(), 1);
 import { readFile as readFile4 } from "node:fs/promises";
 import path4 from "node:path";
 
@@ -17284,7 +17272,7 @@ function escapeForRegex(s) {
 
 // src/scan/projects.ts
 async function scanProjects(repoRoot) {
-  const files = await (0, import_fast_glob3.default)("pursuits/*/projects/*.md", {
+  const files = await (0, import_fast_glob2.default)("pursuits/*/projects/*.md", {
     cwd: repoRoot,
     absolute: true,
     onlyFiles: true,
@@ -17323,7 +17311,7 @@ function progress(items) {
 }
 
 // src/scan/pursuits.ts
-var import_fast_glob4 = __toESM(require_out4(), 1);
+var import_fast_glob3 = __toESM(require_out4(), 1);
 import { readFile as readFile5 } from "node:fs/promises";
 import path5 from "node:path";
 var LIFECYCLE_ROOTS = [
@@ -17339,7 +17327,7 @@ var LIFECYCLE_ROOTS = [
 async function scanPursuits(repoRoot) {
   const results = [];
   for (const { lifecycle, glob } of LIFECYCLE_ROOTS) {
-    const files = await (0, import_fast_glob4.default)(glob, {
+    const files = await (0, import_fast_glob3.default)(glob, {
       cwd: repoRoot,
       absolute: true,
       onlyFiles: true,
@@ -17363,11 +17351,11 @@ async function scanPursuits(repoRoot) {
 }
 
 // src/scan/reflections.ts
-var import_fast_glob5 = __toESM(require_out4(), 1);
+var import_fast_glob4 = __toESM(require_out4(), 1);
 import { readFile as readFile6 } from "node:fs/promises";
 import path6 from "node:path";
 async function scanReflections(repoRoot) {
-  const files = await (0, import_fast_glob5.default)("reflections/*.md", {
+  const files = await (0, import_fast_glob4.default)("reflections/*.md", {
     cwd: repoRoot,
     absolute: true,
     onlyFiles: true
@@ -17388,11 +17376,11 @@ async function scanReflections(repoRoot) {
 
 // src/scan/repo.ts
 async function scan(repoRoot, now = /* @__PURE__ */ new Date()) {
-  const [config, pursuits, projects, ideas, captures, reflections] = await Promise.all([
+  const [config, pursuits, projects, brainstorms, captures, reflections] = await Promise.all([
     loadConfig(repoRoot),
     scanPursuits(repoRoot),
     scanProjects(repoRoot),
-    scanIdeas(repoRoot, now),
+    scanBrainstorms(repoRoot),
     scanCaptures(repoRoot),
     scanReflections(repoRoot)
   ]);
@@ -17404,7 +17392,7 @@ async function scan(repoRoot, now = /* @__PURE__ */ new Date()) {
     config,
     pursuits,
     projects,
-    ideas,
+    brainstorms,
     captures,
     reflections,
     generatedAt: now.toISOString(),
@@ -17429,7 +17417,7 @@ async function annotateLastActivity(project, repoRoot, activityMap) {
 
 // src/scan/inbound.ts
 import { execFile as execFile2 } from "node:child_process";
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync as existsSync2, mkdirSync } from "node:fs";
 import { readFile as readFile7, writeFile } from "node:fs/promises";
 import path8 from "node:path";
 import { promisify as promisify2 } from "node:util";
@@ -17476,7 +17464,7 @@ async function fetchInboundCount(ownerRepo) {
 }
 async function readCache(repoRoot, ownerRepo) {
   const filePath = path8.join(repoRoot, ...CACHE_PATH_SEGMENTS);
-  if (!existsSync(filePath)) return null;
+  if (!existsSync2(filePath)) return null;
   try {
     const raw = await readFile7(filePath, "utf8");
     const parsed = JSON.parse(raw);
@@ -17488,13 +17476,21 @@ async function readCache(repoRoot, ownerRepo) {
 }
 async function writeCache(repoRoot, data) {
   const dir = path8.join(repoRoot, ".cadence");
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  if (!existsSync2(dir)) mkdirSync(dir, { recursive: true });
   const filePath = path8.join(dir, "inbound-cache.json");
   await writeFile(filePath, JSON.stringify(data, null, 2) + "\n", "utf8");
 }
 function isFresh(ts, ttlMinutes) {
   const age = Date.now() - new Date(ts).getTime();
   return age >= 0 && age < ttlMinutes * 6e4;
+}
+
+// src/util/dates.ts
+function daysBetween(iso, now) {
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return 0;
+  const ms = now.getTime() - then.getTime();
+  return Math.floor(ms / (1e3 * 60 * 60 * 24));
 }
 
 // src/report/reconciler.ts
@@ -17513,8 +17509,6 @@ function report(snapshot) {
   flagStructural(flags, activeProjects);
   flagWipOverLimit(flags, activeProjects, config);
   flagClosingInOnResolution(flags, snapshot, activePursuitIds);
-  flagStaleInboxSeeds(flags, snapshot, config);
-  flagInboxOvercap(flags, snapshot, config);
   return { snapshot, flags };
 }
 function flagOverdueWaitingFor(flags, snapshot, now) {
@@ -17576,28 +17570,6 @@ function flagWipOverLimit(flags, activeProjects, config) {
     });
   }
 }
-function flagStaleInboxSeeds(flags, snapshot, config) {
-  const threshold = config.inbox_seed_stale_days;
-  for (const idea of snapshot.ideas) {
-    if (idea.parent !== "inbox") continue;
-    if (idea.state !== "seed") continue;
-    if (idea.ageDays <= threshold) continue;
-    flags.push({
-      kind: "stale_inbox_seed",
-      ideaId: idea.id,
-      ageDays: idea.ageDays,
-      threshold
-    });
-  }
-}
-function flagInboxOvercap(flags, snapshot, config) {
-  const softcap = config.inbox_seed_softcap;
-  const count = snapshot.ideas.filter(
-    (i) => i.parent === "inbox" && i.state === "seed"
-  ).length;
-  if (count <= softcap) return;
-  flags.push({ kind: "inbox_overcap", count, softcap });
-}
 function flagClosingInOnResolution(flags, snapshot, activePursuitIds) {
   for (const pursuitId of activePursuitIds) {
     const pursuitProjects = snapshot.projects.filter(
@@ -17623,7 +17595,7 @@ function flagClosingInOnResolution(flags, snapshot, activePursuitIds) {
 }
 
 // src/render/signals.ts
-import { existsSync as existsSync2 } from "node:fs";
+import { existsSync as existsSync3 } from "node:fs";
 import { join } from "node:path";
 var LONG_GAP_DAYS = 14;
 var NO_SIGNALS = {
@@ -17662,7 +17634,7 @@ function detectNarrateTodayStale(snapshot, repoRoot, now) {
   );
   if (!activityToday) return false;
   const draftPath = join(repoRoot, "narratives", "drafts", `daily-${todayKey}.md`);
-  return !existsSync2(draftPath);
+  return !existsSync3(draftPath);
 }
 function detectWeeklyPreviewDue(reflections, now) {
   const dow = mondayBasedDowLocal(now);
@@ -17701,7 +17673,7 @@ function daysBetweenLocal(from, to) {
 }
 
 // src/validation/queue.ts
-import { existsSync as existsSync3, mkdirSync as mkdirSync2, readFileSync, writeFileSync } from "node:fs";
+import { existsSync as existsSync4, mkdirSync as mkdirSync2, readFileSync, writeFileSync } from "node:fs";
 import path9 from "node:path";
 var QUEUE_DIR = "validations";
 var QUEUE_FILENAME = "pending.md";
@@ -17720,7 +17692,7 @@ function queuePath(repoRoot) {
 }
 function readPendingValidations(repoRoot) {
   const filePath = queuePath(repoRoot);
-  if (!existsSync3(filePath)) {
+  if (!existsSync4(filePath)) {
     return [];
   }
   const raw = readFileSync(filePath, "utf8");
@@ -17736,7 +17708,7 @@ function readPendingValidations(repoRoot) {
 }
 function writeQueue(repoRoot, entries) {
   const dir = path9.join(repoRoot, QUEUE_DIR);
-  if (!existsSync3(dir)) {
+  if (!existsSync4(dir)) {
     mkdirSync2(dir, { recursive: true });
   }
   const filePath = queuePath(repoRoot);
@@ -17980,10 +17952,6 @@ function describeFlag(flag, _snapshot) {
       const cachedNote = flag.fromCache ? " (cached)" : "";
       return `inbound: ${flag.count} untriaged ${issueWord} on ${flag.ownerRepo}${cachedNote} \u2014 /cadence:incoming to triage`;
     }
-    case "stale_inbox_seed":
-      return `stale Inbox seed: ${flag.ideaId} (${flag.ageDays}d on Inbox; triage threshold ${flag.threshold}d) \u2014 /cadence:develop or /cadence:promote to move it to a real pursuit, or close`;
-    case "inbox_overcap":
-      return `Inbox overcap: ${flag.count} seeds (soft cap ${flag.softcap}) \u2014 schedule a triage pass via /cadence:develop`;
   }
   const _exhaustive = flag;
   return _exhaustive;
@@ -18001,7 +17969,6 @@ function renderSnapshot(snapshot) {
   out.push("");
   out.push(...renderSection("Pursuits", pursuitTable(snapshot)));
   out.push(...renderSection("Projects", projectTable(snapshot)));
-  out.push(...renderSection("Ideas", ideaTable(snapshot)));
   out.push(...renderSection("Captures", captureTable(snapshot)));
   out.push(...renderSection("Reflections", reflectionTable(snapshot)));
   return out.join("\n").trimEnd();
@@ -18066,18 +18033,6 @@ function projectTable(snapshot) {
     ])
   };
 }
-function ideaTable(snapshot) {
-  return {
-    headers: ["ID", "STATE", "PARENT", "AGE", "CREATED"],
-    rows: snapshot.ideas.map((i) => [
-      i.id,
-      i.state,
-      i.parent,
-      `${i.ageDays}d`,
-      i.created
-    ])
-  };
-}
 function captureTable(snapshot) {
   return {
     headers: ["CAPTURED", "CONTEXT", "BODY"],
@@ -18117,12 +18072,9 @@ function flagTarget(flag) {
     case "closing_in_on_resolution":
       return flag.pursuitId;
     case "wip_over_limit":
-    case "inbox_overcap":
       return "";
     case "inbound_issues_piling_up":
       return flag.ownerRepo;
-    case "stale_inbox_seed":
-      return `inbox/${flag.ideaId}`;
   }
 }
 function flagDetail(flag) {
@@ -18144,10 +18096,6 @@ function flagDetail(flag) {
       const cachedNote = flag.fromCache ? " (cached)" : "";
       return `${flag.count} untriaged ${issueWord}${cachedNote}; /cadence:incoming to triage`;
     }
-    case "stale_inbox_seed":
-      return `${flag.ageDays}d on Inbox (threshold ${flag.threshold}d) \u2014 move to a pursuit or close`;
-    case "inbox_overcap":
-      return `${flag.count} seeds (soft cap ${flag.softcap}) \u2014 schedule a triage pass`;
   }
 }
 function tabulate(table) {
@@ -18171,7 +18119,7 @@ function truncate(text, max) {
 // src/find.ts
 var KIND_PRIORITY = {
   project: 1,
-  idea: 2,
+  brainstorm: 2,
   capture: 3,
   pursuit: 4
 };
@@ -18203,20 +18151,20 @@ function findEntities(snapshot, query) {
       });
     }
   }
-  for (const i of snapshot.ideas) {
+  for (const b of snapshot.brainstorms) {
     const fields = [
-      { name: "id", text: i.id },
-      { name: "body", text: i.body }
+      { name: "slug", text: b.slug },
+      { name: "candidate_solutions", text: b.candidate_solutions.join(" ") }
     ];
     const matched = fields.filter((f) => f.text.toLowerCase().includes(q));
     if (matched.length > 0) {
       results.push({
-        kind: "idea",
-        id: i.id,
-        context: i.parent,
+        kind: "brainstorm",
+        id: b.slug,
+        context: b.phase,
         matched_fields: matched.map((m) => m.name),
         snippet: extractSnippet(matched[0].text, q),
-        timestamp: i.developed_at ?? i.created
+        timestamp: b.last_touched
       });
     }
   }
@@ -18279,21 +18227,22 @@ function extractSnippet(text, query, windowChars = 80) {
 // src/render/find.ts
 var KIND_LABELS = {
   project: "Projects",
-  idea: "Ideas",
+  brainstorm: "Brainstorms",
   capture: "Captures",
   pursuit: "Pursuits"
 };
-var KIND_ORDER = ["project", "idea", "capture", "pursuit"];
+var KIND_ORDER = ["project", "brainstorm", "capture", "pursuit"];
 var KIND_VERBS = {
   project: [
     "/cadence:status <id>",
     "/cadence:start <id>",
     "/cadence:complete <action>",
-    "/cadence:cancel <id>"
+    "/cadence:resolve <id>"
   ],
-  idea: [
-    "/cadence:promote <id>",
-    "/cadence:develop <id>"
+  brainstorm: [
+    "/cadence:brainstorm <slug>",
+    "/cadence:brainstorm --crystallize",
+    "/cadence:brainstorm --archive"
   ],
   capture: ["/cadence:reflect (Get Clear) to triage"],
   pursuit: [
@@ -18333,11 +18282,11 @@ function renderFindResults(results, query) {
   return out.join("\n");
 }
 function formatHeader(r) {
-  if (r.kind === "idea") {
-    return r.context ? `${r.id} (parent: ${r.context})` : r.id;
-  }
   if (r.kind === "project") {
     return r.context ? `${r.id} (in ${r.context})` : r.id;
+  }
+  if (r.kind === "brainstorm") {
+    return r.context ? `${r.id} [${r.context}]` : r.id;
   }
   if (r.kind === "capture") {
     return r.id;
@@ -18470,17 +18419,6 @@ function renderProject(snapshot, projectId, pursuitHint) {
   }
   return out.join("\n").trimEnd();
 }
-function renderIdeas(ideas) {
-  if (ideas.length === 0) return "No ideas match.";
-  const out = [];
-  for (const i of ideas) {
-    out.push(
-      `- ${i.id} [${i.state}] parent=${i.parent} age=${i.ageDays}d` + (i.closed_reason ? `
-    closed: ${i.closed_reason}` : "")
-    );
-  }
-  return out.join("\n");
-}
 function projectCounts(snapshot, pursuitId) {
   const projects = snapshot.projects.filter((p) => p.pursuit === pursuitId);
   return {
@@ -18540,7 +18478,7 @@ function projectMenu(_projectId, status) {
 
 // src/write/pursuit.ts
 import path11 from "node:path";
-import { existsSync as existsSync4 } from "node:fs";
+import { existsSync as existsSync5 } from "node:fs";
 
 // src/write/util.ts
 import { mkdir, readFile as readFile8, rename, writeFile as writeFile2 } from "node:fs/promises";
@@ -18606,7 +18544,7 @@ async function createPursuit(repoRoot, opts) {
   const status = opts.status ?? (opts.type === "someday" ? "someday" : "active");
   const lifecycleDir = status === "someday" ? "pursuits/_someday" : status === "archived" ? "pursuits/_archived" : "pursuits";
   const pursuitDir = path11.join(repoRoot, lifecycleDir, opts.id);
-  if (existsSync4(pursuitDir)) {
+  if (existsSync5(pursuitDir)) {
     throw new Error(`pursuit already exists: ${opts.id}`);
   }
   await ensureDir(path11.join(pursuitDir, "projects"));
@@ -18634,10 +18572,10 @@ function toTitleCase(id) {
 
 // src/write/project.ts
 import path13 from "node:path";
-import { existsSync as existsSync6 } from "node:fs";
+import { existsSync as existsSync7 } from "node:fs";
 
 // src/write/paths.ts
-import { existsSync as existsSync5 } from "node:fs";
+import { existsSync as existsSync6 } from "node:fs";
 import path12 from "node:path";
 function resolvePursuitDir(repoRoot, pursuitId) {
   const candidates = [
@@ -18647,7 +18585,7 @@ function resolvePursuitDir(repoRoot, pursuitId) {
     path12.join(repoRoot, "pursuits/_dropped", pursuitId)
   ];
   for (const c of candidates) {
-    if (existsSync5(path12.join(c, "pursuit.md"))) return c;
+    if (existsSync6(path12.join(c, "pursuit.md"))) return c;
   }
   return null;
 }
@@ -18655,15 +18593,7 @@ function resolveProjectFile(repoRoot, pursuitId, projectId) {
   const dir = resolvePursuitDir(repoRoot, pursuitId);
   if (!dir) return null;
   const file = path12.join(dir, "projects", `${projectId}.md`);
-  if (!existsSync5(file)) return null;
-  return file;
-}
-function resolveIdeaFile(repoRoot, parent, ideaId) {
-  const pursuitId = parent.split("/")[0] ?? parent;
-  const dir = resolvePursuitDir(repoRoot, pursuitId);
-  if (!dir) return null;
-  const file = path12.join(dir, "ideas", `${ideaId}.md`);
-  if (!existsSync5(file)) return null;
+  if (!existsSync6(file)) return null;
   return file;
 }
 
@@ -18676,7 +18606,7 @@ async function createProject(repoRoot, opts) {
     throw new Error(`pursuit not found: ${opts.pursuit}`);
   }
   const filePath = path13.join(pursuitDir, "projects", `${opts.id}.md`);
-  if (existsSync6(filePath)) {
+  if (existsSync7(filePath)) {
     throw new Error(`project already exists: ${opts.pursuit}/${opts.id}`);
   }
   const cleanList = (xs) => Array.isArray(xs) ? xs.filter((x) => typeof x === "string" && x.length > 0) : [];
@@ -18733,37 +18663,174 @@ function toTitleCase2(id) {
   return id.split("-").map((w) => w[0] ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
 }
 
-// src/write/idea.ts
+// src/write/brainstorm.ts
 import path14 from "node:path";
-import { existsSync as existsSync7 } from "node:fs";
-async function createIdea(repoRoot, opts) {
+import { existsSync as existsSync8 } from "node:fs";
+import { mkdir as mkdir2, readFile as readFile9, rename as rename2, rm, writeFile as writeFile3 } from "node:fs/promises";
+var BRAINSTORMS_ROOT = "brainstorms";
+async function createBrainstorm(repoRoot, opts) {
+  const root = path14.join(repoRoot, BRAINSTORMS_ROOT);
+  const dir = path14.join(root, opts.slug);
+  if (existsSync8(dir)) {
+    throw new Error(`brainstorm already exists: ${opts.slug}`);
+  }
+  await mkdir2(path14.join(dir, "refs"), { recursive: true });
+  await mkdir2(path14.join(dir, "solutions"), { recursive: true });
   const now = opts.now ?? /* @__PURE__ */ new Date();
-  const pursuitId = opts.parent.split("/")[0] ?? opts.parent;
-  const pursuitDir = resolvePursuitDir(repoRoot, pursuitId);
-  if (!pursuitDir) {
-    throw new Error(`pursuit not found for idea parent: ${opts.parent}`);
-  }
-  const filePath = path14.join(pursuitDir, "ideas", `${opts.id}.md`);
-  if (existsSync7(filePath)) {
-    throw new Error(`idea already exists: ${opts.parent}/${opts.id}`);
-  }
-  const state = opts.state ?? "seed";
-  const data = {
-    id: opts.id,
-    parent: opts.parent,
-    state,
-    created: opts.created ?? dateString(now)
+  const ts = isoTimestamp(now);
+  const meta = {
+    slug: opts.slug,
+    created_at: ts,
+    last_touched: ts,
+    phase: "diverging",
+    source_thoughts: opts.source_thoughts ?? [],
+    candidate_solutions: [],
+    selected_solution: null,
+    target_pursuit: null
   };
-  if (opts.developed_at) data["developed_at"] = opts.developed_at;
-  if (opts.promoted_to) data["promoted_to"] = opts.promoted_to;
-  if (opts.closed_reason) data["closed_reason"] = opts.closed_reason;
-  await writeFrontmatterFile(filePath, data, opts.body ?? "");
-  return { path: path14.relative(repoRoot, filePath) };
+  await writeMeta(dir, meta);
+  await writeFile3(
+    path14.join(dir, "workspace.md"),
+    `# ${opts.slug}
+
+_Divergent notes go here. Edit freely; the agent appends as ideation flows._
+`,
+    "utf8"
+  );
+  return { path: path14.relative(repoRoot, dir) };
+}
+async function setBrainstormPhase(repoRoot, opts) {
+  const dir = path14.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
+  const meta = await readMeta(dir);
+  meta.phase = opts.phase;
+  meta.last_touched = isoTimestamp(opts.now ?? /* @__PURE__ */ new Date());
+  await writeMeta(dir, meta);
+  return { path: path14.relative(repoRoot, dir), meta };
+}
+async function crystallize(repoRoot, opts) {
+  const dir = path14.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
+  const meta = await readMeta(dir);
+  if (meta.phase !== "converging") {
+    throw new Error(
+      `brainstorm ${opts.slug} must be in phase 'converging' to crystallize (currently '${meta.phase}')`
+    );
+  }
+  const solutionPath = path14.join(dir, "solutions", `${opts.solution}.md`);
+  if (!existsSync8(solutionPath)) {
+    throw new Error(
+      `solution not found: ${opts.slug}/solutions/${opts.solution}.md`
+    );
+  }
+  const text = await readFile9(solutionPath, "utf8");
+  const parsed = parseSolution(text);
+  if (parsed.actions.length === 0) {
+    throw new Error(
+      `solution ${opts.solution}.md has no '## Next steps' section with '- [ ]' lines; cannot crystallize`
+    );
+  }
+  const projectResult = await createProject(repoRoot, {
+    pursuit: opts.pursuit,
+    id: opts.newProjectId,
+    status: "on_hold",
+    ...parsed.title ? { title: parsed.title } : {},
+    ...parsed.intent ? { intent: parsed.intent } : {},
+    actions: parsed.actions,
+    now: opts.now
+  });
+  const now = opts.now ?? /* @__PURE__ */ new Date();
+  const decisionBody = `# ${opts.slug}: chose ${opts.solution}
+
+` + (opts.decisionNote ? `${opts.decisionNote.trim()}
+
+` : "") + `Crystallized at ${isoTimestamp(now)} \u2192 ${projectResult.path}
+`;
+  await writeFile3(path14.join(dir, "decision.md"), decisionBody, "utf8");
+  meta.phase = "crystallized";
+  meta.selected_solution = opts.solution;
+  meta.target_pursuit = opts.pursuit;
+  meta.last_touched = isoTimestamp(now);
+  await writeMeta(dir, meta);
+  return {
+    brainstorm_path: path14.relative(repoRoot, dir),
+    project_path: projectResult.path
+  };
+}
+async function archiveBrainstorm(repoRoot, opts) {
+  const dir = path14.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
+  if (!existsSync8(dir)) {
+    throw new Error(`brainstorm not found: ${opts.slug}`);
+  }
+  if (opts.mode === "delete") {
+    await rm(dir, { recursive: true, force: true });
+    return { kind: "deleted", from: path14.relative(repoRoot, dir) };
+  }
+  const meta = await readMeta(dir);
+  meta.phase = "archived";
+  meta.last_touched = isoTimestamp(opts.now ?? /* @__PURE__ */ new Date());
+  await writeMeta(dir, meta);
+  const target = path14.join(repoRoot, "narratives", "brainstorms", opts.slug);
+  await mkdir2(path14.dirname(target), { recursive: true });
+  await rename2(dir, target);
+  return {
+    kind: "kept",
+    from: path14.relative(repoRoot, dir),
+    to: path14.relative(repoRoot, target)
+  };
+}
+async function readMeta(dir) {
+  const metaPath = path14.join(dir, "meta.yaml");
+  if (!existsSync8(metaPath)) {
+    throw new Error(`brainstorm meta.yaml not found at ${metaPath}`);
+  }
+  const raw = jsYaml.load(await readFile9(metaPath, "utf8"), {
+    schema: jsYaml.CORE_SCHEMA
+  });
+  return BrainstormMetaSchema.parse(raw);
+}
+async function writeMeta(dir, meta) {
+  const yamlText = jsYaml.dump(meta, { lineWidth: -1 });
+  await writeFile3(path14.join(dir, "meta.yaml"), yamlText, "utf8");
+}
+function parseSolution(text) {
+  const lines = text.split("\n");
+  let title;
+  const intentLines = [];
+  const actions = [];
+  let inNextSteps = false;
+  let pastTitle = false;
+  for (const line of lines) {
+    const titleMatch = !pastTitle && line.match(/^#\s+(.+?)\s*$/);
+    if (titleMatch) {
+      title = titleMatch[1];
+      pastTitle = true;
+      continue;
+    }
+    if (/^##\s+next steps\b/i.test(line)) {
+      inNextSteps = true;
+      continue;
+    }
+    if (inNextSteps) {
+      const m = line.match(/^\s*-\s*\[\s\]\s*(.+?)\s*$/);
+      if (m && m[1]) {
+        actions.push(m[1]);
+        continue;
+      }
+      if (/^##\s+/.test(line)) {
+        inNextSteps = false;
+        intentLines.push(line);
+        continue;
+      }
+      continue;
+    }
+    intentLines.push(line);
+  }
+  const intent = intentLines.join("\n").trim();
+  return { ...title ? { title } : {}, intent, actions };
 }
 
 // src/write/capture.ts
 import path15 from "node:path";
-import { existsSync as existsSync8 } from "node:fs";
+import { existsSync as existsSync9 } from "node:fs";
 import { createHash } from "node:crypto";
 async function writeCapture(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
@@ -18814,7 +18881,7 @@ function sha256Hex(text) {
 function uniqueCapturePath(dir, slug) {
   let candidate = path15.join(dir, `${slug}.md`);
   let n = 2;
-  while (existsSync8(candidate)) {
+  while (existsSync9(candidate)) {
     candidate = path15.join(dir, `${slug}-${n}.md`);
     n += 1;
   }
@@ -18823,14 +18890,14 @@ function uniqueCapturePath(dir, slug) {
 
 // src/write/reflection.ts
 import path16 from "node:path";
-import { existsSync as existsSync9 } from "node:fs";
+import { existsSync as existsSync10 } from "node:fs";
 async function writeReflection(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const date = opts.date ?? dateString(now);
   const dir = path16.join(repoRoot, "reflections");
   await ensureDir(dir);
   const filePath = path16.join(dir, `${date}.md`);
-  const existing = existsSync9(filePath) ? await loadFrontmatterFile(filePath) : null;
+  const existing = existsSync10(filePath) ? await loadFrontmatterFile(filePath) : null;
   const data = existing ? { ...existing.data } : {};
   data["date"] = date;
   data["status"] = opts.status;
@@ -18845,8 +18912,8 @@ async function writeReflection(repoRoot, opts) {
 
 // src/write/edits.ts
 import path17 from "node:path";
-import { readdir, readFile as readFile9 } from "node:fs/promises";
-import { existsSync as existsSync10 } from "node:fs";
+import { readdir as readdir3, readFile as readFile10 } from "node:fs/promises";
+import { existsSync as existsSync11 } from "node:fs";
 
 // src/write/checklist.ts
 var ITEM_RE2 = /^(\s*-\s+\[)([ xX])(\]\s+)(.+?)(\s*)$/;
@@ -19192,11 +19259,11 @@ async function summarizePursuit(repoRoot, projectFilePath) {
   const pursuitDir = path17.dirname(projectsDir);
   const pursuitId = path17.basename(pursuitDir);
   const projects = [];
-  if (existsSync10(projectsDir)) {
-    for (const entry of await readdir(projectsDir, { withFileTypes: true })) {
+  if (existsSync11(projectsDir)) {
+    for (const entry of await readdir3(projectsDir, { withFileTypes: true })) {
       if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
       const file = path17.join(projectsDir, entry.name);
-      const text = await readFile9(file, "utf8");
+      const text = await readFile10(file, "utf8");
       const { data } = parseFrontmatter(text);
       const id = String(data["id"] ?? entry.name.replace(/\.md$/, ""));
       const status = String(data["status"] ?? "active");
@@ -19214,30 +19281,6 @@ async function summarizePursuit(repoRoot, projectFilePath) {
     total,
     allResolved: total > 0 && done === total
   };
-}
-async function setIdeaState(repoRoot, opts) {
-  const filePath = await locateIdea(repoRoot, opts.id, opts.parent);
-  const now = opts.now ?? /* @__PURE__ */ new Date();
-  await mutateFrontmatter(filePath, (data, body) => {
-    data["state"] = opts.state;
-    if (opts.state === "developed") {
-      if (!data["developed_at"]) data["developed_at"] = dateString(now);
-    } else if (opts.state === "promoted") {
-      if (!opts.promoted_to) {
-        throw new Error("promoting an idea requires --promoted-to");
-      }
-      data["promoted_to"] = opts.promoted_to;
-    } else if (opts.state === "closed") {
-      if (!opts.reason) {
-        throw new Error("closing an idea requires a reason");
-      }
-      data["closed_reason"] = opts.reason;
-    } else if (opts.state === "moved") {
-      if (opts.new_parent) data["parent"] = opts.new_parent;
-    }
-    return { data, body };
-  });
-  return { path: path17.relative(repoRoot, filePath) };
 }
 async function checkItem(repoRoot, opts) {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
@@ -19420,8 +19463,8 @@ async function locateProject(repoRoot, projectId, pursuitHint) {
   const roots = ["pursuits", "pursuits/_someday", "pursuits/_archived"];
   for (const root of roots) {
     const absRoot = path17.join(repoRoot, root);
-    if (!existsSync10(absRoot)) continue;
-    for (const pursuit of await readdir(absRoot, { withFileTypes: true })) {
+    if (!existsSync11(absRoot)) continue;
+    for (const pursuit of await readdir3(absRoot, { withFileTypes: true })) {
       if (!pursuit.isDirectory()) continue;
       const candidate = path17.join(
         absRoot,
@@ -19429,36 +19472,11 @@ async function locateProject(repoRoot, projectId, pursuitHint) {
         "projects",
         `${projectId}.md`
       );
-      if (existsSync10(candidate)) return candidate;
+      if (existsSync11(candidate)) return candidate;
     }
   }
   throw new Error(
     `project not found: ${projectId} (pass --pursuit to disambiguate)`
-  );
-}
-async function locateIdea(repoRoot, ideaId, parentHint) {
-  if (parentHint) {
-    const file = resolveIdeaFile(repoRoot, parentHint, ideaId);
-    if (!file) throw new Error(`idea not found: ${parentHint}/${ideaId}`);
-    return file;
-  }
-  const roots = ["pursuits", "pursuits/_someday", "pursuits/_archived"];
-  for (const root of roots) {
-    const absRoot = path17.join(repoRoot, root);
-    if (!existsSync10(absRoot)) continue;
-    for (const pursuit of await readdir(absRoot, { withFileTypes: true })) {
-      if (!pursuit.isDirectory()) continue;
-      const candidate = path17.join(
-        absRoot,
-        pursuit.name,
-        "ideas",
-        `${ideaId}.md`
-      );
-      if (existsSync10(candidate)) return candidate;
-    }
-  }
-  throw new Error(
-    `idea not found: ${ideaId} (pass --parent to disambiguate)`
   );
 }
 function appendNote(body, sectionName, itemText, note) {
@@ -19487,7 +19505,7 @@ function escapeRe(s) {
 
 // src/write/move.ts
 import path18 from "node:path";
-import { existsSync as existsSync11 } from "node:fs";
+import { existsSync as existsSync12 } from "node:fs";
 async function movePursuit(repoRoot, opts) {
   const from = resolvePursuitDir(repoRoot, opts.id);
   if (!from) throw new Error(`pursuit not found: ${opts.id}`);
@@ -19499,7 +19517,7 @@ async function movePursuit(repoRoot, opts) {
       to: path18.relative(repoRoot, to)
     };
   }
-  if (existsSync11(to)) {
+  if (existsSync12(to)) {
     throw new Error(`destination already exists: ${path18.relative(repoRoot, to)}`);
   }
   await moveDir(from, to);
@@ -19514,12 +19532,12 @@ async function movePursuit(repoRoot, opts) {
 }
 
 // src/tip/library.ts
-import { existsSync as existsSync13, readFileSync as readFileSync3 } from "node:fs";
+import { existsSync as existsSync14, readFileSync as readFileSync3 } from "node:fs";
 import path20 from "node:path";
 import { fileURLToPath } from "node:url";
 
 // src/tip/state.ts
-import { existsSync as existsSync12, readFileSync as readFileSync2, mkdirSync as mkdirSync3, writeFileSync as writeFileSync2 } from "node:fs";
+import { existsSync as existsSync13, readFileSync as readFileSync2, mkdirSync as mkdirSync3, writeFileSync as writeFileSync2 } from "node:fs";
 import path19 from "node:path";
 var STATE_FILENAME = "tip-state.json";
 function statePath(repoRoot) {
@@ -19527,7 +19545,7 @@ function statePath(repoRoot) {
 }
 function readTipState(repoRoot) {
   const filePath = statePath(repoRoot);
-  if (!existsSync12(filePath)) {
+  if (!existsSync13(filePath)) {
     return { version: 1, tips: {}, categories: {} };
   }
   try {
@@ -19544,7 +19562,7 @@ function readTipState(repoRoot) {
 }
 function writeTipState(repoRoot, state) {
   const dir = path19.join(repoRoot, ".cadence");
-  if (!existsSync12(dir)) {
+  if (!existsSync13(dir)) {
     mkdirSync3(dir, { recursive: true });
   }
   writeFileSync2(statePath(repoRoot), JSON.stringify(state, null, 2) + "\n");
@@ -19645,7 +19663,7 @@ function libraryPath() {
 }
 function readLibrary(libPath) {
   const filePath = libPath ?? libraryPath();
-  if (!existsSync13(filePath)) {
+  if (!existsSync14(filePath)) {
     return { version: 1, tips: [] };
   }
   const raw = readFileSync3(filePath, "utf8");
@@ -19884,24 +19902,6 @@ cli.command("project <id>", "Show Intent, Actions, and waiting_for for a project
     }
   }
 );
-cli.command("ideas", "List ideas with optional filters").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--parent <id>", "Filter by parent (pursuit or pursuit/project)").option(
-  "--state <state>",
-  "Filter by state (comma-separated: seed,developed,promoted,moved,closed)"
-).option("--since <date>", "Only ideas created on/after this YYYY-MM-DD").option("--json", "Emit as JSON").action(
-  async (opts) => {
-    const repoRoot = await resolveRepoRoot(opts.root);
-    const snapshot = await scan(repoRoot);
-    const states = opts.state ? opts.state.split(",").map((s) => s.trim()) : void 0;
-    const ideas = snapshot.ideas.filter(
-      (i) => (!opts.parent || i.parent === opts.parent) && (!states || states.includes(i.state)) && (!opts.since || i.created >= opts.since)
-    );
-    if (opts.json) {
-      process.stdout.write(JSON.stringify(ideas, null, 2) + "\n");
-    } else {
-      process.stdout.write(renderIdeas(ideas) + "\n");
-    }
-  }
-);
 cli.command("captures", "List unprocessed captures").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--json", "Emit as JSON").action(async (opts) => {
   const repoRoot = await resolveRepoRoot(opts.root);
   const snapshot = await scan(repoRoot);
@@ -19923,7 +19923,7 @@ cli.command("captures", "List unprocessed captures").option("--root <path>", "Re
 });
 cli.command(
   "find <query>",
-  "Search projects, ideas, captures, and pursuits by case-insensitive substring"
+  "Search projects, captures, and pursuits by case-insensitive substring"
 ).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--json", "Emit results as JSON").action(
   async (query, opts) => {
     const repoRoot = await resolveRepoRoot(opts.root);
@@ -19993,17 +19993,63 @@ cli.command("create-project <id>", "Create a new project").option("--root <path>
     process.stdout.write(JSON.stringify(result) + "\n");
   }
 );
-cli.command("create-idea <id>", "Create a new idea (seed by default)").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--parent <parent>", "pursuit-id or pursuit-id/project-id (required)").option("--state <state>", "seed | developed | promoted | moved | closed").option("--body <text>", "Idea body").option("--created <YYYY-MM-DD>", "Override created date (default: today)").action(
-  async (id, opts) => {
-    if (!opts.parent) throw new Error("--parent is required");
+cli.command("create-brainstorm <slug>", "Create a brainstorm workspace at brainstorms/<slug>/ with phase: diverging").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--source-thought <id>", "Thought id this brainstorm grew out of (repeatable)", {
+  type: [String]
+}).action(
+  async (slug, opts) => {
     const repoRoot = await resolveRepoRoot(opts.root);
-    const result = await createIdea(repoRoot, {
-      id,
-      parent: opts.parent,
-      ...opts.state ? { state: opts.state } : {},
-      ...opts.body ? { body: opts.body } : {},
-      ...opts.created ? { created: opts.created } : {}
+    const source_thoughts = multistring(opts.sourceThought);
+    const result = await createBrainstorm(repoRoot, {
+      slug,
+      ...source_thoughts ? { source_thoughts } : {}
     });
+    process.stdout.write(JSON.stringify(result) + "\n");
+  }
+);
+cli.command("set-brainstorm-phase <slug>", "Update a brainstorm's phase in meta.yaml").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--phase <phase>", "diverging | converging | crystallized | archived (required)").action(
+  async (slug, opts) => {
+    if (!opts.phase) throw new Error("--phase is required");
+    const allowed = ["diverging", "converging", "crystallized", "archived"];
+    if (!allowed.includes(opts.phase)) {
+      throw new Error(`--phase must be one of ${allowed.join(" | ")}`);
+    }
+    const repoRoot = await resolveRepoRoot(opts.root);
+    const result = await setBrainstormPhase(repoRoot, {
+      slug,
+      phase: opts.phase
+    });
+    process.stdout.write(JSON.stringify(result) + "\n");
+  }
+);
+cli.command(
+  "crystallize <slug>",
+  "Materialize a pursuit from a chosen solution. Parses solutions/<name>.md (H1 \u2192 title, preamble \u2192 Intent, ## Next steps \u2192 actions), creates the project, writes decision.md, sets phase: crystallized."
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--solution <name>", "Solution name (required); must match a solutions/<name>.md file").option("--pursuit <id>", "Pursuit the new project lands under (required)").option("--project-id <id>", "Slug for the new project. Defaults to the brainstorm slug.").option("--decision-note <text>", "Free-form prose appended to decision.md").action(
+  async (slug, opts) => {
+    if (!opts.solution) throw new Error("--solution is required");
+    if (!opts.pursuit) throw new Error("--pursuit is required");
+    const repoRoot = await resolveRepoRoot(opts.root);
+    const result = await crystallize(repoRoot, {
+      slug,
+      solution: opts.solution,
+      pursuit: opts.pursuit,
+      newProjectId: opts.projectId ?? slug,
+      ...opts.decisionNote ? { decisionNote: opts.decisionNote } : {}
+    });
+    process.stdout.write(JSON.stringify(result) + "\n");
+  }
+);
+cli.command(
+  "archive-brainstorm <slug>",
+  "Close out a brainstorm workspace. --keep moves it to narratives/brainstorms/<slug>/; --delete removes it."
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--keep", "Move to narratives/brainstorms/<slug>/ (default)").option("--delete", "Delete the workspace outright").action(
+  async (slug, opts) => {
+    if (opts.keep && opts.delete) {
+      throw new Error("--keep and --delete are mutually exclusive");
+    }
+    const mode = opts.delete ? "delete" : "keep";
+    const repoRoot = await resolveRepoRoot(opts.root);
+    const result = await archiveBrainstorm(repoRoot, { slug, mode });
     process.stdout.write(JSON.stringify(result) + "\n");
   }
 );
@@ -20068,24 +20114,6 @@ cli.command(
     const result = await syncProjectOrigin(repoRoot, {
       id: projectId,
       ...opts.pursuit ? { pursuit: opts.pursuit } : {}
-    });
-    process.stdout.write(JSON.stringify(result) + "\n");
-  }
-);
-cli.command("set-idea-state <idea-id>", "Update an idea state").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--parent <parent>", "Disambiguate when idea IDs collide").option(
-  "--state <state>",
-  "seed | developed | promoted | moved | closed (required)"
-).option("--reason <text>", "Required when --state=closed").option("--promoted-to <ref>", "Required when --state=promoted (e.g., project:foo)").option("--new-parent <parent>", "New parent when --state=moved").action(
-  async (ideaId, opts) => {
-    if (!opts.state) throw new Error("--state is required");
-    const repoRoot = await resolveRepoRoot(opts.root);
-    const result = await setIdeaState(repoRoot, {
-      id: ideaId,
-      state: opts.state,
-      ...opts.parent ? { parent: opts.parent } : {},
-      ...opts.reason ? { reason: opts.reason } : {},
-      ...opts.promotedTo ? { promoted_to: opts.promotedTo } : {},
-      ...opts.newParent ? { new_parent: opts.newParent } : {}
     });
     process.stdout.write(JSON.stringify(result) + "\n");
   }
@@ -20485,8 +20513,8 @@ async function resolveRepoRoot(explicit) {
 function findRepoRoot(start) {
   let dir = path21.resolve(start);
   for (; ; ) {
-    if (existsSync14(path21.join(dir, "cadence.yaml"))) return dir;
-    if (existsSync14(path21.join(dir, "pursuits"))) return dir;
+    if (existsSync15(path21.join(dir, "cadence.yaml"))) return dir;
+    if (existsSync15(path21.join(dir, "pursuits"))) return dir;
     const parent = path21.dirname(dir);
     if (parent === dir) break;
     dir = parent;
@@ -20494,7 +20522,7 @@ function findRepoRoot(start) {
   return path21.resolve(start);
 }
 function isCadenceRepo(root) {
-  return existsSync14(path21.join(root, "cadence.yaml")) || existsSync14(path21.join(root, "pursuits"));
+  return existsSync15(path21.join(root, "cadence.yaml")) || existsSync15(path21.join(root, "pursuits"));
 }
 function multistring(v) {
   if (!Array.isArray(v)) return void 0;
@@ -20559,7 +20587,7 @@ async function readPluginInfo() {
     );
   }
   const manifestPath = path21.join(pluginDir, ".claude-plugin", "plugin.json");
-  const raw = await readFile10(manifestPath, "utf-8");
+  const raw = await readFile11(manifestPath, "utf-8");
   const manifest = JSON.parse(raw);
   const repository = manifest.repository ?? manifest.homepage ?? null;
   return {
@@ -20573,11 +20601,11 @@ function findPluginDir() {
   const scriptPath = fileURLToPath2(import.meta.url);
   let dir = path21.dirname(scriptPath);
   for (let i = 0; i < 6; i++) {
-    if (existsSync14(path21.join(dir, ".claude-plugin", "plugin.json"))) {
+    if (existsSync15(path21.join(dir, ".claude-plugin", "plugin.json"))) {
       return dir;
     }
     const nested = path21.join(dir, "cadence-plugin", ".claude-plugin", "plugin.json");
-    if (existsSync14(nested)) {
+    if (existsSync15(nested)) {
       return path21.join(dir, "cadence-plugin");
     }
     const parent = path21.dirname(dir);

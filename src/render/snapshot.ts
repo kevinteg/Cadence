@@ -13,7 +13,6 @@ export function renderSnapshot(snapshot: Snapshot): string {
 
   out.push(...renderSection('Pursuits', pursuitTable(snapshot)))
   out.push(...renderSection('Projects', projectTable(snapshot)))
-  out.push(...renderSection('Ideas', ideaTable(snapshot)))
   out.push(...renderSection('Captures', captureTable(snapshot)))
   out.push(...renderSection('Reflections', reflectionTable(snapshot)))
 
@@ -93,19 +92,6 @@ function projectTable(snapshot: Snapshot): Table {
   }
 }
 
-function ideaTable(snapshot: Snapshot): Table {
-  return {
-    headers: ['ID', 'STATE', 'PARENT', 'AGE', 'CREATED'],
-    rows: snapshot.ideas.map((i) => [
-      i.id,
-      i.state,
-      i.parent,
-      `${i.ageDays}d`,
-      i.created,
-    ]),
-  }
-}
-
 function captureTable(snapshot: Snapshot): Table {
   return {
     headers: ['CAPTURED', 'CONTEXT', 'BODY'],
@@ -148,12 +134,9 @@ function flagTarget(flag: Flag): string {
     case 'closing_in_on_resolution':
       return flag.pursuitId
     case 'wip_over_limit':
-    case 'inbox_overcap':
       return ''
     case 'inbound_issues_piling_up':
       return flag.ownerRepo
-    case 'stale_inbox_seed':
-      return `inbox/${flag.ideaId}`
   }
 }
 
@@ -178,10 +161,6 @@ function flagDetail(flag: Flag): string {
       const cachedNote = flag.fromCache ? ' (cached)' : ''
       return `${flag.count} untriaged ${issueWord}${cachedNote}; /cadence:incoming to triage`
     }
-    case 'stale_inbox_seed':
-      return `${flag.ageDays}d on Inbox (threshold ${flag.threshold}d) — move to a pursuit or close`
-    case 'inbox_overcap':
-      return `${flag.count} seeds (soft cap ${flag.softcap}) — schedule a triage pass`
   }
 }
 

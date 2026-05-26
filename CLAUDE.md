@@ -100,11 +100,9 @@ Workflows are at `cadence-plugin/workflows/`. The provocation deck is at
 
 The user-facing surface is **12 verbs** (slimmed from the original 16):
 `brainstorm`, `start`, `complete`, `resolve`, `waiting`, `capture`,
-`reflect`, `narrate`, `status`, `find`, `help`, `init`. Two verbs are
-**hidden internal**: `develop` (chained from `brainstorm`) and `promote`
-(chained from `develop` or `start`). `reconciler` runs as **system
-behavior** (SessionStart hook + during `/reflect` Get Clear); the
-`cadence flags` CLI subcommand stays for power use.
+`reflect`, `narrate`, `status`, `find`, `help`, `init`. `reconciler`
+runs as **system behavior** (SessionStart hook + during `/reflect`
+Get Clear); the `cadence flags` CLI subcommand stays for power use.
 
 When editing skills or workflows, edit the plugin files directly —
 they are the single source of truth. The `.claude/commands/` directory

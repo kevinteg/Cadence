@@ -13,8 +13,7 @@ lives in `cadence-reference.md` — load on demand.
 - **Pursuit**: An intentional commitment tied to values or a role. Has a Why. Lifecycle: `active` → `someday` (set aside, may return) → `archived` (shipped — closed via the closure ritual) | `dropped` (didn't ship — closed via the drop ritual; what got learned without shipping). Archived and dropped are both terminal but distinct outcomes; the directory split (`pursuits/_archived/` vs `pursuits/_dropped/`) lets the lessons-extraction surface treat them as different signal.
 - **Project**: A scoped effort framed by an Intent narrative (motivation + felt-sense of done) and an Actions list. Status: active | on_hold | done | dropped. New projects start `on_hold`; promote to `active` on the first checked action.
 - **Action**: An atomic, concrete task. A checkbox in a project's Actions section. Every project requires at least one at creation.
-- **Idea**: A captured seed, possibly developed, not yet promoted. States: seed → developed → promoted | moved | closed.
-- **Inbox**: A standing pursuit that never closes — a *short-term triage zone* for ideas whose pursuit home isn't yet obvious. Not an organizational layer. Ideas land here only because the right home isn't visible yet; the next `/develop` or `/promote` pass should move them to a real pursuit (force-fit if needed — the pursuit owner can move them later) or kill them. A growing Inbox is a triage debt signal, not a feature. Auto-created at init.
+- **Inbox**: A standing pursuit that never closes — a *short-term triage zone* for thoughts and brainstorms whose pursuit home isn't yet obvious. Not an organizational layer. Items land here only because the right home isn't visible yet; the next pass should move them to a real pursuit (force-fit if needed — the pursuit owner can move them later) or close them. A growing Inbox is a triage debt signal, not a feature. Auto-created at init.
 - **Capture**: A raw thought saved to `thoughts/unprocessed/`. Flow-safe — no agent response at capture time.
 - **Reflection**: A weekly ritual artifact in `reflections/<YYYY-MM-DD>.md`.
 - **Narrative**: Generated writing from activity data. McAdams structure: what happened / what it meant / what shifted / what's next. Each generated narrative carries a watermark in its frontmatter (cadence, consumed_through_commit) — the narrative IS the pointer into the project-file activity stream.
@@ -32,22 +31,19 @@ Read `workflows/verb-contracts.md` for the full contract of each verb.
 
 The user-facing verbs are: **brainstorm**, **start**, **complete**,
 **resolve**, **waiting**, **capture**, **reflect**, **narrate**.
-Internal verbs the agent invokes by chaining: **develop** (from
-brainstorm when convergence is ready) and **promote** (from develop
-or start at graduation moments). Hidden user-invoked verbs that don't
-appear on the visible catalogue: **report** (files a GitHub issue
-against the upstream Cadence repo; privacy-by-default — never
-auto-includes pursuit/project content), **incoming**
-(maintainer-side triage of inbound issues against the upstream Cadence
-repo; routes each issue to an action, project, idea, close, or defer;
-requires `gh`), and **mcp-pull** (pulls resources from a
-Claude-Code-registered MCP server into `thoughts/unprocessed/` as
-captures via the agent's `mcp__<server>__*` tool surface; Claude Code
-owns transport + OAuth, Cadence owns the file write through `cadence
-write-capture --mcp-*`). All three follow the suggest-don't-run pattern
-below — agent SUGGESTS via chat-language signals but never auto-fires. The
-reconciler runs as system behavior (SessionStart hook + during
-`/reflect` Get Clear) and is not a verb.
+Hidden user-invoked verbs that don't appear on the visible catalogue:
+**report** (files a GitHub issue against the upstream Cadence repo;
+privacy-by-default — never auto-includes pursuit/project content),
+**incoming** (maintainer-side triage of inbound issues against the
+upstream Cadence repo; routes each issue to an action, project, capture,
+close, or defer; requires `gh`), and **mcp-pull** (pulls resources
+from a Claude-Code-registered MCP server into `thoughts/unprocessed/`
+as captures via the agent's `mcp__<server>__*` tool surface; Claude
+Code owns transport + OAuth, Cadence owns the file write through
+`cadence write-capture --mcp-*`). All three follow the suggest-don't-run
+pattern below — agent SUGGESTS via chat-language signals but never
+auto-fires. The reconciler runs as system behavior (SessionStart hook
++ during `/reflect` Get Clear) and is not a verb.
 
 Each verb has a no-argument path that presents a curated entry relevant
 to that verb's purpose. The user never types "select" — they invoke
@@ -110,19 +106,6 @@ Completion flows upward from actions to projects to pursuits, with a
   resolved. `/resolve <pursuit>` to walk the closure ritual?"
 - An active entity with no open actions is inconsistent state — resolve
   it (complete, add an action, or move on_hold) before continuing.
-
-## The Pipeline
-
-```
-  Idea ──► Pursuit ──► Project ──► Action
-   │         │           │            │
-  Why?    Intent?    Concrete?   /complete
-```
-
-Three graduation gates enforced by `/promote`:
-- **Idea → Pursuit**: requires a Why (articulated motivation)
-- **Idea → Project**: requires an Intent narrative + at least one concrete first action
-- **Idea → Action**: requires concreteness (you can visualize doing it)
 
 ## Bundled CLI
 

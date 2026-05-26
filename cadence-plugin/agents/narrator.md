@@ -1,6 +1,6 @@
 ---
 name: narrator
-description: Generate cadence-aware narrative from Cadence project-file activity. Use this agent when the /narrate skill needs prose written from a project-activity payload (commits touching project files, current project state, ideas, captures) — for daily, weekly, monthly, annual, or full-pursuit-arc cadences. The agent reads bulk data via the cadence CLI in isolation; the main thread receives only the final prose.
+description: Generate cadence-aware narrative from Cadence project-file activity. Use this agent when the /narrate skill needs prose written from a project-activity payload (commits touching project files, current project state, captures) — for daily, weekly, monthly, annual, or full-pursuit-arc cadences. The agent reads bulk data via the cadence CLI in isolation; the main thread receives only the final prose.
 tools: Read, Bash
 model: sonnet
 ---
@@ -89,9 +89,6 @@ work is). `events` are commits that touched the project file in the
 window, sorted desc.
 
 Supplemental, when relevant:
-- `cadence ideas --json` — Idea state changes (new seeds, developed,
-  promoted, closed-with-reason). Filter by your window via `created` /
-  `developed_at`.
 - `cadence captures --json` — unprocessed thoughts in the window.
 - `cadence scan --json` — for weekly cadence, read the latest
   `reflections[].leveraged_priority` (sort desc by date) — that's the
@@ -179,10 +176,11 @@ Prose, not bullets. No headings. 3-5 paragraphs total.
 3. **What shifted** — change in understanding, position, direction
 4. **What's next** — forward trajectory
 
-For `pursuit:<id>` scope, include the **Idea arc** in "what happened"
-or "what it meant": how many Ideas generated, how many promoted, how
-many closed-with-reason, how many moved to the Inbox. That's the
-meaning-making spine of pursuit closure.
+For `pursuit:<id>` scope, when brainstorm workspaces land (post-P2),
+include the **brainstorm arc** in "what happened" or "what it meant":
+how many brainstorms opened, how many crystallized into projects, how
+many archived with reasons. That's the meaning-making spine of
+pursuit closure.
 
 **Empty window:** "Quiet [period]. No committed activity since [last
 cadence end]." Save anyway so the next run resumes from a fresh watermark.

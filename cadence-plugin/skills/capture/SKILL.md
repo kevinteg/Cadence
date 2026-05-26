@@ -19,7 +19,6 @@ Flow-safe capture to `thoughts/unprocessed/`. Reference
 
 2. Determine the verb context from the conversation:
    - Mid /brainstorm → `seed`
-   - Mid /develop → `concern`
    - Otherwise → `note`
 
 3. Write the capture via the bundled CLI:

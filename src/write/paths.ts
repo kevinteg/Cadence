@@ -34,17 +34,3 @@ export function resolveProjectFile(
   return file
 }
 
-export function resolveIdeaFile(
-  repoRoot: string,
-  parent: string,
-  ideaId: string,
-): string | null {
-  // parent is either "<pursuit-id>" or "<pursuit-id>/<project-id>" — both
-  // store ideas under <pursuit>/ideas/<idea-id>.md.
-  const pursuitId = parent.split('/')[0] ?? parent
-  const dir = resolvePursuitDir(repoRoot, pursuitId)
-  if (!dir) return null
-  const file = path.join(dir, 'ideas', `${ideaId}.md`)
-  if (!existsSync(file)) return null
-  return file
-}

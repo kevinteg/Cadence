@@ -11,7 +11,6 @@ import {
   CONFIG_DEFAULTS,
   type Capture,
   type Flag,
-  type Idea,
   type Project,
   type Pursuit,
   type Reflection,
@@ -57,7 +56,7 @@ function makeSnapshot(overrides: Partial<Snapshot> = {}): Snapshot {
     config: { ...CONFIG_DEFAULTS },
     pursuits: [],
     projects: [],
-    ideas: [],
+    brainstorms: [],
     captures: [],
     reflections: [],
     generatedAt: NOW,
@@ -132,24 +131,8 @@ test('renderSnapshot empty collections render "None." instead of a table', () =>
   const out = renderSnapshot(makeSnapshot())
   assert.match(out, /Pursuits \(0\)\n  None\./)
   assert.match(out, /Projects \(0\)\n  None\./)
-  assert.match(out, /Ideas \(0\)\n  None\./)
   assert.match(out, /Captures \(0\)\n  None\./)
   assert.match(out, /Reflections \(0\)\n  None\./)
-})
-
-test('renderSnapshot ideas table shows state, parent, age', () => {
-  const idea: Idea = {
-    id: 'spark',
-    parent: 'inbox',
-    state: 'seed',
-    created: '2026-04-21',
-    body: '',
-    path: 'pursuits/inbox/ideas/spark.md',
-    ageDays: 6,
-  }
-  const out = renderSnapshot(makeSnapshot({ ideas: [idea] }))
-  assert.match(out, /Ideas \(1\)/)
-  assert.match(out, /spark\s+seed\s+inbox\s+6d/)
 })
 
 test('renderReport appends a Flags section after the snapshot', () => {

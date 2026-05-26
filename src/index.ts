@@ -3,12 +3,10 @@ export { report } from './report/reconciler.js'
 export { loadConfig } from './config.js'
 export { createPursuit } from './write/pursuit.js'
 export { createProject } from './write/project.js'
-export { createIdea } from './write/idea.js'
 export { writeCapture } from './write/capture.js'
 export { writeReflection } from './write/reflection.js'
 export {
   setProjectStatus,
-  setIdeaState,
   checkItem,
   addItem,
   addWaitingFor,
@@ -20,8 +18,6 @@ export type {
   ChecklistItem,
   Config,
   Flag,
-  Idea,
-  IdeaState,
   Progress,
   Project,
   ProjectStatus,

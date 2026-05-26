@@ -19,7 +19,6 @@ wip_limits:
   )
   await mkdir(path.join(dir, 'pursuits/p1/projects'), { recursive: true })
   await mkdir(path.join(dir, 'pursuits/p1/sessions'), { recursive: true })
-  await mkdir(path.join(dir, 'pursuits/p1/ideas'), { recursive: true })
   await mkdir(path.join(dir, 'pursuits/_someday/sp'), { recursive: true })
   await mkdir(path.join(dir, 'thoughts/unprocessed'), { recursive: true })
   await mkdir(path.join(dir, 'reflections'), { recursive: true })
@@ -90,18 +89,6 @@ question
 `,
   )
   await writeFile(
-    path.join(dir, 'pursuits/p1/ideas/seed-1.md'),
-    `---
-id: seed-1
-parent: p1
-state: seed
-created: 2026-04-15
----
-
-idea body
-`,
-  )
-  await writeFile(
     path.join(dir, 'pursuits/_someday/sp/pursuit.md'),
     `---
 id: sp
@@ -161,10 +148,6 @@ test('scan returns a populated Snapshot for a synthetic repo', async () => {
     assert.equal(proj.actionProgress.total, 2)
     assert.equal(proj.waiting_for.length, 1)
     assert.equal(proj.waiting_for[0]?.person, 'bob')
-
-    assert.equal(snapshot.ideas.length, 1)
-    assert.equal(snapshot.ideas[0]?.state, 'seed')
-    assert.equal(snapshot.ideas[0]?.ageDays, 12)
 
     assert.equal(snapshot.captures.length, 1)
     assert.equal(snapshot.reflections.length, 1)

@@ -12,15 +12,19 @@ import { renderSnapshot, renderReport } from './render/snapshot.js'
 import { findEntities } from './find.js'
 import { renderFindResults } from './render/find.js'
 import {
-  renderIdeas,
   renderProject,
   renderPursuit,
   renderPursuits,
 } from './render/drilldown.js'
-import type { Flag, Idea, IdeaState, Snapshot } from './types.js'
+import type { Flag, Snapshot } from './types.js'
 import { createPursuit } from './write/pursuit.js'
 import { createProject } from './write/project.js'
-import { createIdea } from './write/idea.js'
+import {
+  archiveBrainstorm,
+  createBrainstorm,
+  crystallize,
+  setBrainstormPhase,
+} from './write/brainstorm.js'
 import { writeCapture } from './write/capture.js'
 import { writeReflection } from './write/reflection.js'
 import {
@@ -30,7 +34,6 @@ import {
   checkItem,
   checkItems,
   flagWaitingFor,
-  setIdeaState,
   setProjectStatus,
   syncProjectOrigin,
 } from './write/edits.js'
@@ -240,43 +243,6 @@ cli
   )
 
 cli
-  .command('ideas', 'List ideas with optional filters')
-  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--parent <id>', 'Filter by parent (pursuit or pursuit/project)')
-  .option(
-    '--state <state>',
-    'Filter by state (comma-separated: seed,developed,promoted,moved,closed)',
-  )
-  .option('--since <date>', 'Only ideas created on/after this YYYY-MM-DD')
-  .option('--json', 'Emit as JSON')
-  .action(
-    async (opts: {
-      root?: string
-      parent?: string
-      state?: string
-      since?: string
-      json?: boolean
-    }) => {
-      const repoRoot = await resolveRepoRoot(opts.root)
-      const snapshot = await scan(repoRoot)
-      const states = opts.state
-        ? (opts.state.split(',').map((s) => s.trim()) as IdeaState[])
-        : undefined
-      const ideas = snapshot.ideas.filter(
-        (i) =>
-          (!opts.parent || i.parent === opts.parent) &&
-          (!states || states.includes(i.state)) &&
-          (!opts.since || i.created >= opts.since),
-      ) as Idea[]
-      if (opts.json) {
-        process.stdout.write(JSON.stringify(ideas, null, 2) + '\n')
-      } else {
-        process.stdout.write(renderIdeas(ideas) + '\n')
-      }
-    },
-  )
-
-cli
   .command('captures', 'List unprocessed captures')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--json', 'Emit as JSON')
@@ -301,7 +267,7 @@ cli
 cli
   .command(
     'find <query>',
-    'Search projects, ideas, captures, and pursuits by case-insensitive substring',
+    'Search projects, captures, and pursuits by case-insensitive substring',
   )
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--json', 'Emit results as JSON')
@@ -432,32 +398,103 @@ cli
   )
 
 cli
-  .command('create-idea <id>', 'Create a new idea (seed by default)')
+  .command('create-brainstorm <slug>', 'Create a brainstorm workspace at brainstorms/<slug>/ with phase: diverging')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--parent <parent>', 'pursuit-id or pursuit-id/project-id (required)')
-  .option('--state <state>', 'seed | developed | promoted | moved | closed')
-  .option('--body <text>', 'Idea body')
-  .option('--created <YYYY-MM-DD>', 'Override created date (default: today)')
+  .option('--source-thought <id>', 'Thought id this brainstorm grew out of (repeatable)', {
+    type: [String],
+  })
   .action(
     async (
-      id: string,
+      slug: string,
+      opts: { root?: string; sourceThought?: string[] },
+    ) => {
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const source_thoughts = multistring(opts.sourceThought)
+      const result = await createBrainstorm(repoRoot, {
+        slug,
+        ...(source_thoughts ? { source_thoughts } : {}),
+      })
+      process.stdout.write(JSON.stringify(result) + '\n')
+    },
+  )
+
+cli
+  .command('set-brainstorm-phase <slug>', 'Update a brainstorm\'s phase in meta.yaml')
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--phase <phase>', 'diverging | converging | crystallized | archived (required)')
+  .action(
+    async (
+      slug: string,
+      opts: { root?: string; phase?: string },
+    ) => {
+      if (!opts.phase) throw new Error('--phase is required')
+      const allowed = ['diverging', 'converging', 'crystallized', 'archived']
+      if (!allowed.includes(opts.phase)) {
+        throw new Error(`--phase must be one of ${allowed.join(' | ')}`)
+      }
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const result = await setBrainstormPhase(repoRoot, {
+        slug,
+        phase: opts.phase as 'diverging' | 'converging' | 'crystallized' | 'archived',
+      })
+      process.stdout.write(JSON.stringify(result) + '\n')
+    },
+  )
+
+cli
+  .command(
+    'crystallize <slug>',
+    'Materialize a pursuit from a chosen solution. Parses solutions/<name>.md (H1 → title, preamble → Intent, ## Next steps → actions), creates the project, writes decision.md, sets phase: crystallized.',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--solution <name>', 'Solution name (required); must match a solutions/<name>.md file')
+  .option('--pursuit <id>', 'Pursuit the new project lands under (required)')
+  .option('--project-id <id>', 'Slug for the new project. Defaults to the brainstorm slug.')
+  .option('--decision-note <text>', 'Free-form prose appended to decision.md')
+  .action(
+    async (
+      slug: string,
       opts: {
         root?: string
-        parent?: string
-        state?: IdeaState
-        body?: string
-        created?: string
+        solution?: string
+        pursuit?: string
+        projectId?: string
+        decisionNote?: string
       },
     ) => {
-      if (!opts.parent) throw new Error('--parent is required')
+      if (!opts.solution) throw new Error('--solution is required')
+      if (!opts.pursuit) throw new Error('--pursuit is required')
       const repoRoot = await resolveRepoRoot(opts.root)
-      const result = await createIdea(repoRoot, {
-        id,
-        parent: opts.parent,
-        ...(opts.state ? { state: opts.state } : {}),
-        ...(opts.body ? { body: opts.body } : {}),
-        ...(opts.created ? { created: opts.created } : {}),
+      const result = await crystallize(repoRoot, {
+        slug,
+        solution: opts.solution,
+        pursuit: opts.pursuit,
+        newProjectId: opts.projectId ?? slug,
+        ...(opts.decisionNote ? { decisionNote: opts.decisionNote } : {}),
       })
+      process.stdout.write(JSON.stringify(result) + '\n')
+    },
+  )
+
+cli
+  .command(
+    'archive-brainstorm <slug>',
+    'Close out a brainstorm workspace. --keep moves it to narratives/brainstorms/<slug>/; --delete removes it.',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--keep', 'Move to narratives/brainstorms/<slug>/ (default)')
+  .option('--delete', 'Delete the workspace outright')
+  .action(
+    async (
+      slug: string,
+      opts: { root?: string; keep?: boolean; delete?: boolean },
+    ) => {
+      if (opts.keep && opts.delete) {
+        throw new Error('--keep and --delete are mutually exclusive')
+      }
+      const mode: 'keep' | 'delete' = opts.delete ? 'delete' : 'keep'
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const result = await archiveBrainstorm(repoRoot, { slug, mode })
       process.stdout.write(JSON.stringify(result) + '\n')
     },
   )
@@ -586,43 +623,6 @@ cli
       const result = await syncProjectOrigin(repoRoot, {
         id: projectId,
         ...(opts.pursuit ? { pursuit: opts.pursuit } : {}),
-      })
-      process.stdout.write(JSON.stringify(result) + '\n')
-    },
-  )
-
-cli
-  .command('set-idea-state <idea-id>', 'Update an idea state')
-  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--parent <parent>', 'Disambiguate when idea IDs collide')
-  .option(
-    '--state <state>',
-    'seed | developed | promoted | moved | closed (required)',
-  )
-  .option('--reason <text>', 'Required when --state=closed')
-  .option('--promoted-to <ref>', 'Required when --state=promoted (e.g., project:foo)')
-  .option('--new-parent <parent>', 'New parent when --state=moved')
-  .action(
-    async (
-      ideaId: string,
-      opts: {
-        root?: string
-        parent?: string
-        state?: IdeaState
-        reason?: string
-        promotedTo?: string
-        newParent?: string
-      },
-    ) => {
-      if (!opts.state) throw new Error('--state is required')
-      const repoRoot = await resolveRepoRoot(opts.root)
-      const result = await setIdeaState(repoRoot, {
-        id: ideaId,
-        state: opts.state,
-        ...(opts.parent ? { parent: opts.parent } : {}),
-        ...(opts.reason ? { reason: opts.reason } : {}),
-        ...(opts.promotedTo ? { promoted_to: opts.promotedTo } : {}),
-        ...(opts.newParent ? { new_parent: opts.newParent } : {}),
       })
       process.stdout.write(JSON.stringify(result) + '\n')
     },

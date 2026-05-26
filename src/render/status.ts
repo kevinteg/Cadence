@@ -280,10 +280,6 @@ function describeFlag(flag: Flag, _snapshot: Snapshot): string {
       const cachedNote = flag.fromCache ? ' (cached)' : ''
       return `inbound: ${flag.count} untriaged ${issueWord} on ${flag.ownerRepo}${cachedNote} — /cadence:incoming to triage`
     }
-    case 'stale_inbox_seed':
-      return `stale Inbox seed: ${flag.ideaId} (${flag.ageDays}d on Inbox; triage threshold ${flag.threshold}d) — /cadence:develop or /cadence:promote to move it to a real pursuit, or close`
-    case 'inbox_overcap':
-      return `Inbox overcap: ${flag.count} seeds (soft cap ${flag.softcap}) — schedule a triage pass via /cadence:develop`
   }
   const _exhaustive: never = flag
   return _exhaustive

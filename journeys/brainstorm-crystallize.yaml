@@ -1,0 +1,70 @@
+name: Brainstorm Workspace and Crystallize
+description: Verify the v1.1 ideation flow — /brainstorm opens a workspace, the user iterates through diverging → converging, /brainstorm --crystallize materializes a pursuit with Intent + actions extracted from the chosen solution
+
+setup:
+  - create_pursuit:
+      id: test-journeys
+      type: finite
+      status: active
+
+steps:
+  - command: cadence create-brainstorm test-storage --root .
+    assert:
+      - file_exists: brainstorms/test-storage/meta.yaml
+      - file_exists: brainstorms/test-storage/workspace.md
+      - dir_exists: brainstorms/test-storage/refs
+      - dir_exists: brainstorms/test-storage/solutions
+      - file_contains:
+          path: brainstorms/test-storage/meta.yaml
+          pattern: "phase: diverging"
+
+  - command: cadence set-brainstorm-phase test-storage --phase converging --root .
+    assert:
+      - file_contains:
+          path: brainstorms/test-storage/meta.yaml
+          pattern: "phase: converging"
+
+  - action: |
+      Write brainstorms/test-storage/solutions/option-a.md with:
+        # Option A: incremental rewrite
+
+        Migrate the storage layer in place, table by table, keeping the
+        user-facing API stable while the underlying schema evolves.
+
+        ## Next steps
+
+        - [ ] Audit call sites under src/storage/
+        - [ ] Draft the v2 schema
+        - [ ] Write a migration test against a fixture repo
+    assert:
+      - file_exists: brainstorms/test-storage/solutions/option-a.md
+
+  - command: cadence crystallize test-storage --solution option-a --pursuit test-journeys --decision-note "Incremental keeps the user-facing API stable while we migrate" --root .
+    assert:
+      - file_exists: brainstorms/test-storage/decision.md
+      - file_contains:
+          path: brainstorms/test-storage/meta.yaml
+          pattern: "phase: crystallized"
+      - file_contains:
+          path: brainstorms/test-storage/meta.yaml
+          pattern: "selected_solution: option-a"
+      - file_contains:
+          path: brainstorms/test-storage/meta.yaml
+          pattern: "target_pursuit: test-journeys"
+      - file_exists: pursuits/test-journeys/projects/test-storage.md
+      - file_contains:
+          path: pursuits/test-journeys/projects/test-storage.md
+          pattern: "# Option A: incremental rewrite"
+      - file_contains:
+          path: pursuits/test-journeys/projects/test-storage.md
+          pattern: "Audit call sites under src/storage/"
+      - file_contains:
+          path: pursuits/test-journeys/projects/test-storage.md
+          pattern: "Draft the v2 schema"
+
+teardown:
+  - delete_files:
+      - brainstorms/test-storage/
+      - pursuits/test-journeys/
+  - assert_clean: brainstorms/test-storage/
+  - assert_clean: pursuits/test-journeys/
