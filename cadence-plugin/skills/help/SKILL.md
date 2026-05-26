@@ -21,11 +21,13 @@ the source of truth, the skill just presents them.
    - No argument → render the catalogue overview (step 2).
    - Argument matches a group name (`diverge`, `execute`, `reflect`,
      `setup`, `browse`) — case-insensitive → render group view (step 3).
-   - Argument matches a verb name (`brainstorm`, `develop`, `promote`,
-     `start`, `pause`, `complete`, `cancel`, `capture`, `waiting`,
-     `reflect`, `narrate`, `close`, `reconcile`, `init`, `status`,
-     `help`) — case-insensitive, optional leading `/cadence:` or `/`
-     stripped → render verb view (step 4).
+   - Argument matches a verb name (one of the 12 user-facing verbs:
+     `brainstorm`, `start`, `complete`, `resolve`, `waiting`,
+     `capture`, `reflect`, `narrate`, `status`, `find`, `help`,
+     `init`) — case-insensitive, optional leading `/cadence:` or `/`
+     stripped → render verb view (step 4). The hidden verbs
+     (`report`, `incoming`, `mcp-pull`) also resolve for explicit
+     `/help <verb>` lookups but aren't in the catalogue overview.
    - Otherwise: "No verb or group matches '[arg]'. Try `/help` for
      the catalogue."
 
@@ -35,10 +37,9 @@ the source of truth, the skill just presents them.
    commentary or rephrase; the source is the source.
 
 3. **Group view.** From the Verb Catalogue, extract the named group's
-   table (e.g., for `diverge`: `brainstorm`, `develop`, `promote`).
-   Then for each verb in the group, append its **Purpose** and
-   **No-argument entry** lines from
-   `cadence-plugin/workflows/verb-contracts.md`. Format:
+   table (e.g., for `diverge`: `brainstorm`). Then for each verb in
+   the group, append its **Purpose** and **No-argument entry** lines
+   from `cadence-plugin/workflows/verb-contracts.md`. Format:
 
    ```
    ## <Group> — <one-liner>

@@ -82,7 +82,7 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons` a
 
    Example prompt (pursuit-arc, larger budget):
    ```
-   Generate a pursuit-arc narrative for build-cadence-v1. Run `cadence project-activity --scope pursuit --pursuit build-cadence-v1` and read closure metadata as needed. Compose 5-8 paragraphs in McAdams structure with the full Idea arc.
+   Generate a pursuit-arc narrative for build-cadence-v1. Run `cadence project-activity --scope pursuit --pursuit build-cadence-v1` and read closure metadata as needed. Compose 5-8 paragraphs in McAdams structure: what was attempted, what shipped, what got dropped (with reasons), what brainstorms crystallized into projects, what was archived as decided-not-to-pursue.
    [Budget: 8 tool calls. If exceeded, return what you have without retrying.]
    ```
 

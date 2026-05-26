@@ -16,7 +16,7 @@ contract.
 
 | Verb | Purpose |
 |---|---|
-| `brainstorm` | Divergent ideation. Generate quantity. Find what the Pursuit is. (v1.1: rebuild in progress — see `rebuild-brainstorm-as-workspace-with-phase-machine` project.) |
+| `brainstorm` | Divergent ideation in a first-class workspace at `brainstorms/<slug>/`. Phase machine: `diverging → converging → crystallized | archived`. `--crystallize` materializes a Pursuit or Project from the chosen solution. |
 
 ### Execute — do the work
 
@@ -24,7 +24,7 @@ contract.
 |---|---|
 | `start` | Universal work-entry verb. Argument shape selects what opens: no arg → curated menu across pursuits, open projects, brainstorms, Inbox; `<pursuit>` → pursuit workspace view (Why, LP alignment, attached projects + brainstorms + Inbox slice); `<project>` → project view; `<brainstorm-slug>` → resume the workspace at its phase; `inbox` (reserved keyword) → walk untriaged items oldest-first with the outcome menu; `brainstorm` (reserved keyword) → forward to `/cadence:brainstorm`. View-only — no session ceremony. |
 | `complete` | Mark an action done. First check promotes on_hold → active. Triggers upward completion prompts. |
-| `resolve` | Wrap up a project or pursuit. `resolve <project> --state complete` (default) walks the intent-feel-achieved dialogue; `--state dropped` requires a reason. `resolve <pursuit>` walks the closure ritual with absolute-Ideas-block, then archives. |
+| `resolve` | Wrap up a project or pursuit. `resolve <project> --state complete` (default) walks the intent-feel-achieved dialogue; `--state dropped` requires a reason. `resolve <pursuit>` walks the closure ritual (absolute block on unresolved work — open projects + active brainstorms), then routes to `pursuits/_archived/` (completed) or `pursuits/_dropped/` (with reason). |
 | `capture` | Flow-safe parking lot. Get a thought out of your head, zero friction, no agent response. |
 | `waiting` | Record an external blocker so it's tracked, not forgotten. |
 
@@ -547,10 +547,7 @@ item passes its expected date by `waiting_for_grace_days`.
 
 ## Captures
 
-When the user dumps a raw thought mid-flow via `/capture`, save it to
-`thoughts/unprocessed/` with no response. Captures are triaged into
-Ideas or Actions at the next breakpoint or during Reflect. Flag
-uncertain routing for human review.
+When the user dumps a raw thought mid-flow via inline `/capture`, save it to `thoughts/unprocessed/` with no response. The capture joins the Inbox view (status: untriaged) for later triage via `/cadence:start inbox` or during `/reflect` Get Clear's awareness block. Non-inline ingest paths (`--from`, `--source`, `--dump`) dispatch the `capture-ingest` subagent and surface a per-item outcome menu; see "Capture Ingestion" below for the full surface.
 
 ## MCP Integration
 

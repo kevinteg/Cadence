@@ -12,7 +12,7 @@ argument resolution and number-shortcut tracking.
 
 ## Usage
 
-- `/status` — system dashboard with counts and flags
+- `/status` — navigation-led system dashboard (This week, Active Pursuits tables, Active Brainstorms, On Hold, Heads up, Likely next moves)
 - `/status pursuits` — list all pursuits grouped by lifecycle
 - `/status <pursuit>` — list projects in a pursuit (active brainstorms surface here too — phase + last_touched)
 - `/status <project>` — show Intent and actions for a project

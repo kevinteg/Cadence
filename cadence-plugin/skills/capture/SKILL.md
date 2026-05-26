@@ -79,11 +79,15 @@ the instruction (potentially many items).
    - `project` → run the project-creation dialogue (Intent + first actions extracted from the capture body) via `cadence create-project`.
    - `brainstorm_seed` → `cadence create-brainstorm <slug>` (slug from the capture title, kebab-cased) and copy the body into `brainstorms/<slug>/workspace.md`.
    - `note` or `inbox` → leave as-is; the capture stays in the Inbox with `status: untriaged`.
-   For each item the user routed, update the capture's frontmatter to `status: triaged, triaged_to: <ref>`:
-   ```bash
-   cadence write-capture-mark-triaged --path <capture-path> --triaged-to "<ref>"
+   For each item the user routed, update the capture's frontmatter to `status: triaged, triaged_to: <ref>`. The CLI doesn't yet expose an upsert helper for this (write-capture creates new files; `--slug` collides forward), so the agent flips the frontmatter via the Edit tool directly on `thoughts/unprocessed/<file>.md`:
    ```
-   (TODO when the small CLI helper lands — for now, write a one-line script via Bash that uses `sed`/`yq` to flip the status, or rewrite via Edit. The cleanup-CLI surface is a small follow-on.)
+   ---
+   ... existing frontmatter ...
+   status: triaged
+   triaged_to: action:<pursuit>/<project>/<index>   # or project:<id>, brainstorm:<slug>, discarded
+   ---
+   ```
+   The Inbox view (`inboxItems()`) filters on `status: untriaged`, so flipping the field is enough to remove the capture from the Inbox count. A small CLI helper to do this update is on the roadmap (`cadence write-capture-mark-triaged`).
 
 6. **Summarize and exit.** One-line recap:
    ```

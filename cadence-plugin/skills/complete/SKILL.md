@@ -101,8 +101,10 @@ frontmatter) still use Edit.
      <pursuit>` to walk the closure ritual, or add more projects?
      ```
      - If the user resolves: `/cadence:resolve <pursuit>` walks the
-       closure ritual (absolute Ideas block + cleaning) then archives
-       via `cadence move-pursuit <pursuit-id> --to archived`. Same
+       closure ritual (absolute block on open projects + active
+       brainstorms; each gets resolved, crystallized, or archived)
+       then routes via `cadence move-pursuit <pursuit-id> --to
+       archived` (completed) or `--to dropped` (with reason). Same
        rules: complete or extend, no third option.
    - If NOT `allResolved` AND a project just completed AND
      `cadence report --json | .flags[]` includes a

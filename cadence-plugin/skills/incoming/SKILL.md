@@ -56,7 +56,7 @@ Reference `workflows/verb-contracts.md` for the incoming register.
 
    Then prompt:
    ```
-   Triage: [r]oute / [p]romote / [i]dea / [c]lose / [d]efer / [s]kip:
+   Triage: [r]oute / [p]romote / [b]rainstorm / [n]ote-to-inbox / [c]lose / [d]efer / [s]kip:
    ```
 
    Accept either single-key (`r`) or typed (`route`) answers.
@@ -103,19 +103,37 @@ Reference `workflows/verb-contracts.md` for the incoming register.
         --body "Promoted to project \`<project-id>\` under pursuit \`<pursuit-id>\`."
       ```
 
-   ### i — capture-as-thought
+   ### b — open-as-brainstorm
 
-   1. Write the issue as a capture in `thoughts/unprocessed/` for later triage:
+   1. Derive a slug from the issue title (kebab-cased; user can override).
+   2. Create the brainstorm workspace, seeding the body into `workspace.md`:
+      ```bash
+      cadence create-brainstorm <slug> --topic "<issue title>"
+      ```
+      Then append the issue body to `brainstorms/<slug>/workspace.md` (with a "From #<num>: <url>" footer).
+   3. Mark issue triaged:
+      ```bash
+      gh issue edit <num> --repo <owner_repo> --add-label triaged-routed
+      gh issue comment <num> --repo <owner_repo> \
+        --body "Opened as brainstorm \`<slug>\` for divergent ideation."
+      ```
+
+   ### n — note-to-inbox
+
+   1. Write the issue as a v2 capture in `thoughts/unprocessed/`, sourced from the issue URL so dedup catches re-pulls:
       ```bash
       cadence write-capture \
         --body "<issue title>\n\n<issue body>\n\nFrom #<num>: <url>" \
-        --verb-context "incoming:capture"
+        --source-kind url \
+        --source-uri "<url>" \
+        --verb-context "incoming:note"
       ```
+      The capture lands in the Inbox view (status: untriaged) for later triage via `/cadence:start inbox`.
    2. Mark issue triaged:
       ```bash
       gh issue edit <num> --repo <owner_repo> --add-label triaged-routed
       gh issue comment <num> --repo <owner_repo> \
-        --body "Captured to thoughts/unprocessed/ for triage."
+        --body "Noted to Inbox at thoughts/unprocessed/ for triage."
       ```
 
    ### c — close-with-comment

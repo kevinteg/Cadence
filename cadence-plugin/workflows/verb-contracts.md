@@ -80,43 +80,49 @@ intent in the description itself turns the system prompt into a guard.
 
 ## Brainstorm
 
-**Purpose:** Divergent ideation. Generate quantity. Find what the Pursuit is.
+**Purpose:** Divergent ideation in a first-class workspace at `brainstorms/<slug>/`. Generate quantity in `diverging`. Converge on candidates in `converging`. Crystallize into a Pursuit or Project (or archive as decided-not-to-pursue).
 
-**Tone:** Non-judgmental, curious, energy-sustaining. Never evaluative.
-The voice is a facilitator — it reflects meaning, spots patterns, and
-provokes expansion. It does not contribute Ideas.
+**Tone:** Non-judgmental and curious in `diverging`; structured-critical in `converging`. Never evaluative during diverging. The voice is a facilitator — it reflects meaning, spots patterns, and provokes expansion. It does not contribute ideas.
 
-**Behavior:**
-- User states a challenge or question to anchor the ideation
-- Every user input is raw idea material — save as a Seed, then keep
-  momentum with a brief facilitator move (reflect meaning, connect dots,
-  pull a thread, deal a provocation card, name a pattern)
-- Cards are one tool in the kit, dealt when energy dips or ideas go
-  circular — not the primary mechanic
-- Push through the creative cliff: "You're at 12 — the surprising ones
-  usually come after 15"
-- Park any evaluative concern that surfaces: "Parking that for the
-  develop pass. What else?"
-- Create Seed Ideas on the target parent as they emerge
+**Workspace shape** (`brainstorms/<slug>/`):
+- `workspace.md` — main scratch / divergent notes
+- `meta.yaml` — `slug`, `created_at`, `last_touched`, `phase: diverging | converging | crystallized | archived`, `source_thoughts`, `candidate_solutions`, `selected_solution`, `target_pursuit`
+- `solutions/<name>.md` — one candidate per file (populated during `converging`)
+- `decision.md` — written on `--crystallize`
 
-**No-argument entry:** Show pursuits available for ideation, Inbox
-Idea count, aging Seeds. Ask: "Where do you want to brainstorm?"
+**Behavior in `diverging`:**
+- User states a challenge or question to anchor the workspace
+- Every user input is raw idea material — append to `workspace.md`, then keep momentum with a brief facilitator move (reflect meaning, connect dots, pull a thread, deal a provocation card, name a pattern)
+- Cards are one tool in the kit, dealt when energy dips or ideas go circular — not the primary mechanic
+- Push through the creative cliff: "You're at 12 — the surprising ones usually come after 15"
+- Park any evaluative concern that surfaces: "Parking that for the converging pass. What else?"
+
+**Behavior in `converging`:**
+- Each candidate solution becomes a file under `solutions/<name>.md`. Each has a `## Next steps` H2 that lists initial `- [ ] action` lines.
+- Run PPCo (Praise, Potentials, Concerns, Overcome), criteria matrices, pre-mortems across candidates
+- Convergent language is fair game here ("but", "however", "the problem with that") — it's the verb's job in this phase
+
+**`--crystallize`:** materializes the selected `solutions/<name>.md` into a new Pursuit or Project. The "Next steps" H2 becomes the new project's initial Actions. The workspace stays in place as the lineage record; `meta.yaml` flips to `phase: crystallized` and records `target_pursuit`.
+
+**`--archive`:** marks the workspace `phase: archived` — decided not to pursue, preserved as a learning artifact.
+
+**No-argument entry:** Show active brainstorms (diverging or converging) and offer to open one. Ask: "Where do you want to brainstorm?"
 
 **Scope sensitivity:**
-- No target → Ideas on the Inbox (candidate Pursuits)
-- Pursuit → Ideas on that Pursuit (candidate Projects)
-- Project → Ideas on that Project (candidate Actions)
-- Action → Rejected: "That sounds like it needs its own Project. Want to
-  promote it?"
+- `/brainstorm <topic>` — opens or resumes a workspace named for the topic
+- `/brainstorm` — lists active workspaces, prompts which to resume
 
 **Guardrails:**
-- No LLM-generated Ideas. The agent facilitates; the user generates.
-- No evaluation during brainstorm. Concerns get parked, not addressed.
-- No convergent language ("but", "however", "the problem with that").
-- No suggestions to stop early. Push for more.
+- No LLM-generated ideas during `diverging`. The agent facilitates; the user generates.
+- No evaluation during `diverging`. Concerns get parked for `converging`, not addressed inline.
+- No convergent language during `diverging`.
+- No suggestions to stop early during `diverging`. Push for more.
+- The phase machine is `diverging → converging → crystallized | archived`. Phase moves forward only — once crystallized or archived, the workspace is read-only history.
 
-**Exit:** Suggest a develop pass if Seeds accumulated: "You generated
-[N] Seeds. Want to develop any of these?"
+**Exit:** Suggest the next phase based on current state:
+- `diverging` with sufficient material: "You've generated a lot. Ready to converge on candidates?"
+- `converging` with a picked solution: "Ready to `/cadence:brainstorm --crystallize` and materialize this as a Pursuit/Project?"
+- Otherwise: continue or save progress (the workspace persists across sessions).
 
 ---
 
@@ -236,14 +242,8 @@ No judgment on the decision in either direction.
   intent-feel-achieved dialogue. Surfaces project Intent and asks
   "does the intent feel achieved?" If yes, sets status=done. If
   actions remain unchecked, requires explicit override.
-- **`/resolve <project> --state dropped --reason "<text>"`:** walks
-  override-with-reason for unresolved Ideas (move to another parent,
-  close-with-reason, promote, or develop-first), then sets status=
-  dropped with the reason recorded.
-- **`/resolve <pursuit>`:** walks the closure ritual — absolute block
-  on unresolved Ideas, walk each (move / close-with-reason / promote
-  / develop-first), then `move-pursuit --to archived`. Generates and
-  saves a closure narrative summarizing the Pursuit's arc.
+- **`/resolve <project> --state dropped --reason "<text>"`:** sets status=dropped with the reason recorded. No Ideas to clean up (Ideas-as-entities retired in v1.1) — the reason is the meaning-making artifact.
+- **`/resolve <pursuit>`:** walks the closure ritual — absolute block on unresolved work (open projects + active brainstorms). For each: resolve a project (complete or drop-with-reason); for each brainstorm: crystallize (it earned a Pursuit/Project), archive-with-learning (decided not to pursue — what was learned?), or move (reattach to another pursuit). Then `move-pursuit --to archived` (completed) or `--to dropped` (with reason). Generates and saves a closure or drop narrative summarizing the Pursuit's arc.
 - Triggers upward-completion check on project resolution: if pursuit
   has all projects resolved, prompts "All projects in [pursuit]
   resolved. `/resolve <pursuit>` to walk the closure ritual?"
@@ -263,15 +263,11 @@ No judgment on the decision in either direction.
 entity type, lists active candidates.
 
 **Guardrails:**
-- Pursuit closure is an absolute block on unresolved Ideas. No override.
+- Pursuit closure is an absolute block on unresolved work (open projects + active brainstorms). No override.
 - `--state dropped` requires `--reason` for projects.
-- Unresolved Ideas on a project being dropped trigger override-with-
-  reason — nothing silently orphaned.
-- `--state` doesn't apply at pursuit level. Surfacing it on a pursuit
-  request gets a one-line note and falls through to closure.
-- Every closed Idea must have a reason ("what did this teach us?").
-- Closure narratives are generated, not manual. The user reviews but
-  doesn't write.
+- `--state` doesn't apply at pursuit level on the default path; `--state dropped --reason "<text>"` routes the pursuit to `_dropped/` instead of `_archived/`. Both walk the same cleaning ritual.
+- Every archived brainstorm must carry a learning reason ("what did this teach?").
+- Closure and drop narratives are generated, not manual. The user reviews but doesn't write.
 - No evaluative commentary on the decision to drop or close.
 
 **Exit:** Project resolution: "[project] resolved as [state]. [N/M
@@ -291,10 +287,8 @@ Informational, not praise-based.
 **Behavior:**
 - Follow McAdams structure: what happened / what it meant / what shifted /
   what's next
-- Draw from project-file git activity (`cadence project-activity`),
-  Ideas promoted/closed, project milestones, captures
-- For Pursuit narratives: include the full Idea arc — how many generated,
-  promoted, closed with reasons, moved to the Inbox
+- Draw from project-file git activity (`cadence project-activity`), brainstorm crystallization / archival events, project milestones, captures
+- For Pursuit narratives: include what shipped (resolved projects), what got dropped (with reasons), what brainstorms crystallized into projects, what was archived as decided-not-to-pursue
 - For weekly narratives: feed into Reflect
 - Each generated narrative carries a frontmatter watermark
   (cadence, consumed_through_commit) — the next run resumes from there
@@ -505,7 +499,7 @@ write to the same parking lot — that's the integration contract.
 
 *Hidden verb — not on the visible 12-verb surface; explicit-invocation only; agent-suggested when chat language signals maintainer-mode. Maintainer-side complement to `/report`.*
 
-**Purpose:** On-demand triage of open issues on the upstream Cadence repo. Each issue is walked end-to-end and routed into Cadence-shaped state (action / project / idea / close / defer) so the inbound queue never lives only in GitHub.
+**Purpose:** On-demand triage of open issues on the upstream Cadence repo. Each issue is walked end-to-end and routed into Cadence-shaped state (action / project / capture / close / defer) so the inbound queue never lives only in GitHub.
 
 **Tone:** Light, terse, maintainer-functional. One welcome line: `"<N> open issues to triage. First up:"`. Never editorialize the issues (no "this looks like a duplicate") — the maintainer decides.
 
@@ -521,14 +515,15 @@ write to the same parking lot — that's the integration contract.
   Sorts oldest-first so stale issues bubble up.
 - For each issue, displays a compact view (number, label, age, title, body, up to 3 comments) and prompts:
   ```
-  Triage: [r]oute / [p]romote / [i]dea / [c]lose / [d]efer / [s]kip:
+  Triage: [r]oute / [p]romote / [b]rainstorm / [n]ote-to-inbox / [c]lose / [d]efer / [s]kip:
   ```
   Accepts either single-key (`r`) or typed (`route`) answers.
 
 **Triage outcomes:**
 - **r — route-to-action:** prompts for an active project; appends an action via `cadence add-item --section action` with the issue URL embedded. Adds the `triaged-routed` label and a linking comment.
 - **p — promote-to-project:** prompts for a pursuit (default `make-cadence-public`); creates a project via `cadence create-project` with the issue title as the project name, the issue body as the Intent seed (thin Intent is acceptable — co-editable later via `/cadence:start`), and `--origin-issue <owner/repo>#<num>` so the project carries a `origin: github_issue` frontmatter field. The origin closes the loop downstream: on `/cadence:start` (auto-promotion `on_hold → active`) the `triaged-routed` label is swapped for `in-progress` with a "work started" comment; on `/cadence:resolve` (done or dropped) the issue is closed with a Cadence-authored comment. Adds `triaged-routed` label and a linking comment at promotion time.
-- **i — capture-as-idea:** prompts for a pursuit; creates an idea via `cadence create-idea` with the issue body. Adds `triaged-routed` label and a linking comment.
+- **b — open-as-brainstorm:** prompts for a slug (defaults to the issue's kebab-cased title); creates a brainstorm workspace via `cadence create-brainstorm` with the issue body seeded into `workspace.md`. Adds `triaged-routed` label and a linking comment.
+- **n — note-to-inbox:** writes the issue body as a v2 capture into `thoughts/unprocessed/` via `cadence write-capture --source-kind url --source-uri <issue-url>`. The capture lands in the Inbox for later triage via `/cadence:start inbox`. Adds `triaged-routed` label and a linking comment.
 - **c — close-with-comment:** prompts for a one-line comment; closes via `gh issue close --comment`.
 - **d — defer:** adds `triaged-deferred` label. No further prompt.
 - **s — skip:** moves on without changing anything. Skipped issues reappear on the next run (no `triaged-skipped` label — would create sprawl).
@@ -644,9 +639,5 @@ These apply across all verbs:
 - **No "why did you fail?" prompts.** "Why" triggers rumination. "What"
   generates observable data and next steps. "Why" is reserved for Pursuit
   creation (the Why gate).
-- **No LLM-generated Ideas during brainstorm.** The agent facilitates;
-  the user generates.
-- **No session ceremony.** Project state is the project file. There is
-  no /pause counterpart to /start, no marker write, no active-session
-  pointer. Lifecycle changes happen via /complete (action checks) or
-  /cancel.
+- **No LLM-generated ideas during the diverging phase of brainstorm.** The agent facilitates; the user generates. The LLM's convergent bias is reserved for the converging phase where it's an asset.
+- **No session ceremony.** Project state is the project file. There is no /pause counterpart to /start, no marker write, no active-session pointer. Lifecycle changes happen via /complete (action checks) or /resolve (project / pursuit wrap-up).

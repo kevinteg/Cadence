@@ -45,10 +45,10 @@ claude --plugin-dir ~/code/cadence/cadence-plugin
 ### Bootstrap with /cadence:init
 
 Inside Claude Code, run `/cadence:init`. It will:
-- Create the directory structure (pursuits/, ideas, Inbox, etc.)
-- Generate cadence.yaml with default configuration
+- Create the directory structure (`pursuits/`, `brainstorms/`, `thoughts/`, `narratives/`, `reflections/`, `validations/`)
+- Generate `cadence.yaml` with default configuration
 - Walk you through creating your first pursuit and project
-- Set up .gitignore entries for generated files
+- Set up `.gitignore` entries for generated files
 
 After init completes, you're ready to use `/cadence:start` to begin
 work.
@@ -64,23 +64,23 @@ guardrails are specified in
 
 | Verb | Description |
 |------|-------------|
-| `/cadence:brainstorm` | Facilitated divergent ideation. Agent deals provocation cards; user generates ideas. Chains internally into `develop` and `promote`. |
+| `/cadence:brainstorm` | Facilitated divergent ideation in a first-class workspace at `brainstorms/<slug>/`. Phase machine: `diverging → converging → crystallized | archived`. `--crystallize` materializes a Pursuit or Project from the chosen solution. |
 
 ### Execute — do the work
 
 | Verb | Description |
 |------|-------------|
-| `/cadence:start` | Open a project's view (Intent + actions + first unchecked). View-only — no session ceremony. |
+| `/cadence:start` | Universal work-entry verb. No arg → curated menu. `<pursuit>` → pursuit workspace view. `<project>` → project view. `<brainstorm-slug>` → resume the workspace. `inbox` (reserved) → triage walk with outcome menu. View-only — no session ceremony. |
 | `/cadence:complete` | Mark an action done. First check promotes `on_hold` → `active`. Triggers upward completion prompt. |
 | `/cadence:resolve` | Wrap up a project or pursuit. `--state complete` (default) walks the intent-feel-achieved dialogue; `--state dropped` requires a reason. Pursuit-level invokes the closure ritual + archive. |
 | `/cadence:waiting` | Record an external blocker so it's tracked. |
-| `/cadence:capture` | Flow-safe parking lot — saves a thought silently, no agent response. |
+| `/cadence:capture` | Flow-safe parking lot — inline `"..."` saves a thought silently. Extended ingest surface: `--from <path|url>`, `--source <name>` (named MCP queries), `--dump` (long-form in $EDITOR). Non-inline paths dispatch the `capture-ingest` subagent and surface a per-item outcome menu (`[Y/n]` defaults to a high-confidence suggested action). |
 
 ### Reflect — see meaning, check state
 
 | Verb | Description |
 |------|-------------|
-| `/cadence:reflect` | Weekly ritual — Get Clear (process captures + flags) + Get Focused (interactive what-worked / Leveraged Priority). Catch-up entry modes for long gaps. |
+| `/cadence:reflect` | Weekly ritual — Get Clear (short awareness block: Inbox / dormant / closing-in / WIP counts; choose handle / note / pause) + Get Focused (interactive what-worked / Leveraged Priority). Catch-up entry modes for long gaps. Hand-offs to `/start inbox` or `/resolve` persist the reflection at `phase: get_clear` so it resumes cleanly. |
 | `/cadence:narrate` | Generate narrative — today (standup), week (LP-anchored), or pursuit arc (full story). Watermark-resume from git history. |
 
 ### Setup — one-off
@@ -93,25 +93,28 @@ guardrails are specified in
 
 | Verb | Description |
 |------|-------------|
-| `/cadence:status` | System dashboard, or drill into pursuits/projects/actions. |
-| `/cadence:find` | Substring search across projects, ideas, captures, and pursuits. |
+| `/cadence:status` | System dashboard, navigation-led ("This week" framing + Active Pursuits tables + Active Brainstorms + On Hold Pursuits + Heads up + Likely next moves), or drill into a pursuit/project. |
+| `/cadence:find` | Substring search across projects, brainstorms, captures, and pursuits. |
 | `/cadence:help` | Browse the verb surface — catalogue, group, or single verb. |
 
-### Internal verbs (chained, not user-facing)
+### Hidden verbs (explicit invocation only)
 
-These are real verbs the agent invokes internally; users typically don't
-type them directly. They appear when chained from another verb's flow.
+Not on the visible 12-verb catalogue. They're gated to explicit
+invocation because they write to state the user can't easily undo
+(e.g., filing a public GitHub issue). The agent **suggests** them at
+breakpoints when chat language signals intent, but never auto-fires.
 
-- **`/cadence:develop`** — chained from `/brainstorm` when convergence is ready (PPCo, criteria, pre-mortems on Ideas).
-- **`/cadence:promote`** — chained from `/develop` or `/start` at graduation moments (Idea → Pursuit/Project/Action with the appropriate gate).
-
-Users CAN invoke them explicitly; the design target is conversational
-discovery. The agent surfaces "running `/cadence:promote` — this advances
-an Idea to a Project" as a teaching moment when the chain fires.
+- **`/cadence:report`** — file an issue against the upstream Cadence
+  repo. Privacy-by-default; never auto-includes pursuit/project content.
+- **`/cadence:incoming`** — maintainer-side triage of inbound issues
+  against the upstream Cadence repo. Routes each to an action, project,
+  capture, close, or defer. Requires `gh`.
+- **`/cadence:mcp-pull`** — bulk ingest from a Claude-Code-registered
+  MCP server into `thoughts/unprocessed/` as captures for later triage.
 
 ### System behavior (not a verb)
 
-- **`reconciler`** — runs automatically at SessionStart hook (every fresh session) and during `/reflect` Get Clear. Surfaces stale state, aging Ideas, dormant projects, structural issues. The CLI subcommand `cadence flags` is available for power users who want to query on demand.
+- **`reconciler`** — runs automatically at SessionStart hook (every fresh session) and during `/reflect` Get Clear. Surfaces overdue waiting-for items, dormant projects, Inbox pressure, closing-in pursuits, and structural inconsistencies. The CLI subcommand `cadence flags` is available for power users who want to query on demand.
 
 ## Quick Navigation
 
@@ -152,15 +155,16 @@ verbs in one mode, or a single verb name to see its full contract.
 ## The Pipeline
 
 ```
-  Idea ──► Pursuit ──► Project ──► Action
-   │         │           │            │
-  Why?    Intent?    Concrete?   /complete
+   Pursuit ──► Project ──► Action
+      │           │            │
+   Why?       Intent?    Concrete?
 ```
 
-Three graduation gates. `brainstorm` generates Seeds. `develop`
-evaluates them (chained from brainstorm). `promote` advances them
-through the gate that matches the target level (chained from develop
-or start).
+Pursuits are intentional commitments tied to values or roles. Projects are scoped efforts framed by an Intent narrative. Actions are atomic tasks.
+
+Divergent exploration happens in **brainstorm workspaces** at `brainstorms/<slug>/` that run a phase machine (`diverging → converging → crystallized | archived`). `/cadence:brainstorm --crystallize` materializes the chosen solution as a Pursuit or Project, lifting the workspace's notes into Intent + initial Actions.
+
+Unsorted material lives in the **Inbox** — a view, not a directory, over untriaged captures (`thoughts/unprocessed/`) and brainstorms still in `diverging`. Triage moves material out into a real outcome (action, project, brainstorm, close-with-reason).
 
 ## Configuration
 

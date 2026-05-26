@@ -44,32 +44,38 @@ The operative phrasing for each mode lives in
 `cadence-plugin/skills/reflect/SKILL.md`. This doc is the narrative
 overview; the skill is the prompt source-of-truth.
 
-## Phase 1 — Get Clear
+## Phase 1 — Get Clear (awareness block, not triage clearinghouse)
 
-**Purpose:** Process everything that's accumulated. Restore trust in the system.
+**Purpose:** Make the user aware of what's drifting and offer a choice. Move on. Get Clear is intentionally short — the moment-of-capture menu and `/cadence:start inbox` handle the per-item triage work; Reflect's job is reflection, not clearinghouse.
 
 ### Steps
-1. **Process captures** — Triage each unprocessed capture from the parking
-   lot. Route to Idea (Seed), Action, or discard. Confirm with user.
-2. **Clear 2-minute items** — Surface trivial actions from active projects.
-   Do them now or consciously defer them.
-3. **Review reconciler flags** — Run full reconciler checks including:
-   - Waiting-for items past their expected date
-   - Projects with no activity in 14+ days
-   - Markers older than the stale threshold
-   - Aging Seeds (captured but never developed)
-   - Unpromoted Developed Ideas
-   - Growing backlog ratio (generation outpacing resolution)
-   - Long-running projects (propose split-or-promote)
-   - Structural issues (orphaned actions, vague naming)
-   - Someday pursuit cues
-   Present each flag interactively: act, defer, or dismiss.
-4. **Project relevance check** — Review every active project. Is it still
-   relevant? Should it be on_hold, dropped, or restructured?
+
+1. **Compute the awareness counts** from `cadence report --json`:
+   - **Inbox** total + oldest-age (via `inboxItems(snapshot)`)
+   - **Dormant projects** (flags with `kind: dormant_project`)
+   - **Closing-in pursuits** (flags with `kind: closing_in_on_resolution`)
+   - **WIP** (active projects with ≥1 unchecked action) vs `max_active_projects`
+
+2. **Render the canonical awareness block** from `cadence-plugin/workflows/coaching-strings.md`:
+
+   ```
+   Inbox: <N> items (oldest <D>d)  ·  Dormant: <M> projects  ·  Closing-in: <K> pursuits  ·  WIP: <X>/<max>
+
+   Want to handle these now, or note them in the reflection and move on?
+     - 'handle' — hand off to /cadence:start inbox (or /resolve <project>); reflection persists at status: in_progress, phase: get_clear
+     - 'note' — append the awareness counts to the reflection body and proceed to Get Focused
+     - 'pause' — exit; reflection stays in_progress for next time
+   ```
+
+   When all counts are zero: "Inbox empty, no dormant, no closing-in, WIP healthy. Going straight to Get Focused."
+
+3. **Branch on the user's choice**:
+   - `handle` — persist at `phase: get_clear`, forward to `/cadence:start inbox` / `/cadence:resolve <project>` / `/cadence:reconcile` depending on which signal the user picks. Next `/cadence:reflect` resumes here cleanly.
+   - `note` — append counts to the reflection body, advance to Phase 2.
+   - `pause` — persist at `phase: get_clear`, exit.
 
 ### Completion
-Phase 1 is complete when all captures are triaged, flags are reviewed,
-and every project has been confirmed as relevant or acted on.
+Phase 1 is complete when the user has picked `note` (advance to Phase 2) OR when all counts are zero (auto-advance).
 
 ## Phase 2 — Get Focused
 

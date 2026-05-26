@@ -19,7 +19,7 @@ lives in `cadence-reference.md` — load on demand.
 - **Narrative**: Generated writing from activity data. McAdams structure: what happened / what it meant / what shifted / what's next. Each generated narrative carries a watermark in its frontmatter (cadence, consumed_through_commit) — the narrative IS the pointer into the project-file activity stream.
 - **Leveraged Priority**: The ONE thing that defines next week's win. Set during Reflect.
 - **Intent**: A project's narrative section — motivation, scope, felt-sense of what "done" looks like. Co-edited with the agent as actions land and the work focuses. See `cadence-reference.md` for "Intent and Actions".
-- **Reconciler**: Background process that flags overdue waiting-for items, dormant projects, aging seeds, structural issues.
+- **Reconciler**: Background process that flags overdue waiting-for items, dormant projects, Inbox pressure (untriaged material above the soft cap), closing-in pursuits, structural inconsistencies (active projects with no open actions), inbound issues piling up on the upstream Cadence repo.
 - **2-Minute Item**: An action completable in under two minutes. Surfaced immediately when identified, cleared first during Reflect.
 
 ## One Voice
@@ -72,15 +72,15 @@ state.
   `on_hold` → `active`; triggers upward completion prompts.
 - **`/resolve <project>`** wraps up a project. Default `--state complete`
   walks the intent-feel-achieved dialogue and sets status=done.
-  `--state dropped --reason "<text>"` drops with override-with-reason
-  for unresolved Ideas.
-- **`/resolve <pursuit>`** walks the resolution ritual (absolute Ideas
-  block + cleaning). Default routes to `_archived/` (completed — what
-  shipped). `--state dropped --reason "<text>"` routes to `_dropped/`
-  (didn't ship — what got learned). Both paths produce a resolution
-  narrative; the framing differs (closure vs drop) but the ritual is
-  the same. If a pursuit just needs setting aside for later, use
-  `cadence move-pursuit --to someday` instead — that's a different
+  `--state dropped --reason "<text>"` drops with a required reason.
+- **`/resolve <pursuit>`** walks the resolution ritual (absolute block
+  on open projects + active brainstorms; each gets resolved,
+  crystallized, or archived). Default routes to `_archived/` (completed
+  — what shipped). `--state dropped --reason "<text>"` routes to
+  `_dropped/` (didn't ship — what got learned). Both paths produce a
+  resolution narrative; the framing differs (closure vs drop) but the
+  ritual is the same. If a pursuit just needs setting aside for later,
+  use `cadence move-pursuit --to someday` instead — that's a different
   move (no ritual, no narrative).
 - **`/waiting`** records an external blocker on a project's
   `waiting_for` array.
@@ -198,8 +198,8 @@ both:
    `Available actions:` block on every `/status` drill-down. The same
    pattern extends to every verb. Source the suggestions in this order
    of priority: (a) state-derived hints — what's natural to do next
-   given the new state (e.g., after `/promote` of an Idea→Project,
-   suggest `/start <project>` and `/brainstorm <project>`); (b)
+   given the new state (e.g., after `/brainstorm --crystallize`
+   materializes a Project, suggest `/start <project>`); (b)
    verb-hint tips from the library (`cadence tip-pick --triggers
    verb-<name>,state-<…> --types verb-hint`); (c) generic next-step
    prompts that match the cognitive mode. Render as a short bulleted
@@ -350,7 +350,7 @@ Hard rules across all verbs:
 - No evaluative praise — feedback is informational and specific
 - No mid-flow interruptions — nudges and flags live at breakpoints
 - No "why did you fail?" prompts — use "what happened?" and "what shifted?"
-- No LLM-generated Ideas during brainstorm — the agent facilitates, the user generates
+- No LLM-generated ideas during the diverging phase of brainstorm — the agent facilitates, the user generates. (The converging phase is where the LLM's convergent bias becomes an asset.)
 - No session ceremony — the project file is the durable record
 - **No speculative deadlines.** Do not propose `--target` dates when
   creating pursuits or projects. Only suggest a target when the user

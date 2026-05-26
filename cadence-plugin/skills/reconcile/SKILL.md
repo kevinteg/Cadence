@@ -1,5 +1,5 @@
 ---
-description: Quiet report of system health — stale state, aging Ideas, dormant projects. TRIGGER on explicit /cadence:reconcile invocation, OR when the user asks for a system health check by name (e.g., "reconcile the system", "show flags", "what's gone stale"). SKIP for general state questions that don't request the health report.
+description: Quiet report of system health — overdue waiting-fors, dormant projects, Inbox pressure, closing-in pursuits, structural inconsistencies. TRIGGER on explicit /cadence:reconcile invocation, OR when the user asks for a system health check by name (e.g., "reconcile the system", "show flags", "what's gone stale"). SKIP for general state questions that don't request the health report.
 ---
 
 # /reconcile
@@ -27,9 +27,8 @@ prompting for action.
    If null, skip silently. If returned, render inline before delegating.
 
 2. **Delegate to the reconciler subagent.** Avoid pulling the full
-   `cadence flags --json` and `cadence ideas --json` payloads into this
-   thread; the agent runs the scans in isolation and returns a tight
-   flag list.
+   `cadence flags --json` payload into this thread; the agent runs the
+   scans in isolation and returns a tight flag list.
 
    Invoke via the Agent tool:
    - `subagent_type: cadence:reconciler`
@@ -59,14 +58,13 @@ inline:
 cadence flags
 ```
 
-Present the CLI output verbatim. For the idea-specific checks the CLI
-doesn't yet implement (`aging_seed`, `unpromoted_idea`,
-`growing_backlog`), additionally query `cadence ideas --json` and
-`cadence pursuits --json`, apply the thresholds from
-`workflows/reconciler.md`, and append any matches to the report.
+Present the CLI output verbatim. The CLI's `cadence flags` covers the
+full v1.1 flag set: overdue waiting-fors, dormant projects, structural
+active-no-open-actions, WIP-over-limit, closing-in pursuits,
+inbox-pressure, inbound-issues-piling-up.
 
 The fallback keeps /reconcile functional during plugin issues but
-pulls bulk JSON into the main context — the agent path is preferred
+pulls bulk output into the main context — the agent path is preferred
 whenever it works.
 
 ## Guardrails

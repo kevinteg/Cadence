@@ -134,94 +134,52 @@ the section is parsed-but-ignored.
 
 ---
 
-## Idea-Specific Checks
+## Closing-In and Inbox Checks
 
-### 6. Aging Seeds
+### 6. Closing-In on Resolution
 
-**Type:** `aging_seed`
+**Type:** `closing_in_on_resolution`
 **Severity:** `info`
 
 **Logic:**
-1. Scan `pursuits/*/ideas/` and `_seeds/` for Ideas with `state: seed`
-2. Flag if created date is older than 14 days
+1. For each active pursuit, count resolved (done|dropped) vs unresolved (active|on_hold) projects
+2. Flag if ≥1 project is resolved AND 1-2 unresolved projects remain
 
-**Suggestion format:** "Seed [idea] has been sitting for [N days] — develop, promote, or close?"
+**Suggestion format:** "[pursuit] closing in ([R]/[T] done) — what would need to be true to close?"
 
-### 7. Unpromoted Developed Ideas
+**Surfaces in:** `/status`, `/reconcile`, `/reflect`. The dashboard renders this inline as `(closing in)` next to the pursuit header; the curation surface uses it to rank a `/cadence:status <pursuit>` next-move.
 
-**Type:** `unpromoted_idea`
+### 7. Inbox Pressure
+
+**Type:** `inbox_pressure`
+**Severity:** `info`
+
+**Logic:**
+1. Compute `inboxItems(snapshot).counts.total` — the union of untriaged captures + brainstorms in `phase: diverging`
+2. Flag once if total exceeds `cadence.yaml` `inbox_soft_threshold` (default 10)
+
+The flag carries the bucket breakdown (`fresh` ≤2d / `aged` 3-7d / `overdue` >7d) so the dashboard's Inbox bullet can render the per-bucket counts inline.
+
+**Suggestion format:** "Inbox: [N] items ([O] overdue, [A] aged, [F] fresh) — above soft cap ([T]). Run /cadence:start inbox to walk them."
+
+**Surfaces in:** `/status`, `/reconcile`, `/reflect` (Get Clear awareness block).
+
+### 8. Inbound Issues Piling Up
+
+**Type:** `inbound_issues_piling_up`
 **Severity:** `warning`
 
 **Logic:**
-1. Scan Ideas with `state: developed`
-2. Flag if `developed_at` is older than 7 days
+1. Read the upstream owner/repo from `cadence plugin-info --json`
+2. Query open issues bearing neither `triaged-routed` nor `triaged-deferred` via `gh issue list`
+3. Flag if count exceeds `cadence.yaml` `incoming_queue_threshold` (default 5)
+4. Cache result in `.cadence/inbound-cache.json` for `incoming_queue_cache_ttl_minutes` (default 15) to avoid hammering GitHub
 
-**Suggestion format:** "[idea] was developed [N days] ago but not promoted — promote, close, or revisit?"
+Skipped silently when `gh` is unavailable or unauthed — no error, no flag.
 
-### 8. Growing Backlog Ratio
+**Suggestion format:** "[N] untriaged issues on `<owner/repo>` — /cadence:incoming to triage."
 
-**Type:** `growing_backlog`
-**Severity:** `warning`
-
-**Logic:**
-1. For each active pursuit, count Ideas in seed or developed state
-2. Count Ideas promoted or closed in the last 30 days
-3. Flag if unresolved Ideas > 2x resolved Ideas (generation outpacing resolution)
-
-**Suggestion format:** "[pursuit] has [N] unresolved Ideas and only resolved [M] recently — time for a develop pass?"
-
-### 9. Long-Running Projects
-
-**Type:** `long_running_project`
-**Severity:** `info`
-
-**Logic:**
-1. For each active project, find the oldest marker referencing it
-2. Flag if the project has been active for 30+ days with less than 50% of actions checked
-
-**Suggestion format:** "[project] has been active for [N days] with [X/Y] actions done — split into smaller projects, or promote to its own Pursuit?"
-
-### 10. Pursuit Completion Proximity
-
-**Type:** `pursuit_near_completion`
-**Severity:** `info`
-
-**Logic:**
-1. For each active pursuit, count done vs total projects
-2. Flag if only 1-2 projects remain (excluding on_hold)
-
-**Suggestion format:** "[pursuit] has [N] project(s) remaining — close to completion"
-
-Note: Idea-specific checks (6-8) surface during /reflect only, not /status.
-Long-running projects and pursuit proximity surface in both.
-
-### 11. Stale Inbox Seed
-
-**Type:** `stale_inbox_seed`
-**Severity:** `warning`
-
-**Logic:**
-1. Scan ideas with `parent: inbox` and `state: seed`
-2. Flag each whose `ageDays` exceeds `inbox_seed_stale_days` (default 7 — one Reflect cycle)
-
-**Suggestion format:** "Inbox seed `[idea]` has been sitting [N days] (threshold [M]d) — move to a pursuit, promote, or close. Inbox is a triage zone, not a home."
-
-**Distinct from `aging_seed`:** that check fires at 14d for *any* seed regardless of parent; this one is Inbox-only with a shorter horizon because Inbox is explicitly transient.
-
-**Surfaces in:** `/status`, `/reconcile`, `/reflect`. One flag per stale seed (intentional — each seed is its own triage decision).
-
-### 12. Inbox Overcap
-
-**Type:** `inbox_overcap`
-**Severity:** `info`
-
-**Logic:**
-1. Count ideas with `parent: inbox` and `state: seed`
-2. Flag once if the count exceeds `inbox_seed_softcap` (default 10)
-
-**Suggestion format:** "Inbox has [N] seeds (soft cap [M]) — schedule a triage pass via /cadence:develop."
-
-**Surfaces in:** `/status`, `/reconcile`, `/reflect`. One flag total — this is a volume signal, separate from the per-seed age signal.
+**Surfaces in:** `/status`, `/reconcile`. (Maintainer-mode signal; not surfaced during `/reflect` Get Clear.)
 
 ---
 

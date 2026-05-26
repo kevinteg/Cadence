@@ -61,14 +61,15 @@ In Claude Code, run `/cadence:init` to bootstrap, then `/cadence:start` to begin
 ```
 CLAUDE.md                    Agent entry point (imports cadence-runtime.md)
 cadence.yaml                 Repo-local configuration
-cadence-plugin/              The Claude Code plugin (skills, runtime, workflows, deck, tips, CLI)
-pursuits/                    Pursuits with projects and ideas
-thoughts/                    Captured thoughts awaiting triage
+cadence-plugin/              The Claude Code plugin (skills, runtime, workflows, deck, tips, CLI, agents, hooks)
+pursuits/                    Active pursuits and their projects; _archived/ and _dropped/ hold resolved pursuits
+brainstorms/                 Divergent-ideation workspaces (phase machine: diverging → converging → crystallized | archived)
+thoughts/                    Captured thoughts awaiting triage (the Inbox view also surfaces diverging brainstorms)
 reflections/                 Weekly reflection artifacts
-narratives/                  Generated narratives
+narratives/                  Generated narratives + drafts/ + session-log.md (Stop-hook audit trail)
 validations/                 Pending fresh-session validations queue
 journeys/                    User-journey YAML tests
-docs/                        Reference documentation (this directory)
+docs/                        Vision, architecture, research, teaching-tips, Marimo Console design
 ```
 
 ## This Repo Is Its Own First User
@@ -81,6 +82,7 @@ The pursuit `improve-ux-and-vision` (currently active) and the archived `build-c
 - **`docs/architecture.md`** — design rationale: why the model is shaped this way, what tradeoffs got made.
 - **`docs/research-references.md`** — research foundations mapped to design patterns (Allen, Newport, Doerr, Kahneman, McAdams, Gollwitzer, Karpathy, Willison, etc.).
 - **`docs/teaching-tips-research.md`** — the curated content library that powers the in-product tip surfaces.
+- **`docs/marimo-console-design.md`** — forward-looking design notes for Cadence Console (Marimo notebook view). Not yet shipped.
 
 Operational truth lives inside the plugin:
 
