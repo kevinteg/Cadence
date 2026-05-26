@@ -233,7 +233,7 @@ cadence init                         # bootstrap a new repo
 
 Inside Claude Code these are invoked as `/cadence:<verb>` via the Cadence plugin.
 
-Hidden verbs (not on the visible 12-verb surface; explicit-invocation only): `/report` files an issue against the upstream Cadence repo, `/incoming` runs maintainer-side triage of inbound issues, `/mcp-pull` is the bulk-ingest path for pulling many MCP resources at once. The reconciler runs as system behavior. The CLI also exposes power-user subcommands (`cadence flags`, `cadence project-activity`, `cadence pending-validation-*`, `cadence tip-*`, `cadence dismiss-splash`, `cadence stop-hook`, etc.) for direct use outside the slimmed verb surface.
+Hidden verbs (not on the visible 12-verb surface; explicit-invocation only): `/report` files an issue against the upstream Cadence repo, `/incoming` runs maintainer-side triage of inbound issues, `/mcp-pull` is the bulk-ingest path for pulling many MCP resources at once. The reconciler runs as system behavior. The CLI also exposes power-user subcommands (`cadence flags`, `cadence project-activity`, `cadence pending-validation-*`, `cadence tip-*`, `cadence stop-hook`, etc.) for direct use outside the slimmed verb surface.
 
 ---
 

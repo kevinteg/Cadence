@@ -8,12 +8,8 @@ import { getInboundCount } from './scan/inbound.js'
 import { report } from './report/reconciler.js'
 import { renderStatus, renderFlags } from './render/status.js'
 import {
-  computeStateHash,
   isEmptyRepo,
-  recordSplashEmission,
   renderEmptyRepoCoaching,
-  shouldSuppressSplash,
-  writeDismissedUntil,
 } from './sessionstart.js'
 import { runStopHook } from './stophook.js'
 import { computeSuggestionSignals } from './render/signals.js'
@@ -156,27 +152,11 @@ cli
       const inbound = await composeInboundFlag(repoRoot, snapshot)
       if (inbound) result.flags.push(inbound)
       if (opts.hookOutput) {
-        // The hook-output path differs from the bare CLI in three
-        // ways: it (a) checks suppression and emits empty when the
-        // state hasn't changed since the last emission, (b) emits
-        // the empty-repo coaching block instead of the dashboard
-        // when state is empty, and (c) records the emission so the
-        // next call's suppression check has a baseline.
-        const hash = computeStateHash(snapshot)
-        const decision = await shouldSuppressSplash(repoRoot, hash)
-        if (decision.suppress) {
-          // Emit an empty hookSpecificOutput envelope — Claude Code
-          // sees no systemMessage and adds nothing to context.
-          process.stdout.write(
-            JSON.stringify({
-              hookSpecificOutput: { hookEventName: 'SessionStart' },
-            }) + '\n',
-          )
-          return
-        }
-        // Tip pick — frequency-capped at the category level. The
-        // empty-repo branch skips this (the coaching block is the
-        // teaching surface; a tip would crowd it).
+        // The hook-output path differs from the bare CLI in one way:
+        // empty-repo state renders the coaching block instead of the
+        // dashboard. The hook always fires — splash suppression was
+        // removed deliberately (state-hash dedup turned the surface
+        // into a guessing game about whether the hook ran at all).
         const { pickDashboardTip } = await import('./tip/picker.js')
         const tip = isEmptyRepo(snapshot)
           ? null
@@ -193,7 +173,6 @@ cli
             },
           }) + '\n',
         )
-        await recordSplashEmission(repoRoot, hash)
       } else if (opts.json) {
         process.stdout.write(JSON.stringify(result, null, 2) + '\n')
       } else {
@@ -209,29 +188,6 @@ cli
       }
     },
   )
-
-cli
-  .command(
-    'dismiss-splash',
-    'Suppress the SessionStart splash for a window. Writes .cadence/dismissed_until <ISO timestamp>; the splash returns automatically once the window passes.',
-  )
-  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--hours <n>', 'How many hours to suppress for (default: 24)', {
-    type: [Number],
-  })
-  .action(async (opts: { root?: string; hours?: number | number[] }) => {
-    const repoRoot = await resolveRepoRoot(opts.root)
-    const hours = Array.isArray(opts.hours) ? opts.hours[0] : opts.hours
-    const windowHours = typeof hours === 'number' && hours > 0 ? hours : 24
-    const until = new Date(Date.now() + windowHours * 60 * 60 * 1000)
-    await writeDismissedUntil(repoRoot, until)
-    process.stdout.write(
-      JSON.stringify({
-        dismissed_until: until.toISOString(),
-        hours: windowHours,
-      }) + '\n',
-    )
-  })
 
 cli
   .command(

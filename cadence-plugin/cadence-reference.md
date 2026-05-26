@@ -825,46 +825,22 @@ invokes `cadence status --hook-output`. The hook emits a JSON
 envelope with `systemMessage` (rendered inline) and
 `hookSpecificOutput.additionalContext` (added to the model's context).
 
-Three behaviors specific to `--hook-output`:
+One behavior specific to `--hook-output`:
 
-1. **Empty-repo branch.** When `isEmptyRepo(snapshot)` returns
-   true — zero pursuits AND Inbox empty AND
-   `validations/pending.md` empty — the hook emits the canonical
-   empty-repo coaching block from `coaching-strings.md` instead of
-   the dashboard. The bare CLI does NOT branch this way; an explicit
-   `/status` always renders the dashboard.
+**Empty-repo branch.** When `isEmptyRepo(snapshot)` returns
+true — zero pursuits AND Inbox empty AND
+`validations/pending.md` empty — the hook emits the canonical
+empty-repo coaching block from `coaching-strings.md` instead of
+the dashboard. The bare CLI does NOT branch this way; an explicit
+`/status` always renders the dashboard.
 
-2. **Suppression — recent + unchanged.** A
-   `.cadence/last_session_block.json` file stores
-   `{ timestamp, hash }` from the previous emission. `computeStateHash`
-   in `src/sessionstart.ts` hashes pursuits/projects/inbox/brainstorms/
-   pending-validations state into a 16-char hex string. If the hash
-   is unchanged AND less than 60 minutes have passed, the hook emits
-   an empty envelope (no `systemMessage`, no `additionalContext`).
-
-3. **Suppression — explicit dismiss.** A `.cadence/dismissed_until`
-   file (ISO timestamp) suppresses the splash regardless of state
-   change. Written by `cadence dismiss-splash --hours <N>` (default
-   24); auto-expires when `now > until`.
-
-After every non-suppressed emission, `recordSplashEmission` updates
-`.cadence/last_session_block.json` with the current hash and
-timestamp.
-
-The bare `cadence status` CLI bypasses all three branches — the
-user explicitly asked for the dashboard.
-
-### `cadence dismiss-splash` CLI
-
-```
-cadence dismiss-splash [--hours <N>]
-```
-
-Writes `.cadence/dismissed_until <ISO>` with `now + N hours` (default
-24). The SessionStart hook respects the file until the timestamp
-passes. To clear early, delete `.cadence/dismissed_until` or run
-`dismiss-splash --hours 0` (any non-positive value defaults to 24,
-so manual deletion is the actual escape hatch).
+The hook always fires — there is no suppression layer. State-hash
+dedup was tried (60-minute window via `.cadence/last_session_block.json`)
+along with an explicit `cadence dismiss-splash --hours N` override,
+both removed because they turned the hook into a guessing game about
+whether it had actually run. The dashboard reappears on every new
+conversation; the tip category cool-down in `pickDashboardTip` keeps
+the marginalia from feeling repetitive.
 
 ### Stop hook + session log
 

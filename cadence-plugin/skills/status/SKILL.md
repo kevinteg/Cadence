@@ -138,19 +138,9 @@ the SessionStart hook, empty-state answers, and the
 ## SessionStart hook output
 
 The SessionStart hook reuses `cadence status` via the `--hook-output`
-flag. It adds two behaviors not present on the bare CLI:
-
-- **Suppression** — `.cadence/last_session_block.json` (state hash +
-  timestamp) suppresses the splash when state is unchanged AND less
-  than 60 minutes have passed since the last emission. A
-  `.cadence/dismissed_until <ISO>` file (written by
-  `cadence dismiss-splash --hours <N>`) suppresses the splash for the
-  named window regardless of state change.
-- **Empty-state branch** — when `isEmptyRepo()` returns true, the
-  hook emits the canonical coaching block instead of the dashboard.
-
-The bare CLI bypasses both — the user explicitly asked for the
-dashboard.
+flag. The hook always fires; the only behavior not present on the bare
+CLI is the empty-state branch — when `isEmptyRepo()` returns true, the
+hook emits the canonical coaching block instead of the dashboard.
 
 ## Drill-down action menus
 

@@ -293,5 +293,3 @@ That's the full loop. The same loop works for any pursuit — physical (this one
 **SessionStart hook didn't fire on the first run.** Known Claude Code bug for marketplace-installed plugins ([anthropics/claude-code#10997](https://github.com/anthropics/claude-code/issues/10997)). The local `--plugin-dir` install path is unaffected.
 
 **The dashboard says "Inbox: empty ✓" but I captured something.** Captures land at `thoughts/unprocessed/`. Confirm the file exists; the Inbox view reads from there.
-
-**I want the SessionStart splash to be quieter.** Run `cadence dismiss-splash --hours 24` (or any duration) to suppress it for the named window. The splash also auto-suppresses when state hasn't changed in 60 minutes.
