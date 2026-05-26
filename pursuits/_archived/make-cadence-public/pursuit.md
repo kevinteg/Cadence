@@ -1,7 +1,7 @@
 ---
 id: make-cadence-public
 type: someday
-status: active
+status: archived
 created: 2026-04-17
 cue:
   trigger: review

@@ -1,7 +1,7 @@
 ---
 id: mcp-integration-story
 pursuit: make-cadence-public
-status: active
+status: done
 created: 2026-05-21
 origin:
   kind: github_issue
@@ -188,7 +188,7 @@ Lesson: integration correctness is necessary but not sufficient — once the arc
 - [x] Implement the minimal MCP-client adapter (TypeScript). Stdio transport first; HTTP later if needed. No real server required at this step — unit-tested against a fake MCP responder.
 - [x] Wire a cadence:mcp-pull CLI subcommand (or extend an existing verb) that reads a named MCP server's resources and writes each as a capture. Includes server selection, resource filter, dedup against existing captures.
 - [x] Document the cadence.yaml mcp_servers shape + the mcp-pull surface in cadence-reference.md and workflows/verb-contracts.md.
-- [ ] VALIDATE on work computer: user runs cadence:mcp-pull against the real Glean MCP server, captures what worked / what broke / what was surprising, relays findings back here for iteration. Loop until the first integration target is genuinely useful, not just functional.
+- [x] VALIDATE on work computer: user runs cadence:mcp-pull against the real Glean MCP server, captures what worked / what broke / what was surprising, relays findings back here for iteration. Loop until the first integration target is genuinely useful, not just functional.
 - [x] Add MCP server discovery — read ~/.claude.json mcpServers (user scope) + <repoRoot>/.mcp.json (project scope) into the same McpServerConfig[] shape. Merge with cadence.yaml entries; precedence cadence.yaml > .mcp.json > ~/.claude.json. Surface via new 'cadence mcp-list' subcommand for verification.
 - [x] Add HTTP transport to the adapter — wrap SDK's StreamableHTTPClientTransport, thread auth headers from cfg.headers via requestInit, get the same timeout + error-wrapping treatment as stdio. Stop rejecting kind: http at the adapter boundary.
 - [x] ~~Investigate Claude Code's OAuth token store and auto-share credentials with Cadence for HTTP MCP servers~~ **dropped — wrong layer.** Diagnostic on work computer showed `claude mcp get` doesn't expose the token and `~/.claude/` has no cred files (token lives in macOS Keychain). Reading the keychain entry directly would couple us to Claude Code's internals; building our own OAuth client duplicates work the host already does. The right answer is to stop trying to talk to the MCP server ourselves — let Claude Code (the host) do it, and have Cadence consume MCP via the agent's tool-call surface. See "Architecture pivot" in Notes.

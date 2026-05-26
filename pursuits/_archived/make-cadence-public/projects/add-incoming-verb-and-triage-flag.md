@@ -1,7 +1,7 @@
 ---
 id: add-incoming-verb-and-triage-flag
 pursuit: make-cadence-public
-status: active
+status: done
 created: 2026-05-21
 ---
 
