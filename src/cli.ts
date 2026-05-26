@@ -236,33 +236,21 @@ cli
 cli
   .command(
     'stop-hook',
-    'Emit a Stop-hook JSON envelope. When state has changed since the last logged stop, appends a one-line session-log entry to narratives/session-log.md and updates .cadence/last_session_log.json. Otherwise no-op. Stdout always emits an empty hookSpecificOutput so Claude Code surfaces nothing to the user.',
+    "Stop-hook handler. When state has changed since the last logged stop, appends a one-line session-log entry to narratives/session-log.md and updates .cadence/last_session_log.json. Otherwise no-op. Emits empty stdout — Claude Code's hook schema rejects hookSpecificOutput for Stop, and empty output naturally surfaces nothing.",
   )
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .action(async (opts: { root?: string }) => {
     const repoRoot = await resolveRepoRoot(opts.root)
     // Silent no-op for uninitialized repos — the Stop hook fires on
     // every turn regardless of whether Cadence is active here.
-    if (!isCadenceRepo(repoRoot)) {
-      process.stdout.write(
-        JSON.stringify({
-          hookSpecificOutput: { hookEventName: 'Stop' },
-        }) + '\n',
-      )
-      return
-    }
+    if (!isCadenceRepo(repoRoot)) return
     try {
       const snapshot = await scan(repoRoot)
       await runStopHook(repoRoot, snapshot)
     } catch {
-      // Stop hooks must never break a session. Swallow failures and
-      // emit the empty envelope — the worst case is a missed log line.
+      // Stop hooks must never break a session. Swallow failures —
+      // worst case is a missed log line.
     }
-    process.stdout.write(
-      JSON.stringify({
-        hookSpecificOutput: { hookEventName: 'Stop' },
-      }) + '\n',
-    )
   })
 
 cli
