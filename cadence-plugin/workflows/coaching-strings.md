@@ -220,6 +220,40 @@ surfaces (reflect-due, narrate-week, narrate-today). Filled out with
 `/cadence:help` ("Browse the full verb surface.") when room remains
 and no higher-priority signal applies.
 
+## Tip footer — `/cadence:status`, SessionStart hook
+
+The dashboard ends with an optional tip from the curated library — a
+brain-tickler quote rendered as smart-colleague marginalia. Shape:
+
+```
+---
+
+*<quote content>*
+— <attribution>
+```
+
+Italicized content, dimmed when color is on. The attribution lives on
+its own line so the source stays legible without taking visual weight
+from the quote.
+
+**Frequency.** The status surface fires every dashboard render, but a
+tip surfaces only when the `status-marginalia` category is off
+cool-down (default: 3 days). A typical user sees a tip on roughly 1 in
+10-15 invocations — present but not wallpaper. The empty-repo branch
+suppresses the tip entirely; the coaching block is the teaching
+surface there.
+
+**Selection.** `pickDashboardTip()` in `src/tip/picker.ts` reads from
+`cadence-plugin/tips/library.yaml`, filtered to `type: quote` with
+`triggers` overlap on `verb-status` or `idle`. Per-tip cool-downs in
+the library file gate which quotes are eligible at any moment.
+
+The wallpaper warning applies here harder than anywhere else: status
+fires constantly. If a tip context starts firing too often in
+practice, lengthen the per-tip cool-down in `library.yaml` or the
+category cool-down in `pickDashboardTip()`. Don't shorten it without
+evidence.
+
 ## Threshold-aware language — guiding principles
 
 1. **Above cap reads as a system observation, not a scold.** "Above

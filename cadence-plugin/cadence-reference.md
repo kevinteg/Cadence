@@ -804,9 +804,16 @@ language per surface.
 ## Likely next moves
 1. `<verb> <target>` — <rationale>
 2. ...
+
+---
+
+*<tip content>*                          (optional, frequency-capped)
+— <tip attribution>
 ```
 
 Each section collapses when its input is empty. The "This week" line takes the first sentence of the LP (lower-cased, trailing punctuation stripped) plus the most recently active project's relative-time label. The "Likely next moves" block is computed by `curateNextMoves()` in `src/render/curation.ts` — priority order: LP alignment → recency → structural urgency → parking-lot pressure → routine surfaces, capped at 3 entries.
+
+The optional tip footer surfaces via `pickDashboardTip()` in `src/tip/picker.ts` — a `type: quote` tip from the library matched on the `verb-status` or `idle` trigger tags, gated by the `status-marginalia` category cool-down (default 3 days). A typical user sees a tip on roughly 1 in 10-15 status invocations; the empty-repo branch suppresses it. See `workflows/coaching-strings.md` "Tip footer" section for the canonical rendering.
 
 Color is opt-in. The bare-CLI status enables ANSI escape codes when stdout is a TTY (with `NO_COLOR` / `FORCE_COLOR` env overrides). The hook-output path always emits plain markdown — ANSI codes would corrupt Claude Code's table rendering.
 

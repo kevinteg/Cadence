@@ -5,6 +5,7 @@ import type {
   Report,
   Snapshot,
 } from '../types.js'
+import type { Tip } from '../tip/library.js'
 import { daysBetween } from '../util/dates.js'
 import { computeSuggestionSignals } from './signals.js'
 import { renderIdleTimePrompt } from '../sessionstart.js'
@@ -52,7 +53,7 @@ import { bold, dim, gray, statusBadge } from './color.js'
  */
 export function renderStatus(
   result: Report,
-  opts: { color?: boolean } = {},
+  opts: { color?: boolean; tip?: Tip | null } = {},
 ): string {
   const color = opts.color ?? false
   const { snapshot, flags } = result
@@ -104,7 +105,33 @@ export function renderStatus(
     out.push(idle)
   }
 
+  if (opts.tip) {
+    out.push('')
+    out.push('---')
+    out.push('')
+    out.push(renderTipBlock(opts.tip, color))
+  }
+
   return out.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd()
+}
+
+/**
+ * Render a tip as a dimmed, italicized one-or-two-liner. Smart-colleague
+ * marginalia: present but quiet. The attribution renders on its own
+ * line so the source is legible without taking visual weight from the
+ * content. See cadence-plugin/tips/README.md for the editorial tone target.
+ */
+function renderTipBlock(tip: Tip, color: boolean): string {
+  // Italic the content (markdown asterisks render in Claude Code; ANSI
+  // dim approximates the same visual weight in a TTY).
+  const content = `*${tip.content.replace(/\n+/g, ' ')}*`
+  const attribution = tip.attribution
+    ? `— ${tip.attribution}`
+    : null
+  const lines: string[] = []
+  lines.push(dim(content, color))
+  if (attribution) lines.push(dim(attribution, color))
+  return lines.join('\n')
 }
 
 /**

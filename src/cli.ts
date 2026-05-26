@@ -174,9 +174,16 @@ cli
           )
           return
         }
+        // Tip pick — frequency-capped at the category level. The
+        // empty-repo branch skips this (the coaching block is the
+        // teaching surface; a tip would crowd it).
+        const { pickDashboardTip } = await import('./tip/picker.js')
+        const tip = isEmptyRepo(snapshot)
+          ? null
+          : pickDashboardTip(repoRoot)
         const text = isEmptyRepo(snapshot)
           ? renderEmptyRepoCoaching()
-          : renderStatus(result)
+          : renderStatus(result, { tip })
         process.stdout.write(
           JSON.stringify({
             systemMessage: text,
@@ -194,8 +201,10 @@ cli
         // The hook-output path above always passes plain markdown —
         // ANSI codes would corrupt Claude Code's table rendering.
         const { shouldEnableColor } = await import('./render/color.js')
+        const { pickDashboardTip } = await import('./tip/picker.js')
+        const tip = pickDashboardTip(repoRoot)
         process.stdout.write(
-          renderStatus(result, { color: shouldEnableColor() }) + '\n',
+          renderStatus(result, { color: shouldEnableColor(), tip }) + '\n',
         )
       }
     },
