@@ -12,24 +12,11 @@ Set up a new repo for Cadence. Only needs to run once per repo.
    root. If it exists, say: "This repo is already set up for Cadence.
    Run /cadence:start to get started."
 
-   **Legacy check:** If `pursuits/wandering/` exists (from a pre-v1.1
-   install), surface a one-line migration note: "This repo has the
-   legacy `pursuits/wandering/` directory. Cadence renamed this to
-   `inbox` in v1.1. To migrate: `git mv pursuits/wandering pursuits/inbox`,
-   then update the pursuit.md frontmatter `id: wandering` → `id: inbox`
-   and the H1 title."
+   **Legacy checks (pre-v1.1 installs):**
+   - `pursuits/wandering/` → was renamed to `inbox` in earlier v1, then retired entirely in v1.1. Surface: "This repo has the legacy `pursuits/wandering/` directory. Inbox is no longer a pursuit in v1.1 (it's a view over untriaged thoughts + diverging brainstorms). Move any seed content from `pursuits/wandering/ideas/` into `thoughts/unprocessed/` as captures (via `cadence write-capture`), then delete `pursuits/wandering/`."
+   - `pursuits/inbox/` → same retirement note. The Inbox concept survives as a view; the pursuit doesn't.
 
-2. **Create the Inbox pursuit via the CLI:**
-   ```bash
-   cadence create-pursuit inbox \
-     --type ongoing \
-     --description "The default home for unattached ideas. Seeds captured here don't yet belong to any pursuit — they're waiting to be developed, promoted, or closed. The Inbox never closes."
-   ```
-   The CLI creates the pursuit directory plus `projects/` and
-   `ideas/` subdirectories.
-
-3. **Create remaining directories** (the CLI doesn't create these
-   yet — they're per-repo, not per-pursuit):
+2. **Create the standard directory layout** (the CLI doesn't create these — they're per-repo, not per-pursuit):
    ```
    pursuits/_someday/
    pursuits/_archived/
@@ -37,8 +24,9 @@ Set up a new repo for Cadence. Only needs to run once per repo.
    reflections/
    narratives/drafts/
    ```
+   No `pursuits/inbox/` — the Inbox is a view, not a directory (see `cadence-runtime.md` Inbox vocabulary entry).
 
-4. **Create cadence.yaml** from defaults. Compute `win_cycles` from
+3. **Create cadence.yaml** from defaults. Compute `win_cycles` from
    today's date — never hardcode a half:
 
    - Determine current year `YYYY` and half (`H1` if month is 1–6, else `H2`)
@@ -78,13 +66,14 @@ Set up a new repo for Cadence. Only needs to run once per repo.
    ```
    Ask the user to confirm or adjust the win_cycle dates and reflect day.
 
-5. **Create .gitignore entries** (append if .gitignore exists):
+4. **Create .gitignore entries** (append if .gitignore exists):
    ```
    _manifest.md
    .cadence.db
+   .cadence/
    ```
 
-6. **Confirm setup**:
+5. **Confirm setup**:
    ```
    Ready. Run /cadence:brainstorm to start generating ideas, or
    /cadence:start if you already have work to track.

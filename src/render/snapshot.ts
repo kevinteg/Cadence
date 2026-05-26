@@ -134,6 +134,7 @@ function flagTarget(flag: Flag): string {
     case 'closing_in_on_resolution':
       return flag.pursuitId
     case 'wip_over_limit':
+    case 'inbox_pressure':
       return ''
     case 'inbound_issues_piling_up':
       return flag.ownerRepo
@@ -160,6 +161,14 @@ function flagDetail(flag: Flag): string {
       const issueWord = flag.count === 1 ? 'issue' : 'issues'
       const cachedNote = flag.fromCache ? ' (cached)' : ''
       return `${flag.count} untriaged ${issueWord}${cachedNote}; /cadence:incoming to triage`
+    }
+    case 'inbox_pressure': {
+      const buckets: string[] = []
+      if (flag.overdue > 0) buckets.push(`${flag.overdue} overdue`)
+      if (flag.aged > 0) buckets.push(`${flag.aged} aged`)
+      if (flag.fresh > 0) buckets.push(`${flag.fresh} fresh`)
+      const breakdown = buckets.length ? ` (${buckets.join(', ')})` : ''
+      return `${flag.count} items${breakdown}; /cadence:start inbox to triage`
     }
   }
 }

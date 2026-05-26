@@ -1,7 +1,7 @@
 ---
 id: extend-ingestion-surface-and-coaching
 pursuit: improve-ux-and-vision
-status: on_hold
+status: active
 created: 2026-05-22
 ---
 
@@ -39,13 +39,13 @@ Done feels like: `cadence:capture --from ~/onboarding.pdf --prompt "first 30 day
 
 ## Actions
 
-- [ ] Extend cadence write-capture CLI with --from <path|url>, --source <name>, --prompt <text>, --dump, --schema-version 2 flags.
-- [ ] Extend cadence write-capture CLI with structured-source frontmatter flags: --raw-path, --source-kind, --source-name, --source-server, --source-query, --status, --two-minute-eligible, --triaged-to, --suggested-outcomes (JSON).
-- [ ] Document v2 thoughts/<id>.md frontmatter schema in cadence-plugin/cadence-reference.md File Formats section; scanner tolerates v1 + v2; document suggested_outcomes shape (per-item outcome hint: two_minute_action | action | project | brainstorm_seed | note).
-- [ ] Add ingest_sources: schema and precedence rules (cadence.yaml > ~/.cadence/sources.yaml) to cadence-plugin/cadence-reference.md (new Capture Ingestion section).
-- [ ] Define the Inbox view in src/scan/ (or src/render/): a function inboxItems(snapshot) → unioning thoughts where status=untriaged + brainstorms where phase=diverging into a single list with shape {kind, id, source, age_days}. Single source of truth — all surfaces consume this.
-- [ ] Add `inbox_pressure` reconciler flag in src/report/reconciler.ts firing when the Inbox view size exceeds inbox_soft_threshold (default 10 in cadence.yaml). Wire into src/render/{status,snapshot}.ts flag-case branches.
-- [ ] Retire pursuits/inbox/ directory and strip pursuit-flavored Inbox references from the runtime vocabulary and reference docs. Inbox stays as a concept; the pursuit goes away. Move-pursuit script for fresh-install repos isn't needed (lazy: delete on next init or on first time we read pursuits/).
+- [x] Extend cadence write-capture CLI with --from <path|url>, --source <name>, --prompt <text>, --dump, --schema-version 2 flags.
+- [x] Extend cadence write-capture CLI with structured-source frontmatter flags: --raw-path, --source-kind, --source-name, --source-server, --source-query, --status, --two-minute-eligible, --triaged-to, --suggested-outcomes (JSON).
+- [x] Document v2 thoughts/<id>.md frontmatter schema in cadence-plugin/cadence-reference.md File Formats section; scanner tolerates v1 + v2; document suggested_outcomes shape (per-item outcome hint: two_minute_action | action | project | brainstorm_seed | note).
+- [x] Add ingest_sources: schema and precedence rules (cadence.yaml > ~/.cadence/sources.yaml) to cadence-plugin/cadence-reference.md (new Capture Ingestion section).
+- [x] Define the Inbox view in src/scan/ (or src/render/): a function inboxItems(snapshot) → unioning thoughts where status=untriaged + brainstorms where phase=diverging into a single list with shape {kind, id, source, age_days}. Single source of truth — all surfaces consume this.
+- [x] Add `inbox_pressure` reconciler flag in src/report/reconciler.ts firing when the Inbox view size exceeds inbox_soft_threshold (default 10 in cadence.yaml). Wire into src/render/{status,snapshot}.ts flag-case branches.
+- [x] Retire pursuits/inbox/ directory and strip pursuit-flavored Inbox references from the runtime vocabulary and reference docs. Inbox stays as a concept; the pursuit goes away. Move-pursuit script for fresh-install repos isn't needed (lazy: delete on next init or on first time we read pursuits/).
 - [ ] Create cadence-plugin/agents/capture-ingest.md: restricted tools (relevant MCP server + Write), bump-in-the-wire prompt. Returns a list of suggested outcomes per distilled item, each tagged with shape (two_minute_action | action | project | brainstorm_seed | note) plus suggested_pursuit / suggested_project where the subagent can infer one. Action-shape detector heuristic (regex over keywords: email, schedule, send, ping, call, file, book, RSVP, reply, text) determines two_minute_action eligibility. Default budget 5 tool calls.
 - [ ] Rewrite cadence-plugin/skills/capture/SKILL.md end-to-end: dispatch capture-ingest for --from / --source paths, gate inline path silent, present the outcome menu after subagent return (default "keep in Inbox", options to land items as action / project / brainstorm-seed / two-minute-action with ELI5 confirm before any write outside thoughts/), add no-input plus no-flags branch that opens $EDITOR with a hint header.
 - [ ] Reconcile cadence-plugin/skills/mcp-pull/SKILL.md with --source: position mcp-pull as the bulk-many path, --source as single-query shorthand; both write captures via the same CLI flags.

@@ -25,7 +25,16 @@ import {
   crystallize,
   setBrainstormPhase,
 } from './write/brainstorm.js'
-import { writeCapture } from './write/capture.js'
+import {
+  resolveBodyFromFlags,
+  writeCapture,
+  type WriteCaptureOpts,
+} from './write/capture.js'
+import type {
+  CaptureSource,
+  CaptureStatus,
+  CaptureSuggestedOutcome,
+} from './types.js'
 import { writeReflection } from './write/reflection.js'
 import {
   addItem,
@@ -500,13 +509,34 @@ cli
   )
 
 cli
-  .command('write-capture', 'Write a thought to thoughts/unprocessed/. When --mcp-server + --mcp-uri are supplied, the capture is stamped with an mcp: frontmatter block, content_hash is auto-computed (sha256 of body), and the write auto-dedups against existing captures by uri and by content hash.')
+  .command(
+    'write-capture',
+    'Write a thought to thoughts/unprocessed/. v1 flags (--body, --mcp-*) stay for backwards-compat with /cadence:mcp-pull. v2 flags (--from / --source / --prompt / --dump / --schema-version 2 + structured --source-* / --status / --two-minute-eligible / --triaged-to / --suggested-outcomes) drive the new ingestion surface. When --source / --mcp-server is present, content_hash is auto-computed (sha256 of body) and the write auto-dedups against existing captures by uri and by content hash.',
+  )
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--body <text>', 'Capture body (required)')
-  .option('--verb-context <ctx>', 'Verb context (note | seed | concern | mcp-pull:<server> | ...)')
-  .option('--mcp-server <name>', 'MCP server name that sourced this capture. Requires --mcp-uri.')
-  .option('--mcp-uri <uri>', 'MCP resource URI. Requires --mcp-server. Enables auto-dedup.')
-  .option('--mcp-mime-type <type>', 'Optional MIME type of the source resource.')
+  .option('--body <text>', 'Capture body. Mutually exclusive with --from and --dump.')
+  .option('--verb-context <ctx>', 'Verb context (note | seed | mcp-pull:<server> | ...)')
+  // v1 mcp flags (legacy)
+  .option('--mcp-server <name>', '[v1] MCP server name that sourced this capture. Requires --mcp-uri.')
+  .option('--mcp-uri <uri>', '[v1] MCP resource URI. Requires --mcp-server. Enables auto-dedup.')
+  .option('--mcp-mime-type <type>', '[v1] Optional MIME type of the source resource.')
+  // v2 user-facing intent flags
+  .option('--from <path-or-url>', 'Read body from a local file or URL (https://...). Mutually exclusive with --body and --dump.')
+  .option('--dump', 'Open $EDITOR to compose body. Mutually exclusive with --body and --from.')
+  .option('--prompt <text>', 'Distillation prompt — what to extract from the source. Stored in frontmatter for later re-runs.')
+  .option('--schema-version <n>', 'Frontmatter schema (default 1 for legacy, 2 for the v2 source/status/suggested_outcomes shape). Auto-set to 2 when any --source-* flag is present.')
+  // v2 structured frontmatter plumbing (used by the capture-ingest subagent)
+  .option('--source-kind <kind>', 'v2 source.kind: inline | stdin | file | url | mcp | dump')
+  .option('--source-name <name>', 'v2 source.name: named query / source identifier (e.g., an ingest_sources entry)')
+  .option('--source-server <name>', 'v2 source.server: MCP server (when --source-kind=mcp)')
+  .option('--source-uri <uri>', 'v2 source.uri: resource URI; enables dedup')
+  .option('--source-query <text>', 'v2 source.query: the actual query string used')
+  .option('--source-mime-type <type>', 'v2 source.mime_type')
+  .option('--raw-path <path>', 'v2 source.raw_path: relative path to thoughts/_raw/<id>.raw.md when the body is a distillation')
+  .option('--status <status>', 'v2 status: untriaged (default) | triaged | discarded')
+  .option('--two-minute-eligible', 'v2 two_minute_eligible: flag this capture as actionable in under two minutes')
+  .option('--triaged-to <ref>', 'v2 triaged_to: outcome reference (e.g., action:pursuit/project/N, project:<id>, brainstorm:<slug>)')
+  .option('--suggested-outcomes <json>', 'v2 suggested_outcomes: JSON array of {kind, suggested_pursuit?, suggested_project?, confidence}')
   .option('--slug <slug>', 'Override the timestamp-based filename slug (batch writers pass per-item discriminators).')
   .action(
     async (opts: {
@@ -516,13 +546,56 @@ cli
       mcpServer?: string
       mcpUri?: string
       mcpMimeType?: string
+      from?: string
+      dump?: boolean
+      prompt?: string
+      schemaVersion?: number | string
+      sourceKind?: string
+      sourceName?: string
+      sourceServer?: string
+      sourceUri?: string
+      sourceQuery?: string
+      sourceMimeType?: string
+      rawPath?: string
+      status?: string
+      twoMinuteEligible?: boolean
+      triagedTo?: string
+      suggestedOutcomes?: string
       slug?: string
     }) => {
-      if (!opts.body) throw new Error('--body is required')
+      // v1 mcp pair guard
       if ((opts.mcpServer && !opts.mcpUri) || (opts.mcpUri && !opts.mcpServer)) {
         throw new Error('--mcp-server and --mcp-uri must be supplied together')
       }
+
       const repoRoot = await resolveRepoRoot(opts.root)
+      const { body, sourceKindHint } = await resolveBodyFromFlags({
+        ...(opts.body ? { body: opts.body } : {}),
+        ...(opts.from ? { from: opts.from } : {}),
+        ...(opts.dump ? { dump: opts.dump } : {}),
+        ...(opts.prompt ? { promptHint: opts.prompt } : {}),
+      })
+
+      // Decide whether v2 frontmatter is requested.
+      const v2 =
+        Number(opts.schemaVersion) === 2 ||
+        Boolean(
+          opts.sourceKind ??
+            opts.sourceName ??
+            opts.sourceServer ??
+            opts.sourceUri ??
+            opts.sourceQuery ??
+            opts.sourceMimeType ??
+            opts.rawPath ??
+            opts.status ??
+            opts.twoMinuteEligible ??
+            opts.triagedTo ??
+            opts.suggestedOutcomes ??
+            opts.prompt ??
+            opts.from ??
+            opts.dump,
+        )
+
       const mcp =
         opts.mcpServer && opts.mcpUri
           ? {
@@ -531,10 +604,52 @@ cli
               ...(opts.mcpMimeType ? { mime_type: opts.mcpMimeType } : {}),
             }
           : undefined
+
+      let source: WriteCaptureOpts['source']
+      if (v2) {
+        const kind: CaptureSource['kind'] =
+          (opts.sourceKind as CaptureSource['kind']) ?? sourceKindHint ?? 'inline'
+        source = {
+          kind,
+          ...(opts.sourceName ? { name: opts.sourceName } : {}),
+          ...(opts.sourceServer ? { server: opts.sourceServer } : {}),
+          ...(opts.sourceUri ? { uri: opts.sourceUri } : {}),
+          ...(opts.sourceQuery ? { query: opts.sourceQuery } : {}),
+          ...(opts.sourceMimeType ? { mime_type: opts.sourceMimeType } : {}),
+          ...(opts.rawPath ? { raw_path: opts.rawPath } : {}),
+        }
+        // For --from <file>, default source.name to the basename if not set.
+        if (sourceKindHint === 'file' && !source.name && opts.from) {
+          source.name = path.basename(opts.from)
+        }
+      }
+
+      let suggested_outcomes: CaptureSuggestedOutcome[] | undefined
+      if (opts.suggestedOutcomes) {
+        try {
+          const parsed = JSON.parse(opts.suggestedOutcomes)
+          if (!Array.isArray(parsed)) {
+            throw new Error('--suggested-outcomes must be a JSON array')
+          }
+          suggested_outcomes = parsed as CaptureSuggestedOutcome[]
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e)
+          throw new Error(`--suggested-outcomes invalid JSON: ${msg}`)
+        }
+      }
+
       const result = await writeCapture(repoRoot, {
-        body: opts.body,
+        body,
         ...(opts.verbContext ? { verb_context: opts.verbContext } : {}),
         ...(mcp ? { mcp } : {}),
+        ...(source ? { source } : {}),
+        ...(opts.status ? { status: opts.status as CaptureStatus } : {}),
+        ...(opts.twoMinuteEligible !== undefined
+          ? { two_minute_eligible: opts.twoMinuteEligible }
+          : {}),
+        ...(opts.triagedTo !== undefined ? { triaged_to: opts.triagedTo } : {}),
+        ...(opts.prompt ? { prompt: opts.prompt } : {}),
+        ...(suggested_outcomes ? { suggested_outcomes } : {}),
         ...(opts.slug ? { slug: opts.slug } : {}),
       })
       process.stdout.write(JSON.stringify(result) + '\n')

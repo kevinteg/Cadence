@@ -280,6 +280,14 @@ function describeFlag(flag: Flag, _snapshot: Snapshot): string {
       const cachedNote = flag.fromCache ? ' (cached)' : ''
       return `inbound: ${flag.count} untriaged ${issueWord} on ${flag.ownerRepo}${cachedNote} — /cadence:incoming to triage`
     }
+    case 'inbox_pressure': {
+      const buckets: string[] = []
+      if (flag.overdue > 0) buckets.push(`${flag.overdue} overdue`)
+      if (flag.aged > 0) buckets.push(`${flag.aged} aged`)
+      if (flag.fresh > 0) buckets.push(`${flag.fresh} fresh`)
+      const breakdown = buckets.length ? ` (${buckets.join(', ')})` : ''
+      return `Inbox: ${flag.count} items${breakdown} — above soft cap (${flag.threshold}). Run /cadence:start inbox to walk them.`
+    }
   }
   const _exhaustive: never = flag
   return _exhaustive

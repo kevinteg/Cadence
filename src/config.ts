@@ -45,6 +45,8 @@ function mergeDefaults(raw: RawConfig): Config {
     incoming_queue_cache_ttl_minutes:
       d.incoming_queue_cache_ttl_minutes ??
       CONFIG_DEFAULTS.incoming_queue_cache_ttl_minutes,
+    inbox_soft_threshold:
+      d.inbox_soft_threshold ?? CONFIG_DEFAULTS.inbox_soft_threshold,
     win_cycle_current: wc.current,
     win_cycle_start: wc.start,
     win_cycle_end: wc.end,

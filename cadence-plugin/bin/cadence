@@ -107,9 +107,9 @@ var require_path = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.convertPosixPathToPattern = exports2.convertWindowsPathToPattern = exports2.convertPathToPattern = exports2.escapePosixPath = exports2.escapeWindowsPath = exports2.escape = exports2.removeLeadingDotSegment = exports2.makeAbsolute = exports2.unixify = void 0;
-    var os = __require("os");
+    var os2 = __require("os");
     var path22 = __require("path");
-    var IS_WINDOWS_PLATFORM = os.platform() === "win32";
+    var IS_WINDOWS_PLATFORM = os2.platform() === "win32";
     var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
     var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
     var WINDOWS_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()[\]{}]|^!|[!+@](?=\())/g;
@@ -5627,8 +5627,8 @@ var require_settings4 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = void 0;
     var fs = __require("fs");
-    var os = __require("os");
-    var CPU_COUNT = Math.max(os.cpus().length, 1);
+    var os2 = __require("os");
+    var CPU_COUNT = Math.max(os2.cpus().length, 1);
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = {
       lstat: fs.lstat,
       lstatSync: fs.lstatSync,
@@ -9851,7 +9851,7 @@ var cac = (name = "") => new CAC(name);
 
 // src/cli.ts
 import { existsSync as existsSync15 } from "node:fs";
-import { readFile as readFile11 } from "node:fs/promises";
+import { readFile as readFile12 } from "node:fs/promises";
 import path21 from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 
@@ -16622,16 +16622,52 @@ var CaptureMcpRefSchema = external_exports.object({
   mime_type: external_exports.string().optional(),
   content_hash: external_exports.string().optional()
 });
+var CaptureSourceSchema = external_exports.object({
+  kind: external_exports.enum(["inline", "stdin", "file", "url", "mcp", "dump"]),
+  name: external_exports.string().optional(),
+  server: external_exports.string().optional(),
+  uri: external_exports.string().optional(),
+  query: external_exports.string().optional(),
+  mime_type: external_exports.string().optional(),
+  raw_path: external_exports.string().optional(),
+  content_hash: external_exports.string().optional()
+});
+var CaptureStatusSchema = external_exports.enum(["untriaged", "triaged", "discarded"]);
+var CaptureSuggestedOutcomeSchema = external_exports.object({
+  kind: external_exports.enum([
+    "two_minute_action",
+    "action",
+    "project",
+    "brainstorm_seed",
+    "note"
+  ]),
+  suggested_pursuit: external_exports.string().optional(),
+  suggested_project: external_exports.string().optional(),
+  confidence: external_exports.number().optional()
+});
 var CaptureFrontmatterSchema = external_exports.object({
   captured: external_exports.string(),
   verb_context: external_exports.string().optional(),
   /**
-   * Set on captures synthesized through MCP (via `cadence
-   * write-capture --mcp-*`, driven by the `/cadence:mcp-pull` skill)
-   * so dedup logic can match against the source URI without re-
-   * reading the body. Optional — hand-written captures never have it.
+   * v1 (legacy) — set on captures synthesized through MCP via the
+   * old `cadence write-capture --mcp-*` flags driven by
+   * `/cadence:mcp-pull`. Supersceded by `source:` in v2 but kept for
+   * backwards compat. Scanner reads both.
    */
-  mcp: CaptureMcpRefSchema.optional()
+  mcp: CaptureMcpRefSchema.optional(),
+  /**
+   * Frontmatter schema version. Absent or 1 → v1 shape (just
+   * captured + verb_context + optional mcp:). 2 → v2 shape adds
+   * source / status / two_minute_eligible / triaged_to / prompt /
+   * suggested_outcomes.
+   */
+  schema_version: external_exports.number().optional(),
+  source: CaptureSourceSchema.optional(),
+  status: CaptureStatusSchema.optional(),
+  two_minute_eligible: external_exports.boolean().optional(),
+  triaged_to: external_exports.string().nullable().optional(),
+  prompt: external_exports.string().optional(),
+  suggested_outcomes: external_exports.array(CaptureSuggestedOutcomeSchema).optional()
 });
 var ReflectionFrontmatterSchema = external_exports.object({
   date: external_exports.string(),
@@ -16652,7 +16688,8 @@ var ConfigSchema = external_exports.object({
     waiting_for_grace_days: external_exports.number().optional(),
     dormant_days: external_exports.number().optional(),
     incoming_queue_threshold: external_exports.number().optional(),
-    incoming_queue_cache_ttl_minutes: external_exports.number().optional()
+    incoming_queue_cache_ttl_minutes: external_exports.number().optional(),
+    inbox_soft_threshold: external_exports.number().optional()
   }).optional(),
   wip_limits: external_exports.object({
     max_active_projects: external_exports.number().optional()
@@ -16670,7 +16707,8 @@ var CONFIG_DEFAULTS = {
   reflect_day: "sunday",
   reflect_duration_minutes: 30,
   incoming_queue_threshold: 5,
-  incoming_queue_cache_ttl_minutes: 15
+  incoming_queue_cache_ttl_minutes: 15,
+  inbox_soft_threshold: 10
 };
 
 // src/config.ts
@@ -16700,6 +16738,7 @@ function mergeDefaults(raw) {
     reflect_duration_minutes: reflect.duration_minutes ?? CONFIG_DEFAULTS.reflect_duration_minutes,
     incoming_queue_threshold: d.incoming_queue_threshold ?? CONFIG_DEFAULTS.incoming_queue_threshold,
     incoming_queue_cache_ttl_minutes: d.incoming_queue_cache_ttl_minutes ?? CONFIG_DEFAULTS.incoming_queue_cache_ttl_minutes,
+    inbox_soft_threshold: d.inbox_soft_threshold ?? CONFIG_DEFAULTS.inbox_soft_threshold,
     win_cycle_current: wc.current,
     win_cycle_start: wc.start,
     win_cycle_end: wc.end,
@@ -17493,6 +17532,86 @@ function daysBetween(iso, now) {
   return Math.floor(ms / (1e3 * 60 * 60 * 24));
 }
 
+// src/inbox.ts
+var FRESH_MAX_DAYS = 2;
+var AGED_MAX_DAYS = 7;
+function inboxItems(snapshot, now = /* @__PURE__ */ new Date()) {
+  const items = [];
+  for (const c of snapshot.captures) {
+    if (!isUntriagedCapture(c)) continue;
+    const age = ageDays(c.captured, now);
+    items.push({
+      kind: "thought",
+      id: c.captured,
+      source: describeCaptureSource(c),
+      age_days: age,
+      path: c.path,
+      bucket: bucketFor(age)
+    });
+  }
+  for (const b of snapshot.brainstorms) {
+    if (b.phase !== "diverging") continue;
+    const age = ageDays(b.last_touched, now);
+    items.push({
+      kind: "brainstorm",
+      id: b.slug,
+      source: `brainstorm: ${b.slug}`,
+      age_days: age,
+      path: b.path,
+      bucket: bucketFor(age)
+    });
+  }
+  items.sort((a, b) => b.age_days - a.age_days);
+  return {
+    items,
+    counts: {
+      total: items.length,
+      thoughts: items.filter((i) => i.kind === "thought").length,
+      brainstorms: items.filter((i) => i.kind === "brainstorm").length,
+      fresh: items.filter((i) => i.bucket === "fresh").length,
+      aged: items.filter((i) => i.bucket === "aged").length,
+      overdue: items.filter((i) => i.bucket === "overdue").length
+    }
+  };
+}
+function isUntriagedCapture(c) {
+  if (c.schema_version === 2) {
+    return c.status === void 0 || c.status === "untriaged";
+  }
+  return true;
+}
+function describeCaptureSource(c) {
+  if (c.source) {
+    if (c.source.kind === "mcp" && c.source.server) {
+      return c.source.name ? `from ${c.source.server} (${c.source.name})` : `from ${c.source.server}`;
+    }
+    if (c.source.kind === "file" && c.source.name) {
+      return `file: ${c.source.name}`;
+    }
+    if (c.source.kind === "url" && c.source.uri) {
+      return `url: ${c.source.uri}`;
+    }
+    if (c.source.kind === "dump") return "brain dump";
+    if (c.source.kind === "stdin") return "piped";
+    return c.source.kind;
+  }
+  if (c.mcp) {
+    return `from ${c.mcp.server}`;
+  }
+  if (c.verb_context) {
+    return c.verb_context;
+  }
+  return "inline note";
+}
+function ageDays(timestamp2, now) {
+  return Math.max(0, daysBetween(timestamp2, now));
+}
+function bucketFor(age) {
+  if (age <= FRESH_MAX_DAYS) return "fresh";
+  if (age <= AGED_MAX_DAYS) return "aged";
+  return "overdue";
+}
+
 // src/report/reconciler.ts
 function report(snapshot) {
   const flags = [];
@@ -17509,7 +17628,20 @@ function report(snapshot) {
   flagStructural(flags, activeProjects);
   flagWipOverLimit(flags, activeProjects, config);
   flagClosingInOnResolution(flags, snapshot, activePursuitIds);
+  flagInboxPressure(flags, snapshot, now, config);
   return { snapshot, flags };
+}
+function flagInboxPressure(flags, snapshot, now, config) {
+  const view = inboxItems(snapshot, now);
+  if (view.counts.total <= config.inbox_soft_threshold) return;
+  flags.push({
+    kind: "inbox_pressure",
+    count: view.counts.total,
+    threshold: config.inbox_soft_threshold,
+    fresh: view.counts.fresh,
+    aged: view.counts.aged,
+    overdue: view.counts.overdue
+  });
 }
 function flagOverdueWaitingFor(flags, snapshot, now) {
   const grace = snapshot.config.waiting_for_grace_days;
@@ -17952,6 +18084,14 @@ function describeFlag(flag, _snapshot) {
       const cachedNote = flag.fromCache ? " (cached)" : "";
       return `inbound: ${flag.count} untriaged ${issueWord} on ${flag.ownerRepo}${cachedNote} \u2014 /cadence:incoming to triage`;
     }
+    case "inbox_pressure": {
+      const buckets = [];
+      if (flag.overdue > 0) buckets.push(`${flag.overdue} overdue`);
+      if (flag.aged > 0) buckets.push(`${flag.aged} aged`);
+      if (flag.fresh > 0) buckets.push(`${flag.fresh} fresh`);
+      const breakdown = buckets.length ? ` (${buckets.join(", ")})` : "";
+      return `Inbox: ${flag.count} items${breakdown} \u2014 above soft cap (${flag.threshold}). Run /cadence:start inbox to walk them.`;
+    }
   }
   const _exhaustive = flag;
   return _exhaustive;
@@ -18072,6 +18212,7 @@ function flagTarget(flag) {
     case "closing_in_on_resolution":
       return flag.pursuitId;
     case "wip_over_limit":
+    case "inbox_pressure":
       return "";
     case "inbound_issues_piling_up":
       return flag.ownerRepo;
@@ -18095,6 +18236,14 @@ function flagDetail(flag) {
       const issueWord = flag.count === 1 ? "issue" : "issues";
       const cachedNote = flag.fromCache ? " (cached)" : "";
       return `${flag.count} untriaged ${issueWord}${cachedNote}; /cadence:incoming to triage`;
+    }
+    case "inbox_pressure": {
+      const buckets = [];
+      if (flag.overdue > 0) buckets.push(`${flag.overdue} overdue`);
+      if (flag.aged > 0) buckets.push(`${flag.aged} aged`);
+      if (flag.fresh > 0) buckets.push(`${flag.fresh} fresh`);
+      const breakdown = buckets.length ? ` (${buckets.join(", ")})` : "";
+      return `${flag.count} items${breakdown}; /cadence:start inbox to triage`;
     }
   }
 }
@@ -18830,7 +18979,10 @@ function parseSolution(text) {
 
 // src/write/capture.ts
 import path15 from "node:path";
+import os from "node:os";
 import { existsSync as existsSync9 } from "node:fs";
+import { readFile as readFile10, unlink, writeFile as writeFile4 } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 async function writeCapture(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
@@ -18845,24 +18997,31 @@ async function writeCapture(repoRoot, opts) {
       content_hash,
       ...opts.mcp.mime_type ? { mime_type: opts.mcp.mime_type } : {}
     };
-    const existing = await scanCaptures(repoRoot);
-    for (const c of existing) {
-      if (c.mcp?.uri === mcp.uri) {
-        return {
-          kind: "skipped_existing",
-          reason: "uri_seen",
-          path: c.path
-        };
-      }
-    }
-    for (const c of existing) {
-      if (c.mcp?.content_hash && c.mcp.content_hash === mcp.content_hash) {
-        return {
-          kind: "skipped_existing",
-          reason: "content_hash_seen",
-          path: c.path
-        };
-      }
+    const dedup = await checkDedup(repoRoot, { uri: mcp.uri, content_hash });
+    if (dedup) return dedup;
+  }
+  let source;
+  if (opts.source) {
+    const content_hash = opts.source.content_hash ?? `sha256:${sha256Hex(opts.body)}`;
+    source = {
+      kind: opts.source.kind,
+      ...opts.source.name ? { name: opts.source.name } : {},
+      ...opts.source.server ? { server: opts.source.server } : {},
+      ...opts.source.uri ? { uri: opts.source.uri } : {},
+      ...opts.source.query ? { query: opts.source.query } : {},
+      ...opts.source.mime_type ? { mime_type: opts.source.mime_type } : {},
+      ...opts.source.raw_path ? { raw_path: opts.source.raw_path } : {},
+      content_hash
+    };
+    if (source.uri) {
+      const dedup = await checkDedup(repoRoot, {
+        uri: source.uri,
+        content_hash
+      });
+      if (dedup) return dedup;
+    } else {
+      const dedup = await checkDedup(repoRoot, { content_hash });
+      if (dedup) return dedup;
     }
   }
   const data = {
@@ -18870,10 +19029,46 @@ async function writeCapture(repoRoot, opts) {
   };
   if (opts.verb_context) data["verb_context"] = opts.verb_context;
   if (mcp) data["mcp"] = mcp;
+  if (source) {
+    data["schema_version"] = 2;
+    data["source"] = source;
+    data["status"] = opts.status ?? "untriaged";
+    if (opts.two_minute_eligible !== void 0) {
+      data["two_minute_eligible"] = opts.two_minute_eligible;
+    }
+    if (opts.triaged_to !== void 0) {
+      data["triaged_to"] = opts.triaged_to;
+    }
+    if (opts.prompt) data["prompt"] = opts.prompt;
+    if (opts.suggested_outcomes && opts.suggested_outcomes.length > 0) {
+      data["suggested_outcomes"] = opts.suggested_outcomes;
+    }
+  }
   const baseSlug = opts.slug ?? timestampSlug(now);
   const filePath = uniqueCapturePath(dir, baseSlug);
   await writeFrontmatterFile(filePath, data, opts.body);
   return { kind: "written", path: path15.relative(repoRoot, filePath) };
+}
+async function checkDedup(repoRoot, match) {
+  const existing = await scanCaptures(repoRoot);
+  if (match.uri) {
+    for (const c of existing) {
+      if (c.mcp?.uri === match.uri || c.source?.uri === match.uri) {
+        return { kind: "skipped_existing", reason: "uri_seen", path: c.path };
+      }
+    }
+  }
+  for (const c of existing) {
+    const h = c.mcp?.content_hash ?? c.source?.content_hash;
+    if (h && h === match.content_hash) {
+      return {
+        kind: "skipped_existing",
+        reason: "content_hash_seen",
+        path: c.path
+      };
+    }
+  }
+  return null;
 }
 function sha256Hex(text) {
   return createHash("sha256").update(text, "utf8").digest("hex");
@@ -18886,6 +19081,55 @@ function uniqueCapturePath(dir, slug) {
     n += 1;
   }
   return candidate;
+}
+async function resolveBodyFromFlags(opts) {
+  const flagsSet = [opts.body, opts.from, opts.dump].filter(Boolean).length;
+  if (flagsSet === 0) {
+    throw new Error("one of --body, --from, --dump is required");
+  }
+  if (flagsSet > 1) {
+    throw new Error("--body, --from, --dump are mutually exclusive");
+  }
+  if (opts.body) return { body: opts.body };
+  if (opts.from) {
+    if (opts.from.startsWith("http://") || opts.from.startsWith("https://")) {
+      const res = await fetch(opts.from);
+      if (!res.ok) {
+        throw new Error(
+          `--from URL fetch failed: ${res.status} ${res.statusText}`
+        );
+      }
+      const body3 = await res.text();
+      return { body: body3, sourceKindHint: "url" };
+    }
+    const filePath = path15.resolve(opts.from);
+    if (!existsSync9(filePath)) {
+      throw new Error(`--from file not found: ${filePath}`);
+    }
+    const body2 = await readFile10(filePath, "utf8");
+    return { body: body2, sourceKindHint: "file" };
+  }
+  const editor = process.env["EDITOR"] || process.env["VISUAL"] || "nano";
+  const tmpPath = path15.join(os.tmpdir(), `cadence-dump-${Date.now()}.md`);
+  const header = opts.promptHint ? `# Brain dump \u2014 ${opts.promptHint}
+# Save and exit when done.
+
+` : "# Brain dump \u2014 save and exit when done.\n\n";
+  await writeFile4(tmpPath, header, "utf8");
+  const result = spawnSync(editor, [tmpPath], { stdio: "inherit" });
+  if (result.status !== 0) {
+    await unlink(tmpPath).catch(() => {
+    });
+    throw new Error(`$EDITOR (${editor}) exited with code ${result.status}`);
+  }
+  const raw = await readFile10(tmpPath, "utf8");
+  await unlink(tmpPath).catch(() => {
+  });
+  const body = raw.split("\n").filter((line, i) => !(i < 3 && line.startsWith("# "))).join("\n").trim();
+  if (body.length === 0) {
+    throw new Error("--dump produced empty body; nothing captured");
+  }
+  return { body, sourceKindHint: "dump" };
 }
 
 // src/write/reflection.ts
@@ -18912,7 +19156,7 @@ async function writeReflection(repoRoot, opts) {
 
 // src/write/edits.ts
 import path17 from "node:path";
-import { readdir as readdir3, readFile as readFile10 } from "node:fs/promises";
+import { readdir as readdir3, readFile as readFile11 } from "node:fs/promises";
 import { existsSync as existsSync11 } from "node:fs";
 
 // src/write/checklist.ts
@@ -19263,7 +19507,7 @@ async function summarizePursuit(repoRoot, projectFilePath) {
     for (const entry of await readdir3(projectsDir, { withFileTypes: true })) {
       if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
       const file = path17.join(projectsDir, entry.name);
-      const text = await readFile10(file, "utf8");
+      const text = await readFile11(file, "utf8");
       const { data } = parseFrontmatter(text);
       const id = String(data["id"] ?? entry.name.replace(/\.md$/, ""));
       const status = String(data["status"] ?? "active");
@@ -20053,22 +20297,68 @@ cli.command(
     process.stdout.write(JSON.stringify(result) + "\n");
   }
 );
-cli.command("write-capture", "Write a thought to thoughts/unprocessed/. When --mcp-server + --mcp-uri are supplied, the capture is stamped with an mcp: frontmatter block, content_hash is auto-computed (sha256 of body), and the write auto-dedups against existing captures by uri and by content hash.").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--body <text>", "Capture body (required)").option("--verb-context <ctx>", "Verb context (note | seed | concern | mcp-pull:<server> | ...)").option("--mcp-server <name>", "MCP server name that sourced this capture. Requires --mcp-uri.").option("--mcp-uri <uri>", "MCP resource URI. Requires --mcp-server. Enables auto-dedup.").option("--mcp-mime-type <type>", "Optional MIME type of the source resource.").option("--slug <slug>", "Override the timestamp-based filename slug (batch writers pass per-item discriminators).").action(
+cli.command(
+  "write-capture",
+  "Write a thought to thoughts/unprocessed/. v1 flags (--body, --mcp-*) stay for backwards-compat with /cadence:mcp-pull. v2 flags (--from / --source / --prompt / --dump / --schema-version 2 + structured --source-* / --status / --two-minute-eligible / --triaged-to / --suggested-outcomes) drive the new ingestion surface. When --source / --mcp-server is present, content_hash is auto-computed (sha256 of body) and the write auto-dedups against existing captures by uri and by content hash."
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--body <text>", "Capture body. Mutually exclusive with --from and --dump.").option("--verb-context <ctx>", "Verb context (note | seed | mcp-pull:<server> | ...)").option("--mcp-server <name>", "[v1] MCP server name that sourced this capture. Requires --mcp-uri.").option("--mcp-uri <uri>", "[v1] MCP resource URI. Requires --mcp-server. Enables auto-dedup.").option("--mcp-mime-type <type>", "[v1] Optional MIME type of the source resource.").option("--from <path-or-url>", "Read body from a local file or URL (https://...). Mutually exclusive with --body and --dump.").option("--dump", "Open $EDITOR to compose body. Mutually exclusive with --body and --from.").option("--prompt <text>", "Distillation prompt \u2014 what to extract from the source. Stored in frontmatter for later re-runs.").option("--schema-version <n>", "Frontmatter schema (default 1 for legacy, 2 for the v2 source/status/suggested_outcomes shape). Auto-set to 2 when any --source-* flag is present.").option("--source-kind <kind>", "v2 source.kind: inline | stdin | file | url | mcp | dump").option("--source-name <name>", "v2 source.name: named query / source identifier (e.g., an ingest_sources entry)").option("--source-server <name>", "v2 source.server: MCP server (when --source-kind=mcp)").option("--source-uri <uri>", "v2 source.uri: resource URI; enables dedup").option("--source-query <text>", "v2 source.query: the actual query string used").option("--source-mime-type <type>", "v2 source.mime_type").option("--raw-path <path>", "v2 source.raw_path: relative path to thoughts/_raw/<id>.raw.md when the body is a distillation").option("--status <status>", "v2 status: untriaged (default) | triaged | discarded").option("--two-minute-eligible", "v2 two_minute_eligible: flag this capture as actionable in under two minutes").option("--triaged-to <ref>", "v2 triaged_to: outcome reference (e.g., action:pursuit/project/N, project:<id>, brainstorm:<slug>)").option("--suggested-outcomes <json>", "v2 suggested_outcomes: JSON array of {kind, suggested_pursuit?, suggested_project?, confidence}").option("--slug <slug>", "Override the timestamp-based filename slug (batch writers pass per-item discriminators).").action(
   async (opts) => {
-    if (!opts.body) throw new Error("--body is required");
     if (opts.mcpServer && !opts.mcpUri || opts.mcpUri && !opts.mcpServer) {
       throw new Error("--mcp-server and --mcp-uri must be supplied together");
     }
     const repoRoot = await resolveRepoRoot(opts.root);
+    const { body, sourceKindHint } = await resolveBodyFromFlags({
+      ...opts.body ? { body: opts.body } : {},
+      ...opts.from ? { from: opts.from } : {},
+      ...opts.dump ? { dump: opts.dump } : {},
+      ...opts.prompt ? { promptHint: opts.prompt } : {}
+    });
+    const v2 = Number(opts.schemaVersion) === 2 || Boolean(
+      opts.sourceKind ?? opts.sourceName ?? opts.sourceServer ?? opts.sourceUri ?? opts.sourceQuery ?? opts.sourceMimeType ?? opts.rawPath ?? opts.status ?? opts.twoMinuteEligible ?? opts.triagedTo ?? opts.suggestedOutcomes ?? opts.prompt ?? opts.from ?? opts.dump
+    );
     const mcp = opts.mcpServer && opts.mcpUri ? {
       server: opts.mcpServer,
       uri: opts.mcpUri,
       ...opts.mcpMimeType ? { mime_type: opts.mcpMimeType } : {}
     } : void 0;
+    let source;
+    if (v2) {
+      const kind = opts.sourceKind ?? sourceKindHint ?? "inline";
+      source = {
+        kind,
+        ...opts.sourceName ? { name: opts.sourceName } : {},
+        ...opts.sourceServer ? { server: opts.sourceServer } : {},
+        ...opts.sourceUri ? { uri: opts.sourceUri } : {},
+        ...opts.sourceQuery ? { query: opts.sourceQuery } : {},
+        ...opts.sourceMimeType ? { mime_type: opts.sourceMimeType } : {},
+        ...opts.rawPath ? { raw_path: opts.rawPath } : {}
+      };
+      if (sourceKindHint === "file" && !source.name && opts.from) {
+        source.name = path21.basename(opts.from);
+      }
+    }
+    let suggested_outcomes;
+    if (opts.suggestedOutcomes) {
+      try {
+        const parsed = JSON.parse(opts.suggestedOutcomes);
+        if (!Array.isArray(parsed)) {
+          throw new Error("--suggested-outcomes must be a JSON array");
+        }
+        suggested_outcomes = parsed;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        throw new Error(`--suggested-outcomes invalid JSON: ${msg}`);
+      }
+    }
     const result = await writeCapture(repoRoot, {
-      body: opts.body,
+      body,
       ...opts.verbContext ? { verb_context: opts.verbContext } : {},
       ...mcp ? { mcp } : {},
+      ...source ? { source } : {},
+      ...opts.status ? { status: opts.status } : {},
+      ...opts.twoMinuteEligible !== void 0 ? { two_minute_eligible: opts.twoMinuteEligible } : {},
+      ...opts.triagedTo !== void 0 ? { triaged_to: opts.triagedTo } : {},
+      ...opts.prompt ? { prompt: opts.prompt } : {},
+      ...suggested_outcomes ? { suggested_outcomes } : {},
       ...opts.slug ? { slug: opts.slug } : {}
     });
     process.stdout.write(JSON.stringify(result) + "\n");
@@ -20587,7 +20877,7 @@ async function readPluginInfo() {
     );
   }
   const manifestPath = path21.join(pluginDir, ".claude-plugin", "plugin.json");
-  const raw = await readFile11(manifestPath, "utf-8");
+  const raw = await readFile12(manifestPath, "utf-8");
   const manifest = JSON.parse(raw);
   const repository = manifest.repository ?? manifest.homepage ?? null;
   return {

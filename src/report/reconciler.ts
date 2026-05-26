@@ -1,5 +1,6 @@
 import type { Flag, Project, Snapshot } from '../types.js'
 import { daysBetween } from '../util/dates.js'
+import { inboxItems } from '../inbox.js'
 
 export function report(snapshot: Snapshot): { snapshot: Snapshot; flags: Flag[] } {
   const flags: Flag[] = []
@@ -18,8 +19,34 @@ export function report(snapshot: Snapshot): { snapshot: Snapshot; flags: Flag[] 
   flagStructural(flags, activeProjects)
   flagWipOverLimit(flags, activeProjects, config)
   flagClosingInOnResolution(flags, snapshot, activePursuitIds)
+  flagInboxPressure(flags, snapshot, now, config)
 
   return { snapshot, flags }
+}
+
+/**
+ * Fires when the Inbox view (untriaged thoughts + diverging
+ * brainstorms) exceeds inbox_soft_threshold. One flag total — the
+ * per-item story lives in /start inbox, not here. Carries the
+ * bucket breakdown so renderers can show "12 items: 3 fresh, 4
+ * aged, 5 overdue."
+ */
+function flagInboxPressure(
+  flags: Flag[],
+  snapshot: Snapshot,
+  now: Date,
+  config: { inbox_soft_threshold: number },
+): void {
+  const view = inboxItems(snapshot, now)
+  if (view.counts.total <= config.inbox_soft_threshold) return
+  flags.push({
+    kind: 'inbox_pressure',
+    count: view.counts.total,
+    threshold: config.inbox_soft_threshold,
+    fresh: view.counts.fresh,
+    aged: view.counts.aged,
+    overdue: view.counts.overdue,
+  })
 }
 
 function flagOverdueWaitingFor(

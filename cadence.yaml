@@ -14,6 +14,7 @@ defaults:
   dormant_days: 14              # active projects with no marker in this many days are dormant
   incoming_queue_threshold: 5   # untriaged upstream-repo issues above this fire a flag (requires gh)
   incoming_queue_cache_ttl_minutes: 15  # cache window for the gh issue list call (.cadence/inbound-cache.json)
+  inbox_soft_threshold: 10      # Inbox view size above this fires inbox_pressure (untriaged thoughts + diverging brainstorms)
 
 wip_limits:
   max_active_projects: 5        # in-progress projects (with markers) before warning

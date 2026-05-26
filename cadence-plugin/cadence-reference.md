@@ -112,8 +112,80 @@ markdown content. The key formats are:
   frontmatter. See `src/types.ts` `OriginSchema`. The CLI shorthand
   `cadence create-project --origin-issue owner/repo#42` constructs
   the github_issue shape from `repo#number`; the URL is derived.
-- **Capture** (`<timestamp>.md`): frontmatter with captured, verb_context;
-  raw input. Lives in `thoughts/unprocessed/`.
+- **Capture** (`<timestamp>.md`): raw or distilled input under
+  `thoughts/unprocessed/`. Two frontmatter shapes coexist; the
+  scanner reads either:
+
+  **v1 (legacy, default for inline `/cadence:capture "..."`):**
+
+  ```yaml
+  ---
+  captured: 2026-05-22T14:30:00
+  verb_context: note               # optional
+  mcp:                             # optional — set by mcp-pull
+    server: glean
+    uri: glean://doc/abc
+    mime_type: text/markdown
+    content_hash: sha256:abc123...
+  ---
+
+  <body>
+  ```
+
+  **v2 (emitted when any v2 flag is set on `cadence write-capture`,
+  including `--from`, `--source-*`, `--prompt`, `--status`,
+  `--two-minute-eligible`, `--triaged-to`, `--suggested-outcomes`,
+  or `--schema-version 2`):**
+
+  ```yaml
+  ---
+  captured: 2026-05-22T14:30:00
+  verb_context: mcp-pull:glean      # optional
+  schema_version: 2
+  status: untriaged                  # untriaged | triaged | discarded
+  two_minute_eligible: false         # optional, defaults to absent
+  triaged_to: null                   # optional; e.g., "action:nexthop-onboarding/proj/0" or "project:foo" or "brainstorm:bar"
+  source:
+    kind: mcp                        # inline | stdin | file | url | mcp | dump
+    name: onboarding                 # optional — ingest_sources entry name, file basename, etc.
+    server: glean                    # optional — MCP server alias (kind: mcp)
+    uri: glean://doc/abc             # optional — enables dedup
+    query: "onboarding docs from last 30 days"   # optional
+    mime_type: text/markdown         # optional
+    raw_path: thoughts/_raw/2026-05-22-1430-glean-onboarding.raw.md   # optional — set when body is a distillation
+    content_hash: sha256:abc123...   # auto-computed if absent
+  prompt: "Pull action items I should own in my first 30 days"   # optional
+  suggested_outcomes:                # optional — capture-ingest subagent's per-item recommendations
+    - kind: action                   # two_minute_action | action | project | brainstorm_seed | note
+      suggested_pursuit: nexthop-onboarding
+      confidence: 0.85
+    - kind: note
+      confidence: 0.30
+  ---
+
+  <body>
+  ```
+
+  **Suggested-outcomes shape.** Each item carries a `kind` (the
+  outcome shape the subagent thinks fits) plus optional
+  `suggested_pursuit` / `suggested_project` (the target it inferred)
+  and `confidence` (0.0–1.0). The capture-exit menu in
+  `/cadence:capture` renders these for the user to confirm or
+  override; `/start inbox` re-uses them during later triage without
+  re-running the subagent. Persisting them in frontmatter is the
+  audit trail of what the subagent thought, not a contract the user
+  has accepted.
+
+  **Auto-dedup.** When `source.uri` is set (or v1 `mcp.uri`), the
+  CLI checks existing captures by uri first, then by `content_hash`,
+  and short-circuits with `{kind: "skipped_existing", reason, path}`
+  instead of writing a duplicate. Dedup spans both schema versions.
+
+  **Storage convention for `--from` / `--source` distillations:**
+  the raw payload (uncondensed PDF text, full Glean response, etc.)
+  lands at `thoughts/_raw/<id>.raw.md`; the distilled body lands at
+  `thoughts/<id>.md` with `source.raw_path` pointing back. The
+  `_raw/` directory is created lazily on first distilled write.
 - **Reflection** (`<YYYY-MM-DD>.md`): frontmatter with date, status, phase,
   leveraged_priority; sections for Get Clear and Get Focused
 - **Narrative** (in `narratives/drafts/`): per-cadence filename + body
@@ -345,7 +417,7 @@ is the absolute block that replaces the v1 "unresolved Ideas" check.
 - **Someday** pursuits live in `pursuits/_someday/<id>/` (set aside, may return)
 - **Archived** pursuits live in `pursuits/_archived/<id>/` (resolved as **completed** — shipped; closed via the closure path of /resolve)
 - **Dropped** pursuits live in `pursuits/_dropped/<id>/` (resolved as **dropped** — didn't ship; closed via the drop path of /resolve with `--state dropped --reason "..."`). Same Zeigarnik-release ritual as archived; different terminal outcome.
-- **Inbox** lives in `pursuits/inbox/` — never closes; it's a short-term triage zone for ideas without an obvious home, not an organizational layer. A growing Inbox is a triage debt signal; the reconciler surfaces it.
+- **Inbox** is no longer a pursuit. In v1.1 it became a *view* over untriaged thoughts + diverging brainstorms — see `cadence-runtime.md`'s Inbox vocabulary entry and the reconciler's `inbox_pressure` flag. No `pursuits/inbox/` directory exists.
 - Moving between states is a file move (`cadence move-pursuit <id> --to active|someday|archived|dropped`); the CLI updates the pursuit's `status` frontmatter to match.
 - Someday pursuits can have cue metadata in frontmatter for reconciler
   surfacing.
@@ -548,6 +620,93 @@ mcp:
 - **`cadence.yaml mcp_servers` config.** Removed in the full pivot —
   it can't contribute a server to the agent's tool surface, so it was
   dead config. Register MCP servers via `claude mcp add ...`.
+
+## Capture Ingestion
+
+`/cadence:capture` accepts five ingestion paths beyond inline text:
+file (`--from <local-path>`), URL (`--from https://...`), MCP
+(`--source <named>`), brain dump (`--dump`, opens `$EDITOR`), and
+stdin (`--`). For the MCP path, `--source <name>` resolves against a
+config registry — `ingest_sources:` — that names canned queries
+against MCP servers Claude Code already knows about.
+
+### `ingest_sources:` config
+
+Two files, both optional. Precedence: repo > user. Same-named entry
+in `cadence.yaml` overrides the one in `~/.cadence/sources.yaml`.
+
+**Repo-scoped (`cadence.yaml`):**
+
+```yaml
+ingest_sources:
+  onboarding:
+    server: glean                     # MCP server alias (registered via `claude mcp add`)
+    query: "onboarding docs from last 30 days OR shared with me by hiring manager"
+    prompt: "Pull action items I should own in my first 30 days."
+  jira_inbox:
+    server: jira
+    jql: "assignee = currentUser() AND status = 'To Do'"
+  cadence_issues:
+    server: github
+    query: "repo:kevinteg/cadence is:issue is:open label:capture-source"
+```
+
+**User-scoped (`~/.cadence/sources.yaml`):**
+
+Same shape. Lives outside any single repo so personal pre-canned
+queries (Glean credentials, personal inbox queries) survive across
+projects.
+
+```yaml
+ingest_sources:
+  morning-brief:
+    server: glean
+    query: "calendar events for today AND emails from VIPs in the last 24h"
+    prompt: "Pull anything I should be aware of before my first meeting."
+```
+
+### Important caveat — what `ingest_sources` declares
+
+It declares **named queries against MCP servers Claude Code already
+knows about** (registered via `claude mcp add`). Cadence has no
+server registry post-pivot (see "MCP Integration" → "What's
+deliberately out of scope" — `cadence.yaml mcp_servers` is gone).
+An entry like `server: glean` references whatever Claude Code knows
+as `glean`, not a Cadence-declared server.
+
+If `claude mcp list` doesn't show the server an `ingest_sources`
+entry references, the `--source` flow exits with a clear hint to
+register the server first.
+
+### Flow
+
+`/cadence:capture --source onboarding` runs as:
+
+1. Resolve `onboarding` against `ingest_sources` (cadence.yaml first,
+   then ~/.cadence/sources.yaml). Error with available names if no
+   match.
+2. Dispatch the `capture-ingest` subagent with the resolved server,
+   query, and prompt. (See `cadence-plugin/agents/capture-ingest.md`.)
+3. Subagent calls the relevant `mcp__<server>__*` tools via Claude
+   Code's MCP transport, fetches results, distills per the prompt.
+4. Raw payload lands at `thoughts/_raw/<id>.raw.md`; distilled body
+   at `thoughts/<id>.md` with v2 frontmatter including
+   `source: {kind: mcp, name: onboarding, server: glean, query, ...}`
+   and the subagent's `suggested_outcomes`.
+5. The capture SKILL surfaces the outcome menu so the user can
+   immediately route items into actions / projects / brainstorms
+   instead of leaving them in the Inbox.
+
+### When to use which
+
+| Flag | Use case |
+|---|---|
+| `cadence:capture "..."` | Inline stray thought, silent contract |
+| `cadence:capture --from <path>` | One-shot local file ingest (PDF, doc, log) |
+| `cadence:capture --from <url>` | One-shot URL ingest (article, gist, search result) |
+| `cadence:capture --source <name>` | Repeatable MCP-driven pull (corporate search, Jira inbox, etc.) |
+| `cadence:capture --dump` | Long-form brain dump in `$EDITOR` |
+| `/cadence:mcp-pull --server <name>` | **Bulk many resources from one server** — the dedicated batch path; `--source` is the single-query shorthand for the same plumbing |
 
 ## Maintainer Labels (Upstream Cadence Repo)
 
