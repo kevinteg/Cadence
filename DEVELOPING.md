@@ -47,6 +47,14 @@ npm test                    # Node test runner across test/*.test.ts
 
 The bundle is committed to the repo (`cadence-plugin/bin/cadence`) so end-users don't need a build step. Rebundle after touching anything under `src/`.
 
+A pre-commit hook at `.githooks/pre-commit` auto-rebundles when any `src/**/*.ts` file is staged. Activate it once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+`core.hooksPath` is local config and doesn't propagate from `git clone` — re-run after fresh checkouts.
+
 ## Plugin architecture
 
 Three layers, loaded progressively:

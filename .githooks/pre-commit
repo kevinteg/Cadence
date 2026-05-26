@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Rebundle cadence-plugin/bin/cadence when src/ changes are staged.
+# The bundled binary is checked in for plugin distribution — commits
+# that touch src/ without rebundling leave the plugin running stale code.
+set -euo pipefail
+
+if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '^src/.*\.ts$'; then
+  exit 0
+fi
+
+echo "[pre-commit] src/ changed — running npm run bundle..."
+npm run bundle >/dev/null
+
+if ! git diff --quiet -- cadence-plugin/bin/cadence; then
+  echo "[pre-commit] re-staging cadence-plugin/bin/cadence"
+  git add cadence-plugin/bin/cadence
+fi
