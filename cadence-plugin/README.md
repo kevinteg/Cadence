@@ -2,56 +2,26 @@
 
 Cognitive operating system for Claude Code. Manages attention, protects
 flow state, separates the modes of thought, and generates narrative
-across pursuits.
+across pursuits — for **physical pursuits** (cleaning out the garage,
+training for a 10K) and **knowledge work** (shipping a feature, writing
+a paper) alike.
 
-## Installation
+This README documents the plugin surface. For install + a 10-minute
+walkthrough, see [`../README.md`](../README.md) and
+[`../docs/getting-started.md`](../docs/getting-started.md).
 
-**Prerequisites:** Node 20+ (the bundled CLI is a self-contained Node
-bundle). The plugin ships with `bin/cadence` already built — no `npm
-install` or build step needed for end-users.
+## Quick install
 
-### Quick start
-
-Clone the repo and launch Claude Code with the plugin:
-
-```bash
-git clone https://github.com/kevinteg/Cadence.git
-cd Cadence
-claude --plugin-dir ./cadence-plugin
-```
-
-The repo's `CLAUDE.md` already imports the runtime via a relative path,
-so the SessionStart dashboard appears immediately. You're inside the
-Cadence repo — poke around the active `improve-ux-and-vision` pursuit,
-or `cd` into a fresh subdirectory and run `/cadence:init` to start clean.
-
-### Use Cadence in your own repo
-
-Clone the plugin to a stable location once, then point your own
-Cadence-tracked repo at it:
+Prerequisites: Node 20+ (the bundled CLI is a self-contained Node
+bundle; no `npm install` needed at consume-time).
 
 ```bash
 git clone https://github.com/kevinteg/Cadence.git ~/code/cadence
-mkdir my-work && cd my-work
-git init
-cat > CLAUDE.md <<'EOF'
-@~/code/cadence/cadence-plugin/cadence-runtime.md
-EOF
+cd <your-cadence-tracked-repo>     # any git repo, or a fresh directory + git init
 claude --plugin-dir ~/code/cadence/cadence-plugin
 ```
 
-(Adjust `~/code/cadence` to wherever you want the plugin to live.)
-
-### Bootstrap with /cadence:init
-
-Inside Claude Code, run `/cadence:init`. It will:
-- Create the directory structure (`pursuits/`, `brainstorms/`, `thoughts/`, `narratives/`, `reflections/`, `validations/`)
-- Generate `cadence.yaml` with default configuration
-- Walk you through creating your first pursuit and project
-- Set up `.gitignore` entries for generated files
-
-After init completes, you're ready to use `/cadence:start` to begin
-work.
+Inside Claude Code, run `/cadence:init` — the SKILL walks the bootstrap (directory structure, `cadence.yaml`, your first pursuit + project, `.gitignore` entries).
 
 ## Verbs
 

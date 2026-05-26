@@ -15,9 +15,9 @@ Write a 1-page quickstart that walks a new user through 'in 10 minutes you will:
 
 ## Actions
 
-- [ ] Wait until prerequisite projects land: P1 (docs reconciled), P2 (verb surface slimmed), P3 (Inbox rename), P5 (physical-domain awareness). The quickstart is written against the post-v1.1 surface, not v1.
-- [ ] Use lived ground truth from the personal-repo experiment (the W18 Leveraged Priority's outcome) — write from the actual install/init/capture/promote/reflect/narrate flow you walked.
-- [ ] Draft the quickstart as a single page. Walk one concrete loop end-to-end in plain language — install, init, capture three thoughts, promote one, reflect, narrate. Include enough screenshots or terminal output to make it scannable.
-- [ ] Make sure the quickstart works for a non-dev pursuit (household or family or creative example) — the demo example should not be a coding project. Per domain neutrality.
-- [ ] Save to docs/quickstart.md or README.md (or both — README points at quickstart). Cross-link from product-vision.md so a new reader has a clear path to action.
+- [x] Wait until prerequisite projects land: P1 (docs reconciled), P2 (verb surface slimmed), P3 (Inbox rename), P5 (physical-domain awareness). The quickstart is written against the post-v1.1 surface, not v1.
+- [x] Use lived ground truth from the personal-repo experiment (the W18 Leveraged Priority's outcome) — write from the actual install/init/capture/promote/reflect/narrate flow you walked.
+- [x] Draft the quickstart as a single page. Walk one concrete loop end-to-end in plain language — install, init, capture three thoughts, promote one, reflect, narrate. Include enough screenshots or terminal output to make it scannable.
+- [x] Make sure the quickstart works for a non-dev pursuit (household or family or creative example) — the demo example should not be a coding project. Per domain neutrality.
+- [x] Save to docs/quickstart.md or README.md (or both — README points at quickstart). Cross-link from product-vision.md so a new reader has a clear path to action.
 - [x] Clean up install instructions for a fresh-Mac user with no prior Node/JS knowledge: `brew install nvm` → `nvm install --lts` → `nvm use --lts` → plugin install. Add `brew install gh` as a recommended optional prerequisite (pairs with `/cadence:report` for filing issues). Make sure a non-dev user can follow these in order without insider knowledge.

@@ -2,91 +2,95 @@
 
 *The rhythm you return to.*
 
-A cognitive operating system that holds your context, protects your flow, separates the modes of thought, and tells the story of what you're building — across work, family, and personal growth. Lives inside Claude Code as a plugin.
+A cognitive operating system that holds your context, protects your flow, separates the modes of thought, and tells the story of what you're building. It works as well for **physical pursuits** (cleaning out the garage, training for a 10K, planning a wedding) as for **knowledge work** (a code review, a paper, a launch). Lives inside Claude Code as a plugin.
 
-## Quick Start
+## At a glance
 
-### Prerequisites
+```
+# Cadence Status
 
-For a fresh Mac. Skip the steps you already have.
+**This week**: no leveraged priority set — /cadence:reflect to set one. Last touch was `sort-and-donate-old-tools` (just now).
 
-1. **Homebrew** — install from [brew.sh](https://brew.sh) if you don't have it.
+## Active Pursuits
 
-2. **Node.js (LTS) via nvm** — Cadence's plugin runs on Node. Install via nvm so future upgrades don't require a system reinstall:
+### get-the-garage-cleaned-out — 0/1 projects done
 
-   ```bash
-   brew install nvm
-   ```
+| Project | Status | Actions | What it's about |
+|---|---|---|---|
+| `sort-and-donate-old-tools` | active | 2/5 | The toolbox in the corner has duplicates of everything — th… |
 
-   Follow the post-install instructions Homebrew prints to add nvm to your shell profile (typically a `source $(brew --prefix nvm)/nvm.sh` line in `~/.zshrc` or `~/.bashrc`), then open a new shell. Install and select Node LTS:
+## Heads up
 
-   ```bash
-   nvm install --lts
-   nvm use --lts
-   ```
+- Inbox: 2 items ✓
 
-3. **Claude Code CLI:**
+## Likely next moves
 
-   ```bash
-   npm install -g @anthropic-ai/claude-code
-   ```
+1. `/cadence:start sort-and-donate-old-tools` — Touched today — natural to pick back up.
+2. `/cadence:narrate today` — Activity landed today with no daily narrative yet.
+3. `/cadence:reflect` — No reflection yet — set a Leveraged Priority.
+```
 
-4. **GitHub CLI (optional but recommended):** install `gh` if you want to file issues against this repo:
+Navigation-led: what to work on, what's drifting, what to do next. No counts-as-noise, no scolding.
 
-   ```bash
-   brew install gh
-   gh auth login
-   ```
+## Get started
 
-### Install Cadence
-
-Clone the plugin somewhere on your machine — anywhere is fine; the path is referenced by `--plugin-dir` below.
+If you already have Node, Claude Code, and `gh` installed:
 
 ```bash
 git clone https://github.com/kevinteg/Cadence.git ~/code/cadence
-```
-
-### Run Cadence in a repo
-
-```bash
-cd <your-repo>
-git init  # if it's not already a git repo
+cd <your-repo>             # any repo, or a fresh directory + git init
 claude --plugin-dir ~/code/cadence/cadence-plugin
 ```
 
-In Claude Code, run `/cadence:init` to bootstrap, then `/cadence:start` to begin.
+Then in Claude Code: `/cadence:init` walks the bootstrap and your first pursuit.
 
-## What's Here
+Fresh-Mac install (Node + Claude Code + `gh` from scratch) and the **10-minute walkthrough** with a working example: [`docs/getting-started.md`](docs/getting-started.md).
+
+## Why Cadence
+
+- **Hold your commitments alongside the work.** Pursuits (`be a present father`, `stand up CI for the team`, `get the garage cleaned out`) aren't a separate system; they're the parent of every project and action. → [`docs/vision.md`](docs/vision.md)
+
+- **Protect flow state.** `/cadence:capture "..."` saves a thought silently — no agent response, no acknowledgment, no elaboration. The system never interrupts mid-flow; everything else surfaces at breakpoints. → [`docs/architecture.md`](docs/architecture.md)
+
+- **Diverge before you converge.** `/cadence:brainstorm` opens a workspace with a phase machine (`diverging → converging → crystallized | archived`). Quantity-first ideation, then PPCo / criteria / pre-mortems, then a `--crystallize` flag that materializes the chosen solution as a Pursuit or Project. → [`docs/architecture.md`](docs/architecture.md)
+
+- **See the story.** Generated narratives — daily, weekly, per-pursuit, multi-pursuit-lessons — pull from git history of your project files. The narrative IS the watermark; each run resumes from the last. → [`docs/vision.md`](docs/vision.md)
+
+The 12 user-facing verbs (`brainstorm`, `start`, `complete`, `resolve`, `waiting`, `capture`, `reflect`, `narrate`, `status`, `find`, `help`, `init`) are documented in [`cadence-plugin/README.md`](cadence-plugin/README.md) and the full per-verb contracts live in [`cadence-plugin/workflows/verb-contracts.md`](cadence-plugin/workflows/verb-contracts.md).
+
+## What's in this repo
+
+This repo is both the **plugin source** and **Cadence's own first user**.
+
+The `cadence-plugin/` directory IS the distributable Claude Code plugin (skills, runtime, workflows, agents, hooks, bundled CLI). Pointing `claude --plugin-dir` at it gives you working Cadence in any repo.
+
+The `pursuits/`, `brainstorms/`, `thoughts/`, `reflections/`, and `narratives/` directories contain **real data** — the work of building Cadence itself, tracked in Cadence. They double as live test fixtures for validating the format.
 
 ```
-CLAUDE.md                    Agent entry point (imports cadence-runtime.md)
+README.md                    This file
+DEVELOPING.md                Build, test, plugin architecture (for hacking on Cadence)
+CLAUDE.md                    Claude Code entry point (imports cadence-runtime.md)
 cadence.yaml                 Repo-local configuration
-cadence-plugin/              The Claude Code plugin (skills, runtime, workflows, deck, tips, CLI, agents, hooks)
-pursuits/                    Active pursuits and their projects; _archived/ and _dropped/ hold resolved pursuits
-brainstorms/                 Divergent-ideation workspaces (phase machine: diverging → converging → crystallized | archived)
-thoughts/                    Captured thoughts awaiting triage (the Inbox view also surfaces diverging brainstorms)
+cadence-plugin/              The distributable Claude Code plugin
+pursuits/                    Active pursuits + projects; _archived/ and _dropped/ hold resolved pursuits
+brainstorms/                 Divergent-ideation workspaces
+thoughts/                    Captured thoughts awaiting triage (the Inbox view)
 reflections/                 Weekly reflection artifacts
-narratives/                  Generated narratives + drafts/ + session-log.md (Stop-hook audit trail)
-validations/                 Pending fresh-session validations queue
-journeys/                    User-journey YAML tests
-docs/                        Vision, architecture, research, teaching-tips, Marimo Console design
+narratives/                  Generated narratives + drafts/ + session-log.md
+docs/                        Vision, architecture, getting started, research, teaching tips, Marimo Console design
 ```
-
-## This Repo Is Its Own First User
-
-The pursuit `improve-ux-and-vision` (currently active) and the archived `build-cadence-v1` track building Cadence itself. The project files and directory structure ARE Cadence data — used for real tracking AND as test fixtures for validating the format.
 
 ## Documentation
 
-- **`docs/vision.md`** — what Cadence is and why. The single vision doc (TL;DR + deep dive). **Read this first.**
-- **`docs/architecture.md`** — design rationale: why the model is shaped this way, what tradeoffs got made.
-- **`docs/research-references.md`** — research foundations mapped to design patterns (Allen, Newport, Doerr, Kahneman, McAdams, Gollwitzer, Karpathy, Willison, etc.).
-- **`docs/teaching-tips-research.md`** — the curated content library that powers the in-product tip surfaces.
-- **`docs/marimo-console-design.md`** — forward-looking design notes for Cadence Console (Marimo notebook view). Not yet shipped.
+- **[`docs/getting-started.md`](docs/getting-started.md)** — install + the 10-minute walkthrough. Start here.
+- **[`docs/vision.md`](docs/vision.md)** — what Cadence is and why. TL;DR plus the deep dive.
+- **[`docs/architecture.md`](docs/architecture.md)** — design rationale. Why the model is shaped this way, what tradeoffs got made.
+- **[`docs/research-references.md`](docs/research-references.md)** — research foundations mapped to design patterns.
+- **[`docs/teaching-tips-research.md`](docs/teaching-tips-research.md)** — the curated content library that powers the in-product tip surfaces.
+- **[`docs/marimo-console-design.md`](docs/marimo-console-design.md)** — forward-looking design notes for Cadence Console (Marimo notebook view). Not yet shipped.
 
-Operational truth lives inside the plugin:
+Operational truth lives inside the plugin: [`cadence-plugin/cadence-runtime.md`](cadence-plugin/cadence-runtime.md) (always-loaded), [`cadence-plugin/cadence-reference.md`](cadence-plugin/cadence-reference.md) (on-demand), [`cadence-plugin/workflows/verb-contracts.md`](cadence-plugin/workflows/verb-contracts.md), and the per-verb [`cadence-plugin/skills/<verb>/SKILL.md`](cadence-plugin/skills/) files.
 
-- `cadence-plugin/cadence-runtime.md` — always-loaded runtime instructions
-- `cadence-plugin/cadence-reference.md` — on-demand reference (file formats, CLI catalog, lifecycle mechanics, Intent and Actions discipline, tip library schema)
-- `cadence-plugin/workflows/verb-contracts.md` — per-verb behavioral contracts
-- `cadence-plugin/skills/<verb>/SKILL.md` — per-verb skill definitions
+## Hacking on Cadence
+
+See [`DEVELOPING.md`](DEVELOPING.md) for build, test, and the codebase tour.
