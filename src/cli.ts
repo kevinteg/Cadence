@@ -7,6 +7,15 @@ import { scan } from './scan/repo.js'
 import { getInboundCount } from './scan/inbound.js'
 import { report } from './report/reconciler.js'
 import { renderStatus, renderFlags } from './render/status.js'
+import {
+  computeStateHash,
+  isEmptyRepo,
+  recordSplashEmission,
+  renderEmptyRepoCoaching,
+  shouldSuppressSplash,
+  writeDismissedUntil,
+} from './sessionstart.js'
+import { runStopHook } from './stophook.js'
 import { computeSuggestionSignals } from './render/signals.js'
 import { renderSnapshot, renderReport } from './render/snapshot.js'
 import { findEntities } from './find.js'
@@ -147,10 +156,27 @@ cli
       const inbound = await composeInboundFlag(repoRoot, snapshot)
       if (inbound) result.flags.push(inbound)
       if (opts.hookOutput) {
-        // renderStatus now appends a "Next:" block with up to 3
-        // contextual suggestions (computed via nextSteps()), so we
-        // emit the same text in both bare-CLI and hook-output paths.
-        const text = renderStatus(result)
+        // The hook-output path differs from the bare CLI in three
+        // ways: it (a) checks suppression and emits empty when the
+        // state hasn't changed since the last emission, (b) emits
+        // the empty-repo coaching block instead of the dashboard
+        // when state is empty, and (c) records the emission so the
+        // next call's suppression check has a baseline.
+        const hash = computeStateHash(snapshot)
+        const decision = await shouldSuppressSplash(repoRoot, hash)
+        if (decision.suppress) {
+          // Emit an empty hookSpecificOutput envelope — Claude Code
+          // sees no systemMessage and adds nothing to context.
+          process.stdout.write(
+            JSON.stringify({
+              hookSpecificOutput: { hookEventName: 'SessionStart' },
+            }) + '\n',
+          )
+          return
+        }
+        const text = isEmptyRepo(snapshot)
+          ? renderEmptyRepoCoaching()
+          : renderStatus(result)
         process.stdout.write(
           JSON.stringify({
             systemMessage: text,
@@ -160,6 +186,7 @@ cli
             },
           }) + '\n',
         )
+        await recordSplashEmission(repoRoot, hash)
       } else if (opts.json) {
         process.stdout.write(JSON.stringify(result, null, 2) + '\n')
       } else {
@@ -167,6 +194,61 @@ cli
       }
     },
   )
+
+cli
+  .command(
+    'dismiss-splash',
+    'Suppress the SessionStart splash for a window. Writes .cadence/dismissed_until <ISO timestamp>; the splash returns automatically once the window passes.',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--hours <n>', 'How many hours to suppress for (default: 24)', {
+    type: [Number],
+  })
+  .action(async (opts: { root?: string; hours?: number | number[] }) => {
+    const repoRoot = await resolveRepoRoot(opts.root)
+    const hours = Array.isArray(opts.hours) ? opts.hours[0] : opts.hours
+    const windowHours = typeof hours === 'number' && hours > 0 ? hours : 24
+    const until = new Date(Date.now() + windowHours * 60 * 60 * 1000)
+    await writeDismissedUntil(repoRoot, until)
+    process.stdout.write(
+      JSON.stringify({
+        dismissed_until: until.toISOString(),
+        hours: windowHours,
+      }) + '\n',
+    )
+  })
+
+cli
+  .command(
+    'stop-hook',
+    'Emit a Stop-hook JSON envelope. When state has changed since the last logged stop, appends a one-line session-log entry to narratives/session-log.md and updates .cadence/last_session_log.json. Otherwise no-op. Stdout always emits an empty hookSpecificOutput so Claude Code surfaces nothing to the user.',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .action(async (opts: { root?: string }) => {
+    const repoRoot = await resolveRepoRoot(opts.root)
+    // Silent no-op for uninitialized repos — the Stop hook fires on
+    // every turn regardless of whether Cadence is active here.
+    if (!isCadenceRepo(repoRoot)) {
+      process.stdout.write(
+        JSON.stringify({
+          hookSpecificOutput: { hookEventName: 'Stop' },
+        }) + '\n',
+      )
+      return
+    }
+    try {
+      const snapshot = await scan(repoRoot)
+      await runStopHook(repoRoot, snapshot)
+    } catch {
+      // Stop hooks must never break a session. Swallow failures and
+      // emit the empty envelope — the worst case is a missed log line.
+    }
+    process.stdout.write(
+      JSON.stringify({
+        hookSpecificOutput: { hookEventName: 'Stop' },
+      }) + '\n',
+    )
+  })
 
 cli
   .command('flags', 'Print reconciler flags only')

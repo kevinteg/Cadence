@@ -6,16 +6,35 @@ description: Bulk-pull resources from an MCP server into thoughts/unprocessed/ a
 
 Hidden verb — not in the visible 12-verb catalogue; explicit
 invocation only. The *bulk-ingestion* path for MCP resources →
-captures. (Ad-hoc lookups during other verbs are fine when the user
-explicitly directs them — see `cadence-runtime.md` "External Tool
-Discipline." Use this verb when you want many resources captured
-to the parking lot for later triage in `/cadence:reflect`.)
+captures.
 
 Drives MCP integration through the agent's normal tool-call surface
 so Claude Code (the MCP host) owns the transport and OAuth; Cadence
 owns the file write.
 
 Reference `workflows/verb-contracts.md` for the mcp-pull register.
+
+## When to use `/mcp-pull` vs. `/cadence:capture --source`
+
+Both write captures into `thoughts/unprocessed/` via the same
+`cadence write-capture` CLI primitive — they differ in *intent shape*,
+not transport:
+
+| | `/cadence:mcp-pull <server>` | `/cadence:capture --source <named>` |
+|---|---|---|
+| **Shape** | Bulk many resources from one server | Single named query (one ingest_sources entry) |
+| **Selection** | Walk a list / search result; pick N | Query is pre-canned in `ingest_sources:` |
+| **Distillation** | None — captures the resource verbatim with light header framing | Dispatches `capture-ingest` subagent; distills per `--prompt` |
+| **Per-item classification** | No — items land for later triage | Yes — subagent emits `suggested_outcomes` per item |
+| **Outcome menu after write** | No — bulk pull is too noisy for per-item menus | Yes — outcome menu surfaces immediately so the user can route items out of the Inbox |
+| **Frontmatter shape** | v1 (`mcp:` block) | v2 (`source:` + `suggested_outcomes` + `status`) |
+| **Best for** | "Let me see what's in this corpus" — Glean search dumps, repository scans | "Pull the onboarding docs and tell me what I should act on" — focused, repeated queries |
+
+Both contribute to the Inbox view (untriaged thoughts + diverging
+brainstorms). `/cadence:mcp-pull`'s output gets classified later
+during `/cadence:start inbox` triage; `/cadence:capture --source`'s
+output usually exits the Inbox at the post-capture outcome menu.
+Pick the verb that matches the *intent shape* of what you're doing.
 
 ## Usage
 

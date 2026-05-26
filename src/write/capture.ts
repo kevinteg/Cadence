@@ -69,6 +69,17 @@ export async function writeCapture(
   const dir = path.join(repoRoot, 'thoughts/unprocessed')
   await ensureDir(dir)
 
+  // Lazy: when a v2 source carries a raw_path under thoughts/_raw/,
+  // make sure that parent directory exists so the subagent's
+  // subsequent Write doesn't trip on a missing dir. The CLI doesn't
+  // write the raw file itself — the subagent does — but ensuring the
+  // dir here removes one tool call from the subagent's budget and
+  // keeps the lazy-creation invariant in one place.
+  if (opts.source?.raw_path) {
+    const rawDir = path.dirname(path.join(repoRoot, opts.source.raw_path))
+    await ensureDir(rawDir)
+  }
+
   // ── v1 mcp: block (legacy) ──────────────────────────────────────
   let mcp: CaptureMcpRef | undefined
   if (opts.mcp) {

@@ -708,6 +708,123 @@ register the server first.
 | `cadence:capture --dump` | Long-form brain dump in `$EDITOR` |
 | `/cadence:mcp-pull --server <name>` | **Bulk many resources from one server** — the dedicated batch path; `--source` is the single-query shorthand for the same plumbing |
 
+## Ambient Surfaces — Inbox, SessionStart, Stop hook
+
+The v1.1 ambient surfaces share one mental model: **render state
+where the user already is, rather than asking them to navigate to
+it.** Three pieces — the Inbox view, the SessionStart splash, and
+the Stop-hook session log — are described here as a set because they
+share data structures, suppression mechanics, and canonical copy.
+
+### Inbox view
+
+The Inbox is a *view*, not a directory or pursuit. It's defined in
+`src/inbox.ts` as:
+
+```ts
+inboxItems(snapshot, now?) → {
+  items: InboxItem[],   // sorted oldest-first
+  counts: { total, thoughts, brainstorms, fresh, aged, overdue },
+}
+```
+
+Membership rules:
+- `thoughts/unprocessed/*.md` where `status: untriaged` (the default
+  on fresh captures) — surfaced as `kind: 'thought'`.
+- `brainstorms/<slug>/meta.yaml` where `phase: diverging` — surfaced
+  as `kind: 'brainstorm'`.
+
+Bucket boundaries (from `src/inbox.ts`):
+- `fresh` — age_days ≤ 2
+- `aged` — 3 ≤ age_days ≤ 7
+- `overdue` — age_days > 7
+
+The reconciler emits an `inbox_pressure` flag when
+`counts.total > inbox_soft_threshold` (default 10, configured via
+`cadence.yaml`). Every surface that mentions "Inbox" consumes
+`inboxItems()` — same definition across `/status`, the SessionStart
+hook, the reconciler, and `/start inbox`.
+
+Canonical strings for the Inbox line live in
+`cadence-plugin/workflows/coaching-strings.md`. Skills, hooks, and
+CLI render helpers quote from that doc rather than re-inventing
+language per surface.
+
+### SessionStart hook
+
+Hook config in `cadence-plugin/hooks/hooks.json` registers the
+`SessionStart` event (matchers: `startup`, `resume`, `clear`) and
+invokes `cadence status --hook-output`. The hook emits a JSON
+envelope with `systemMessage` (rendered inline) and
+`hookSpecificOutput.additionalContext` (added to the model's context).
+
+Three behaviors specific to `--hook-output`:
+
+1. **Empty-repo branch.** When `isEmptyRepo(snapshot)` returns
+   true — zero pursuits AND Inbox empty AND
+   `validations/pending.md` empty — the hook emits the canonical
+   empty-repo coaching block from `coaching-strings.md` instead of
+   the dashboard. The bare CLI does NOT branch this way; an explicit
+   `/status` always renders the dashboard.
+
+2. **Suppression — recent + unchanged.** A
+   `.cadence/last_session_block.json` file stores
+   `{ timestamp, hash }` from the previous emission. `computeStateHash`
+   in `src/sessionstart.ts` hashes pursuits/projects/inbox/brainstorms/
+   pending-validations state into a 16-char hex string. If the hash
+   is unchanged AND less than 60 minutes have passed, the hook emits
+   an empty envelope (no `systemMessage`, no `additionalContext`).
+
+3. **Suppression — explicit dismiss.** A `.cadence/dismissed_until`
+   file (ISO timestamp) suppresses the splash regardless of state
+   change. Written by `cadence dismiss-splash --hours <N>` (default
+   24); auto-expires when `now > until`.
+
+After every non-suppressed emission, `recordSplashEmission` updates
+`.cadence/last_session_block.json` with the current hash and
+timestamp.
+
+The bare `cadence status` CLI bypasses all three branches — the
+user explicitly asked for the dashboard.
+
+### `cadence dismiss-splash` CLI
+
+```
+cadence dismiss-splash [--hours <N>]
+```
+
+Writes `.cadence/dismissed_until <ISO>` with `now + N hours` (default
+24). The SessionStart hook respects the file until the timestamp
+passes. To clear early, delete `.cadence/dismissed_until` or run
+`dismiss-splash --hours 0` (any non-positive value defaults to 24,
+so manual deletion is the actual escape hatch).
+
+### Stop hook + session log
+
+The `Stop` event in `hooks.json` invokes `cadence stop-hook` when
+Claude Code finishes a turn naturally. The hook:
+
+1. Computes the same state hash as the SessionStart splash.
+2. Reads `.cadence/last_session_log.json` (the hash + timestamp of
+   the last logged stop). If the hash is unchanged, emits an empty
+   envelope and exits — no log line.
+3. If the hash has changed, appends a one-line summary to
+   `narratives/session-log.md`:
+   ```
+   2026-05-21T14:23:45Z — pursuits:3 projects:5 (12/24 actions) inbox:4 brainstorms:1
+   ```
+   Counts come from the snapshot — no narrative claim, no editorial.
+4. Updates `.cadence/last_session_log.json` with the new hash so
+   the next unchanged stop is a no-op.
+
+Stop-hook failures are swallowed silently — a session-log issue
+must never break the user's session. `narratives/` is lazy-created
+on first append; pre-existing repos don't need a migration.
+
+The SubagentStop and PreCompact hooks are NOT wired. SubagentStop is
+too chatty (fires per subagent invocation); PreCompact fires after
+the user has already lost the thread.
+
 ## Maintainer Labels (Upstream Cadence Repo)
 
 The maintainer-side `/incoming` workflow and the origin-sync CLI use

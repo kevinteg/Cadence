@@ -5,6 +5,11 @@ import {
   NO_SIGNALS,
   type SuggestionSignals,
 } from './signals.js'
+import {
+  renderActiveBrainstormsLine,
+  renderIdleTimePrompt,
+  renderInboxLine,
+} from '../sessionstart.js'
 import { readPendingValidations } from '../validation/queue.js'
 
 export function renderStatus(result: Report): string {
@@ -22,7 +27,10 @@ export function renderStatus(result: Report): string {
   out.push(pursuitsLine(snapshot))
   out.push(projectsLine(snapshot))
   out.push(actionsLine(snapshot))
-  out.push(`Thoughts: ${snapshot.captures.length} unprocessed`)
+  // Canonical Inbox line — see cadence-plugin/workflows/coaching-strings.md
+  out.push(renderInboxLine(snapshot, snapshot.config.inbox_soft_threshold))
+  const brainstormsLine = renderActiveBrainstormsLine(snapshot)
+  if (brainstormsLine) out.push(brainstormsLine)
   out.push('')
 
   // Pending validations — surface above flags so a fresh session sees
@@ -54,6 +62,14 @@ export function renderStatus(result: Report): string {
   const next = nextSteps(snapshot, flags, signals)
   out.push('Next:')
   for (const step of next) out.push('  - ' + step)
+
+  // Idle-time prompt — appended below Next: when activity is stale
+  // (>7d). See coaching-strings.md for wording.
+  const idle = renderIdleTimePrompt(snapshot)
+  if (idle) {
+    out.push('')
+    out.push(idle)
+  }
 
   return out.join('\n')
 }

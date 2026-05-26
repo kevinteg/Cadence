@@ -108,7 +108,7 @@ var require_path = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.convertPosixPathToPattern = exports2.convertWindowsPathToPattern = exports2.convertPathToPattern = exports2.escapePosixPath = exports2.escapeWindowsPath = exports2.escape = exports2.removeLeadingDotSegment = exports2.makeAbsolute = exports2.unixify = void 0;
     var os2 = __require("os");
-    var path22 = __require("path");
+    var path24 = __require("path");
     var IS_WINDOWS_PLATFORM = os2.platform() === "win32";
     var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
     var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
@@ -120,7 +120,7 @@ var require_path = __commonJS({
     }
     exports2.unixify = unixify;
     function makeAbsolute(cwd, filepath) {
-      return path22.resolve(cwd, filepath);
+      return path24.resolve(cwd, filepath);
     }
     exports2.makeAbsolute = makeAbsolute;
     function removeLeadingDotSegment(entry) {
@@ -1417,7 +1417,7 @@ var require_braces = __commonJS({
 var require_constants2 = __commonJS({
   "node_modules/picomatch/lib/constants.js"(exports2, module2) {
     "use strict";
-    var path22 = __require("path");
+    var path24 = __require("path");
     var WIN_SLASH = "\\\\/";
     var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
     var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
@@ -1591,7 +1591,7 @@ var require_constants2 = __commonJS({
       /* | */
       CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
       /* \uFEFF */
-      SEP: path22.sep,
+      SEP: path24.sep,
       /**
        * Create EXTGLOB_CHARS
        */
@@ -1618,7 +1618,7 @@ var require_constants2 = __commonJS({
 var require_utils2 = __commonJS({
   "node_modules/picomatch/lib/utils.js"(exports2) {
     "use strict";
-    var path22 = __require("path");
+    var path24 = __require("path");
     var win32 = process.platform === "win32";
     var {
       REGEX_BACKSLASH,
@@ -1647,7 +1647,7 @@ var require_utils2 = __commonJS({
       if (options2 && typeof options2.windows === "boolean") {
         return options2.windows;
       }
-      return win32 === true || path22.sep === "\\";
+      return win32 === true || path24.sep === "\\";
     };
     exports2.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx);
@@ -3011,7 +3011,7 @@ var require_parse2 = __commonJS({
 var require_picomatch = __commonJS({
   "node_modules/picomatch/lib/picomatch.js"(exports2, module2) {
     "use strict";
-    var path22 = __require("path");
+    var path24 = __require("path");
     var scan2 = require_scan();
     var parse2 = require_parse2();
     var utils = require_utils2();
@@ -3096,7 +3096,7 @@ var require_picomatch = __commonJS({
     };
     picomatch.matchBase = (input, glob, options2, posix = utils.isWindows(options2)) => {
       const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options2);
-      return regex.test(path22.basename(input));
+      return regex.test(path24.basename(input));
     };
     picomatch.isMatch = (str3, patterns, options2) => picomatch(patterns, options2)(str3);
     picomatch.parse = (pattern, options2) => {
@@ -3323,7 +3323,7 @@ var require_pattern = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isAbsolute = exports2.partitionAbsoluteAndRelative = exports2.removeDuplicateSlashes = exports2.matchAny = exports2.convertPatternsToRe = exports2.makeRe = exports2.getPatternParts = exports2.expandBraceExpansion = exports2.expandPatternsWithBraceExpansion = exports2.isAffectDepthOfReadingPattern = exports2.endsWithSlashGlobStar = exports2.hasGlobStar = exports2.getBaseDirectory = exports2.isPatternRelatedToParentDirectory = exports2.getPatternsOutsideCurrentDirectory = exports2.getPatternsInsideCurrentDirectory = exports2.getPositivePatterns = exports2.getNegativePatterns = exports2.isPositivePattern = exports2.isNegativePattern = exports2.convertToNegativePattern = exports2.convertToPositivePattern = exports2.isDynamicPattern = exports2.isStaticPattern = void 0;
-    var path22 = __require("path");
+    var path24 = __require("path");
     var globParent = require_glob_parent();
     var micromatch = require_micromatch();
     var GLOBSTAR = "**";
@@ -3418,7 +3418,7 @@ var require_pattern = __commonJS({
     }
     exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
     function isAffectDepthOfReadingPattern(pattern) {
-      const basename = path22.basename(pattern);
+      const basename = path24.basename(pattern);
       return endsWithSlashGlobStar(pattern) || isStaticPattern(basename);
     }
     exports2.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
@@ -3476,7 +3476,7 @@ var require_pattern = __commonJS({
     }
     exports2.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative;
     function isAbsolute(pattern) {
-      return path22.isAbsolute(pattern);
+      return path24.isAbsolute(pattern);
     }
     exports2.isAbsolute = isAbsolute;
   }
@@ -3653,8 +3653,8 @@ var require_utils3 = __commonJS({
     exports2.errno = errno;
     var fs = require_fs();
     exports2.fs = fs;
-    var path22 = require_path();
-    exports2.path = path22;
+    var path24 = require_path();
+    exports2.path = path24;
     var pattern = require_pattern();
     exports2.pattern = pattern;
     var stream = require_stream();
@@ -3766,8 +3766,8 @@ var require_async = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path22, settings, callback) {
-      settings.fs.lstat(path22, (lstatError, lstat) => {
+    function read(path24, settings, callback) {
+      settings.fs.lstat(path24, (lstatError, lstat) => {
         if (lstatError !== null) {
           callFailureCallback(callback, lstatError);
           return;
@@ -3776,7 +3776,7 @@ var require_async = __commonJS({
           callSuccessCallback(callback, lstat);
           return;
         }
-        settings.fs.stat(path22, (statError, stat2) => {
+        settings.fs.stat(path24, (statError, stat2) => {
           if (statError !== null) {
             if (settings.throwErrorOnBrokenSymbolicLink) {
               callFailureCallback(callback, statError);
@@ -3808,13 +3808,13 @@ var require_sync = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path22, settings) {
-      const lstat = settings.fs.lstatSync(path22);
+    function read(path24, settings) {
+      const lstat = settings.fs.lstatSync(path24);
       if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) {
         return lstat;
       }
       try {
-        const stat2 = settings.fs.statSync(path22);
+        const stat2 = settings.fs.statSync(path24);
         if (settings.markSymbolicLink) {
           stat2.isSymbolicLink = () => true;
         }
@@ -3885,17 +3885,17 @@ var require_out = __commonJS({
     var sync = require_sync();
     var settings_1 = require_settings();
     exports2.Settings = settings_1.default;
-    function stat2(path22, optionsOrSettingsOrCallback, callback) {
+    function stat2(path24, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path22, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path24, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path22, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path24, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.stat = stat2;
-    function statSync(path22, optionsOrSettings) {
+    function statSync(path24, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path22, settings);
+      return sync.read(path24, settings);
     }
     exports2.statSync = statSync;
     function getSettings(settingsOrOptions = {}) {
@@ -4111,16 +4111,16 @@ var require_async2 = __commonJS({
           return;
         }
         const tasks = names.map((name) => {
-          const path22 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+          const path24 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
           return (done) => {
-            fsStat.stat(path22, settings.fsStatSettings, (error, stats) => {
+            fsStat.stat(path24, settings.fsStatSettings, (error, stats) => {
               if (error !== null) {
                 done(error);
                 return;
               }
               const entry = {
                 name,
-                path: path22,
+                path: path24,
                 dirent: utils.fs.createDirentFromStats(name, stats)
               };
               if (settings.stats) {
@@ -4238,7 +4238,7 @@ var require_settings2 = __commonJS({
   "node_modules/@nodelib/fs.scandir/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path22 = __require("path");
+    var path24 = __require("path");
     var fsStat = require_out();
     var fs = require_fs4();
     var Settings = class {
@@ -4246,7 +4246,7 @@ var require_settings2 = __commonJS({
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
         this.fs = fs.createFileSystemAdapter(this._options.fs);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path22.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path24.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
         this.fsStatSettings = new fsStat.Settings({
@@ -4273,17 +4273,17 @@ var require_out2 = __commonJS({
     var sync = require_sync2();
     var settings_1 = require_settings2();
     exports2.Settings = settings_1.default;
-    function scandir(path22, optionsOrSettingsOrCallback, callback) {
+    function scandir(path24, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path22, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path24, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path22, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path24, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.scandir = scandir;
-    function scandirSync(path22, optionsOrSettings) {
+    function scandirSync(path24, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path22, settings);
+      return sync.read(path24, settings);
     }
     exports2.scandirSync = scandirSync;
     function getSettings(settingsOrOptions = {}) {
@@ -4930,7 +4930,7 @@ var require_settings3 = __commonJS({
   "node_modules/@nodelib/fs.walk/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path22 = __require("path");
+    var path24 = __require("path");
     var fsScandir = require_out2();
     var Settings = class {
       constructor(_options = {}) {
@@ -4940,7 +4940,7 @@ var require_settings3 = __commonJS({
         this.deepFilter = this._getValue(this._options.deepFilter, null);
         this.entryFilter = this._getValue(this._options.entryFilter, null);
         this.errorFilter = this._getValue(this._options.errorFilter, null);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path22.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path24.sep);
         this.fsScandirSettings = new fsScandir.Settings({
           followSymbolicLinks: this._options.followSymbolicLinks,
           fs: this._options.fs,
@@ -5002,7 +5002,7 @@ var require_reader2 = __commonJS({
   "node_modules/fast-glob/out/readers/reader.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path22 = __require("path");
+    var path24 = __require("path");
     var fsStat = require_out();
     var utils = require_utils3();
     var Reader = class {
@@ -5015,7 +5015,7 @@ var require_reader2 = __commonJS({
         });
       }
       _getFullEntryPath(filepath) {
-        return path22.resolve(this._settings.cwd, filepath);
+        return path24.resolve(this._settings.cwd, filepath);
       }
       _makeEntry(stats, pattern) {
         const entry = {
@@ -5431,7 +5431,7 @@ var require_provider = __commonJS({
   "node_modules/fast-glob/out/providers/provider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path22 = __require("path");
+    var path24 = __require("path");
     var deep_1 = require_deep();
     var entry_1 = require_entry();
     var error_1 = require_error();
@@ -5445,7 +5445,7 @@ var require_provider = __commonJS({
         this.entryTransformer = new entry_2.default(this._settings);
       }
       _getRootDirectory(task) {
-        return path22.resolve(this._settings.cwd, task.base);
+        return path24.resolve(this._settings.cwd, task.base);
       }
       _getReaderOptions(task) {
         const basePath = task.base === "." ? "" : task.base;
@@ -9850,9 +9850,9 @@ var CAC = class extends EventEmitter {
 var cac = (name = "") => new CAC(name);
 
 // src/cli.ts
-import { existsSync as existsSync15 } from "node:fs";
-import { readFile as readFile12 } from "node:fs/promises";
-import path21 from "node:path";
+import { existsSync as existsSync17 } from "node:fs";
+import { readFile as readFile14 } from "node:fs/promises";
+import path23 from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 
 // src/scan/repo.ts
@@ -12965,8 +12965,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path22, errorMaps, issueData } = params;
-  const fullPath = [...path22, ...issueData.path || []];
+  const { data, path: path24, errorMaps, issueData } = params;
+  const fullPath = [...path24, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -13082,11 +13082,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path22, key) {
+  constructor(parent, value, path24, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path22;
+    this._path = path24;
     this._key = key;
   }
   get path() {
@@ -17804,6 +17804,12 @@ function daysBetweenLocal(from, to) {
   return Math.round((end.getTime() - start.getTime()) / (24 * 3600 * 1e3));
 }
 
+// src/sessionstart.ts
+import { createHash } from "node:crypto";
+import { existsSync as existsSync5, mkdirSync as mkdirSync3 } from "node:fs";
+import { readFile as readFile8, writeFile as writeFile2 } from "node:fs/promises";
+import path10 from "node:path";
+
 // src/validation/queue.ts
 import { existsSync as existsSync4, mkdirSync as mkdirSync2, readFileSync, writeFileSync } from "node:fs";
 import path9 from "node:path";
@@ -17880,6 +17886,125 @@ function clearPendingValidations(repoRoot, predicate) {
   return cleared;
 }
 
+// src/sessionstart.ts
+var STATE_DIR = ".cadence";
+var LAST_BLOCK_FILE = "last_session_block.json";
+var DISMISSED_UNTIL_FILE = "dismissed_until";
+var DEFAULT_SUPPRESS_MINUTES = 60;
+function computeStateHash(snapshot) {
+  const view = inboxItems(snapshot);
+  const parts = {
+    pursuits: snapshot.pursuits.map((p) => `${p.id}:${p.lifecycle}`).sort(),
+    projects: snapshot.projects.map((p) => `${p.id}:${p.status}:${p.actionProgress.done}/${p.actionProgress.total}`).sort(),
+    inbox_count: view.counts.total,
+    brainstorms: snapshot.brainstorms.map((b) => `${b.slug}:${b.phase}`).sort(),
+    validations: readPendingValidations(snapshot.repoRoot).map((v) => v.description).sort()
+  };
+  return createHash("sha256").update(JSON.stringify(parts)).digest("hex").slice(0, 16);
+}
+async function shouldSuppressSplash(repoRoot, currentHash, now = /* @__PURE__ */ new Date(), suppressMinutes = DEFAULT_SUPPRESS_MINUTES) {
+  const dismissedPath = path10.join(repoRoot, STATE_DIR, DISMISSED_UNTIL_FILE);
+  if (existsSync5(dismissedPath)) {
+    try {
+      const text = (await readFile8(dismissedPath, "utf8")).trim();
+      const until = new Date(text);
+      if (!Number.isNaN(until.getTime()) && now < until) {
+        return { suppress: true, reason: "dismissed" };
+      }
+    } catch {
+    }
+  }
+  const blockPath = path10.join(repoRoot, STATE_DIR, LAST_BLOCK_FILE);
+  if (!existsSync5(blockPath)) return { suppress: false };
+  try {
+    const raw = await readFile8(blockPath, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!parsed.timestamp || !parsed.hash) return { suppress: false };
+    const lastTs = new Date(parsed.timestamp);
+    if (Number.isNaN(lastTs.getTime())) return { suppress: false };
+    const ageMs = now.getTime() - lastTs.getTime();
+    const withinWindow = ageMs < suppressMinutes * 6e4 && ageMs >= 0;
+    if (withinWindow && parsed.hash === currentHash) {
+      return { suppress: true, reason: "recent_unchanged" };
+    }
+  } catch {
+  }
+  return { suppress: false };
+}
+async function recordSplashEmission(repoRoot, currentHash, now = /* @__PURE__ */ new Date()) {
+  const dir = path10.join(repoRoot, STATE_DIR);
+  if (!existsSync5(dir)) mkdirSync3(dir, { recursive: true });
+  const payload = JSON.stringify({
+    timestamp: now.toISOString(),
+    hash: currentHash
+  });
+  await writeFile2(path10.join(dir, LAST_BLOCK_FILE), payload + "\n", "utf8");
+}
+async function writeDismissedUntil(repoRoot, until) {
+  const dir = path10.join(repoRoot, STATE_DIR);
+  if (!existsSync5(dir)) mkdirSync3(dir, { recursive: true });
+  await writeFile2(
+    path10.join(dir, DISMISSED_UNTIL_FILE),
+    until.toISOString() + "\n",
+    "utf8"
+  );
+}
+function isEmptyRepo(snapshot) {
+  if (snapshot.pursuits.length > 0) return false;
+  const view = inboxItems(snapshot);
+  if (view.counts.total > 0) return false;
+  const pending = readPendingValidations(snapshot.repoRoot);
+  if (pending.length > 0) return false;
+  return true;
+}
+function renderEmptyRepoCoaching() {
+  return [
+    "Cadence is initialized. Your Inbox is empty \u2713.",
+    "",
+    "What do you want to start?",
+    '  \u2022 Quick thought          \u2192 /cadence:capture "..."',
+    "  \u2022 Long brain dump        \u2192 /cadence:capture --dump",
+    "  \u2022 Ingest a doc           \u2192 /cadence:capture --from <path-or-url>",
+    "  \u2022 Pull from a saved source \u2192 /cadence:capture --source <name>",
+    "  \u2022 Open ideation          \u2192 /cadence:brainstorm <topic>",
+    "  \u2022 See the verb surface   \u2192 /cadence:help"
+  ].join("\n");
+}
+function renderInboxLine(snapshot, threshold) {
+  const view = inboxItems(snapshot);
+  if (view.counts.total === 0) return "Inbox: empty \u2713";
+  if (view.counts.total <= threshold) {
+    return `Inbox: ${view.counts.total} items \u2713`;
+  }
+  const buckets = [];
+  if (view.counts.overdue > 0) buckets.push(`${view.counts.overdue} overdue`);
+  if (view.counts.aged > 0) buckets.push(`${view.counts.aged} aged`);
+  if (view.counts.fresh > 0) buckets.push(`${view.counts.fresh} fresh`);
+  return `Inbox: ${view.counts.total} items (${buckets.join(", ")}) \u2014 above soft cap (${threshold}). Run /cadence:start inbox to walk them.`;
+}
+function renderActiveBrainstormsLine(snapshot) {
+  const active = snapshot.brainstorms.filter((b) => b.phase === "diverging" || b.phase === "converging").sort((a, b) => b.last_touched.localeCompare(a.last_touched));
+  if (active.length === 0) return null;
+  const head = active.slice(0, 3);
+  const tailCount = active.length - head.length;
+  const formatted = head.map((b) => `${b.slug} [${b.phase}]`).join(", ");
+  const tail = tailCount > 0 ? ` and ${tailCount} more` : "";
+  return `Active brainstorms: ${active.length} (${formatted}${tail})`;
+}
+function renderIdleTimePrompt(snapshot, now = /* @__PURE__ */ new Date(), idleDayThreshold = 7) {
+  let mostRecent = null;
+  for (const p of snapshot.projects) {
+    if (!p.last_activity_at) continue;
+    const ts = new Date(p.last_activity_at).getTime();
+    if (Number.isNaN(ts)) continue;
+    if (mostRecent === null || ts > mostRecent) mostRecent = ts;
+  }
+  if (mostRecent === null) return null;
+  const daysSince = (now.getTime() - mostRecent) / (1e3 * 60 * 60 * 24);
+  if (daysSince <= idleDayThreshold) return null;
+  return "It's been a while since the last activity here. /cadence:reflect to catch up, or /cadence:status to see what's open.";
+}
+
 // src/render/status.ts
 function renderStatus(result) {
   const { snapshot, flags } = result;
@@ -17894,7 +18019,9 @@ function renderStatus(result) {
   out.push(pursuitsLine(snapshot));
   out.push(projectsLine(snapshot));
   out.push(actionsLine(snapshot));
-  out.push(`Thoughts: ${snapshot.captures.length} unprocessed`);
+  out.push(renderInboxLine(snapshot, snapshot.config.inbox_soft_threshold));
+  const brainstormsLine = renderActiveBrainstormsLine(snapshot);
+  if (brainstormsLine) out.push(brainstormsLine);
   out.push("");
   const pending = readPendingValidations(snapshot.repoRoot);
   if (pending.length > 0) {
@@ -17920,6 +18047,11 @@ function renderStatus(result) {
   const next = nextSteps(snapshot, flags, signals);
   out.push("Next:");
   for (const step of next) out.push("  - " + step);
+  const idle = renderIdleTimePrompt(snapshot);
+  if (idle) {
+    out.push("");
+    out.push(idle);
+  }
   return out.join("\n");
 }
 function renderFlags(flags, snapshot) {
@@ -18095,6 +18227,73 @@ function describeFlag(flag, _snapshot) {
   }
   const _exhaustive = flag;
   return _exhaustive;
+}
+
+// src/stophook.ts
+import { existsSync as existsSync6, mkdirSync as mkdirSync4 } from "node:fs";
+import { readFile as readFile9, writeFile as writeFile3, appendFile } from "node:fs/promises";
+import path11 from "node:path";
+var STATE_DIR2 = ".cadence";
+var LAST_LOG_FILE = "last_session_log.json";
+var NARRATIVES_DIR = "narratives";
+var SESSION_LOG_FILE = "session-log.md";
+async function shouldLogSession(repoRoot, currentHash) {
+  const pointer = path11.join(repoRoot, STATE_DIR2, LAST_LOG_FILE);
+  if (!existsSync6(pointer)) return true;
+  try {
+    const raw = await readFile9(pointer, "utf8");
+    const parsed = JSON.parse(raw);
+    if (!parsed.hash) return true;
+    return parsed.hash !== currentHash;
+  } catch {
+    return true;
+  }
+}
+function composeSessionLogLine(snapshot, now = /* @__PURE__ */ new Date()) {
+  const activePursuits = snapshot.pursuits.filter(
+    (p) => p.lifecycle === "active"
+  ).length;
+  const activeProjects = snapshot.projects.filter(
+    (p) => p.status === "active"
+  ).length;
+  let doneActions = 0;
+  let totalActions = 0;
+  for (const p of snapshot.projects) {
+    if (p.status !== "active") continue;
+    doneActions += p.actionProgress.done;
+    totalActions += p.actionProgress.total;
+  }
+  const inbox = inboxItems(snapshot, now).counts.total;
+  const activeBrainstorms = snapshot.brainstorms.filter(
+    (b) => b.phase === "diverging" || b.phase === "converging"
+  ).length;
+  const ts = now.toISOString().replace(/\.\d{3}Z$/, "Z");
+  return `${ts} \u2014 pursuits:${activePursuits} projects:${activeProjects} (${doneActions}/${totalActions} actions) inbox:${inbox} brainstorms:${activeBrainstorms}`;
+}
+async function appendSessionLog(repoRoot, line, currentHash, now = /* @__PURE__ */ new Date()) {
+  const narrativesDir = path11.join(repoRoot, NARRATIVES_DIR);
+  if (!existsSync6(narrativesDir)) mkdirSync4(narrativesDir, { recursive: true });
+  const logPath = path11.join(narrativesDir, SESSION_LOG_FILE);
+  await appendFile(logPath, line + "\n", "utf8");
+  const stateDir = path11.join(repoRoot, STATE_DIR2);
+  if (!existsSync6(stateDir)) mkdirSync4(stateDir, { recursive: true });
+  const payload = JSON.stringify({
+    timestamp: now.toISOString(),
+    hash: currentHash
+  });
+  await writeFile3(
+    path11.join(stateDir, LAST_LOG_FILE),
+    payload + "\n",
+    "utf8"
+  );
+}
+async function runStopHook(repoRoot, snapshot, now = /* @__PURE__ */ new Date()) {
+  const hash = computeStateHash(snapshot);
+  const should = await shouldLogSession(repoRoot, hash);
+  if (!should) return { logged: false, line: null };
+  const line = composeSessionLogLine(snapshot, now);
+  await appendSessionLog(repoRoot, line, hash, now);
+  return { logged: true, line };
 }
 
 // src/render/snapshot.ts
@@ -18626,12 +18825,12 @@ function projectMenu(_projectId, status) {
 }
 
 // src/write/pursuit.ts
-import path11 from "node:path";
-import { existsSync as existsSync5 } from "node:fs";
+import path13 from "node:path";
+import { existsSync as existsSync7 } from "node:fs";
 
 // src/write/util.ts
-import { mkdir, readFile as readFile8, rename, writeFile as writeFile2 } from "node:fs/promises";
-import path10 from "node:path";
+import { mkdir, readFile as readFile10, rename, writeFile as writeFile4 } from "node:fs/promises";
+import path12 from "node:path";
 
 // src/write/yaml.ts
 function dumpYaml(data) {
@@ -18658,11 +18857,11 @@ async function ensureDir(dir) {
   await mkdir(dir, { recursive: true });
 }
 async function writeFrontmatterFile(filePath, data, body) {
-  await ensureDir(path10.dirname(filePath));
-  await writeFile2(filePath, formatFrontmatterFile(data, body), "utf8");
+  await ensureDir(path12.dirname(filePath));
+  await writeFile4(filePath, formatFrontmatterFile(data, body), "utf8");
 }
 async function loadFrontmatterFile(filePath) {
-  const text = await readFile8(filePath, "utf8");
+  const text = await readFile10(filePath, "utf8");
   return parseFrontmatter(text);
 }
 async function mutateFrontmatter(filePath, mutate) {
@@ -18671,7 +18870,7 @@ async function mutateFrontmatter(filePath, mutate) {
   await writeFrontmatterFile(filePath, next.data, next.body);
 }
 async function moveDir(from, to) {
-  await ensureDir(path10.dirname(to));
+  await ensureDir(path12.dirname(to));
   await rename(from, to);
 }
 function timestampSlug(date) {
@@ -18692,12 +18891,12 @@ async function createPursuit(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const status = opts.status ?? (opts.type === "someday" ? "someday" : "active");
   const lifecycleDir = status === "someday" ? "pursuits/_someday" : status === "archived" ? "pursuits/_archived" : "pursuits";
-  const pursuitDir = path11.join(repoRoot, lifecycleDir, opts.id);
-  if (existsSync5(pursuitDir)) {
+  const pursuitDir = path13.join(repoRoot, lifecycleDir, opts.id);
+  if (existsSync7(pursuitDir)) {
     throw new Error(`pursuit already exists: ${opts.id}`);
   }
-  await ensureDir(path11.join(pursuitDir, "projects"));
-  await ensureDir(path11.join(pursuitDir, "ideas"));
+  await ensureDir(path13.join(pursuitDir, "projects"));
+  await ensureDir(path13.join(pursuitDir, "ideas"));
   const data = {
     id: opts.id,
     type: opts.type,
@@ -18711,38 +18910,38 @@ async function createPursuit(repoRoot, opts) {
   const body = `# ${title}` + (opts.description ? `
 
 ${opts.description}` : "");
-  const filePath = path11.join(pursuitDir, "pursuit.md");
+  const filePath = path13.join(pursuitDir, "pursuit.md");
   await writeFrontmatterFile(filePath, data, body);
-  return { path: path11.relative(repoRoot, filePath) };
+  return { path: path13.relative(repoRoot, filePath) };
 }
 function toTitleCase(id) {
   return id.split("-").map((w) => w[0] ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
 }
 
 // src/write/project.ts
-import path13 from "node:path";
-import { existsSync as existsSync7 } from "node:fs";
+import path15 from "node:path";
+import { existsSync as existsSync9 } from "node:fs";
 
 // src/write/paths.ts
-import { existsSync as existsSync6 } from "node:fs";
-import path12 from "node:path";
+import { existsSync as existsSync8 } from "node:fs";
+import path14 from "node:path";
 function resolvePursuitDir(repoRoot, pursuitId) {
   const candidates = [
-    path12.join(repoRoot, "pursuits", pursuitId),
-    path12.join(repoRoot, "pursuits/_someday", pursuitId),
-    path12.join(repoRoot, "pursuits/_archived", pursuitId),
-    path12.join(repoRoot, "pursuits/_dropped", pursuitId)
+    path14.join(repoRoot, "pursuits", pursuitId),
+    path14.join(repoRoot, "pursuits/_someday", pursuitId),
+    path14.join(repoRoot, "pursuits/_archived", pursuitId),
+    path14.join(repoRoot, "pursuits/_dropped", pursuitId)
   ];
   for (const c of candidates) {
-    if (existsSync6(path12.join(c, "pursuit.md"))) return c;
+    if (existsSync8(path14.join(c, "pursuit.md"))) return c;
   }
   return null;
 }
 function resolveProjectFile(repoRoot, pursuitId, projectId) {
   const dir = resolvePursuitDir(repoRoot, pursuitId);
   if (!dir) return null;
-  const file = path12.join(dir, "projects", `${projectId}.md`);
-  if (!existsSync6(file)) return null;
+  const file = path14.join(dir, "projects", `${projectId}.md`);
+  if (!existsSync8(file)) return null;
   return file;
 }
 
@@ -18754,8 +18953,8 @@ async function createProject(repoRoot, opts) {
   if (!pursuitDir) {
     throw new Error(`pursuit not found: ${opts.pursuit}`);
   }
-  const filePath = path13.join(pursuitDir, "projects", `${opts.id}.md`);
-  if (existsSync7(filePath)) {
+  const filePath = path15.join(pursuitDir, "projects", `${opts.id}.md`);
+  if (existsSync9(filePath)) {
     throw new Error(`project already exists: ${opts.pursuit}/${opts.id}`);
   }
   const cleanList = (xs) => Array.isArray(xs) ? xs.filter((x) => typeof x === "string" && x.length > 0) : [];
@@ -18806,25 +19005,25 @@ async function createProject(repoRoot, opts) {
   if (actionLines.length > 0) sections.push(actionLines.join("\n"));
   const body = sections.join("\n\n");
   await writeFrontmatterFile(filePath, data, body);
-  return { path: path13.relative(repoRoot, filePath) };
+  return { path: path15.relative(repoRoot, filePath) };
 }
 function toTitleCase2(id) {
   return id.split("-").map((w) => w[0] ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
 }
 
 // src/write/brainstorm.ts
-import path14 from "node:path";
-import { existsSync as existsSync8 } from "node:fs";
-import { mkdir as mkdir2, readFile as readFile9, rename as rename2, rm, writeFile as writeFile3 } from "node:fs/promises";
+import path16 from "node:path";
+import { existsSync as existsSync10 } from "node:fs";
+import { mkdir as mkdir2, readFile as readFile11, rename as rename2, rm, writeFile as writeFile5 } from "node:fs/promises";
 var BRAINSTORMS_ROOT = "brainstorms";
 async function createBrainstorm(repoRoot, opts) {
-  const root = path14.join(repoRoot, BRAINSTORMS_ROOT);
-  const dir = path14.join(root, opts.slug);
-  if (existsSync8(dir)) {
+  const root = path16.join(repoRoot, BRAINSTORMS_ROOT);
+  const dir = path16.join(root, opts.slug);
+  if (existsSync10(dir)) {
     throw new Error(`brainstorm already exists: ${opts.slug}`);
   }
-  await mkdir2(path14.join(dir, "refs"), { recursive: true });
-  await mkdir2(path14.join(dir, "solutions"), { recursive: true });
+  await mkdir2(path16.join(dir, "refs"), { recursive: true });
+  await mkdir2(path16.join(dir, "solutions"), { recursive: true });
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const ts = isoTimestamp(now);
   const meta = {
@@ -18838,39 +19037,39 @@ async function createBrainstorm(repoRoot, opts) {
     target_pursuit: null
   };
   await writeMeta(dir, meta);
-  await writeFile3(
-    path14.join(dir, "workspace.md"),
+  await writeFile5(
+    path16.join(dir, "workspace.md"),
     `# ${opts.slug}
 
 _Divergent notes go here. Edit freely; the agent appends as ideation flows._
 `,
     "utf8"
   );
-  return { path: path14.relative(repoRoot, dir) };
+  return { path: path16.relative(repoRoot, dir) };
 }
 async function setBrainstormPhase(repoRoot, opts) {
-  const dir = path14.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
+  const dir = path16.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
   const meta = await readMeta(dir);
   meta.phase = opts.phase;
   meta.last_touched = isoTimestamp(opts.now ?? /* @__PURE__ */ new Date());
   await writeMeta(dir, meta);
-  return { path: path14.relative(repoRoot, dir), meta };
+  return { path: path16.relative(repoRoot, dir), meta };
 }
 async function crystallize(repoRoot, opts) {
-  const dir = path14.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
+  const dir = path16.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
   const meta = await readMeta(dir);
   if (meta.phase !== "converging") {
     throw new Error(
       `brainstorm ${opts.slug} must be in phase 'converging' to crystallize (currently '${meta.phase}')`
     );
   }
-  const solutionPath = path14.join(dir, "solutions", `${opts.solution}.md`);
-  if (!existsSync8(solutionPath)) {
+  const solutionPath = path16.join(dir, "solutions", `${opts.solution}.md`);
+  if (!existsSync10(solutionPath)) {
     throw new Error(
       `solution not found: ${opts.slug}/solutions/${opts.solution}.md`
     );
   }
-  const text = await readFile9(solutionPath, "utf8");
+  const text = await readFile11(solutionPath, "utf8");
   const parsed = parseSolution(text);
   if (parsed.actions.length === 0) {
     throw new Error(
@@ -18893,52 +19092,52 @@ async function crystallize(repoRoot, opts) {
 
 ` : "") + `Crystallized at ${isoTimestamp(now)} \u2192 ${projectResult.path}
 `;
-  await writeFile3(path14.join(dir, "decision.md"), decisionBody, "utf8");
+  await writeFile5(path16.join(dir, "decision.md"), decisionBody, "utf8");
   meta.phase = "crystallized";
   meta.selected_solution = opts.solution;
   meta.target_pursuit = opts.pursuit;
   meta.last_touched = isoTimestamp(now);
   await writeMeta(dir, meta);
   return {
-    brainstorm_path: path14.relative(repoRoot, dir),
+    brainstorm_path: path16.relative(repoRoot, dir),
     project_path: projectResult.path
   };
 }
 async function archiveBrainstorm(repoRoot, opts) {
-  const dir = path14.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
-  if (!existsSync8(dir)) {
+  const dir = path16.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
+  if (!existsSync10(dir)) {
     throw new Error(`brainstorm not found: ${opts.slug}`);
   }
   if (opts.mode === "delete") {
     await rm(dir, { recursive: true, force: true });
-    return { kind: "deleted", from: path14.relative(repoRoot, dir) };
+    return { kind: "deleted", from: path16.relative(repoRoot, dir) };
   }
   const meta = await readMeta(dir);
   meta.phase = "archived";
   meta.last_touched = isoTimestamp(opts.now ?? /* @__PURE__ */ new Date());
   await writeMeta(dir, meta);
-  const target = path14.join(repoRoot, "narratives", "brainstorms", opts.slug);
-  await mkdir2(path14.dirname(target), { recursive: true });
+  const target = path16.join(repoRoot, "narratives", "brainstorms", opts.slug);
+  await mkdir2(path16.dirname(target), { recursive: true });
   await rename2(dir, target);
   return {
     kind: "kept",
-    from: path14.relative(repoRoot, dir),
-    to: path14.relative(repoRoot, target)
+    from: path16.relative(repoRoot, dir),
+    to: path16.relative(repoRoot, target)
   };
 }
 async function readMeta(dir) {
-  const metaPath = path14.join(dir, "meta.yaml");
-  if (!existsSync8(metaPath)) {
+  const metaPath = path16.join(dir, "meta.yaml");
+  if (!existsSync10(metaPath)) {
     throw new Error(`brainstorm meta.yaml not found at ${metaPath}`);
   }
-  const raw = jsYaml.load(await readFile9(metaPath, "utf8"), {
+  const raw = jsYaml.load(await readFile11(metaPath, "utf8"), {
     schema: jsYaml.CORE_SCHEMA
   });
   return BrainstormMetaSchema.parse(raw);
 }
 async function writeMeta(dir, meta) {
   const yamlText = jsYaml.dump(meta, { lineWidth: -1 });
-  await writeFile3(path14.join(dir, "meta.yaml"), yamlText, "utf8");
+  await writeFile5(path16.join(dir, "meta.yaml"), yamlText, "utf8");
 }
 function parseSolution(text) {
   const lines = text.split("\n");
@@ -18978,16 +19177,20 @@ function parseSolution(text) {
 }
 
 // src/write/capture.ts
-import path15 from "node:path";
+import path17 from "node:path";
 import os from "node:os";
-import { existsSync as existsSync9 } from "node:fs";
-import { readFile as readFile10, unlink, writeFile as writeFile4 } from "node:fs/promises";
+import { existsSync as existsSync11 } from "node:fs";
+import { readFile as readFile12, unlink, writeFile as writeFile6 } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash as createHash2 } from "node:crypto";
 async function writeCapture(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
-  const dir = path15.join(repoRoot, "thoughts/unprocessed");
+  const dir = path17.join(repoRoot, "thoughts/unprocessed");
   await ensureDir(dir);
+  if (opts.source?.raw_path) {
+    const rawDir = path17.dirname(path17.join(repoRoot, opts.source.raw_path));
+    await ensureDir(rawDir);
+  }
   let mcp;
   if (opts.mcp) {
     const content_hash = opts.mcp.content_hash ?? `sha256:${sha256Hex(opts.body)}`;
@@ -19047,7 +19250,7 @@ async function writeCapture(repoRoot, opts) {
   const baseSlug = opts.slug ?? timestampSlug(now);
   const filePath = uniqueCapturePath(dir, baseSlug);
   await writeFrontmatterFile(filePath, data, opts.body);
-  return { kind: "written", path: path15.relative(repoRoot, filePath) };
+  return { kind: "written", path: path17.relative(repoRoot, filePath) };
 }
 async function checkDedup(repoRoot, match) {
   const existing = await scanCaptures(repoRoot);
@@ -19071,13 +19274,13 @@ async function checkDedup(repoRoot, match) {
   return null;
 }
 function sha256Hex(text) {
-  return createHash("sha256").update(text, "utf8").digest("hex");
+  return createHash2("sha256").update(text, "utf8").digest("hex");
 }
 function uniqueCapturePath(dir, slug) {
-  let candidate = path15.join(dir, `${slug}.md`);
+  let candidate = path17.join(dir, `${slug}.md`);
   let n = 2;
-  while (existsSync9(candidate)) {
-    candidate = path15.join(dir, `${slug}-${n}.md`);
+  while (existsSync11(candidate)) {
+    candidate = path17.join(dir, `${slug}-${n}.md`);
     n += 1;
   }
   return candidate;
@@ -19102,27 +19305,27 @@ async function resolveBodyFromFlags(opts) {
       const body3 = await res.text();
       return { body: body3, sourceKindHint: "url" };
     }
-    const filePath = path15.resolve(opts.from);
-    if (!existsSync9(filePath)) {
+    const filePath = path17.resolve(opts.from);
+    if (!existsSync11(filePath)) {
       throw new Error(`--from file not found: ${filePath}`);
     }
-    const body2 = await readFile10(filePath, "utf8");
+    const body2 = await readFile12(filePath, "utf8");
     return { body: body2, sourceKindHint: "file" };
   }
   const editor = process.env["EDITOR"] || process.env["VISUAL"] || "nano";
-  const tmpPath = path15.join(os.tmpdir(), `cadence-dump-${Date.now()}.md`);
+  const tmpPath = path17.join(os.tmpdir(), `cadence-dump-${Date.now()}.md`);
   const header = opts.promptHint ? `# Brain dump \u2014 ${opts.promptHint}
 # Save and exit when done.
 
 ` : "# Brain dump \u2014 save and exit when done.\n\n";
-  await writeFile4(tmpPath, header, "utf8");
+  await writeFile6(tmpPath, header, "utf8");
   const result = spawnSync(editor, [tmpPath], { stdio: "inherit" });
   if (result.status !== 0) {
     await unlink(tmpPath).catch(() => {
     });
     throw new Error(`$EDITOR (${editor}) exited with code ${result.status}`);
   }
-  const raw = await readFile10(tmpPath, "utf8");
+  const raw = await readFile12(tmpPath, "utf8");
   await unlink(tmpPath).catch(() => {
   });
   const body = raw.split("\n").filter((line, i) => !(i < 3 && line.startsWith("# "))).join("\n").trim();
@@ -19133,15 +19336,15 @@ async function resolveBodyFromFlags(opts) {
 }
 
 // src/write/reflection.ts
-import path16 from "node:path";
-import { existsSync as existsSync10 } from "node:fs";
+import path18 from "node:path";
+import { existsSync as existsSync12 } from "node:fs";
 async function writeReflection(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const date = opts.date ?? dateString(now);
-  const dir = path16.join(repoRoot, "reflections");
+  const dir = path18.join(repoRoot, "reflections");
   await ensureDir(dir);
-  const filePath = path16.join(dir, `${date}.md`);
-  const existing = existsSync10(filePath) ? await loadFrontmatterFile(filePath) : null;
+  const filePath = path18.join(dir, `${date}.md`);
+  const existing = existsSync12(filePath) ? await loadFrontmatterFile(filePath) : null;
   const data = existing ? { ...existing.data } : {};
   data["date"] = date;
   data["status"] = opts.status;
@@ -19151,13 +19354,13 @@ async function writeReflection(repoRoot, opts) {
   }
   const body = opts.body ?? existing?.content ?? `# Reflection \u2014 ${date}`;
   await writeFrontmatterFile(filePath, data, body);
-  return { path: path16.relative(repoRoot, filePath) };
+  return { path: path18.relative(repoRoot, filePath) };
 }
 
 // src/write/edits.ts
-import path17 from "node:path";
-import { readdir as readdir3, readFile as readFile11 } from "node:fs/promises";
-import { existsSync as existsSync11 } from "node:fs";
+import path19 from "node:path";
+import { readdir as readdir3, readFile as readFile13 } from "node:fs/promises";
+import { existsSync as existsSync13 } from "node:fs";
 
 // src/write/checklist.ts
 var ITEM_RE2 = /^(\s*-\s+\[)([ xX])(\]\s+)(.+?)(\s*)$/;
@@ -19442,7 +19645,7 @@ async function setProjectStatus(repoRoot, opts) {
     return { data, body };
   });
   const result = {
-    path: path17.relative(repoRoot, filePath)
+    path: path19.relative(repoRoot, filePath)
   };
   if (opts.include_pursuit) {
     result.pursuit = await summarizePursuit(repoRoot, filePath);
@@ -19480,7 +19683,7 @@ async function syncProjectOrigin(repoRoot, opts) {
   const parsedOrigin = OriginSchema.safeParse(data["origin"]);
   if (!parsedOrigin.success) {
     return {
-      path: path17.relative(repoRoot, filePath),
+      path: path19.relative(repoRoot, filePath),
       origin_sync: { kind: "no_origin" }
     };
   }
@@ -19496,18 +19699,18 @@ async function syncProjectOrigin(repoRoot, opts) {
     projectId: opts.id,
     pursuitId
   });
-  return { path: path17.relative(repoRoot, filePath), origin_sync };
+  return { path: path19.relative(repoRoot, filePath), origin_sync };
 }
 async function summarizePursuit(repoRoot, projectFilePath) {
-  const projectsDir = path17.dirname(projectFilePath);
-  const pursuitDir = path17.dirname(projectsDir);
-  const pursuitId = path17.basename(pursuitDir);
+  const projectsDir = path19.dirname(projectFilePath);
+  const pursuitDir = path19.dirname(projectsDir);
+  const pursuitId = path19.basename(pursuitDir);
   const projects = [];
-  if (existsSync11(projectsDir)) {
+  if (existsSync13(projectsDir)) {
     for (const entry of await readdir3(projectsDir, { withFileTypes: true })) {
       if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
-      const file = path17.join(projectsDir, entry.name);
-      const text = await readFile11(file, "utf8");
+      const file = path19.join(projectsDir, entry.name);
+      const text = await readFile13(file, "utf8");
       const { data } = parseFrontmatter(text);
       const id = String(data["id"] ?? entry.name.replace(/\.md$/, ""));
       const status = String(data["status"] ?? "active");
@@ -19554,7 +19757,7 @@ async function checkItem(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   const result = {
-    path: path17.relative(repoRoot, filePath),
+    path: path19.relative(repoRoot, filePath),
     matched,
     ...promoted ? { promoted: true } : {},
     ...progress2
@@ -19596,7 +19799,7 @@ async function checkItems(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   const result = {
-    path: path17.relative(repoRoot, filePath),
+    path: path19.relative(repoRoot, filePath),
     matched,
     ...promoted ? { promoted: true } : {},
     ...progress2
@@ -19621,7 +19824,7 @@ async function addItem(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   return {
-    path: path17.relative(repoRoot, filePath),
+    path: path19.relative(repoRoot, filePath),
     ...progress2
   };
 }
@@ -19644,7 +19847,7 @@ async function addItems(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   return {
-    path: path17.relative(repoRoot, filePath),
+    path: path19.relative(repoRoot, filePath),
     added: opts.texts.length,
     ...progress2
   };
@@ -19662,7 +19865,7 @@ async function addWaitingFor(repoRoot, opts) {
     data["waiting_for"] = list;
     return { data, body };
   });
-  return { path: path17.relative(repoRoot, filePath) };
+  return { path: path19.relative(repoRoot, filePath) };
 }
 async function flagWaitingFor(repoRoot, opts) {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
@@ -19694,7 +19897,7 @@ async function flagWaitingFor(repoRoot, opts) {
     data["waiting_for"] = list;
     return { data, body };
   });
-  return { path: path17.relative(repoRoot, filePath), matched };
+  return { path: path19.relative(repoRoot, filePath), matched };
 }
 async function locateProject(repoRoot, projectId, pursuitHint) {
   if (pursuitHint) {
@@ -19706,17 +19909,17 @@ async function locateProject(repoRoot, projectId, pursuitHint) {
   }
   const roots = ["pursuits", "pursuits/_someday", "pursuits/_archived"];
   for (const root of roots) {
-    const absRoot = path17.join(repoRoot, root);
-    if (!existsSync11(absRoot)) continue;
+    const absRoot = path19.join(repoRoot, root);
+    if (!existsSync13(absRoot)) continue;
     for (const pursuit of await readdir3(absRoot, { withFileTypes: true })) {
       if (!pursuit.isDirectory()) continue;
-      const candidate = path17.join(
+      const candidate = path19.join(
         absRoot,
         pursuit.name,
         "projects",
         `${projectId}.md`
       );
-      if (existsSync11(candidate)) return candidate;
+      if (existsSync13(candidate)) return candidate;
     }
   }
   throw new Error(
@@ -19748,48 +19951,48 @@ function escapeRe(s) {
 }
 
 // src/write/move.ts
-import path18 from "node:path";
-import { existsSync as existsSync12 } from "node:fs";
+import path20 from "node:path";
+import { existsSync as existsSync14 } from "node:fs";
 async function movePursuit(repoRoot, opts) {
   const from = resolvePursuitDir(repoRoot, opts.id);
   if (!from) throw new Error(`pursuit not found: ${opts.id}`);
-  const targetParent = opts.to === "active" ? path18.join(repoRoot, "pursuits") : opts.to === "someday" ? path18.join(repoRoot, "pursuits/_someday") : opts.to === "dropped" ? path18.join(repoRoot, "pursuits/_dropped") : path18.join(repoRoot, "pursuits/_archived");
-  const to = path18.join(targetParent, opts.id);
-  if (path18.resolve(from) === path18.resolve(to)) {
+  const targetParent = opts.to === "active" ? path20.join(repoRoot, "pursuits") : opts.to === "someday" ? path20.join(repoRoot, "pursuits/_someday") : opts.to === "dropped" ? path20.join(repoRoot, "pursuits/_dropped") : path20.join(repoRoot, "pursuits/_archived");
+  const to = path20.join(targetParent, opts.id);
+  if (path20.resolve(from) === path20.resolve(to)) {
     return {
-      from: path18.relative(repoRoot, from),
-      to: path18.relative(repoRoot, to)
+      from: path20.relative(repoRoot, from),
+      to: path20.relative(repoRoot, to)
     };
   }
-  if (existsSync12(to)) {
-    throw new Error(`destination already exists: ${path18.relative(repoRoot, to)}`);
+  if (existsSync14(to)) {
+    throw new Error(`destination already exists: ${path20.relative(repoRoot, to)}`);
   }
   await moveDir(from, to);
-  await mutateFrontmatter(path18.join(to, "pursuit.md"), (data, body) => {
+  await mutateFrontmatter(path20.join(to, "pursuit.md"), (data, body) => {
     data["status"] = opts.to;
     return { data, body };
   });
   return {
-    from: path18.relative(repoRoot, from),
-    to: path18.relative(repoRoot, to)
+    from: path20.relative(repoRoot, from),
+    to: path20.relative(repoRoot, to)
   };
 }
 
 // src/tip/library.ts
-import { existsSync as existsSync14, readFileSync as readFileSync3 } from "node:fs";
-import path20 from "node:path";
+import { existsSync as existsSync16, readFileSync as readFileSync3 } from "node:fs";
+import path22 from "node:path";
 import { fileURLToPath } from "node:url";
 
 // src/tip/state.ts
-import { existsSync as existsSync13, readFileSync as readFileSync2, mkdirSync as mkdirSync3, writeFileSync as writeFileSync2 } from "node:fs";
-import path19 from "node:path";
+import { existsSync as existsSync15, readFileSync as readFileSync2, mkdirSync as mkdirSync5, writeFileSync as writeFileSync2 } from "node:fs";
+import path21 from "node:path";
 var STATE_FILENAME = "tip-state.json";
 function statePath(repoRoot) {
-  return path19.join(repoRoot, ".cadence", STATE_FILENAME);
+  return path21.join(repoRoot, ".cadence", STATE_FILENAME);
 }
 function readTipState(repoRoot) {
   const filePath = statePath(repoRoot);
-  if (!existsSync13(filePath)) {
+  if (!existsSync15(filePath)) {
     return { version: 1, tips: {}, categories: {} };
   }
   try {
@@ -19805,9 +20008,9 @@ function readTipState(repoRoot) {
   }
 }
 function writeTipState(repoRoot, state) {
-  const dir = path19.join(repoRoot, ".cadence");
-  if (!existsSync13(dir)) {
-    mkdirSync3(dir, { recursive: true });
+  const dir = path21.join(repoRoot, ".cadence");
+  if (!existsSync15(dir)) {
+    mkdirSync5(dir, { recursive: true });
   }
   writeFileSync2(statePath(repoRoot), JSON.stringify(state, null, 2) + "\n");
 }
@@ -19903,11 +20106,11 @@ function asString(v) {
 }
 function libraryPath() {
   const here = fileURLToPath(import.meta.url);
-  return path20.resolve(path20.dirname(here), "..", "tips", "library.yaml");
+  return path22.resolve(path22.dirname(here), "..", "tips", "library.yaml");
 }
 function readLibrary(libPath) {
   const filePath = libPath ?? libraryPath();
-  if (!existsSync14(filePath)) {
+  if (!existsSync16(filePath)) {
     return { version: 1, tips: [] };
   }
   const raw = readFileSync3(filePath, "utf8");
@@ -20070,7 +20273,17 @@ Run /cadence:init to set up.`;
     const inbound = await composeInboundFlag(repoRoot, snapshot);
     if (inbound) result.flags.push(inbound);
     if (opts.hookOutput) {
-      const text = renderStatus(result);
+      const hash = computeStateHash(snapshot);
+      const decision = await shouldSuppressSplash(repoRoot, hash);
+      if (decision.suppress) {
+        process.stdout.write(
+          JSON.stringify({
+            hookSpecificOutput: { hookEventName: "SessionStart" }
+          }) + "\n"
+        );
+        return;
+      }
+      const text = isEmptyRepo(snapshot) ? renderEmptyRepoCoaching() : renderStatus(result);
       process.stdout.write(
         JSON.stringify({
           systemMessage: text,
@@ -20080,6 +20293,7 @@ Run /cadence:init to set up.`;
           }
         }) + "\n"
       );
+      await recordSplashEmission(repoRoot, hash);
     } else if (opts.json) {
       process.stdout.write(JSON.stringify(result, null, 2) + "\n");
     } else {
@@ -20087,6 +20301,48 @@ Run /cadence:init to set up.`;
     }
   }
 );
+cli.command(
+  "dismiss-splash",
+  "Suppress the SessionStart splash for a window. Writes .cadence/dismissed_until <ISO timestamp>; the splash returns automatically once the window passes."
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--hours <n>", "How many hours to suppress for (default: 24)", {
+  type: [Number]
+}).action(async (opts) => {
+  const repoRoot = await resolveRepoRoot(opts.root);
+  const hours = Array.isArray(opts.hours) ? opts.hours[0] : opts.hours;
+  const windowHours = typeof hours === "number" && hours > 0 ? hours : 24;
+  const until = new Date(Date.now() + windowHours * 60 * 60 * 1e3);
+  await writeDismissedUntil(repoRoot, until);
+  process.stdout.write(
+    JSON.stringify({
+      dismissed_until: until.toISOString(),
+      hours: windowHours
+    }) + "\n"
+  );
+});
+cli.command(
+  "stop-hook",
+  "Emit a Stop-hook JSON envelope. When state has changed since the last logged stop, appends a one-line session-log entry to narratives/session-log.md and updates .cadence/last_session_log.json. Otherwise no-op. Stdout always emits an empty hookSpecificOutput so Claude Code surfaces nothing to the user."
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").action(async (opts) => {
+  const repoRoot = await resolveRepoRoot(opts.root);
+  if (!isCadenceRepo(repoRoot)) {
+    process.stdout.write(
+      JSON.stringify({
+        hookSpecificOutput: { hookEventName: "Stop" }
+      }) + "\n"
+    );
+    return;
+  }
+  try {
+    const snapshot = await scan(repoRoot);
+    await runStopHook(repoRoot, snapshot);
+  } catch {
+  }
+  process.stdout.write(
+    JSON.stringify({
+      hookSpecificOutput: { hookEventName: "Stop" }
+    }) + "\n"
+  );
+});
 cli.command("flags", "Print reconciler flags only").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--json", "Emit flags as JSON").action(async (opts) => {
   const repoRoot = await resolveRepoRoot(opts.root);
   const snapshot = await scan(repoRoot);
@@ -20333,7 +20589,7 @@ cli.command(
         ...opts.rawPath ? { raw_path: opts.rawPath } : {}
       };
       if (sourceKindHint === "file" && !source.name && opts.from) {
-        source.name = path21.basename(opts.from);
+        source.name = path23.basename(opts.from);
       }
     }
     let suggested_outcomes;
@@ -20797,22 +21053,22 @@ if (cli.matchedCommand) {
   cli.outputHelp();
 }
 async function resolveRepoRoot(explicit) {
-  if (explicit) return path21.resolve(explicit);
+  if (explicit) return path23.resolve(explicit);
   return findRepoRoot(process.cwd());
 }
 function findRepoRoot(start) {
-  let dir = path21.resolve(start);
+  let dir = path23.resolve(start);
   for (; ; ) {
-    if (existsSync15(path21.join(dir, "cadence.yaml"))) return dir;
-    if (existsSync15(path21.join(dir, "pursuits"))) return dir;
-    const parent = path21.dirname(dir);
+    if (existsSync17(path23.join(dir, "cadence.yaml"))) return dir;
+    if (existsSync17(path23.join(dir, "pursuits"))) return dir;
+    const parent = path23.dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
-  return path21.resolve(start);
+  return path23.resolve(start);
 }
 function isCadenceRepo(root) {
-  return existsSync15(path21.join(root, "cadence.yaml")) || existsSync15(path21.join(root, "pursuits"));
+  return existsSync17(path23.join(root, "cadence.yaml")) || existsSync17(path23.join(root, "pursuits"));
 }
 function multistring(v) {
   if (!Array.isArray(v)) return void 0;
@@ -20876,8 +21132,8 @@ async function readPluginInfo() {
       "Could not locate plugin directory \u2014 no .claude-plugin/plugin.json found above the cadence binary."
     );
   }
-  const manifestPath = path21.join(pluginDir, ".claude-plugin", "plugin.json");
-  const raw = await readFile12(manifestPath, "utf-8");
+  const manifestPath = path23.join(pluginDir, ".claude-plugin", "plugin.json");
+  const raw = await readFile14(manifestPath, "utf-8");
   const manifest = JSON.parse(raw);
   const repository = manifest.repository ?? manifest.homepage ?? null;
   return {
@@ -20889,16 +21145,16 @@ async function readPluginInfo() {
 }
 function findPluginDir() {
   const scriptPath = fileURLToPath2(import.meta.url);
-  let dir = path21.dirname(scriptPath);
+  let dir = path23.dirname(scriptPath);
   for (let i = 0; i < 6; i++) {
-    if (existsSync15(path21.join(dir, ".claude-plugin", "plugin.json"))) {
+    if (existsSync17(path23.join(dir, ".claude-plugin", "plugin.json"))) {
       return dir;
     }
-    const nested = path21.join(dir, "cadence-plugin", ".claude-plugin", "plugin.json");
-    if (existsSync15(nested)) {
-      return path21.join(dir, "cadence-plugin");
+    const nested = path23.join(dir, "cadence-plugin", ".claude-plugin", "plugin.json");
+    if (existsSync17(nested)) {
+      return path23.join(dir, "cadence-plugin");
     }
-    const parent = path21.dirname(dir);
+    const parent = path23.dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
