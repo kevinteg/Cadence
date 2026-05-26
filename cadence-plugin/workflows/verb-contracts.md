@@ -122,28 +122,53 @@ Idea count, aging Seeds. Ask: "Where do you want to brainstorm?"
 
 ## Start
 
-**Purpose:** Open a project's view. Surface the work so the user can
-pick it up. View-only — no session ceremony, no marker write, no
+**Purpose:** Universal work-entry verb. One entry point for every
+"I want to begin doing something" intent. Argument shape selects what
+opens. View-only — no session ceremony, no marker write, no
 active-session pointer.
 
 **Tone:** Silent during flow. Terse at breakpoints. The voice protects
 your attention — it does not compete for it.
 
+**Argument shapes:**
+- **No argument** → curated menu surfacing pursuits, open projects,
+  active brainstorms, and the Inbox. The top entry from
+  `curateNextMoves()` appears as the suggested next move — same
+  ranker the dashboard uses.
+- **`<pursuit>`** → pursuit workspace view: Why narrative, LP alignment,
+  open projects (with next unchecked action), active brainstorms
+  attached, Inbox slice attributable to this pursuit.
+- **`<project>`** → project view: Intent (first sentence or two),
+  action progress (N/M), first unchecked action as "Next."
+- **`<brainstorm-slug>`** → resume the brainstorm at its current
+  phase (forwards to `/cadence:brainstorm <slug>`).
+- **`inbox`** (reserved keyword) → Inbox triage walk: iterate items
+  oldest-first with the outcome menu (action / project / brainstorm /
+  close / keep / quit). Each routed item flips to `status: triaged`
+  with `triaged_to: <ref>`.
+- **`brainstorm`** (reserved keyword) → forward to
+  `/cadence:brainstorm` for a new workspace.
+
+**Reserved-keyword discipline:** `inbox` and `brainstorm` win on
+collision. A pursuit or project named `inbox` is unreachable via
+`/start`; rename it or drill in via `cadence pursuit inbox` /
+`cadence project inbox`.
+
 **Behavior:**
-- Opens the project view: Intent (first sentence or two), action
-  progress (N/M), and the first unchecked action as "Next."
 - Does NOT mark the project as active. Promotion to `active` happens
   on the first checked action via `/complete`.
 - During flow: respond only to direct questions. No suggestions, no
-  observations, no "have you considered." Batch everything for breakpoints.
+  observations, no "have you considered." Batch everything for
+  breakpoints.
 - At breakpoints (natural pauses, task completion, user-initiated):
   surface batched observations, quick wins, parking lot items.
 - Keep the work moving — after completing a step, prompt with what's
-  next rather than waiting for explicit continuation
-
-**No-argument entry:** Curated selection: Leveraged Priority highlighted,
-active projects with their first unchecked action as "Next", quick
-wins, reconciler flags. Ask: "What do you want to work on?"
+  next rather than waiting for explicit continuation.
+- `/start inbox` is explicit per-item triage — the walk does not
+  auto-route even when a capture's `suggested_outcomes` frontmatter
+  carries a high-confidence recommendation. That auto-default lives
+  at the moment-of-capture menu (see Capture below); the triage walk
+  exists for when the user has already deferred those moments.
 
 **Guardrails:**
 - No mid-flow interruptions. All non-flow work lives at breakpoints.
@@ -305,25 +330,38 @@ what moved and focus on what matters next.
 - **Catch-up entry modes** (branched at the top once on
   `signals.reflectEntryMode` from `cadence report --json`):
   - `first` / `normal` — standard fresh-draft flow.
-  - `same_week_in_progress` — pick up where the user left off.
+  - `same_week_in_progress` — pick up where the user left off. If the
+    persisted phase was `get_clear`, re-render the awareness block and
+    offer handle/note/pause again; the counts will have shifted since
+    last time.
   - `same_week_done` — offer to add to the existing reflection
     (status flips back to `in_progress` via the same upsert) or call
     it finished. Re-opening lands directly in Phase 2 with the
     existing LP preserved; Phase 1 is skipped.
   - `long_gap` (>14 days since last reflection) — open with "It's
-    been a while — let's catch up. We'll keep this short." Run a
-    condensed Get Clear (top 3 most recent captures only, severity-1
-    flags only, skip per-project relevance walk; ask a single
-    "anything obvious to drop or hold?" question instead). Phase 2
-    proceeds normally.
+    been a while — let's catch up. We'll keep this short." Phase 1's
+    awareness block is already short by design; no separate condensed
+    path is needed.
   - `early_in_week` (last reflection was the prior ISO week and
     today is Mon-Wed) — confirm before proceeding: "This is earlier
     than usual — are you wrapping the week, or just checking in?
     (We can go ahead either way.)" If checking in, drop to a status
     summary instead of starting a draft.
-- Phase 1 — Get Clear: process captures, clear 2-minute items, review
-  reconciler flags (including Idea-specific flags: aging Seeds, unpromoted
-  Developed Ideas, growing backlog), confirm project relevance
+- **Phase 1 — Get Clear (awareness block, not triage clearinghouse).**
+  Compute Inbox / dormant-project / closing-in-pursuit / WIP counts.
+  Render the canonical awareness block from `coaching-strings.md`
+  and offer three choices:
+  - `handle` → hand off to `/cadence:start inbox` (or
+    `/cadence:resolve <project>`, or `/cadence:reconcile` depending on
+    which signal the user picks). Persist the reflection at
+    `status: in_progress, phase: get_clear` so the next
+    `/cadence:reflect` resumes here cleanly.
+  - `note` → append the awareness counts to the reflection body as a
+    "Going-in state" subsection and proceed to Phase 2.
+  - `pause` → exit; reflection stays `in_progress` for next time.
+  When all counts are zero, skip the prompt and go straight to Phase 2
+  with the canonical "Inbox empty, no dormant, no closing-in, WIP
+  healthy" framing.
 - Phase 2 — Get Focused: recap (narrative-generated), what worked /
   what didn't work (interactive), WIP check (max_active_projects,
   in-progress only), waiting-for review, if-then Nudge generation,

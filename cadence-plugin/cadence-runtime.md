@@ -55,8 +55,19 @@ Projects are worked through explicit lifecycle verbs — no session
 ceremony, no save/resume mechanics. The project file IS the durable
 state.
 
-- **`/start`** opens a project's view (Intent + N/M actions + first
-  unchecked action). View-only — does not mark the project active.
+- **`/start`** is the universal work-entry verb. Argument shape
+  determines what opens: no argument → curated menu across pursuits,
+  open projects, active brainstorms, and the Inbox; `<pursuit>` →
+  pursuit workspace view (Why, LP alignment, open projects, attached
+  brainstorms, Inbox slice); `<project>` → project view (Intent + N/M
+  actions + first unchecked); `<brainstorm-slug>` → resume the
+  workspace at its phase; `inbox` (reserved keyword) → walk untriaged
+  items oldest-first with the outcome menu. `brainstorm` (reserved
+  keyword) → forward to `/cadence:brainstorm`. View-only — does not
+  mark anything active. First checked action promotes `on_hold` →
+  `active`. The curated menu's suggested next move comes from the
+  same `curateNextMoves()` ranker the dashboard uses, so both
+  surfaces stay consistent.
 - **`/complete`** marks an action done; first checked action promotes
   `on_hold` → `active`; triggers upward completion prompts.
 - **`/resolve <project>`** wraps up a project. Default `--state complete`

@@ -72,7 +72,7 @@ the instruction (potentially many items).
    (Each routing prompts an ELI5 confirm before any write outside thoughts/.)
    ```
 
-   **Default-to-action when confidence is high.** For items where the subagent returned `confidence >= 0.8` AND a `suggested_pursuit`, frame the choice as "Suggested: add as action on <pursuit> [y/N — defaults to y]" rather than burying the action under a generic menu. This keeps the path of least resistance toward acting on high-confidence captures, not hoarding them in the Inbox.
+   **Default-to-action when confidence is high.** For items where the subagent returned `confidence >= 0.8` AND a `suggested_pursuit`, frame the choice as "Suggested: add as action on `<pursuit>` [Y/n]" — capital Y signals default Yes, so pressing Enter accepts the suggestion. This keeps the path of least resistance toward acting on high-confidence captures, not hoarding them in the Inbox. Fall back to "keep in Inbox" as the default ([Y/n] on `inbox`) only when confidence is low OR no `suggested_pursuit` is named. The exact wording lives in `cadence-plugin/workflows/coaching-strings.md` under "Post-capture outcome menu" — quote from there.
 
 5. **Materialize routed outcomes.** Per the user's pick:
    - `two_minute_action` / `action` → `cadence add-item <project> --pursuit <pursuit> --section action --text "<title>"`. If the user chose a different project than suggested, ask which.
@@ -100,7 +100,7 @@ the instruction (potentially many items).
 - **Inline silent contract holds.** `/capture "..."` produces zero response. No outcome menu, no nudge, no acknowledgment. The user is at-pace and the flow trumps everything.
 - **Outcome menu only when a subagent processed the capture.** No mid-capture interruption for the silent path.
 - **ELI5 confirm before any write outside `thoughts/`.** Materializing an outcome means writing to `pursuits/<id>/projects/...` or `brainstorms/<slug>/` — those are real state changes. The user confirms each one.
-- **Default-to-action for high-confidence items, but never force.** "Suggested: add as action on X [y/N]" is the framing. The user can always say no.
+- **Default-to-action for high-confidence items, but never force.** "Suggested: add as action on `<pursuit>` [Y/n]" is the framing (capital Y = default Yes). The user can always say no by typing `n` or naming a different outcome. Low-confidence items default to "keep in Inbox" — the menu surface stays the same, but the default flips.
 - **The audit trail always lands.** Even when the user routes everything immediately into outcomes, the underlying capture in `thoughts/unprocessed/` persists with `status: triaged, triaged_to: <ref>`. The captures are the record of what entered the Inbox; the outcomes are what left.
 - **Don't generate content the source doesn't justify.** This applies to the subagent, but also to the parent surface: don't pad the menu with phantom items, don't volunteer extra outcomes beyond what the subagent suggested.
 

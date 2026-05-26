@@ -22,7 +22,7 @@ contract.
 
 | Verb | Purpose |
 |---|---|
-| `start` | Open a project's view (Intent + actions + first unchecked). View-only — no session ceremony. |
+| `start` | Universal work-entry verb. Argument shape selects what opens: no arg → curated menu across pursuits, open projects, brainstorms, Inbox; `<pursuit>` → pursuit workspace view (Why, LP alignment, attached projects + brainstorms + Inbox slice); `<project>` → project view; `<brainstorm-slug>` → resume the workspace at its phase; `inbox` (reserved keyword) → walk untriaged items oldest-first with the outcome menu; `brainstorm` (reserved keyword) → forward to `/cadence:brainstorm`. View-only — no session ceremony. |
 | `complete` | Mark an action done. First check promotes on_hold → active. Triggers upward completion prompts. |
 | `resolve` | Wrap up a project or pursuit. `resolve <project> --state complete` (default) walks the intent-feel-achieved dialogue; `--state dropped` requires a reason. `resolve <pursuit>` walks the closure ritual with absolute-Ideas-block, then archives. |
 | `capture` | Flow-safe parking lot. Get a thought out of your head, zero friction, no agent response. |
@@ -428,6 +428,38 @@ across the two corpora: archived pursuits teach lessons of execution
 judgment (what got learned without shipping). The `/cadence:narrate
 lessons` scope reads from both folders by default; `--from completed`
 or `--from dropped` filters the corpus for targeted synthesis.
+
+## Universal Work-Entry (`/start` argument shapes)
+
+`/cadence:start` is the one verb for "I want to begin doing something."
+The argument shape selects which workspace opens. Canonical wording for
+the curated menu and the awareness lines lives in
+`cadence-plugin/workflows/coaching-strings.md` — the SKILL quotes from
+there.
+
+| Argument | What opens |
+|---|---|
+| (none) | Curated menu: active pursuits, open projects, active brainstorms, Inbox line, and the top `curateNextMoves()` suggestion. The same ranker the dashboard uses, so /start and /status stay consistent. |
+| `<pursuit-id>` | Pursuit workspace view: Why, LP alignment, open projects with next unchecked action, attached brainstorms, Inbox slice. |
+| `<project-id>` | Project view: Intent (first sentence or two) + N/M actions + first unchecked. Unchanged from earlier behavior. |
+| `<brainstorm-slug>` | Resume the brainstorm at its current phase. Forwards to `/cadence:brainstorm <slug>`. |
+| `inbox` (reserved) | Inbox triage walk: iterate untriaged items oldest-first with the outcome menu (action / project / brainstorm / close / keep / quit). Per-item routing flips `status: triaged, triaged_to: <ref>`. |
+| `brainstorm` (reserved) | Forward to `/cadence:brainstorm` for a new workspace. |
+
+**Reserved keywords win on collision.** A pursuit or project named
+`inbox` or `brainstorm` is unreachable via `/start <id>`. Rename the
+entity or drill in via `cadence pursuit inbox` / `cadence project
+inbox` directly. The CLI does not reserve these tokens — only the
+SKILL does.
+
+**Inbox slice attribution heuristic** (used by `/start <pursuit>`):
+a capture belongs to a pursuit if its `verb_context` references the
+pursuit ID (e.g. `seed:<pursuit-id>`) OR its body contains the
+pursuit ID as a substring. A brainstorm belongs to a pursuit if its
+`source_thoughts` array overlaps with captures attributed to that
+pursuit OR its slug contains a substantial pursuit-ID token.
+Conservative on purpose — false attribution is more confusing than no
+attribution; when nothing matches, the Inbox slice section is omitted.
 
 ## Creating a Project
 

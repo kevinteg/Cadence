@@ -51,20 +51,10 @@ Start or resume the weekly Reflect ritual. Reference
    - **`long_gap`** — last reflection was >14 days ago. Open with the
      canonical encouraging line:
      > "It's been a while — let's catch up. We'll keep this short."
-     **No deficit framing.** No "you missed N weeks" language. Run a
-     **condensed Get Clear**:
-     - Captures: triage at most the 3 most recent. The rest stays
-       parked: "the older captures can ride; we can come back to them
-       once we're moving again."
-     - Reconciler flags: surface only severity-1 items (overdue
-       waiting-for, WIP-over-limit). Skip dormant-project flags —
-       everything is dormant after a long gap; listing them is the
-       deficit framing this catch-up flow exists to avoid.
-     - Skip the per-project relevance walk. Instead ask: "Anything
-       obvious that should be on hold or dropped before we look
-       forward?"
-     Then proceed to Phase 2 normally (which is itself interactive —
-     Phase 2 is unchanged here).
+     **No deficit framing.** No "you missed N weeks" language. The
+     lightened Get Clear (step 4 below) is already short — render the
+     awareness block, offer the same handle/note/pause choice, and
+     move on to Phase 2.
 
    - **`early_in_week`** — last reflection was the prior ISO week and
      today is Mon/Tue/Wed. Before opening a draft, say:
@@ -93,69 +83,87 @@ Gather state for Get Clear with:
 cadence report --json
 ```
 
-This single call yields snapshot + reconciler flags — captures count,
-projects with action lists, waiting-for items, and the structural/
-dormant/stale/WIP flag set covered by checks 1-5 in
-`workflows/reconciler.md`.
+This single call yields snapshot + reconciler flags — Inbox view,
+dormant-project flags, closing-in pursuits, WIP, and the rest. The
+lightened Get Clear (step 4) consumes counts directly from this
+payload; it does not walk items individually.
 
-**Idea-specific checks and someday cues** are extracted into the
-reconciler subagent (see step 4c) so the bulk Ideas JSON does not have
-to land in this thread.
+4. **Phase 1 — Get Clear (awareness block, not triage clearinghouse)**
 
-4. **Phase 1 — Get Clear**
+   Get Clear is **short**. It is not the triage clearinghouse — that
+   work happens at the moment of capture (the capture exit menu) or
+   via `/cadence:start inbox` for accumulated material. Reflect's job
+   is to make the user aware of what's drifting and offer a choice,
+   then move on.
 
-   a. Process captures: read `snapshot.captures` from the report. If
-      non-empty, triage one by one: route to Idea (Seed), Action, or
-      discard. Confirm with the user.
+   a. Compute the awareness counts from `cadence report --json`:
+      - **Inbox**: `inboxItems(snapshot).counts.total` plus the bucket
+        breakdown (`overdue` / `aged` / `fresh`).
+      - **Dormant projects**: count of flags with `kind: dormant_project`.
+      - **Closing-in pursuits**: count of flags with `kind: closing_in_on_resolution`.
+      - **WIP**: count of `snapshot.projects` filtered to `status: active`
+        with at least one unchecked action; the limit is
+        `snapshot.config.max_active_projects`.
 
-   b. 2-minute actions: scan unchecked items in `snapshot.projects[].actions`
-      for active projects in active pursuits; surface trivial items
-      ("These look quick — want to clear any of them now?").
+   b. Render the canonical awareness block from
+      `workflows/coaching-strings.md`:
 
-   c. Walk reconciler flags interactively. **Surface a brain-tickler
-      tip first (frequency-capped):**
-      ```bash
-      cadence tip-pick --triggers moment-long-agent-run --types quote \
-        --category reflect-interjection --category-cool-down-days 14
       ```
-      If a non-null tip is returned, render it inline before invoking
-      the subagent ("While the reconciler scans, here's a frame to
-      chew on: …"). If null, skip silently. The 14-day category
-      cool-down is intentionally longer than narrate's 7d — Reflect
-      runs weekly, so a 14d cap means at most one Reflect-interjection
-      every ~2 weeks.
+      Inbox: <N> items (oldest <D>d)  ·  Dormant: <M> projects  ·  Closing-in: <K> pursuits  ·  WIP: <X>/<max>
 
-      Then **delegate the scan to the reconciler subagent**: invoke
-      the Agent tool with `subagent_type: cadence:reconciler` and
-      `prompt`: `scan. [Budget: 3 tool calls. If exceeded, return
-      what you have without retrying.]` (see runtime "Subagent
-      budgets" principle.) The agent returns a flag list (one per
-      line, grouped by severity) covering `overdue_waiting_for`,
-      `dormant_project`, `structural_active_no_open_actions`,
-      `wip_over_limit`, `closing_in_on_resolution`, and
-      `inbound_issues_piling_up`. For each flag, present and ask:
-      act on it, defer, or dismiss. Finally check someday cues by
-      iterating `snapshot.pursuits` filtered to `lifecycle: someday`
-      — evaluate each `cue.trigger` against the current date.
-
-      **Fallback:** if the reconciler subagent invocation fails, run
-      the scans inline using `cadence flags --json` with the
-      thresholds from `workflows/reconciler.md`.
-
-   d. Project relevance check: iterate active projects from
-      `snapshot.projects`. For each, ask "Still relevant?" If the user
-      wants to change a project's status, use the CLI:
-      ```bash
-      cadence set-status <project-id> --pursuit <pursuit-id> \
-        --status <on_hold|dropped|done> [--reason "..." for dropped]
+      Want to handle these now, or note them in the reflection and move on?
+        - 'handle' — hand off to /cadence:start inbox (or /resolve <project>); reflection persists at status: in_progress, phase: get_clear
+        - 'note' — append the awareness counts to the reflection body and proceed to Get Focused
+        - 'pause' — exit; reflection stays in_progress for next time
       ```
 
-   e. Update the reflection file via the CLI (re-running
-      `write-reflection` with the same date is an upsert):
+      When all counts are zero: "Inbox empty, no dormant, no closing-in, WIP healthy. Going straight to Get Focused."
+
+   c. Branch on the user's choice:
+
+      - **`handle`** — ask "which one?" if multiple non-zero buckets
+        exist. Route accordingly:
+        - Inbox → forward to `/cadence:start inbox` (the triage walk)
+        - Closing-in pursuit → forward to `/cadence:status <pursuit>`
+          and let them decide; they can `/cadence:resolve` from there
+        - Dormant projects → forward to `/cadence:reconcile` for the
+          full flag walk
+        Before handing off, persist the reflection at `get_clear`:
+        ```bash
+        cadence write-reflection \
+          --date <YYYY-MM-DD> --status in_progress --phase get_clear
+        ```
+        The next `/cadence:reflect` invocation will see
+        `same_week_in_progress` and resume here. After the user
+        finishes handling, they re-invoke `/cadence:reflect`; the
+        skill picks up at this awareness block (the counts will have
+        shifted) and offers handle/note/pause again. The user can
+        loop through several handle passes if they want.
+
+      - **`note`** — append the awareness counts to the reflection
+        body as a "Going-in state" subsection, then advance the
+        reflection phase:
+        ```bash
+        cadence write-reflection \
+          --date <YYYY-MM-DD> --status in_progress --phase get_focused
+        ```
+        Continue to Phase 2.
+
+      - **`pause`** — persist the reflection at `get_clear` and exit:
+        ```bash
+        cadence write-reflection \
+          --date <YYYY-MM-DD> --status in_progress --phase get_clear
+        ```
+        Tell the user: "Paused at Get Clear. `/cadence:reflect` will
+        pick this back up." Emit the verb-hint + teaching footer.
+
+   d. Optional brain-tickler tip surface before Phase 2 (frequency-capped):
       ```bash
-      cadence write-reflection \
-        --date <YYYY-MM-DD> --status in_progress --phase get_clear
+      cadence tip-pick --triggers moment-reflect-phase-transition \
+        --types quote --category reflect-interjection --category-cool-down-days 14
       ```
+      If a non-null tip is returned, render inline ("Before we look
+      forward, a frame to chew on: …"). Skip silently on null.
 
 5. **Phase 2 — Get Focused**
 
