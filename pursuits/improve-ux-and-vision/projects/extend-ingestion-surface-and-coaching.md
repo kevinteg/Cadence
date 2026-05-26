@@ -1,7 +1,7 @@
 ---
 id: extend-ingestion-surface-and-coaching
 pursuit: improve-ux-and-vision
-status: active
+status: done
 created: 2026-05-22
 ---
 
