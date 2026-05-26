@@ -66,35 +66,57 @@ context so future `/status N` calls resolve correctly.
 
 When no argument is provided:
 
-1. Run `cadence status`. The CLI produces the entire dashboard:
-   - Leveraged Priority (extracted from latest reflection)
-   - Last Reflect (date + status)
-   - Last Activity (most recent commit/edit on a non-done project)
-   - Pursuits / Projects / Actions counts
-   - **Inbox line** — the canonical Inbox view (union of untriaged
-     `thoughts/unprocessed/` captures + brainstorms in
-     `phase: diverging`). Three threshold-aware shapes from
-     `workflows/coaching-strings.md`:
-       - empty: `Inbox: empty ✓`
-       - within cap: `Inbox: <N> items ✓`
-       - above cap: `Inbox: <N> items (<O> overdue, <A> aged, <F> fresh) — above soft cap (<threshold>). Run /cadence:start inbox to walk them.`
-   - **Active brainstorms line** — when at least one brainstorm is
-     `diverging` or `converging`. Omitted when none are active.
-   - Pending validations (when `validations/pending.md` is non-empty)
-   - Reconciler flags (includes `inbox_pressure` when the Inbox
-     view exceeds `cadence.yaml` `inbox_soft_threshold`)
-   - **Next:** up to 3 contextual next-step suggestions ranked by
-     state (in-progress projects, unprocessed captures, flags,
-     reflect cadence, on-hold pickup candidates, and a
-     `/cadence:help` pointer in any spare slot)
-   - **Idle-time prompt** — appended below `Next:` when activity
-     is stale (>7 days). Wording is the canonical string from
+1. Run `cadence status`. The CLI produces the entire dashboard in
+   markdown — the surface is navigation-led, not counts-led:
+
+   - **`# Cadence Status`** header
+   - **`**This week**: <LP framing>. Last touch was `<project>` (<ago>).`**
+     — a one-line orientation. The LP is uplevelled (first sentence,
+     lowered + stripped of trailing punctuation). The "last touch"
+     names the most recently touched active/on_hold project. Falls
+     back to "no leveraged priority set" when no LP is recorded.
+   - **`## Active Pursuits`** — one subsection per active pursuit, each
+     with a `### <pursuit> — <done>/<total> projects done` header (plus
+     ` (closing in)` or ` (all projects shipped)` tag when applicable),
+     followed by a markdown table of open projects:
+     ```
+     | Project | Status | Actions | What it's about |
+     ```
+     "What it's about" is the first sentence of the project's Intent,
+     truncated. Pursuits with all projects shipped show a
+     `/cadence:resolve <pursuit>` framing line in place of the table.
+   - **`## Active Brainstorms`** — table of brainstorms in
+     `diverging` or `converging` phase. Omitted when none are active.
+   - **`## On Hold Pursuits`** — table of pursuits in lifecycle
+     `someday`, with the date of their last activity and the first
+     sentence of their Why. Omitted when none exist.
+   - **`## Heads up`** — bulleted nudges:
+     - Inbox bullet (the canonical line from `coaching-strings.md`)
+     - Pending validations as a one-line nudge when the queue is
+       non-empty (omitted when empty)
+     - Flag summary as one prose line naming the top 1-3 specific
+       signals, ending with `/cadence:reconcile to walk them`. Omitted
+       when no non-inbox flags exist.
+   - **`## Likely next moves`** — numbered list of up to 3 entries,
+     each `N. \`<verb> <target>\` — <one-line rationale>`. Ranked in
+     priority order: LP alignment, recency (in-progress today),
+     structural urgency (closing-in pursuits, all-actions-checked
+     projects), parking-lot pressure (Inbox above soft cap), routine
+     surfaces (reflect-due, narrate-week, narrate-today).
+   - **Idle-time prompt** — appended below `Likely next moves` when
+     activity is stale (>7 days). Wording is the canonical string from
      `workflows/coaching-strings.md`.
 
 2. Present the CLI output verbatim. Do not paraphrase or annotate.
-   The "Next:" block is computed deterministically by `nextSteps()`
-   in the CLI — same heuristic in both the bare-CLI dashboard and
-   the SessionStart hook output, so suggestions stay consistent.
+   The "Likely next moves" block is computed deterministically by
+   `curateNextMoves()` in the CLI — same heuristic in both the
+   bare-CLI dashboard and the SessionStart hook output, so the
+   suggestions stay consistent across surfaces.
+
+3. **Color is opt-in.** The bare-CLI `cadence status` enables ANSI
+   color when stdout is a TTY (with `NO_COLOR` / `FORCE_COLOR` env
+   overrides). The hook-output path always passes plain markdown —
+   ANSI escape codes would corrupt Claude Code's table rendering.
 
 ## Empty-state branch
 

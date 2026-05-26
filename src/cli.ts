@@ -190,7 +190,13 @@ cli
       } else if (opts.json) {
         process.stdout.write(JSON.stringify(result, null, 2) + '\n')
       } else {
-        process.stdout.write(renderStatus(result) + '\n')
+        // Color is opt-in by TTY (and NO_COLOR / FORCE_COLOR overrides).
+        // The hook-output path above always passes plain markdown —
+        // ANSI codes would corrupt Claude Code's table rendering.
+        const { shouldEnableColor } = await import('./render/color.js')
+        process.stdout.write(
+          renderStatus(result, { color: shouldEnableColor() }) + '\n',
+        )
       }
     },
   )

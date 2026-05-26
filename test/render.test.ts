@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { renderSnapshot, renderReport } from '../src/render/snapshot.ts'
-import { nextSteps, renderStatus } from '../src/render/status.ts'
+import { renderStatus } from '../src/render/status.ts'
 import {
   renderProject,
   renderPursuit,
@@ -9,11 +9,9 @@ import {
 } from '../src/render/drilldown.ts'
 import {
   CONFIG_DEFAULTS,
-  type Capture,
   type Flag,
   type Project,
   type Pursuit,
-  type Reflection,
   type Report,
   type Snapshot,
 } from '../src/types.ts'
@@ -142,175 +140,52 @@ test('renderReport appends a Flags section after the snapshot', () => {
   assert.match(out, /Flags \(0\)\n  No flags\./)
 })
 
-test('nextSteps surfaces unprocessed captures as priority 1', () => {
-  const cap: Capture = {
-    captured: '2026-04-29T08:00:00',
-    body: 'something',
-    path: 'thoughts/unprocessed/x.md',
-  }
-  const steps = nextSteps(
-    makeSnapshot({ pursuits: [makePursuit()], captures: [cap] }),
-    [],
-  )
-  assert.ok(steps[0]!.includes('1 unprocessed capture'))
-  assert.ok(steps[0]!.includes('/cadence:reflect'))
-})
-
-test('nextSteps surfaces in-progress projects with marker first', () => {
-  const steps = nextSteps(
-    makeSnapshot({
-      pursuits: [makePursuit()],
-      projects: [
-        makeProject({ id: 'foo' }),
-        makeProject({ id: 'bar' }),
-      ],
-    }),
-    [],
-  )
-  assert.ok(steps.some((s) => s.includes('Resume') && s.includes('foo')))
-  assert.ok(steps.some((s) => s.includes('1 other in-progress')))
-})
-
-test('nextSteps surfaces flags as priority 2', () => {
-  const flags: Flag[] = [
-    {
-      kind: 'dormant_project',
-      pursuitId: 'p',
-      projectId: 'proj',
-      daysSinceActivity: 30,
-    },
-  ]
-  const steps = nextSteps(makeSnapshot({ pursuits: [makePursuit()] }), flags)
-  assert.ok(steps.some((s) => s.includes('1 flag') && s.includes('/cadence:reconcile')))
-})
-
-test('nextSteps suggests reflect when last reflect is older than 7 days', () => {
-  const oldReflection: Reflection = {
-    date: '2026-04-15',
-    status: 'complete',
-    body: '',
-    path: '',
-  }
-  // /reflect suggestion only fires when there's something to reflect on,
-  // so include at least one project.
-  const steps = nextSteps(
-    makeSnapshot({
-      pursuits: [makePursuit()],
-      projects: [makeProject({ id: 'foo', status: 'on_hold' })],
-      reflections: [oldReflection],
-    }),
-    [],
-  )
-  assert.ok(steps.some((s) => /Last reflect was \d+d ago/.test(s)))
-})
-
-test('nextSteps falls back to on-hold pickup when no active', () => {
-  const steps = nextSteps(
-    makeSnapshot({
-      pursuits: [makePursuit()],
-      projects: [makeProject({ id: 'paused', status: 'on_hold' })],
-    }),
-    [],
-  )
-  assert.ok(
-    steps.some((s) => s.includes('on hold') && s.includes('/cadence:start')),
-  )
-})
-
-test('nextSteps emits a bootstrap suggestion when nothing else applies', () => {
-  const steps = nextSteps(
-    makeSnapshot({ pursuits: [makePursuit({ id: 'inbox' })] }),
-    [],
-  )
-  // No reflections, no projects, no captures, no flags →
-  // bootstrap message.
-  assert.ok(
-    steps.some(
-      (s) =>
-        s.includes('Get started') &&
-        (s.includes('/cadence:brainstorm') || s.includes('/cadence:init')),
-    ),
-  )
-})
-
-test('nextSteps caps suggestions at 3 and always points at /cadence:help when room', () => {
-  const steps = nextSteps(makeSnapshot({ pursuits: [makePursuit()] }), [])
-  assert.ok(steps.length <= 3)
-  // With sparse state, /cadence:help should appear.
-  assert.ok(steps.some((s) => s.includes('/cadence:help')))
-})
-
-test('nextSteps surfaces narrate-today when the narrateTodayStale signal is set', () => {
-  const steps = nextSteps(
-    makeSnapshot({ pursuits: [makePursuit()] }),
-    [],
-    { narrateTodayStale: true, weeklyPreviewDue: false },
-  )
-  assert.ok(
-    steps.some(
-      (s) => s.includes('/cadence:narrate today') && s.includes('Activity landed today'),
-    ),
-  )
-})
-
-test('nextSteps stays quiet about narrate-today when the signal is false', () => {
-  const steps = nextSteps(
-    makeSnapshot({ pursuits: [makePursuit()] }),
-    [],
-    { narrateTodayStale: false, weeklyPreviewDue: false },
-  )
-  assert.ok(!steps.some((s) => s.includes('/cadence:narrate today')))
-})
-
-test('nextSteps surfaces weekly-preview when the weeklyPreviewDue signal is set', () => {
-  const steps = nextSteps(
-    makeSnapshot({ pursuits: [makePursuit()] }),
-    [],
-    { narrateTodayStale: false, weeklyPreviewDue: true },
-  )
-  assert.ok(
-    steps.some(
-      (s) =>
-        s.includes('/cadence:narrate week') && s.includes('Week is closing'),
-    ),
-  )
-})
-
-test('nextSteps stays quiet about weekly-preview when the signal is false', () => {
-  const steps = nextSteps(
-    makeSnapshot({ pursuits: [makePursuit()] }),
-    [],
-    { narrateTodayStale: false, weeklyPreviewDue: false },
-  )
-  assert.ok(!steps.some((s) => s.includes('Week is closing')))
-})
-
-test('nextSteps with both new signals on ranks weekly-preview above narrate-today', () => {
-  const steps = nextSteps(
-    makeSnapshot({ pursuits: [makePursuit()] }),
-    [],
-    { narrateTodayStale: true, weeklyPreviewDue: true },
-  )
-  const weeklyIdx = steps.findIndex((s) => s.includes('Week is closing'))
-  const narrateIdx = steps.findIndex((s) => s.includes('Activity landed today'))
-  assert.notStrictEqual(weeklyIdx, -1)
-  assert.notStrictEqual(narrateIdx, -1)
-  assert.ok(weeklyIdx < narrateIdx)
-})
-
-test('nextSteps default signals keep the new rules silent (back-compat)', () => {
-  const steps = nextSteps(makeSnapshot({ pursuits: [makePursuit()] }), [])
-  assert.ok(!steps.some((s) => s.includes('Week is closing')))
-  assert.ok(!steps.some((s) => s.includes('Activity landed today')))
-})
-
-test('renderStatus appends a Next: block computed by nextSteps', () => {
+test('renderStatus emits a Likely next moves block', () => {
   const out = renderStatus({
     snapshot: makeSnapshot({ pursuits: [makePursuit()] }),
     flags: [],
   })
-  assert.match(out, /Next:\n/)
+  assert.match(out, /Likely next moves/)
   assert.match(out, /\/cadence:help/)
+})
+
+test('renderStatus leads with This week + Active Pursuits headers', () => {
+  const out = renderStatus({
+    snapshot: makeSnapshot({
+      pursuits: [makePursuit()],
+      projects: [makeProject({ id: 'foo', intent: 'Build the thing.' })],
+    }),
+    flags: [],
+  })
+  assert.match(out, /# Cadence Status/)
+  assert.match(out, /## Active Pursuits/)
+})
+
+test('renderStatus does not emit ANSI escape codes when color is off', () => {
+  const out = renderStatus({
+    snapshot: makeSnapshot({
+      pursuits: [makePursuit()],
+      projects: [makeProject({ id: 'foo', intent: 'Build the thing.' })],
+    }),
+    flags: [],
+  })
+  // eslint-disable-next-line no-control-regex
+  assert.doesNotMatch(out, /\x1b\[/)
+})
+
+test('renderStatus emits ANSI escape codes when color is on', () => {
+  const out = renderStatus(
+    {
+      snapshot: makeSnapshot({
+        pursuits: [makePursuit()],
+        projects: [makeProject({ id: 'foo', intent: 'Build the thing.' })],
+      }),
+      flags: [],
+    },
+    { color: true },
+  )
+  // eslint-disable-next-line no-control-regex
+  assert.match(out, /\x1b\[/)
 })
 
 test('renderPursuits ends with an Available actions menu', () => {

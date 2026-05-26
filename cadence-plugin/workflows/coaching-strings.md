@@ -159,6 +159,67 @@ WIP healthy. Going straight to Get Focused."
 (This string ships when P5 lands; this section is the
 single-source-of-truth contract.)
 
+## Dashboard "This week" opener — `/cadence:status`, SessionStart hook
+
+The opening orientation line of the dashboard. One line, manager-recap
+tone, up-leveled. Two ingredients: the user's current Leveraged
+Priority (first sentence, lower-cased, trailing punctuation stripped)
+and the most recently touched active/on_hold project.
+
+```
+**This week**: <LP framing>. Last touch was `<project>` (<ago>).
+```
+
+Empty-state variant (no LP recorded yet, but there's a recent touch):
+
+```
+**This week**: no leveraged priority set — /cadence:reflect to set one. Last touch was `<project>` (<ago>).
+```
+
+When both are absent the line is omitted entirely — the dashboard
+moves straight to Active Pursuits.
+
+## Heads up nudges — `/cadence:status`, SessionStart hook
+
+The dashboard's "Heads up" section reads as bulleted nudges, never as
+a queue or counter list. Three bullets in order, each conditional:
+
+```
+- Inbox: <line>                                              (always; uses the canonical Inbox line above)
+- <N> behaviors are queued for fresh-session validation — peek when you're ready.
+                                                              (when validations/pending.md is non-empty)
+- Health: <N> quiet signals — <specific signal>; <specific signal>. /cadence:reconcile to walk them.
+                                                              (when ≥1 non-inbox flag exists)
+```
+
+Specific-signal phrasing per flag kind (used inside the Health line):
+
+| Flag                                    | Phrase                                                |
+|-----------------------------------------|-------------------------------------------------------|
+| `overdue_waiting_for`                   | `<person> re: <what> (<N>d overdue)`                  |
+| `dormant_project`                       | `dormant project \`<id>\` (<N>d)`                     |
+| `structural_active_no_open_actions`     | `` `<id>` has all actions checked — ready to resolve? `` |
+| `wip_over_limit`                        | `<N> in-progress projects (limit <M>)`                |
+| `closing_in_on_resolution`              | `` `<id>` closing in (<N>/<M> done) ``                |
+| `inbound_issues_piling_up`              | `<N> untriaged issues on \`<repo>\``                  |
+
+The `inbox_pressure` flag does NOT appear in the Health line — the
+Inbox bullet above already carries that signal. Double-rendering would
+look like noise.
+
+## Likely next moves — `/cadence:status`, SessionStart hook
+
+A numbered list of up to 3 priority-ranked verb suggestions. Each
+entry is `N. \`<verb> <target>\` — <one-line rationale>.` The
+rationale is descriptive and forward-pointing, never a scold.
+
+Priority order: LP alignment → recency (in-progress today) →
+structural urgency (closing-in pursuits, all-actions-checked
+projects) → parking-lot pressure (Inbox above soft cap) → routine
+surfaces (reflect-due, narrate-week, narrate-today). Filled out with
+`/cadence:help` ("Browse the full verb surface.") when room remains
+and no higher-priority signal applies.
+
 ## Threshold-aware language — guiding principles
 
 1. **Above cap reads as a system observation, not a scold.** "Above

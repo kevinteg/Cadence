@@ -1,7 +1,7 @@
 ---
 id: reshape-status-output-for-navigation
 pursuit: improve-ux-and-vision
-status: on_hold
+status: active
 created: 2026-05-22
 ---
 
@@ -19,11 +19,11 @@ Done feels like: opening /cadence:status is scannable for "what should I do next
 
 ## Actions
 
-- [ ] Sketch the new dashboard render shape in src/render/status.ts — pursuits-first block, Next-ranked block, counts/flags footer.
-- [ ] Implement the priority-ranking function in src/render/signals.ts (or a new src/render/curation.ts): inputs LP alignment, recency, structural urgency, parking-lot pressure; returns at most 3 entries each shaped {verb, target?, rationale}.
-- [ ] Wire active brainstorms into the pursuits block (depends on P2).
-- [ ] Update cadence-plugin/skills/status/SKILL.md to describe the new output shape and render contract.
-- [ ] Ensure the SessionStart hook uses the same renderer so both surfaces stay consistent (verify after P3's hook extensions land).
-- [ ] Update cadence-plugin/cadence-reference.md Verb Catalogue → status entry to describe the new lead-with-navigation shape.
-- [ ] Add tests for the curation ranking function in test/curation.test.ts (or similar) covering the four input signals.
-- [ ] Update CLI catalog in cadence-plugin/cadence-reference.md if any new subcommands are needed (none anticipated, but verify).
+- [x] Sketch the new dashboard render shape in src/render/status.ts — pursuits-first block, Next-ranked block, counts/flags footer.
+- [x] Implement the priority-ranking function in src/render/signals.ts (or a new src/render/curation.ts): inputs LP alignment, recency, structural urgency, parking-lot pressure; returns at most 3 entries each shaped {verb, target?, rationale}.
+- [x] Wire active brainstorms into the pursuits block (depends on P2).
+- [x] Update cadence-plugin/skills/status/SKILL.md to describe the new output shape and render contract.
+- [x] Ensure the SessionStart hook uses the same renderer so both surfaces stay consistent (verify after P3's hook extensions land).
+- [x] Update cadence-plugin/cadence-reference.md Verb Catalogue → status entry to describe the new lead-with-navigation shape.
+- [x] Add tests for the curation ranking function in test/curation.test.ts (or similar) covering the four input signals.
+- [x] Update CLI catalog in cadence-plugin/cadence-reference.md if any new subcommands are needed (none anticipated, but verify).

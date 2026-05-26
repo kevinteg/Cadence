@@ -45,7 +45,7 @@ contract.
 
 | Verb | Purpose |
 |---|---|
-| `status` | System dashboard with contextual next-step hints, or drill into pursuits / projects / actions. Each drill ends with an action menu showing the verbs applicable to the viewed entity. |
+| `status` | System dashboard, navigation-led: a one-line "This week" framing, per-active-pursuit tables of open projects (with status / actions / first-sentence Intent), Active Brainstorms and On Hold Pursuits tables when applicable, a "Heads up" prose block (Inbox + validations + flag summary), and "Likely next moves" — up to 3 priority-ranked verb suggestions with rationale. Drill-down (`status <pursuit>` / `status <project>`) opens the entity view; each drill ends with an action menu. |
 | `find` | Search across projects, captures, and pursuits by case-insensitive substring. Results grouped by kind with per-group verb hints so any result is directly actionable. |
 | `help` | Render this catalogue inline, or a single verb's contract. |
 
@@ -749,6 +749,37 @@ Canonical strings for the Inbox line live in
 `cadence-plugin/workflows/coaching-strings.md`. Skills, hooks, and
 CLI render helpers quote from that doc rather than re-inventing
 language per surface.
+
+### Dashboard layout (status output)
+
+`cadence status` (bare CLI) and the SessionStart hook share one renderer (`src/render/status.ts`). The dashboard is navigation-led:
+
+```
+# Cadence Status
+
+**This week**: <LP framing>. Last touch was `<project>` (<ago>).
+
+## Active Pursuits
+### <pursuit> — <done>/<total> projects done
+| Project | Status | Actions | What it's about |
+...
+
+## Active Brainstorms                    (collapses when none active)
+## On Hold Pursuits                      (collapses when none on hold)
+
+## Heads up
+- Inbox: <line>
+- <validations nudge>                    (collapses when empty)
+- Health: <flag summary>                 (collapses when no non-inbox flags)
+
+## Likely next moves
+1. `<verb> <target>` — <rationale>
+2. ...
+```
+
+Each section collapses when its input is empty. The "This week" line takes the first sentence of the LP (lower-cased, trailing punctuation stripped) plus the most recently active project's relative-time label. The "Likely next moves" block is computed by `curateNextMoves()` in `src/render/curation.ts` — priority order: LP alignment → recency → structural urgency → parking-lot pressure → routine surfaces, capped at 3 entries.
+
+Color is opt-in. The bare-CLI status enables ANSI escape codes when stdout is a TTY (with `NO_COLOR` / `FORCE_COLOR` env overrides). The hook-output path always emits plain markdown — ANSI codes would corrupt Claude Code's table rendering.
 
 ### SessionStart hook
 

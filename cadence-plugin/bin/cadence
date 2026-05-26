@@ -12,6 +12,9 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
 var __commonJS = (cb, mod) => function __require2() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
@@ -482,8 +485,8 @@ var require_to_regex_range = __commonJS({
       let relax = String(opts.relaxZeros);
       let shorthand = String(opts.shorthand);
       let capture = String(opts.capture);
-      let wrap2 = String(opts.wrap);
-      let cacheKey = min + ":" + max + "=" + relax + shorthand + capture + wrap2;
+      let wrap3 = String(opts.wrap);
+      let cacheKey = min + ":" + max + "=" + relax + shorthand + capture + wrap3;
       if (toRegexRange.cache.hasOwnProperty(cacheKey)) {
         return toRegexRange.cache[cacheKey].result;
       }
@@ -753,9 +756,9 @@ var require_fill_range = __commonJS({
     };
     var toRegex = (start, end, options2) => {
       if (Array.isArray(start)) {
-        let wrap2 = options2.wrap === true;
+        let wrap3 = options2.wrap === true;
         let prefix = options2.capture ? "" : "?:";
-        return wrap2 ? `(${prefix}${start.join("|")})` : start.join("|");
+        return wrap3 ? `(${prefix}${start.join("|")})` : start.join("|");
       }
       return toRegexRange(start, end, options2);
     };
@@ -9264,6 +9267,80 @@ var require_gray_matter = __commonJS({
   }
 });
 
+// src/render/color.ts
+var color_exports = {};
+__export(color_exports, {
+  blue: () => blue,
+  bold: () => bold,
+  cyan: () => cyan,
+  dim: () => dim,
+  gray: () => gray,
+  green: () => green,
+  magenta: () => magenta,
+  shouldEnableColor: () => shouldEnableColor,
+  statusBadge: () => statusBadge,
+  yellow: () => yellow
+});
+function wrap2(code, text, on) {
+  if (!on) return text;
+  return `${ESC}${code}m${text}${ESC}0m`;
+}
+function bold(text, on) {
+  return wrap2("1", text, on);
+}
+function dim(text, on) {
+  return wrap2("2", text, on);
+}
+function green(text, on) {
+  return wrap2("32", text, on);
+}
+function yellow(text, on) {
+  return wrap2("33", text, on);
+}
+function blue(text, on) {
+  return wrap2("34", text, on);
+}
+function magenta(text, on) {
+  return wrap2("35", text, on);
+}
+function cyan(text, on) {
+  return wrap2("36", text, on);
+}
+function gray(text, on) {
+  return wrap2("90", text, on);
+}
+function statusBadge(status, on) {
+  switch (status) {
+    case "active":
+      return green(status, on);
+    case "on_hold":
+    case "on hold":
+      return yellow("on hold", on);
+    case "done":
+      return gray(status, on);
+    case "dropped":
+      return gray(status, on);
+    case "diverging":
+      return blue(status, on);
+    case "converging":
+      return magenta(status, on);
+    default:
+      return status;
+  }
+}
+function shouldEnableColor() {
+  if (process.env.NO_COLOR) return false;
+  if (process.env.FORCE_COLOR) return true;
+  return Boolean(process.stdout.isTTY);
+}
+var ESC;
+var init_color = __esm({
+  "src/render/color.ts"() {
+    "use strict";
+    ESC = "\x1B[";
+  }
+});
+
 // node_modules/cac/dist/index.mjs
 import { EventEmitter } from "events";
 function toArr(any) {
@@ -17730,11 +17807,6 @@ function flagClosingInOnResolution(flags, snapshot, activePursuitIds) {
 import { existsSync as existsSync3 } from "node:fs";
 import { join } from "node:path";
 var LONG_GAP_DAYS = 14;
-var NO_SIGNALS = {
-  narrateTodayStale: false,
-  weeklyPreviewDue: false,
-  reflectEntryMode: "normal"
-};
 function computeSuggestionSignals(snapshot, repoRoot) {
   const now = new Date(snapshot.generatedAt);
   return {
@@ -17970,27 +18042,6 @@ function renderEmptyRepoCoaching() {
     "  \u2022 See the verb surface   \u2192 /cadence:help"
   ].join("\n");
 }
-function renderInboxLine(snapshot, threshold) {
-  const view = inboxItems(snapshot);
-  if (view.counts.total === 0) return "Inbox: empty \u2713";
-  if (view.counts.total <= threshold) {
-    return `Inbox: ${view.counts.total} items \u2713`;
-  }
-  const buckets = [];
-  if (view.counts.overdue > 0) buckets.push(`${view.counts.overdue} overdue`);
-  if (view.counts.aged > 0) buckets.push(`${view.counts.aged} aged`);
-  if (view.counts.fresh > 0) buckets.push(`${view.counts.fresh} fresh`);
-  return `Inbox: ${view.counts.total} items (${buckets.join(", ")}) \u2014 above soft cap (${threshold}). Run /cadence:start inbox to walk them.`;
-}
-function renderActiveBrainstormsLine(snapshot) {
-  const active = snapshot.brainstorms.filter((b) => b.phase === "diverging" || b.phase === "converging").sort((a, b) => b.last_touched.localeCompare(a.last_touched));
-  if (active.length === 0) return null;
-  const head = active.slice(0, 3);
-  const tailCount = active.length - head.length;
-  const formatted = head.map((b) => `${b.slug} [${b.phase}]`).join(", ");
-  const tail = tailCount > 0 ? ` and ${tailCount} more` : "";
-  return `Active brainstorms: ${active.length} (${formatted}${tail})`;
-}
 function renderIdleTimePrompt(snapshot, now = /* @__PURE__ */ new Date(), idleDayThreshold = 7) {
   let mostRecent = null;
   for (const p of snapshot.projects) {
@@ -18005,124 +18056,439 @@ function renderIdleTimePrompt(snapshot, now = /* @__PURE__ */ new Date(), idleDa
   return "It's been a while since the last activity here. /cadence:reflect to catch up, or /cadence:status to see what's open.";
 }
 
+// src/render/curation.ts
+var MAX_MOVES = 3;
+function curateNextMoves(snapshot, flags, signals) {
+  const moves = [];
+  const seen = /* @__PURE__ */ new Set();
+  const add = (m) => {
+    const key = `${m.verb}:${m.target ?? ""}`;
+    if (seen.has(key)) return;
+    if (moves.length >= MAX_MOVES) return;
+    seen.add(key);
+    moves.push(m);
+  };
+  const activePursuitIds = new Set(
+    snapshot.pursuits.filter((p) => p.lifecycle === "active").map((p) => p.id)
+  );
+  const projectsInActive = snapshot.projects.filter(
+    (p) => activePursuitIds.has(p.pursuit)
+  );
+  const lp = extractLeveragedPriority(snapshot.reflections);
+  if (lp) {
+    const aligned = findLpAlignedProject(lp, projectsInActive);
+    if (aligned) {
+      add({
+        verb: "/cadence:start",
+        target: aligned.id,
+        rationale: `LP-aligned (${quoteShort(lp)}) \u2014 pick up where this leaves off.`
+      });
+    }
+  }
+  const inProgressToday = findInProgressToday(projectsInActive, snapshot.generatedAt);
+  if (inProgressToday) {
+    add({
+      verb: "/cadence:start",
+      target: inProgressToday.id,
+      rationale: "Touched today \u2014 natural to pick back up."
+    });
+  }
+  const fullyShippedPursuit = findFullyShippedPursuit(snapshot, activePursuitIds);
+  if (fullyShippedPursuit) {
+    add({
+      verb: "/cadence:resolve",
+      target: fullyShippedPursuit,
+      rationale: "All projects shipped \u2014 the pursuit is ready to close."
+    });
+  }
+  const closingIn = flags.find(
+    (f) => f.kind === "closing_in_on_resolution"
+  );
+  if (closingIn) {
+    add({
+      verb: "/cadence:status",
+      target: closingIn.pursuitId,
+      rationale: `${closingIn.resolvedCount}/${closingIn.totalCount} projects done \u2014 what would need to be true to close?`
+    });
+  }
+  const structurallyDone = flags.find(
+    (f) => f.kind === "structural_active_no_open_actions"
+  );
+  if (structurallyDone) {
+    add({
+      verb: "/cadence:resolve",
+      target: structurallyDone.projectId,
+      rationale: "All actions checked \u2014 does the intent feel achieved?"
+    });
+  }
+  const inboxFlag = flags.find((f) => f.kind === "inbox_pressure");
+  if (inboxFlag) {
+    add({
+      verb: "/cadence:start inbox",
+      rationale: `Inbox above soft cap (${inboxFlag.count} items) \u2014 walk them.`
+    });
+  } else {
+    const inboxCount = inboxItems(snapshot).counts.total;
+    if (inboxCount > 0 && moves.length < MAX_MOVES - 1) {
+    }
+  }
+  if (signals.weeklyPreviewDue) {
+    add({
+      verb: "/cadence:narrate week",
+      rationale: "Week is closing \u2014 preview before /cadence:reflect."
+    });
+  }
+  if (signals.narrateTodayStale) {
+    add({
+      verb: "/cadence:narrate today",
+      rationale: "Activity landed today with no daily narrative yet."
+    });
+  }
+  const daysSinceReflect = daysSinceLastReflect(snapshot);
+  if (daysSinceReflect !== null && daysSinceReflect > 7 && projectsInActive.length > 0) {
+    add({
+      verb: "/cadence:reflect",
+      rationale: `${daysSinceReflect}d since the last one \u2014 the week is moving.`
+    });
+  } else if (daysSinceReflect === null && projectsInActive.length > 0) {
+    add({
+      verb: "/cadence:reflect",
+      rationale: "No reflection yet \u2014 set a Leveraged Priority."
+    });
+  }
+  if (moves.length < 2) {
+    const onHold = projectsInActive.find((p) => p.status === "on_hold");
+    if (onHold) {
+      add({
+        verb: "/cadence:start",
+        target: onHold.id,
+        rationale: `On hold \u2014 pick it back up.`
+      });
+    }
+  }
+  if (moves.length === 0) {
+    add({
+      verb: "/cadence:brainstorm",
+      rationale: "Nothing in flight \u2014 open ideation."
+    });
+  }
+  if (moves.length < MAX_MOVES) {
+    add({
+      verb: "/cadence:help",
+      rationale: "Browse the full verb surface."
+    });
+  }
+  return moves.slice(0, MAX_MOVES);
+}
+function extractLeveragedPriority(reflections) {
+  const sorted = [...reflections].sort(
+    (a, b) => a.date < b.date ? 1 : -1
+  );
+  for (const r of sorted) {
+    if (r.leveraged_priority) return r.leveraged_priority;
+  }
+  return null;
+}
+function findLpAlignedProject(lp, projects) {
+  const lpLower = lp.toLowerCase();
+  const ranked = [...projects].sort((a, b) => {
+    const aActive = a.status === "active" ? 0 : 1;
+    const bActive = b.status === "active" ? 0 : 1;
+    return aActive - bActive;
+  });
+  for (const p of ranked) {
+    if (p.status !== "active" && p.status !== "on_hold") continue;
+    const idTokens = p.id.toLowerCase().split("-");
+    const allTokensInLp = idTokens.every((t) => t.length <= 2 || lpLower.includes(t));
+    if (allTokensInLp && idTokens.length >= 2) return p;
+  }
+  const lpTokens = lpLower.split(/[^a-z0-9]+/).filter((t) => t.length > 3);
+  if (lpTokens.length === 0) return null;
+  for (const p of ranked) {
+    if (p.status !== "active" && p.status !== "on_hold") continue;
+    const idTokens = p.id.toLowerCase().split("-").filter((t) => t.length > 3);
+    const shared = idTokens.filter((t) => lpTokens.includes(t));
+    if (shared.length >= 2) return p;
+  }
+  return null;
+}
+function findFullyShippedPursuit(snapshot, activePursuitIds) {
+  const candidates = [];
+  for (const pid of activePursuitIds) {
+    const projects = snapshot.projects.filter((p) => p.pursuit === pid);
+    if (projects.length === 0) continue;
+    const open = projects.filter(
+      (p) => p.status === "active" || p.status === "on_hold"
+    );
+    if (open.length > 0) continue;
+    candidates.push(pid);
+  }
+  candidates.sort();
+  return candidates[0] ?? null;
+}
+function findInProgressToday(projects, generatedAt) {
+  const now = new Date(generatedAt);
+  const today = isoDateLocal2(now);
+  for (const p of projects) {
+    if (p.status !== "active") continue;
+    if (!p.last_activity_at) continue;
+    if (isoDateLocal2(new Date(p.last_activity_at)) === today) return p;
+  }
+  return null;
+}
+function daysSinceLastReflect(snapshot) {
+  if (snapshot.reflections.length === 0) return null;
+  const sorted = [...snapshot.reflections].sort(
+    (a, b) => a.date < b.date ? 1 : -1
+  );
+  const latest = sorted[0];
+  const now = new Date(snapshot.generatedAt);
+  const last = /* @__PURE__ */ new Date(latest.date + "T00:00:00");
+  const ms = now.getTime() - last.getTime();
+  return Math.max(0, Math.floor(ms / (24 * 60 * 60 * 1e3)));
+}
+function isoDateLocal2(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+function quoteShort(s) {
+  const trimmed = s.trim();
+  if (trimmed.length <= 40) return `"${trimmed}"`;
+  return `"${trimmed.slice(0, 37)}\u2026"`;
+}
+
 // src/render/status.ts
-function renderStatus(result) {
+init_color();
+function renderStatus(result, opts = {}) {
+  const color = opts.color ?? false;
   const { snapshot, flags } = result;
   const out = [];
-  out.push("Cadence Status");
+  out.push(bold("# Cadence Status", color));
   out.push("");
-  const lp = leveragedPriority(snapshot);
-  out.push(`Leveraged Priority: ${lp ?? "not set"}`);
-  out.push(lastReflectLine(snapshot));
-  out.push(lastActivityLine(snapshot));
-  out.push("");
-  out.push(pursuitsLine(snapshot));
-  out.push(projectsLine(snapshot));
-  out.push(actionsLine(snapshot));
-  out.push(renderInboxLine(snapshot, snapshot.config.inbox_soft_threshold));
-  const brainstormsLine = renderActiveBrainstormsLine(snapshot);
-  if (brainstormsLine) out.push(brainstormsLine);
-  out.push("");
-  const pending = readPendingValidations(snapshot.repoRoot);
-  if (pending.length > 0) {
-    out.push(
-      `New behaviors to validate in this fresh session (${pending.length}):`
-    );
-    for (const entry of pending) {
-      out.push(`  - ${entry.description}`);
-    }
-    out.push(
-      `  Clear with: cadence pending-validation-clear --match "<text>"`
-    );
+  const thisWeek = renderThisWeek(snapshot, color);
+  if (thisWeek) {
+    out.push(thisWeek);
     out.push("");
   }
-  out.push("Flags:");
-  if (flags.length === 0) {
-    out.push("  No flags. System is healthy.");
-  } else {
-    for (const flag of flags) out.push("  - " + describeFlag(flag, snapshot));
+  const activeBlock = renderActivePursuits(snapshot, flags, color);
+  if (activeBlock) {
+    out.push(activeBlock);
+    out.push("");
   }
-  out.push("");
+  const brainstormsBlock = renderActiveBrainstorms(snapshot, color);
+  if (brainstormsBlock) {
+    out.push(brainstormsBlock);
+    out.push("");
+  }
+  const onHoldBlock = renderOnHoldPursuits(snapshot, color);
+  if (onHoldBlock) {
+    out.push(onHoldBlock);
+    out.push("");
+  }
+  const headsUp = renderHeadsUp(snapshot, flags, color);
+  if (headsUp) {
+    out.push(headsUp);
+    out.push("");
+  }
   const signals = computeSuggestionSignals(snapshot, snapshot.repoRoot);
-  const next = nextSteps(snapshot, flags, signals);
-  out.push("Next:");
-  for (const step of next) out.push("  - " + step);
+  const moves = curateNextMoves(snapshot, flags, signals);
+  const movesBlock = renderLikelyNextMoves(moves, color);
+  if (movesBlock) {
+    out.push(movesBlock);
+  }
   const idle = renderIdleTimePrompt(snapshot);
   if (idle) {
     out.push("");
     out.push(idle);
   }
-  return out.join("\n");
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd();
 }
 function renderFlags(flags, snapshot) {
   if (flags.length === 0) return "No flags. System is healthy.";
   return flags.map((f) => "- " + describeFlag(f, snapshot)).join("\n");
 }
-function nextSteps(snapshot, flags, signals = NO_SIGNALS) {
-  const suggestions = [];
-  const activePursuitIds = new Set(
-    snapshot.pursuits.filter((p) => p.lifecycle === "active").map((p) => p.id)
+function renderThisWeek(snapshot, color) {
+  const lp = leveragedPriority(snapshot);
+  const lastTouch = mostRecentActiveProject(snapshot);
+  if (!lp && !lastTouch) return null;
+  const parts = [];
+  parts.push(bold("**This week**", color) + ":");
+  if (lp) {
+    parts.push(`${lpToFraming(lp)}.`);
+  } else {
+    parts.push(`no leveraged priority set \u2014 /cadence:reflect to set one.`);
+  }
+  if (lastTouch) {
+    const ago = relativeAgo(lastTouch.last_activity_at, snapshot.generatedAt);
+    parts.push(`Last touch was ${shortProjectLabel(lastTouch)} (${ago}).`);
+  }
+  return parts.join(" ");
+}
+function renderActivePursuits(snapshot, flags, color) {
+  const activePursuits = snapshot.pursuits.filter(
+    (p) => p.lifecycle === "active"
   );
-  const projectsInActivePursuits = snapshot.projects.filter(
-    (p) => activePursuitIds.has(p.pursuit)
+  if (activePursuits.length === 0) return null;
+  const out = [];
+  out.push(bold("## Active Pursuits", color));
+  const closingInIds = new Set(
+    flags.filter((f) => f.kind === "closing_in_on_resolution").map((f) => f.pursuitId)
   );
-  const inProgress = projectsInActivePursuits.filter(
-    (p) => p.status === "active" && p.actions.some((a) => !a.checked)
+  const pursuitsSorted = [...activePursuits].sort((a, b) => {
+    const aTs = lastActivityOnPursuit(snapshot, a.id) ?? "";
+    const bTs = lastActivityOnPursuit(snapshot, b.id) ?? "";
+    if (aTs && !bTs) return -1;
+    if (!aTs && bTs) return 1;
+    if (aTs && bTs && aTs !== bTs) return aTs < bTs ? 1 : -1;
+    return a.id.localeCompare(b.id);
+  });
+  for (const pursuit of pursuitsSorted) {
+    const allProjects = snapshot.projects.filter((p) => p.pursuit === pursuit.id);
+    const done = allProjects.filter(
+      (p) => p.status === "done" || p.status === "dropped"
+    ).length;
+    const total = allProjects.length;
+    const openProjects = allProjects.filter(
+      (p) => p.status === "active" || p.status === "on_hold"
+    );
+    const isClosingIn = closingInIds.has(pursuit.id);
+    const allShipped = total > 0 && openProjects.length === 0;
+    const tag = allShipped ? gray(" (all projects shipped)", color) : isClosingIn ? gray(" (closing in)", color) : "";
+    out.push("");
+    out.push(
+      bold(`### ${pursuit.id} \u2014 ${done}/${total} projects done${tag}`, color)
+    );
+    out.push("");
+    if (allShipped) {
+      out.push(
+        `Ready to \`/cadence:resolve ${pursuit.id}\` \u2014 the closure narrative will surface what landed.`
+      );
+      continue;
+    }
+    if (openProjects.length === 0) {
+      out.push(dim("_no open work \u2014 pursuit may be ready to resolve_", color));
+      continue;
+    }
+    out.push(renderPursuitTable(openProjects, color));
+  }
+  return out.join("\n");
+}
+function renderPursuitTable(projects, color) {
+  const rows = [];
+  rows.push("| Project | Status | Actions | What it's about |");
+  rows.push("|---|---|---|---|");
+  const projectsSorted = [...projects].sort((a, b) => {
+    const order = (s) => s === "active" ? 0 : s === "on_hold" ? 1 : 2;
+    const so = order(a.status) - order(b.status);
+    if (so !== 0) return so;
+    return a.id.localeCompare(b.id);
+  });
+  for (const p of projectsSorted) {
+    const status = statusBadge(p.status, color);
+    const actions = `${p.actionProgress.done}/${p.actionProgress.total}`;
+    const blurb = escapeTableCell(firstSentence(p.intent, 60));
+    rows.push(
+      `| \`${p.id}\` | ${status} | ${actions} | ${blurb} |`
+    );
+  }
+  return rows.join("\n");
+}
+function renderActiveBrainstorms(snapshot, color) {
+  const active = snapshot.brainstorms.filter((b) => b.phase === "diverging" || b.phase === "converging").sort((a, b) => b.last_touched.localeCompare(a.last_touched));
+  if (active.length === 0) return null;
+  const out = [];
+  out.push(bold("## Active Brainstorms", color));
+  out.push("");
+  out.push("| Brainstorm | Phase | Last touched |");
+  out.push("|---|---|---|");
+  for (const b of active) {
+    const phase = statusBadge(b.phase, color);
+    const touched = b.last_touched.slice(0, 10);
+    out.push(`| \`${b.slug}\` | ${phase} | ${touched} |`);
+  }
+  return out.join("\n");
+}
+function renderOnHoldPursuits(snapshot, color) {
+  const onHold = snapshot.pursuits.filter((p) => p.lifecycle === "someday");
+  if (onHold.length === 0) return null;
+  const out = [];
+  out.push(bold("## On Hold Pursuits", color));
+  out.push("");
+  out.push("| Pursuit | Paused | Why it mattered |");
+  out.push("|---|---|---|");
+  for (const p of onHold) {
+    const paused = onHoldPausedDate(snapshot, p) ?? "\u2014";
+    const why = escapeTableCell(firstSentence(p.why ?? p.description, 80));
+    out.push(`| \`${p.id}\` | ${paused} | ${why} |`);
+  }
+  return out.join("\n");
+}
+function renderHeadsUp(snapshot, flags, color) {
+  const bullets = [];
+  const inboxView = inboxItems(snapshot);
+  const threshold = snapshot.config.inbox_soft_threshold;
+  bullets.push(renderInboxBullet(inboxView, threshold));
+  const pending = readPendingValidations(snapshot.repoRoot);
+  if (pending.length > 0) {
+    const subjectFragment = pending.length === 1 ? "one behavior is queued" : `${pending.length} behaviors are queued`;
+    bullets.push(
+      `${subjectFragment} for fresh-session validation \u2014 peek when you're ready.`
+    );
+  }
+  const flagSummary = summarizeFlags(flags, snapshot);
+  if (flagSummary) bullets.push(flagSummary);
+  if (bullets.length === 0) return null;
+  const out = [];
+  out.push(bold("## Heads up", color));
+  out.push("");
+  for (const b of bullets) out.push(`- ${b}`);
+  return out.join("\n");
+}
+function renderLikelyNextMoves(moves, color) {
+  if (moves.length === 0) return null;
+  const out = [];
+  out.push(bold("## Likely next moves", color));
+  out.push("");
+  moves.forEach((m, i) => {
+    const call = m.target ? `${m.verb} ${m.target}` : m.verb;
+    out.push(`${i + 1}. ${bold("`" + call + "`", color)} \u2014 ${m.rationale}`);
+  });
+  return out.join("\n");
+}
+function lpToFraming(lp) {
+  const trimmed = lp.trim();
+  if (!trimmed) return "no leveraged priority set";
+  const sentence = firstSentence(trimmed, 80).replace(/[.!?]+$/, "");
+  if (!sentence) return "no leveraged priority set";
+  return sentence[0].toLowerCase() + sentence.slice(1);
+}
+function shortProjectLabel(p) {
+  return `\`${p.id}\``;
+}
+function relativeAgo(timestamp2, generatedAt) {
+  const now = new Date(generatedAt).getTime();
+  const then = new Date(timestamp2).getTime();
+  const diffMs = now - then;
+  if (diffMs < 0) return "just now";
+  const mins = Math.floor(diffMs / (60 * 1e3));
+  if (mins < 60) return mins <= 1 ? "just now" : `${mins}m ago`;
+  const hours = Math.floor(diffMs / (60 * 60 * 1e3));
+  if (hours < 24) return hours === 1 ? "1h ago" : `${hours}h ago`;
+  const days = Math.floor(diffMs / (24 * 60 * 60 * 1e3));
+  if (days === 1) return "yesterday";
+  return `${days}d ago`;
+}
+function mostRecentActiveProject(snapshot) {
+  const candidates = snapshot.projects.filter(
+    (p) => p.last_activity_at && (p.status === "active" || p.status === "on_hold")
   );
-  const onHold = projectsInActivePursuits.filter((p) => p.status === "on_hold");
-  const capturesCount = snapshot.captures.length;
-  const sortedReflections = [...snapshot.reflections].sort(
-    (a, b) => a.date < b.date ? 1 : -1
+  if (candidates.length === 0) return null;
+  const sorted = [...candidates].sort(
+    (a, b) => (a.last_activity_at ?? "") < (b.last_activity_at ?? "") ? 1 : -1
   );
-  const lastReflect = sortedReflections[0];
-  const today = new Date(snapshot.generatedAt);
-  const daysSinceReflect = lastReflect ? daysBetween(lastReflect.date, today) : Number.POSITIVE_INFINITY;
-  if (capturesCount > 0) {
-    suggestions.push(
-      `Triage ${capturesCount} unprocessed capture${capturesCount === 1 ? "" : "s"} \u2014 /cadence:reflect (Get Clear).`
-    );
-  }
-  if (inProgress.length > 0) {
-    const first = inProgress[0];
-    const tail = inProgress.length > 1 ? ` (or one of ${inProgress.length - 1} other in-progress project${inProgress.length - 1 === 1 ? "" : "s"})` : "";
-    suggestions.push(
-      `Resume in-progress work \u2014 /cadence:start ${first.id}${tail}.`
-    );
-  }
-  if (signals.weeklyPreviewDue && suggestions.length < 3) {
-    suggestions.push(
-      `Week is closing \u2014 /cadence:narrate week to preview before /cadence:reflect.`
-    );
-  }
-  if (flags.length > 0 && suggestions.length < 3) {
-    suggestions.push(
-      `Review ${flags.length} flag${flags.length === 1 ? "" : "s"} \u2014 /cadence:reconcile.`
-    );
-  }
-  if (signals.narrateTodayStale && suggestions.length < 3) {
-    suggestions.push(
-      `Activity landed today with no daily narrative \u2014 /cadence:narrate today.`
-    );
-  }
-  if (daysSinceReflect > 7 && suggestions.length < 3 && projectsInActivePursuits.length > 0) {
-    suggestions.push(
-      lastReflect ? `Last reflect was ${daysSinceReflect}d ago \u2014 time for /cadence:reflect.` : `No reflection yet \u2014 /cadence:reflect to set a Leveraged Priority.`
-    );
-  }
-  if (suggestions.length < 2 && onHold.length > 0) {
-    suggestions.push(
-      `${onHold.length} project${onHold.length === 1 ? "" : "s"} on hold \u2014 /cadence:start to pick one up.`
-    );
-  }
-  if (suggestions.length === 0) {
-    suggestions.push(
-      `Get started \u2014 /cadence:brainstorm to generate ideas, or /cadence:init for a fresh repo.`
-    );
-  }
-  if (suggestions.length < 3) {
-    suggestions.push(`Browse the full verb surface \u2014 /cadence:help.`);
-  }
-  return suggestions.slice(0, 3);
+  return sorted[0] ?? null;
 }
 function leveragedPriority(snapshot) {
   const sorted = [...snapshot.reflections].sort(
@@ -18133,69 +18499,68 @@ function leveragedPriority(snapshot) {
   }
   return void 0;
 }
-function lastReflectLine(snapshot) {
-  if (snapshot.reflections.length === 0) return "Last Reflect: none";
-  const sorted = [...snapshot.reflections].sort(
-    (a, b) => a.date < b.date ? 1 : -1
-  );
-  const r = sorted[0];
-  return `Last Reflect: ${r.date} (${r.status})`;
+function firstSentence(text, maxLen) {
+  if (!text) return "";
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  const period = cleaned.search(/[.!?](\s|$)/);
+  const sentence = period > 0 ? cleaned.slice(0, period).trim() : cleaned;
+  if (sentence.length <= maxLen) return sentence;
+  return sentence.slice(0, maxLen - 1).trim() + "\u2026";
 }
-function lastActivityLine(snapshot) {
-  const candidates = snapshot.projects.filter(
-    (p2) => p2.last_activity_at && p2.status !== "done" && p2.status !== "dropped"
-  );
-  if (candidates.length === 0) return "Last Activity: none";
-  const sorted = [...candidates].sort(
-    (a, b) => (a.last_activity_at ?? "") < (b.last_activity_at ?? "") ? 1 : -1
-  );
-  const p = sorted[0];
-  const stateLabel = p.status === "on_hold" ? "on hold" : "WIP";
-  const days = daysBetween(p.last_activity_at, new Date(snapshot.generatedAt));
-  const ago = relativeDays(days);
-  return `Last Activity: ${ago} on ${p.pursuit}/${p.id} (${stateLabel})`;
+function escapeTableCell(text) {
+  return text.replace(/\|/g, "\\|").replace(/\n/g, " ");
 }
-function relativeDays(days) {
-  if (days <= 0) return "today";
-  if (days === 1) return "yesterday";
-  return `${days} days ago`;
-}
-function pursuitsLine(snapshot) {
-  const groups = countLifecycle(snapshot.pursuits);
-  return `Pursuits: ${groups.active} active | ${groups.someday} someday`;
-}
-function projectsLine(snapshot) {
-  const activePursuitIds = new Set(
-    snapshot.pursuits.filter((p) => p.lifecycle === "active").map((p) => p.id)
-  );
-  const inActive = snapshot.projects.filter(
-    (p) => activePursuitIds.has(p.pursuit)
-  );
-  const active = inActive.filter((p) => p.status === "active").length;
-  const onHold = inActive.filter((p) => p.status === "on_hold").length;
-  const done = inActive.filter((p) => p.status === "done").length;
-  return `Projects: ${active} active | ${onHold} on_hold | ${done} done`;
-}
-function actionsLine(snapshot) {
-  const activePursuitIds = new Set(
-    snapshot.pursuits.filter((p) => p.lifecycle === "active").map((p) => p.id)
-  );
-  let pending = 0;
-  let waiting = 0;
-  for (const project of snapshot.projects) {
-    if (project.status !== "active") continue;
-    if (!activePursuitIds.has(project.pursuit)) continue;
-    pending += project.actions.filter((a) => !a.checked).length;
-    waiting += project.waiting_for.length;
+function lastActivityOnPursuit(snapshot, pursuitId) {
+  let max = null;
+  for (const p of snapshot.projects) {
+    if (p.pursuit !== pursuitId) continue;
+    if (!p.last_activity_at) continue;
+    if (max === null || p.last_activity_at > max) max = p.last_activity_at;
   }
-  return `Actions:  ${pending} pending | ${waiting} waiting`;
+  return max;
 }
-function countLifecycle(pursuits) {
-  return {
-    active: pursuits.filter((p) => p.lifecycle === "active").length,
-    someday: pursuits.filter((p) => p.lifecycle === "someday").length,
-    archived: pursuits.filter((p) => p.lifecycle === "archived").length
-  };
+function onHoldPausedDate(snapshot, pursuit) {
+  const ts = lastActivityOnPursuit(snapshot, pursuit.id);
+  if (ts) return ts.slice(0, 10);
+  return pursuit.created || null;
+}
+function renderInboxBullet(view, threshold) {
+  const { total, overdue, aged, fresh } = view.counts;
+  if (total === 0) return "Inbox: empty \u2713";
+  if (total <= threshold) return `Inbox: ${total} items \u2713`;
+  const buckets = [];
+  if (overdue > 0) buckets.push(`${overdue} overdue`);
+  if (aged > 0) buckets.push(`${aged} aged`);
+  if (fresh > 0) buckets.push(`${fresh} fresh`);
+  return `Inbox: ${total} items (${buckets.join(", ")}) \u2014 above soft cap (${threshold}). \`/cadence:start inbox\` to walk them.`;
+}
+function summarizeFlags(flags, snapshot) {
+  const visible = flags.filter((f) => f.kind !== "inbox_pressure");
+  if (visible.length === 0) return null;
+  const phrases = visible.slice(0, 3).map((f) => describeFlagShort(f, snapshot));
+  const tail = visible.length > 3 ? ` and ${visible.length - 3} more` : "";
+  const lead = visible.length === 1 ? "Health: one quiet signal \u2014" : `Health: ${visible.length} quiet signals \u2014`;
+  return `${lead} ${phrases.join("; ")}${tail}. \`/cadence:reconcile\` to walk them.`;
+}
+function describeFlagShort(flag, _snapshot) {
+  switch (flag.kind) {
+    case "overdue_waiting_for":
+      return `${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`;
+    case "dormant_project":
+      return flag.daysSinceActivity !== null ? `dormant project \`${flag.projectId}\` (${flag.daysSinceActivity}d)` : `dormant project \`${flag.projectId}\``;
+    case "structural_active_no_open_actions":
+      return `\`${flag.projectId}\` has all actions checked \u2014 ready to resolve?`;
+    case "wip_over_limit":
+      return `${flag.count} in-progress projects (limit ${flag.limit})`;
+    case "closing_in_on_resolution":
+      return `\`${flag.pursuitId}\` closing in (${flag.resolvedCount}/${flag.totalCount} done)`;
+    case "inbound_issues_piling_up":
+      return `${flag.count} untriaged issues on \`${flag.ownerRepo}\``;
+    case "inbox_pressure":
+      return "";
+  }
+  const _exhaustive = flag;
+  return _exhaustive;
 }
 function describeFlag(flag, _snapshot) {
   switch (flag.kind) {
@@ -20297,7 +20662,10 @@ Run /cadence:init to set up.`;
     } else if (opts.json) {
       process.stdout.write(JSON.stringify(result, null, 2) + "\n");
     } else {
-      process.stdout.write(renderStatus(result) + "\n");
+      const { shouldEnableColor: shouldEnableColor2 } = await Promise.resolve().then(() => (init_color(), color_exports));
+      process.stdout.write(
+        renderStatus(result, { color: shouldEnableColor2() }) + "\n"
+      );
     }
   }
 );
