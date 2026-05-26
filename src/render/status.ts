@@ -150,7 +150,7 @@ export function renderFlags(flags: Flag[], snapshot: Snapshot): string {
 
 function renderThisWeek(snapshot: Snapshot, color: boolean): string | null {
   const lp = leveragedPriority(snapshot)
-  const lastTouch = mostRecentActiveProject(snapshot)
+  const lastTouch = snapshot.lastTouch ?? null
 
   if (!lp && !lastTouch) return null
 
@@ -162,8 +162,8 @@ function renderThisWeek(snapshot: Snapshot, color: boolean): string | null {
     parts.push(`no leveraged priority set — /cadence:reflect to set one.`)
   }
   if (lastTouch) {
-    const ago = relativeAgo(lastTouch.last_activity_at!, snapshot.generatedAt)
-    parts.push(`Last touch was ${shortProjectLabel(lastTouch)} (${ago}).`)
+    const ago = relativeAgo(lastTouch.timestamp, snapshot.generatedAt)
+    parts.push(`Last touch was \`${lastTouch.project_id}\` (${ago}).`)
   }
   return parts.join(' ')
 }
@@ -389,10 +389,6 @@ function lpToFraming(lp: string): string {
   return sentence[0]!.toLowerCase() + sentence.slice(1)
 }
 
-function shortProjectLabel(p: Project): string {
-  return `\`${p.id}\``
-}
-
 function relativeAgo(timestamp: string, generatedAt: string): string {
   const now = new Date(generatedAt).getTime()
   const then = new Date(timestamp).getTime()
@@ -405,19 +401,6 @@ function relativeAgo(timestamp: string, generatedAt: string): string {
   const days = Math.floor(diffMs / (24 * 60 * 60 * 1000))
   if (days === 1) return 'yesterday'
   return `${days}d ago`
-}
-
-function mostRecentActiveProject(snapshot: Snapshot): Project | null {
-  const candidates = snapshot.projects.filter(
-    (p) =>
-      p.last_activity_at &&
-      (p.status === 'active' || p.status === 'on_hold'),
-  )
-  if (candidates.length === 0) return null
-  const sorted = [...candidates].sort((a, b) =>
-    (a.last_activity_at ?? '') < (b.last_activity_at ?? '') ? 1 : -1,
-  )
-  return sorted[0] ?? null
 }
 
 function leveragedPriority(snapshot: Snapshot): string | undefined {

@@ -1,10 +1,10 @@
 import { stat } from 'node:fs/promises'
 import path from 'node:path'
 import { loadConfig } from '../config.js'
-import type { Project, Snapshot } from '../types.js'
+import type { LastTouch, Project, Snapshot } from '../types.js'
 import { scanBrainstorms } from './brainstorms.js'
 import { scanCaptures } from './captures.js'
-import { lastActivityMap } from './git-activity.js'
+import { lastActivityMap, parseProjectPath } from './git-activity.js'
 import { scanProjects } from './projects.js'
 import { scanPursuits } from './pursuits.js'
 import { scanReflections } from './reflections.js'
@@ -28,6 +28,8 @@ export async function scan(
     projects.map((p) => annotateLastActivity(p, repoRoot, activityMap)),
   )
 
+  const lastTouch = computeLastTouch(activityMap)
+
   return {
     config,
     pursuits,
@@ -37,6 +39,25 @@ export async function scan(
     reflections,
     generatedAt: now.toISOString(),
     repoRoot,
+    lastTouch,
+  }
+}
+
+function computeLastTouch(
+  activityMap: Map<string, string>,
+): LastTouch | null {
+  let best: { file: string; timestamp: string } | null = null
+  for (const [file, ts] of activityMap) {
+    if (!best || ts > best.timestamp) best = { file, timestamp: ts }
+  }
+  if (!best) return null
+  const parsed = parseProjectPath(best.file)
+  if (!parsed) return null
+  return {
+    project_id: parsed.project_id,
+    pursuit_id: parsed.pursuit_id,
+    pursuit_archived: parsed.pursuit_archived,
+    timestamp: best.timestamp,
   }
 }
 

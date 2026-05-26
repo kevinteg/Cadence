@@ -309,6 +309,13 @@ export const CONFIG_DEFAULTS: Config = {
   inbox_soft_threshold: 10,
 }
 
+export type LastTouch = {
+  project_id: string
+  pursuit_id: string
+  pursuit_archived: boolean
+  timestamp: string
+}
+
 export type Snapshot = {
   config: Config
   pursuits: Pursuit[]
@@ -318,6 +325,7 @@ export type Snapshot = {
   reflections: Reflection[]
   generatedAt: string
   repoRoot: string
+  lastTouch?: LastTouch | null
 }
 
 export type Flag =

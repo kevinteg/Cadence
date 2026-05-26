@@ -208,6 +208,10 @@ function parseLog(out: string): RawCommit[] {
  * Map of project file path → most recent commit timestamp (ISO).
  * Single git invocation; returns empty map on any git failure
  * (including non-git directories, common in tests).
+ *
+ * Includes archived/dropped/someday pursuit paths so callers can
+ * compute "last touch" semantics over the full activity stream,
+ * not just over still-open pursuits.
  */
 export async function lastActivityMap(
   repoRoot: string,
@@ -233,8 +237,38 @@ export async function lastActivityMap(
     }
     const file = line.trim()
     if (!file) continue
-    if (!/^pursuits\/[^/]+\/projects\/[^/]+\.md$/.test(file)) continue
+    if (!PROJECT_PATH_RE.test(file)) continue
     if (!map.has(file)) map.set(file, currentTs)
   }
   return map
+}
+
+/**
+ * Matches a project file path under either a live pursuit
+ * (`pursuits/<id>/projects/<file>.md`) or an archived/dropped/someday
+ * one (`pursuits/_archived/<id>/projects/<file>.md`, same for
+ * `_dropped`, `_someday`). Capture groups: optional bucket, pursuit
+ * id, project id.
+ */
+const PROJECT_PATH_RE =
+  /^pursuits\/(_archived|_dropped|_someday)?\/?([^_/][^/]*)\/projects\/([^/]+)\.md$/
+
+export type ParsedProjectPath = {
+  pursuit_id: string
+  project_id: string
+  pursuit_archived: boolean
+}
+
+export function parseProjectPath(file: string): ParsedProjectPath | null {
+  const m = PROJECT_PATH_RE.exec(file)
+  if (!m) return null
+  const bucket = m[1]
+  const pursuit = m[2]
+  const project = m[3]
+  if (!pursuit || !project) return null
+  return {
+    pursuit_id: pursuit,
+    project_id: project,
+    pursuit_archived: bucket === '_archived' || bucket === '_dropped',
+  }
 }

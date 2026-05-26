@@ -11,11 +11,14 @@ import {
  * SessionStart hook). Returns the selected tip or null if the category
  * is on cool-down, no tip is eligible, or the library can't be read.
  *
- * The dashboard is the most frequent breakpoint in the system, so the
- * default `coolDownDays: 3` is intentionally generous — a tip surfaces
- * on roughly 1 in 10-15 status invocations rather than every call.
- * That preserves the "smart-colleague marginalia, not wallpaper"
- * tone target. See `docs/teaching-tips-research.md` for the rationale.
+ * The dashboard is the most frequent breakpoint in the system. The
+ * default `coolDownDays: 1` gates the *category* — once a dashboard
+ * tip fires, no other dashboard tip fires for ~24h — while the
+ * per-tip `cool_down_days` in `library.yaml` (typically 14-30 days)
+ * keeps individual tip variety high. That preserves the
+ * "smart-colleague marginalia, not wallpaper" tone target while still
+ * letting the surface refresh daily. See
+ * `docs/teaching-tips-research.md` for the rationale.
  *
  * Side effects on success: records the per-tip show + the category
  * show, both via `recordShow` / `recordCategoryShow` in tip-state.json.
@@ -24,7 +27,7 @@ import {
  */
 export function pickDashboardTip(
   repoRoot: string,
-  coolDownDays: number = 3,
+  coolDownDays: number = 1,
 ): Tip | null {
   try {
     const state = readTipState(repoRoot)
