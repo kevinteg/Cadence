@@ -578,6 +578,7 @@ cli
   .option('--two-minute-eligible', 'v2 two_minute_eligible: flag this capture as actionable in under two minutes')
   .option('--triaged-to <ref>', 'v2 triaged_to: outcome reference (e.g., action:pursuit/project/N, project:<id>, brainstorm:<slug>)')
   .option('--suggested-outcomes <json>', 'v2 suggested_outcomes: JSON array of {kind, suggested_pursuit?, suggested_project?, confidence}')
+  .option('--triage-gist <text>', 'v2 triage_gist: one-sentence narrative rendered beside the item in Inbox surfaces')
   .option('--slug <slug>', 'Override the timestamp-based filename slug (batch writers pass per-item discriminators).')
   .action(
     async (opts: {
@@ -602,6 +603,7 @@ cli
       twoMinuteEligible?: boolean
       triagedTo?: string
       suggestedOutcomes?: string
+      triageGist?: string
       slug?: string
     }) => {
       // v1 mcp pair guard
@@ -632,6 +634,7 @@ cli
             opts.twoMinuteEligible ??
             opts.triagedTo ??
             opts.suggestedOutcomes ??
+            opts.triageGist ??
             opts.prompt ??
             opts.from ??
             opts.dump,
@@ -691,6 +694,7 @@ cli
         ...(opts.triagedTo !== undefined ? { triaged_to: opts.triagedTo } : {}),
         ...(opts.prompt ? { prompt: opts.prompt } : {}),
         ...(suggested_outcomes ? { suggested_outcomes } : {}),
+        ...(opts.triageGist ? { triage_gist: opts.triageGist } : {}),
         ...(opts.slug ? { slug: opts.slug } : {}),
       })
       process.stdout.write(JSON.stringify(result) + '\n')

@@ -5,6 +5,7 @@ import type { LastTouch, Project, Snapshot } from '../types.js'
 import { scanBrainstorms } from './brainstorms.js'
 import { scanCaptures } from './captures.js'
 import { lastActivityMap, parseProjectPath } from './git-activity.js'
+import { scanLessonsWatermark } from './lessons.js'
 import { scanProjects } from './projects.js'
 import { scanPursuits } from './pursuits.js'
 import { scanReflections } from './reflections.js'
@@ -13,15 +14,23 @@ export async function scan(
   repoRoot: string,
   now: Date = new Date(),
 ): Promise<Snapshot> {
-  const [config, pursuits, projects, brainstorms, captures, reflections] =
-    await Promise.all([
-      loadConfig(repoRoot),
-      scanPursuits(repoRoot),
-      scanProjects(repoRoot),
-      scanBrainstorms(repoRoot),
-      scanCaptures(repoRoot),
-      scanReflections(repoRoot),
-    ])
+  const [
+    config,
+    pursuits,
+    projects,
+    brainstorms,
+    captures,
+    reflections,
+    lessonsWatermark,
+  ] = await Promise.all([
+    loadConfig(repoRoot),
+    scanPursuits(repoRoot),
+    scanProjects(repoRoot),
+    scanBrainstorms(repoRoot),
+    scanCaptures(repoRoot),
+    scanReflections(repoRoot),
+    scanLessonsWatermark(repoRoot),
+  ])
 
   const activityMap = await lastActivityMap(repoRoot)
   await Promise.all(
@@ -40,6 +49,7 @@ export async function scan(
     generatedAt: now.toISOString(),
     repoRoot,
     lastTouch,
+    lessons_watermark: lessonsWatermark,
   }
 }
 

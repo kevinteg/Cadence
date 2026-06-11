@@ -20,8 +20,74 @@ export function report(snapshot: Snapshot): { snapshot: Snapshot; flags: Flag[] 
   flagWipOverLimit(flags, activeProjects, config)
   flagClosingInOnResolution(flags, snapshot, activePursuitIds)
   flagInboxPressure(flags, snapshot, now, config)
+  flagCapstoneGap(flags, snapshot)
+  flagRetrospectiveDue(flags, snapshot, config)
 
   return { snapshot, flags }
+}
+
+/**
+ * A resolved unit still carries an uncrystallized research substrate:
+ * the index status is `researching` (the GC ritual never ran, or the
+ * user chose Keep) and the unit has no `narrative:` capstone pointer.
+ * Substrates marked `cleared` / `archived-raw` don't fire — the user
+ * already made the disposition call at close-out.
+ */
+function flagCapstoneGap(flags: Flag[], snapshot: Snapshot): void {
+  for (const project of snapshot.projects) {
+    if (project.status !== 'done' && project.status !== 'dropped') continue
+    if (!project.research || project.research.status !== 'researching') continue
+    if (project.narrative) continue
+    flags.push({
+      kind: 'capstone_gap',
+      unitId: `${project.pursuit}/${project.id}`,
+      pursuitId: project.pursuit,
+      projectId: project.id,
+      sources: project.research.sources,
+    })
+  }
+  for (const pursuit of snapshot.pursuits) {
+    if (pursuit.lifecycle !== 'archived' && pursuit.lifecycle !== 'dropped')
+      continue
+    if (!pursuit.research || pursuit.research.status !== 'researching') continue
+    if (pursuit.narrative) continue
+    flags.push({
+      kind: 'capstone_gap',
+      unitId: pursuit.id,
+      pursuitId: pursuit.id,
+      sources: pursuit.research.sources,
+    })
+  }
+}
+
+/**
+ * N pursuits have resolved since the last lessons retrospective. Reads
+ * the set-watermark of the latest lessons narrative (scanned into
+ * snapshot.lessons_watermark); resolved pursuits not yet consulted
+ * count toward the threshold. The meta-project nudge — "want to
+ * synthesize the arc?" — surfaces via /reflect Get Clear and the
+ * SessionStart heads-up.
+ */
+function flagRetrospectiveDue(
+  flags: Flag[],
+  snapshot: Snapshot,
+  config: { retrospective_due_threshold: number },
+): void {
+  const consulted = new Set(
+    snapshot.lessons_watermark?.pursuits_consulted ?? [],
+  )
+  const newSince = snapshot.pursuits.filter(
+    (p) =>
+      (p.lifecycle === 'archived' || p.lifecycle === 'dropped') &&
+      !consulted.has(p.id),
+  )
+  if (newSince.length < config.retrospective_due_threshold) return
+  flags.push({
+    kind: 'retrospective_due',
+    newSinceLast: newSince.length,
+    threshold: config.retrospective_due_threshold,
+    pursuitIds: newSince.map((p) => p.id),
+  })
 }
 
 /**

@@ -55,11 +55,13 @@ overview; the skill is the prompt source-of-truth.
    - **Dormant projects** (flags with `kind: dormant_project`)
    - **Closing-in pursuits** (flags with `kind: closing_in_on_resolution`)
    - **WIP** (active projects with ≥1 unchecked action) vs `max_active_projects`
+   - **Capstone gaps** (flags with `kind: capstone_gap`) and **Retrospective** (the `retrospective_due` flag's `newSinceLast`) — the wiki signals; rendered on a second line only when non-zero
 
 2. **Render the canonical awareness block** from `cadence-plugin/workflows/coaching-strings.md`:
 
    ```
    Inbox: <N> items (oldest <D>d)  ·  Dormant: <M> projects  ·  Closing-in: <K> pursuits  ·  WIP: <X>/<max>
+   Capstone gaps: <G> resolved units with uncrystallized research  ·  Retrospective: <R> pursuits since the last lessons run
 
    Want to handle these now, or note them in the reflection and move on?
      - 'handle' — hand off to /cadence:start inbox (or /resolve <project>); reflection persists at status: in_progress, phase: get_clear

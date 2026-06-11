@@ -1887,6 +1887,27 @@ tips:
     tone: directive
     frequency: { cool_down_days: 7, lifetime_max: 10 }
 
+  - id: research-verb-discovery-on-research-signal
+    type: skill-teaching
+    content: |
+      `/cadence:research <source>` files an article, doc, or page into
+      the current project's research substrate — raw copy plus a
+      distilled note, kept next to the work. `/research ask` and
+      `/research primer` query what accumulates.
+    triggers: [intent-research-signal]
+    tone: directive
+    frequency: { cool_down_days: 7, lifetime_max: 10 }
+
+  - id: wiki-verb-discovery-on-lookup-signal
+    type: skill-teaching
+    content: |
+      `/cadence:wiki ask "<question>"` answers from your durable
+      corpus — capstones and primers — index-first, with citations.
+      Months-later re-entry is the whole point.
+    triggers: [intent-wiki-signal]
+    tone: directive
+    frequency: { cool_down_days: 7, lifetime_max: 10 }
+
   # ============================================================
   # Verb-hint next-step suggestions
   # ============================================================
@@ -1945,7 +1966,7 @@ tips:
     type: verb-hint
     content: |
       Pursuit archived. The closure narrative is in
-      `narratives/drafts/`. Open it before the file fades from
+      `wiki/drafts/`. Open it before the file fades from
       attention — it's the meaning-making artifact.
     triggers: [verb-close]
     tone: directive

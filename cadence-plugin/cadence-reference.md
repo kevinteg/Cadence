@@ -33,7 +33,7 @@ contract.
 | Verb | Purpose |
 |---|---|
 | `reflect` | Weekly ritual: Get Clear, then Get Focused. See the whole picture. Set one Leveraged Priority. |
-| `narrate` | Generate the story (today, week, or pursuit-arc) from activity data. Make meaning visible. |
+| `narrate` | Generate the story (today, week, pursuit-arc, or capstone) from activity data. Make meaning visible. `capstone <unit>` is the graduation path: dual-source (activity + research substrate), style-aware, promotes to `wiki/narratives/`. |
 
 ### Setup — one-off
 
@@ -161,10 +161,20 @@ markdown content. The key formats are:
       confidence: 0.85
     - kind: note
       confidence: 0.30
+  triage_gist: "A pattern for keeping bulk JSON out of the main thread."   # optional — one-sentence narrative; Inbox surfaces render it beside the name
   ---
 
   <body>
   ```
+
+  **Triage gist.** Distillation paths (which already run the
+  capture-ingest subagent) stamp a one-sentence `triage_gist` at zero
+  added cost on the hot path; inline `/capture` stays bare — flow
+  safety beats everything. `inboxItems()` exposes the gist on each
+  item; every surface that lists Inbox items renders it beside the
+  name, falling back gracefully when absent. An inline capture
+  opened during a triage walk gets its gist generated then
+  (gist-on-open in `/start inbox`).
 
   **Suggested-outcomes shape.** Each item carries a `kind` (the
   outcome shape the subagent thinks fits) plus optional
@@ -188,7 +198,9 @@ markdown content. The key formats are:
   `_raw/` directory is created lazily on first distilled write.
 - **Reflection** (`<YYYY-MM-DD>.md`): frontmatter with date, status, phase,
   leveraged_priority; sections for Get Clear and Get Focused
-- **Narrative** (in `narratives/drafts/`): per-cadence filename + body
+- **Narrative** (in `wiki/drafts/`; legacy repos may hold older files
+  in `narratives/drafts/` — readers check both, writers use
+  `wiki/drafts/` only): per-cadence filename + body
   shape. **Commit-watermark cadences** (`daily-YYYY-MM-DD.md`,
   `weekly-YYYY-WNN.md`, `monthly-YYYY-MM.md`, `annual-YYYY.md`,
   `pursuit-<id>-YYYY-MM-DD.md`) carry frontmatter with `cadence`,
@@ -198,7 +210,7 @@ markdown content. The key formats are:
   resumes from its `consumed_through_commit`.
 - **Resolution narratives** (per-pursuit closure or drop): saved as
   `<pursuit-id>-closure.md` (archived/completed) or
-  `<pursuit-id>-drop.md` (dropped). Same `narratives/drafts/` directory.
+  `<pursuit-id>-drop.md` (dropped). Same `wiki/drafts/` directory.
   The filename suffix lets `/cadence:narrate lessons` distinguish "what
   shipped" from "what got learned without shipping" when synthesizing
   patterns across pursuits.
@@ -736,6 +748,311 @@ register the server first.
 | `cadence:capture --source <name>` | Repeatable MCP-driven pull (corporate search, Jira inbox, etc.) |
 | `cadence:capture --dump` | Long-form brain dump in `$EDITOR` |
 | `/cadence:mcp-pull --server <name>` | **Bulk many resources from one server** — the dedicated batch path; `--source` is the single-query shorthand for the same plumbing |
+
+## Research Substrate
+
+Working-tier research that accumulates *under* the unit of work — a
+pursuit or a project. Captures park stray thoughts in the Inbox; the
+research substrate is different: it holds **sources you deliberately
+studied for a unit of work**, kept next to that work. Managed by the
+`/cadence:research` skill (hidden verb) and the `research-ingest`
+subagent. The substrate is the working tier of the narrative/wiki
+system: polished artifacts (primers, capstone narratives) graduate
+out of it at closure; the substrate's `raw/` tier is GC-eligible once
+that graduation has happened. GC runs as `/resolve`'s
+research-disposition step — prompted, never silent. Once a capstone
+exists, **Delete `raw/` is the default** (git history retains;
+distilled notes and citation stubs survive); Archive
+(`wiki/_archive/<unit>/raw/`) and Keep are always on the menu. Only
+`raw/` ever clears — `notes/`, `index.md`, and `log.md` are durable.
+
+### Directory layout
+
+```
+pursuits/<pursuit>/research/                       ← pursuit-scoped substrate
+pursuits/<pursuit>/projects/<project>/research/    ← project-scoped substrate
+    raw/<id>.raw.md     immutable captured sources (never edited after write)
+    notes/<id>.md       LLM-distilled atomic notes (literature notes)
+    index.md            the research template: catalog + primer + open questions
+    log.md              append-only ingest/query/primer log
+```
+
+A project-scoped substrate lives in a directory **named after the
+project file, sibling to it**: `projects/<project>/research/` next to
+`projects/<project>.md`. Both scopes are created lazily on first
+ingest — no empty `research/` directories.
+
+Scope default: research attaches to the **project** most recently in
+scope (same targeting rule as `/complete`); `--pursuit` escalates to
+the pursuit-level substrate (cross-project material). When no unit is
+in scope, the skill asks rather than guessing.
+
+### `index.md` — the research template
+
+Scaffolded by the skill on first ingest; both the human front door and
+the agent's catalog. Query paths read this file FIRST and drill into
+notes from it — structure beats embeddings for discoverability at
+personal scale.
+
+```markdown
+---
+unit: <pursuit-id>/<project-id>     # or just <pursuit-id> for pursuit scope
+created: <YYYY-MM-DD>
+status: researching
+sources: 0                           # bumped on every ingest
+---
+
+# Research: <unit name>
+
+## Primer
+<!-- generated by /research primer once enough sources accumulate -->
+
+## Suggested learning
+<!-- curated reading order + why each source matters -->
+
+## Sources
+<!-- one line per source, appended by the skill after each ingest -->
+
+## Open questions
+<!-- what we still need to find — the backfill targets -->
+```
+
+The index `status:` field tracks the substrate lifecycle:
+`researching` (set at scaffold) → `cleared` (raw/ deleted by the GC
+ritual) or `archived-raw` (raw/ relocated to `wiki/_archive/`). The
+GC step writes the transition; nothing else touches it.
+
+Sources lines follow one shape so they stay greppable and parseable:
+
+```markdown
+- `<id>` — <one-line summary> → [note](notes/<id>.md) · [raw](raw/<id>.raw.md)
+```
+
+### `notes/<id>.md` — atomic note
+
+One note per ingested source. Provenance lives in frontmatter; the
+body is the distillation (free-form literature note); cross-links live
+in a `## Related` section as `[[wikilink]]` lines (Obsidian-native).
+
+```markdown
+---
+id: <id>
+unit: <pursuit-id>/<project-id>
+ingested: <ISO-8601 timestamp>
+source:
+  kind: file | url | mcp
+  name: <basename, source name, or title>
+  uri: <path or URL>
+  content_hash: sha256:<hex of raw body>
+raw_path: <unit-path>/research/raw/<id>.raw.md
+prompt: "<distillation guidance, when one was given>"
+tags: [<topic>, ...]
+---
+
+# <Source title>
+
+<distilled atomic note>
+
+## Related
+- [[<other-note-id>]] — <why related>
+```
+
+Cross-links are **bidirectional by convention**: the subagent writes
+the new note's `## Related` lines; the parent skill appends the
+back-link (`- [[<new-id>]] — <why>`) to each referenced note's
+`## Related` section. The index stays the catalog; the Related
+sections are the graph.
+
+### `log.md` — append-only event log
+
+```markdown
+# Research log: <unit>
+
+## [YYYY-MM-DD] ingest | <source title>
+<id> from <uri> — <one-line summary>
+
+## [YYYY-MM-DD] query | <question>
+consulted: <note ids> — <one-line answer gist>
+
+## [YYYY-MM-DD] primer | regenerated
+from <N> notes
+```
+
+Never edited, only appended. The log is the substrate's activity
+trail — cheap to write, useful at capstone time.
+
+### ID convention and dedup
+
+`<id>` is a kebab-case slug derived from the source title or file
+basename (e.g. `rocev2-pfc-deadlocks`) — human-readable because note
+ids double as `[[wikilink]]` targets. On collision, append `-2`,
+`-3`, …. The ingest timestamp lives in note frontmatter, not the id.
+
+Dedup is index-driven: the subagent reads `index.md` before fetching;
+if the source uri (or content hash) already appears in Sources, it
+returns `skipped_existing` instead of writing a duplicate. Same
+source into a *different* unit's substrate is NOT a duplicate — units
+own their substrates independently.
+
+### Division of labor
+
+| Step | Owner |
+|---|---|
+| Resolve unit + scaffold template on first ingest | `/research` skill (main thread) |
+| Fetch source, write `raw/`, write `notes/`, suggest cross-links | `research-ingest` subagent (bulk payload stays in its context) |
+| Append Sources line, bump `sources:`, merge Open questions, append log entry, write back-links | `/research` skill (main thread) |
+| Primer synthesis (reads all notes) | `research-ingest` subagent, primer mode |
+| `ask` over small substrates (≤10 sources) | main thread, index-first |
+| `ask` over large substrates | `research-ingest` subagent, ask mode |
+
+The subagent isolation is load-bearing for the same reason it is in
+capture ingestion: raw payloads (a 20-page PDF, a long article) never
+enter the main conversation; only distilled notes and structured
+summaries return.
+
+## Wiki — Durable Narrative Layer
+
+The root-level `wiki/` directory is the durable, curated corpus of
+finished artifacts — the layer that **outlives** the working files
+that produced it. Where the research substrate is the working tier
+(unit-scoped, GC-eligible), the wiki is the graduated tier:
+cross-cutting, never GC'd, readable as a plain Obsidian vault.
+
+```
+wiki/
+    index.md            curated front door (see "Wiki front door" below)
+    log.md              wiki-level event log
+    narratives/         capstone narratives — promoted by /narrate capstone
+    primers/            evergreen primers graduated from research substrates
+    _style/             house voice + user style overrides (seeded from plugin defaults)
+    _meta/              retrospectives + cross-pursuit synthesis (never GC'd)
+    drafts/             working-tier narratives (the old wiki/drafts/ home)
+```
+
+All directories are created lazily. The first `/narrate capstone` run
+seeds `wiki/_style/` and `wiki/narratives/`; nothing else appears
+until a verb needs it.
+
+### The pointer seam — reference, not containment
+
+Projects and pursuits never *own* polished content; they point at it.
+After a capstone promotes, the unit's file carries exactly one
+frontmatter line:
+
+```yaml
+narrative: wiki/narratives/<unit-id>.md
+```
+
+…and the capstone carries back-references to the sources it drew from
+(as citation stubs — see below). The unit file stays clean; the wiki
+stays browsable; provenance survives the deletion of the research
+substrate's `raw/`.
+
+### Capstone artifact (`wiki/narratives/<unit-id>.md`)
+
+Generated by `/narrate capstone <unit>` (narrator subagent, budget 8,
+dual-source: project-file git activity + the unit's research
+substrate). Frontmatter is the queryable layer — formal YAML
+properties so Obsidian Bases/Dataview can build live tables:
+
+```yaml
+---
+type: capstone
+cadence: capstone
+unit: <pursuit-id>[/<project-id>]
+pursuit: <pursuit-id>
+title: <human title>
+created: <YYYY-MM-DD>
+generated_at: <ISO timestamp>
+status: published
+sources: <N>                 # research sources consulted; 0 when no substrate
+tags: []
+consumed_from_commit: <hash>      # standard narrate watermark fields
+consumed_through_commit: <hash>
+projects_consulted: [...]
+---
+```
+
+Body shape per `wiki/_style/capstone.md`: orientation, McAdams arc as
+prose, optional "How it works" (Mermaid-only diagrams, gated on
+`effective_domain: digital | hybrid`), and a Sources section of
+**citation stubs**:
+
+```markdown
+- <title> — <url-or-origin> (captured <YYYY-MM-DD>) · [[<note-id>]]
+```
+
+The stub text (title + uri + date) is self-sufficient by design — the
+trailing `[[<note-id>]]` wikilink works while the distilled note
+exists and degrades to plain text after GC clears the substrate.
+Provenance never depends on the working tier surviving.
+
+### Wiki front door (`wiki/index.md`)
+
+The catalog the agent reads first and the page a human opens first in
+Obsidian — one artifact serving both. Maintained incrementally (each
+promotion/graduation appends its line) and rebuilt from frontmatter by
+`/wiki` when stale. Curated, linked, one line per artifact:
+
+```markdown
+---
+updated: <YYYY-MM-DD>
+artifacts: <N>
+---
+
+# Wiki
+
+## Narratives
+- [[<unit-id>]] — <title> · <pursuit> · <created> — <one-line summary>
+
+## Primers
+- [[<unit-id>-primer]] — <title> · <created> — <one-line summary>   (draft)
+
+## Threads
+<!-- optional hand-curated cross-links: recurring topics across artifacts -->
+```
+
+`(draft)` marks `status: draft` primers filed from `/wiki ask`'s
+compounding path; the marker clears when the user promotes the
+artifact to `status: published` during curation.
+
+### Meta-index (`wiki/_meta/index.md`)
+
+The retrospective spine — the long arc across pursuits. Holds the
+catalog of which pursuits produced which capstones, which primers
+exist, what threads recur; `/narrate lessons` retrospectives and
+cross-pursuit syntheses land here as they graduate. Never GC'd.
+
+```markdown
+# Meta — the long arc
+
+## Retrospectives
+- [[lessons-<YYYY-MM-DD>]] — <pursuits consulted> — <one-line>
+
+## Capstones by pursuit
+| Pursuit | Capstone | Resolved |
+|---|---|---|
+
+## Recurring threads
+<!-- what keeps showing up across pursuits -->
+```
+
+### Wiki event log (`wiki/log.md`)
+
+Append-only, same H2 shape as research logs:
+`## [YYYY-MM-DD] <op> | <subject>` where `<op>` is
+`promote` (capstone landed), `graduate` (primer landed), `ask`,
+`file-back` (compounding write), or `lint` (health scan).
+
+### Style files (`wiki/_style/`)
+
+Four files seeded from the plugin's `styles/` directory on first
+capstone run: `voice.md` (house voice + hard guardrails), `capstone.md`
+(capstone structure), `primer.md` (primer structure), `diagrams.md`
+(Mermaid conventions). **User edits win** — wiki skills read the repo
+copies before generating, and the plugin never overwrites an existing
+file. Voice lives in version-controlled markdown, not in code —
+same externalization pattern as the tip library and coaching strings.
 
 ## Ambient Surfaces — Inbox, SessionStart, Stop hook
 

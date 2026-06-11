@@ -146,12 +146,18 @@ The canonical block:
 
 ```
 "Inbox: <N> items  ·  Dormant: <M> projects  ·  Closing-in: <K> pursuits  ·  WIP: <X>/<max>
+Capstone gaps: <G> resolved units with uncrystallized research  ·  Retrospective: <R> pursuits since the last lessons run
 
 Want to handle these now, or note them in the reflection and move on?
   - 'handle' — hand off to /cadence:start inbox (or /resolve <project>); reflection persists at status: in_progress, phase: get_clear
   - 'note' — append the awareness counts to the reflection body and proceed to Get Focused
   - 'pause' — exit; reflection stays in_progress for next time"
 ```
+
+The second line carries the wiki signals (`capstone_gap` count and
+`retrospective_due` `newSinceLast`); it renders only when G or R is
+non-zero — both zero → omit the line, keeping the block at its
+2-3 line contract.
 
 When all counts are zero: "Inbox empty, no dormant, no closing-in,
 WIP healthy. Going straight to Get Focused."

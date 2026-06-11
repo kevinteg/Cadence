@@ -317,3 +317,81 @@ test('closing_in_on_resolution does NOT fire when all projects are resolved', ()
   )
 })
 
+test('capstone_gap fires for resolved units with uncrystallized research, not for cleared or capstoned ones', () => {
+  const snapshot = makeSnapshot({
+    pursuits: [
+      makePursuit(),
+      makePursuit({
+        id: 'old-pursuit',
+        lifecycle: 'archived',
+        status: 'archived',
+        research: { sources: 4, status: 'researching' },
+        path: 'pursuits/_archived/old-pursuit/pursuit.md',
+      }),
+    ],
+    projects: [
+      // Fires: done + researching substrate + no narrative pointer.
+      makeProject({
+        id: 'gap',
+        status: 'done',
+        research: { sources: 6, status: 'researching' },
+      }),
+      // Silent: GC ritual already cleared raw/.
+      makeProject({
+        id: 'cleared',
+        status: 'done',
+        research: { sources: 3, status: 'cleared' },
+      }),
+      // Silent: capstone pointer exists.
+      makeProject({
+        id: 'capstoned',
+        status: 'done',
+        research: { sources: 5, status: 'researching' },
+        narrative: 'wiki/narratives/capstoned.md',
+      }),
+      // Silent: still open.
+      makeProject({
+        id: 'open',
+        status: 'active',
+        research: { sources: 2, status: 'researching' },
+      }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  const gaps = flags.filter((f) => f.kind === 'capstone_gap')
+  assert.equal(gaps.length, 2)
+  assert.deepEqual(
+    gaps.map((g) => (g.kind === 'capstone_gap' ? g.unitId : '')).sort(),
+    ['old-pursuit', 'p/gap'],
+  )
+})
+
+test('retrospective_due fires at threshold and respects the lessons set-watermark', () => {
+  const resolved = ['a', 'b', 'c'].map((id) =>
+    makePursuit({
+      id,
+      lifecycle: 'archived',
+      status: 'archived',
+      path: `pursuits/_archived/${id}/pursuit.md`,
+    }),
+  )
+  // Three resolved, no watermark → fires at the default threshold (3).
+  const due = report(makeSnapshot({ pursuits: resolved })).flags.filter(
+    (f) => f.kind === 'retrospective_due',
+  )
+  assert.equal(due.length, 1)
+  assert.equal(due[0]?.kind === 'retrospective_due' && due[0].newSinceLast, 3)
+
+  // Same three already consulted by the last lessons run → silent.
+  const quiet = report(
+    makeSnapshot({
+      pursuits: resolved,
+      lessons_watermark: {
+        path: 'wiki/drafts/lessons-2026-04-01.md',
+        pursuits_consulted: ['a', 'b', 'c'],
+      },
+    }),
+  ).flags.filter((f) => f.kind === 'retrospective_due')
+  assert.equal(quiet.length, 0)
+})
+

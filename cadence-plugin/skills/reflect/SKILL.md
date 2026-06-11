@@ -104,12 +104,17 @@ payload; it does not walk items individually.
       - **WIP**: count of `snapshot.projects` filtered to `status: active`
         with at least one unchecked action; the limit is
         `snapshot.config.max_active_projects`.
+      - **Capstone gaps**: count of flags with `kind: capstone_gap`
+        (resolved units whose research never crystallized).
+      - **Retrospective**: the `retrospective_due` flag's
+        `newSinceLast`, when present.
 
    b. Render the canonical awareness block from
       `workflows/coaching-strings.md`:
 
       ```
       Inbox: <N> items (oldest <D>d)  ·  Dormant: <M> projects  ·  Closing-in: <K> pursuits  ·  WIP: <X>/<max>
+      Capstone gaps: <G> resolved units with uncrystallized research  ·  Retrospective: <R> pursuits since the last lessons run
 
       Want to handle these now, or note them in the reflection and move on?
         - 'handle' — hand off to /cadence:start inbox (or /resolve <project>); reflection persists at status: in_progress, phase: get_clear
@@ -128,6 +133,8 @@ payload; it does not walk items individually.
           and let them decide; they can `/cadence:resolve` from there
         - Dormant projects → forward to `/cadence:reconcile` for the
           full flag walk
+        - Capstone gap → suggest `/cadence:narrate capstone <unit>`
+        - Retrospective due → suggest `/cadence:narrate lessons`
         Before handing off, persist the reflection at `get_clear`:
         ```bash
         cadence write-reflection \

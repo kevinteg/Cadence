@@ -116,6 +116,9 @@ frontmatter) still use Edit.
 
      - audit: does the implementation match the Intent?
      - narrative: capture the arc (run /cadence:narrate <pursuit>)
+     - capstone: crystallize the research into a durable narrative
+       (run /cadence:narrate capstone <pursuit>) — especially when a
+       research substrate exists with no capstone yet
      - demo: prepare to show others
      - validation review: clear the pending-validations queue
        (cadence pending-validation-list)

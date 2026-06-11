@@ -45,13 +45,24 @@ export const PursuitFrontmatterSchema = z.object({
   target: z.string().optional(),
   win_cycle: z.string().optional(),
   cue: PursuitCueSchema.optional(),
+  /** Pointer to the promoted capstone at wiki/narratives/<id>.md — reference, not containment. */
+  narrative: z.string().optional(),
 })
 export type PursuitFrontmatter = z.infer<typeof PursuitFrontmatterSchema>
+
+/**
+ * Lifecycle ref of a unit's research substrate, read from
+ * `<unit>/research/index.md` frontmatter. `status` is
+ * `researching` until the GC ritual transitions it to `cleared`
+ * (raw/ deleted) or `archived-raw` (raw/ relocated).
+ */
+export type ResearchRef = { sources: number; status: string }
 
 export type Pursuit = PursuitFrontmatter & {
   lifecycle: z.infer<typeof PursuitLifecycleSchema>
   description: string
   path: string
+  research?: ResearchRef
 }
 
 export const ProjectStatusSchema = z.enum([
@@ -101,6 +112,8 @@ export const ProjectFrontmatterSchema = z.object({
    */
   domain: DomainSchema.optional(),
   origin: OriginSchema.optional(),
+  /** Pointer to the promoted capstone at wiki/narratives/<id>.md — reference, not containment. */
+  narrative: z.string().optional(),
 })
 export type ProjectFrontmatter = z.infer<typeof ProjectFrontmatterSchema>
 
@@ -125,6 +138,7 @@ export type Project = ProjectFrontmatter & {
   detected_domain: 'physical' | 'digital' | 'hybrid' | 'unknown'
   /** Override (`domain` frontmatter) if set, else `detected_domain`. */
   effective_domain: 'physical' | 'digital' | 'hybrid' | 'unknown'
+  research?: ResearchRef
 }
 
 export const BrainstormPhaseSchema = z.enum([
@@ -226,6 +240,14 @@ export const CaptureFrontmatterSchema = z.object({
   triaged_to: z.string().nullable().optional(),
   prompt: z.string().optional(),
   suggested_outcomes: z.array(CaptureSuggestedOutcomeSchema).optional(),
+  /**
+   * One-sentence narrative readable at triage time — set by the
+   * capture-ingest subagent on distillation paths (zero cost on the
+   * inline hot path, which stays bare). Inbox surfaces render it
+   * beside the item name; absent on inline captures unless generated
+   * later during a triage walk (gist-on-open).
+   */
+  triage_gist: z.string().optional(),
 })
 export type CaptureFrontmatter = z.infer<typeof CaptureFrontmatterSchema>
 
@@ -265,6 +287,7 @@ export const ConfigSchema = z.object({
       incoming_queue_threshold: z.number().optional(),
       incoming_queue_cache_ttl_minutes: z.number().optional(),
       inbox_soft_threshold: z.number().optional(),
+      retrospective_due_threshold: z.number().optional(),
     })
     .optional(),
   wip_limits: z
@@ -291,6 +314,7 @@ export type Config = {
   incoming_queue_threshold: number
   incoming_queue_cache_ttl_minutes: number
   inbox_soft_threshold: number
+  retrospective_due_threshold: number
   win_cycle_current?: string
   win_cycle_start?: string
   win_cycle_end?: string
@@ -307,6 +331,7 @@ export const CONFIG_DEFAULTS: Config = {
   incoming_queue_threshold: 5,
   incoming_queue_cache_ttl_minutes: 15,
   inbox_soft_threshold: 10,
+  retrospective_due_threshold: 3,
 }
 
 export type LastTouch = {
@@ -314,6 +339,16 @@ export type LastTouch = {
   pursuit_id: string
   pursuit_archived: boolean
   timestamp: string
+}
+
+/**
+ * Set-watermark of the most recent `/narrate lessons` run — which
+ * resolved pursuits the last retrospective consulted. Drives the
+ * reconciler's `retrospective_due` nudge.
+ */
+export type LessonsWatermark = {
+  path: string
+  pursuits_consulted: string[]
 }
 
 export type Snapshot = {
@@ -326,6 +361,7 @@ export type Snapshot = {
   generatedAt: string
   repoRoot: string
   lastTouch?: LastTouch | null
+  lessons_watermark?: LessonsWatermark | null
 }
 
 export type Flag =
@@ -386,6 +422,28 @@ export type Flag =
       fresh: number
       aged: number
       overdue: number
+    }
+  | {
+      // A resolved unit (done/dropped project, or archived/dropped
+      // pursuit) still carries an uncrystallized research substrate:
+      // index status is `researching` and the unit has no `narrative:`
+      // pointer. Nudges toward `/cadence:narrate capstone <unit>`.
+      // Substrates the GC ritual already cleared or archived don't
+      // fire — the user decided at close-out.
+      kind: 'capstone_gap'
+      unitId: string // "<pursuit>" or "<pursuit>/<project>"
+      pursuitId: string
+      projectId?: string
+      sources: number
+    }
+  | {
+      // N pursuits have resolved since the last lessons retrospective
+      // (the set-watermark /narrate lessons writes). The meta-project
+      // nudge: "want to synthesize the arc?"
+      kind: 'retrospective_due'
+      newSinceLast: number
+      threshold: number
+      pursuitIds: string[]
     }
 
 export type Report = {

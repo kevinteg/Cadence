@@ -1,5 +1,5 @@
 ---
-description: Search projects, brainstorms, captures, and pursuits by case-insensitive substring. TRIGGER on explicit /cadence:find invocation, OR when the user asks to find a Cadence entity by partial text by name (e.g., "find anything mentioning plugin", "where did I write about X"). SKIP for general code-search or filesystem-search requests that aren't about Cadence entities.
+description: Search projects, brainstorms, captures, pursuits, and the wiki corpus by case-insensitive substring. TRIGGER on explicit /cadence:find invocation, OR when the user asks to find a Cadence entity by partial text by name (e.g., "find anything mentioning plugin", "where did I write about X"). SKIP for general code-search or filesystem-search requests that aren't about Cadence entities.
 ---
 
 # /find
@@ -24,12 +24,24 @@ by entity kind with snippets and per-group verb hints.
    returns results grouped by kind with one snippet per result and a
    per-group verb hint line.
 
-2. **Present output verbatim.** Each group ends with a `Verbs:` line
+2. **Extend across the wiki corpus.** When `wiki/` exists, grep it
+   (`grep -ril "<query>" wiki/ --include="*.md"`, excluding `_style/`).
+   For each hit, pull the artifact's `title:` (or H1) plus one
+   matching line as the snippet. Render as an additional **Wiki**
+   group after the CLI groups:
+   ```
+   Wiki (<N>)
+     <slug> — <snippet>
+   Verbs: /cadence:wiki <slug> · /cadence:wiki related <slug>
+   ```
+   Skip the group silently when `wiki/` is absent or has no hits.
+
+3. **Present output verbatim.** Each group ends with a `Verbs:` line
    listing the applicable verbs for that entity kind (e.g.,
    `/cadence:start <id>` for Projects). The user can pick a result
    and invoke the verb directly.
 
-3. **No drill-in agency.** This skill returns search results; it does
+4. **No drill-in agency.** This skill returns search results; it does
    not auto-drill or auto-act on a result. The user follows the
    inline verb hints.
 

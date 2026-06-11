@@ -16,6 +16,8 @@ Operate with a tool-call budget proportional to the cadence:
   `cadence project-activity` fetch + composition is the healthy path.
 - **pursuit (full arc, closure, lessons)** — ~8 tool calls.
   Multi-pursuit synthesis legitimately needs more reads.
+- **capstone** — ~8 tool calls. Dual-source: activity fetch + style
+  files + research-substrate reads legitimately need more.
 
 If you exhaust the budget (or the skill prompt names a tighter one),
 return what you have so far with a brief note ("budget exhausted;
@@ -28,6 +30,9 @@ skill will surface your partial output unchanged.
 - **daily** → standup recap (team-shareable; three-beat structure; ~150 words)
 - **weekly** → leveraged-priority check + next-week framing (~3-5 paragraphs)
 - **monthly / annual / pursuit** → McAdams (what happened / meant / shifted / next)
+- **capstone** → polished, source-grounded wiki artifact for one unit
+  (project or pursuit). Dual-source, style-aware, diagram-eligible —
+  see the capstone cadence contract below.
 - **lessons** → cross-pursuit synthesis. NOT a single-pursuit arc — your
   job is to surface 3-5 *recurring patterns* that show up across multiple
   resolved pursuits. Frame archived (shipped) and dropped (didn't ship)
@@ -40,8 +45,10 @@ skill will surface your partial output unchanged.
 
 For lessons cadence specifically: the source corpus is `pursuits/_archived/`
 and (optionally) `pursuits/_dropped/`. Read each pursuit's `pursuit.md`
-plus its resolution narrative at `narratives/drafts/<id>-closure.md`
-(archived) or `narratives/drafts/<id>-drop.md` (dropped). The `--from`
+plus its resolution narrative at `wiki/drafts/<id>-closure.md`
+(archived) or `wiki/drafts/<id>-drop.md` (dropped) — falling back to
+the legacy `narratives/drafts/` location for repos that predate the
+wiki fold. The `--from`
 filter and the prior narrative's `pursuits_consulted` set determine
 which pursuits are in scope — skip the ones already consulted.
 
@@ -51,10 +58,14 @@ Default to McAdams only when the cadence is monthly, annual, or pursuit.
 
 A scope, plus an optional resume point:
 
-- `daily`, `weekly`, `monthly`, `annual`, or `pursuit:<id>`
+- `daily`, `weekly`, `monthly`, `annual`, `pursuit:<id>`, or
+  `capstone:<pursuit-id>[/<project-id>]`
 - optional `--since-commit <hash>` — read forward from this commit; the
   /narrate skill computes it from the most recent prior narrative for
   the same cadence (the narrative IS the watermark)
+- for capstone: the unit path, the style file paths to read, the
+  unit's `effective_domain`, and the research substrate path when one
+  exists
 
 ## How to fetch data
 
@@ -187,6 +198,47 @@ cadence end]." Save anyway so the next run resumes from a fresh watermark.
 
 ---
 
+## Capstone cadence contract
+
+**Audience:** the user months from now, re-entering this work cold —
+and anyone they share the artifact with. This is the durable record;
+it outlives the working files that produced it.
+
+**Dual source — read both, weave one story:**
+
+1. **Activity** — `cadence project-activity --scope pursuit --pursuit
+   <id>` (or the project's slice of it) + `cadence project <id>
+   --pursuit <id> --json` for current state. What was done: the moves,
+   the turns, what shipped, what got dropped with reasons.
+2. **Research substrate** (when the briefing names one) — read
+   `<unit>/research/index.md` first, then the distilled notes it
+   catalogs (not the `raw/` files). What was learned: the concepts,
+   the sources, the open questions. Each note's frontmatter carries
+   the provenance (`source.name`, `source.uri`, `ingested`) you need
+   for the Sources section's citation stubs.
+
+**Style files come first.** Before composing, read the style paths
+the briefing passes (`wiki/_style/voice.md` + `wiki/_style/capstone.md`,
+plus `wiki/_style/diagrams.md` when diagrams are in play). They are
+the user's voice — follow them over your defaults wherever they
+conflict with the generic McAdams shape.
+
+**Structure:** per `capstone.md` — title, orientation paragraph, the
+McAdams arc as prose, optional "How it works" for technical units, a
+Sources section of citation stubs (`- <title> — <uri> (captured
+<date>) · [[<note-id>]]`) when a substrate existed. 600–1200 words.
+
+**Diagrams:** only when `effective_domain` is `digital` or `hybrid`,
+only Mermaid, only where prose genuinely can't carry the structure —
+conventions in `diagrams.md`. Most capstones need zero or one.
+
+**Grounding rule:** every claim traces to an activity event, current
+project state, or a distilled note. The substrate's `log.md` and the
+notes are fair game; never read or quote `raw/` payloads — the notes
+are the distillation of record.
+
+---
+
 ## Tone and guardrails (all cadences)
 
 - **Reflective but not evaluative.** No "great job", "well done", or
@@ -208,3 +260,8 @@ no postamble ("Let me know if..."), no metadata, no markdown headings,
 no frontmatter. The /narrate skill receives your text, wraps it in the
 watermark frontmatter (cadence, consumed_from_commit,
 consumed_through_commit, projects_consulted), and saves the file.
+
+**Capstone exception:** capstone output is a full markdown document —
+H1 title, sparing section headings, fenced ```mermaid blocks, and the
+Sources stub list are all expected. Still no frontmatter and no
+preamble/postamble; the skill wraps the frontmatter.

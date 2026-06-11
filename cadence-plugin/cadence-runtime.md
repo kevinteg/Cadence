@@ -15,11 +15,13 @@ lives in `cadence-reference.md` — load on demand.
 - **Action**: An atomic, concrete task. A checkbox in a project's Actions section. Every project requires at least one at creation.
 - **Inbox**: A *view*, not a directory or pursuit. The Inbox is the union of (a) captures in `thoughts/unprocessed/` whose status is untriaged (all v1 captures count; v2 captures with `status: untriaged`) and (b) brainstorms in `phase: diverging`. Cadence surfaces it as a single "Inbox: N items" line across status / SessionStart hook / capture-exit menu / `/start inbox` triage. Triage means moving an item out into a real outcome — an action on a pursuit, a new project, a brainstorm crystallized into one, or `closed` with a reason — so the Inbox shrinks back toward empty. A growing Inbox is a triage debt signal; the reconciler emits `inbox_pressure` above `inbox_soft_threshold` (default 10). No `pursuits/inbox/` pursuit exists in v1.1 onward — the term refers to the cross-repo view, not a folder. **The exact phrasing of the Inbox line, the active-brainstorms line, the empty-repo coaching block, and related ambient strings is canonical in `cadence-plugin/workflows/coaching-strings.md`** — surfaces quote from there rather than re-inventing wording. Function (this runtime entry) and form (that doc) stay split so consistency is enforced by source.
 - **Capture**: A raw thought saved to `thoughts/unprocessed/`. Flow-safe — no agent response at capture time.
+- **Research substrate**: The working tier of deliberately studied sources under a unit of work — `<unit>/research/` with `raw/` (immutable sources), `notes/` (distilled atomic notes), `index.md` (catalog + primer), `log.md` (append-only event log). Managed by the hidden verb `/research` (ingest / ask / primer). Distinct from Capture: captures park stray thoughts in the Inbox; the substrate holds sources studied for a unit, kept next to that work. `raw/` is GC-eligible at closure via `/resolve`'s disposition ritual; everything else is durable. Formats: `cadence-reference.md` → "Research Substrate".
+- **Wiki**: The durable, curated corpus at root-level `wiki/` — capstone narratives (promoted by `/narrate capstone`), graduated primers, the meta-project (`_meta/`), style files (`_style/`), and the working narrative tier (`drafts/`, the old `narratives/drafts/` home). Outlives the research substrates that produced it; never GC'd. Browsed via the hidden verb `/wiki` (front door / ask / open / related); reads as a plain Obsidian vault. Formats: `cadence-reference.md` → "Wiki — Durable Narrative Layer".
 - **Reflection**: A weekly ritual artifact in `reflections/<YYYY-MM-DD>.md`.
 - **Narrative**: Generated writing from activity data. McAdams structure: what happened / what it meant / what shifted / what's next. Each generated narrative carries a watermark in its frontmatter (cadence, consumed_through_commit) — the narrative IS the pointer into the project-file activity stream.
 - **Leveraged Priority**: The ONE thing that defines next week's win. Set during Reflect.
 - **Intent**: A project's narrative section — motivation, scope, felt-sense of what "done" looks like. Co-edited with the agent as actions land and the work focuses. See `cadence-reference.md` for "Intent and Actions".
-- **Reconciler**: Background process that flags overdue waiting-for items, dormant projects, Inbox pressure (untriaged material above the soft cap), closing-in pursuits, structural inconsistencies (active projects with no open actions), inbound issues piling up on the upstream Cadence repo.
+- **Reconciler**: Background process that flags overdue waiting-for items, dormant projects, Inbox pressure (untriaged material above the soft cap), closing-in pursuits, structural inconsistencies (active projects with no open actions), inbound issues piling up on the upstream Cadence repo, capstone gaps (resolved units whose research never crystallized into a narrative), and retrospectives coming due (resolved pursuits accumulating past `retrospective_due_threshold` since the last `/narrate lessons` run).
 - **2-Minute Item**: An action completable in under two minutes. Surfaced immediately when identified, cleared first during Reflect.
 
 ## One Voice
@@ -36,12 +38,18 @@ Hidden user-invoked verbs that don't appear on the visible catalogue:
 privacy-by-default — never auto-includes pursuit/project content),
 **incoming** (maintainer-side triage of inbound issues against the
 upstream Cadence repo; routes each issue to an action, project, capture,
-close, or defer; requires `gh`), and **mcp-pull** (pulls resources
+close, or defer; requires `gh`), **mcp-pull** (pulls resources
 from a Claude-Code-registered MCP server into `thoughts/unprocessed/`
 as captures via the agent's `mcp__<server>__*` tool surface; Claude
 Code owns transport + OAuth, Cadence owns the file write through
-`cadence write-capture --mcp-*`). All three follow the suggest-don't-run
-pattern below — agent SUGGESTS via chat-language signals but never
+`cadence write-capture --mcp-*`), **research** (builds and
+queries a unit-scoped research substrate — sources distilled into
+atomic notes under the unit's `research/` directory via the
+`research-ingest` subagent; operations: ingest / ask / primer), and
+**wiki** (queries and curates the durable corpus at root-level
+`wiki/` — front door, index-first ask with citations, open by slug,
+link-graph related). All five follow the suggest-don't-run pattern
+below — agent SUGGESTS via chat-language signals but never
 auto-fires. The reconciler runs as system behavior (SessionStart hook
 + during `/reflect` Get Clear) and is not a verb.
 
@@ -107,8 +115,10 @@ Completion flows upward from actions to projects to pursuits, with a
   --json` — fires when ≥1 project is resolved AND 1-2 unresolved
   projects remain), the system surfaces the finalization prompt:
   "[pursuit] is closing in — what would need to be true for it to
-  close? Common finalizing work: audit, narrative, demo, validation
-  review. Add finalizing projects, or close enough to /resolve?"
+  close? Common finalizing work: audit, narrative, capstone
+  (crystallize research into a durable wiki narrative —
+  /cadence:narrate capstone), demo, validation review. Add finalizing
+  projects, or close enough to /resolve?"
   Suggestion, not block. The point is to make finalization a planned
   phase rather than a surprise — pursuits should NOT need their
   audit/narrative/demo work inserted at the very end.

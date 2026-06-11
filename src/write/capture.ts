@@ -44,6 +44,7 @@ export type WriteCaptureOpts = {
   triaged_to?: string | null
   prompt?: string
   suggested_outcomes?: CaptureSuggestedOutcome[]
+  triage_gist?: string
   /**
    * Optional filename slug. Defaults to the minute-resolution
    * timestampSlug. Callers writing many captures in one batch supply
@@ -144,6 +145,7 @@ export async function writeCapture(
     if (opts.suggested_outcomes && opts.suggested_outcomes.length > 0) {
       data['suggested_outcomes'] = opts.suggested_outcomes
     }
+    if (opts.triage_gist) data['triage_gist'] = opts.triage_gist
   }
 
   const baseSlug = opts.slug ?? timestampSlug(now)

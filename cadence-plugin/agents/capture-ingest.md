@@ -49,6 +49,7 @@ for `thoughts/_raw/<id>.raw.md` and the capture filename (via
      - `note`: informational, no immediate outcome shape. Defaults to "keep in Inbox" at the user-facing menu.
    - **suggested_pursuit / suggested_project**: when you can confidently infer a target from the source name (e.g., `--source onboarding` → likely an onboarding pursuit) or the item content, name it. When unsure, omit — don't guess.
    - **confidence**: 0.0–1.0. Score your conviction in the outcome classification + the suggested target. Use ≥0.8 for "this is clearly X for clearly Y"; 0.5–0.7 for "probably X"; <0.5 for "unsure, here's my best guess."
+   - **triage_gist**: one sentence (≤120 chars) a future-you can read while triaging — what this item IS, not what to do about it. Inbox surfaces render it beside the name, so write it as a headline, not a fragment of the body.
 5. **Write each item via `cadence write-capture`.** One call per item:
    ```bash
    cadence write-capture \
@@ -64,7 +65,8 @@ for `thoughts/_raw/<id>.raw.md` and the capture filename (via
      --body "<the distilled item body — markdown OK>" \
      --status untriaged \
      --two-minute-eligible \  # only when kind = two_minute_action
-     --suggested-outcomes '[{"kind":"...","suggested_pursuit":"...","confidence":0.85}]'
+     --suggested-outcomes '[{"kind":"...","suggested_pursuit":"...","confidence":0.85}]' \
+     --triage-gist "<the one-sentence triage narrative>"
    ```
    The CLI dedups; if it returns `kind: skipped_existing`, that's fine — record it in the summary and move on.
 6. **Return the per-item summary.** See the contract below.

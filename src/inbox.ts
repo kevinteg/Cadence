@@ -41,6 +41,13 @@ export type InboxItem = {
   age_days: number
   path: string
   bucket: InboxBucket
+  /**
+   * One-sentence triage narrative (v2 captures distilled by the
+   * capture-ingest subagent). Absent on inline captures and
+   * brainstorms — surfaces render it beside the name when present
+   * and fall back gracefully when not.
+   */
+  gist?: string
 }
 
 export type InboxView = {
@@ -71,6 +78,7 @@ export function inboxItems(
       age_days: age,
       path: c.path,
       bucket: bucketFor(age),
+      ...(c.triage_gist ? { gist: c.triage_gist } : {}),
     })
   }
 

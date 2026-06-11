@@ -502,6 +502,10 @@ function describeFlagShort(flag: Flag, _snapshot: Snapshot): string {
       return `\`${flag.pursuitId}\` closing in (${flag.resolvedCount}/${flag.totalCount} done)`
     case 'inbound_issues_piling_up':
       return `${flag.count} untriaged issues on \`${flag.ownerRepo}\``
+    case 'capstone_gap':
+      return `\`${flag.unitId}\` resolved with ${flag.sources} researched sources and no capstone`
+    case 'retrospective_due':
+      return `${flag.newSinceLast} pursuits resolved since the last retrospective`
     case 'inbox_pressure':
       // Not reached — filtered above.
       return ''
@@ -543,6 +547,12 @@ function describeFlag(flag: Flag, _snapshot: Snapshot): string {
       const breakdown = buckets.length ? ` (${buckets.join(', ')})` : ''
       return `Inbox: ${flag.count} items${breakdown} — above soft cap (${flag.threshold}). Run /cadence:start inbox to walk them.`
     }
+    case 'capstone_gap': {
+      const sourceWord = flag.sources === 1 ? 'source' : 'sources'
+      return `capstone gap: ${flag.unitId} resolved with ${flag.sources} researched ${sourceWord} and no capstone — /cadence:narrate capstone ${flag.projectId ?? flag.pursuitId} to crystallize`
+    }
+    case 'retrospective_due':
+      return `retrospective due: ${flag.newSinceLast} pursuits resolved since the last retrospective (${flag.pursuitIds.join(', ')}) — /cadence:narrate lessons to synthesize the arc`
   }
   const _exhaustive: never = flag
   return _exhaustive

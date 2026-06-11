@@ -22,8 +22,13 @@ Set up a new repo for Cadence. Only needs to run once per repo.
    pursuits/_archived/
    thoughts/unprocessed/
    reflections/
-   narratives/drafts/
+   wiki/drafts/
    ```
+   (`wiki/`'s other tiers — `narratives/`, `primers/`, `_style/`,
+   `_meta/` — are created lazily by the verbs that first need them.
+   `narratives/` at the root remains the home of `session-log.md` and
+   archived brainstorms only; working narrative drafts live in
+   `wiki/drafts/`.)
    No `pursuits/inbox/` — the Inbox is a view, not a directory (see `cadence-runtime.md` Inbox vocabulary entry).
 
 3. **Create cadence.yaml** from defaults. Compute `win_cycles` from

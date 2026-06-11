@@ -8,6 +8,7 @@ import {
   PursuitFrontmatterSchema,
   PursuitLifecycleSchema,
 } from '../types.js'
+import { readResearchRef } from './research.js'
 
 const LIFECYCLE_ROOTS = [
   { lifecycle: 'active' as const, glob: 'pursuits/*/pursuit.md' },
@@ -37,11 +38,13 @@ export async function scanPursuits(repoRoot: string): Promise<Pursuit[]> {
       const raw = await readFile(file, 'utf8')
       const { data, content } = parseFrontmatter(raw)
       const fm = PursuitFrontmatterSchema.parse(data)
+      const research = await readResearchRef(path.dirname(file))
       results.push({
         ...fm,
         lifecycle: PursuitLifecycleSchema.parse(lifecycle),
         description: extractDescription(content),
         path: path.relative(repoRoot, file),
+        ...(research ? { research } : {}),
       })
     }
   }

@@ -47,6 +47,9 @@ function mergeDefaults(raw: RawConfig): Config {
       CONFIG_DEFAULTS.incoming_queue_cache_ttl_minutes,
     inbox_soft_threshold:
       d.inbox_soft_threshold ?? CONFIG_DEFAULTS.inbox_soft_threshold,
+    retrospective_due_threshold:
+      d.retrospective_due_threshold ??
+      CONFIG_DEFAULTS.retrospective_due_threshold,
     win_cycle_current: wc.current,
     win_cycle_start: wc.start,
     win_cycle_end: wc.end,

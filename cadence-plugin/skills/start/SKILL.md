@@ -188,7 +188,7 @@ When a token could plausibly match both a pursuit and a project (e.g. fuzzy coll
 3. Walk items **oldest-first** (overdue → aged → fresh). For each item, render:
 
    ```
-   <bucket> · <age> · <kind>
+   <bucket> · <age> · <kind> — <triage_gist, when present>
    ---
    <item summary — body for captures, topic for brainstorms>
    ---
@@ -200,6 +200,14 @@ When a token could plausibly match both a pursuit and a project (e.g. fuzzy coll
      [k] keep — leave in Inbox; surface again next walk
      [q] quit — exit the walk; remaining items stay
    ```
+
+   **Gist-on-open.** When a capture has no `triage_gist` (inline
+   captures stay bare by contract), compose one now — one sentence,
+   ≤120 chars, what the item IS — from the body already in context,
+   and persist it into the capture's frontmatter via Edit before
+   prompting for the outcome. Costs nothing extra (the body is being
+   read anyway) and the next walk renders it. Items the user keeps
+   come back gisted.
 
 4. Apply the chosen outcome:
    - **action** — prompt for the target pursuit/project and the action text. Append via `cadence add-item <project-id> --pursuit <pursuit-id> --section action --text "<text>"`. Mark the source capture `status: triaged, triaged_to: action:<pursuit>/<project>/<index>` via `cadence write-capture --slug <existing> --status triaged --triaged-to ...`.

@@ -18,6 +18,7 @@ import {
 } from '../src/write/edits.ts'
 import { movePursuit } from '../src/write/move.ts'
 import { scan } from '../src/scan/repo.ts'
+import { inboxItems } from '../src/inbox.ts'
 import { writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 
@@ -197,6 +198,28 @@ test('writeCapture produces a parseable capture', async () => {
     const c = snapshot.captures[0]!
     assert.equal(c.body, 'a stray thought')
     assert.equal(c.verb_context, 'note')
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('writeCapture with triage_gist emits v2 frontmatter and the Inbox view carries the gist', async () => {
+  const dir = await tempRepo()
+  try {
+    const gist = 'A pattern for keeping bulk JSON out of the main thread.'
+    const result = await writeCapture(dir, {
+      body: 'distilled item body',
+      source: { kind: 'url', name: 'an-article', uri: 'https://example.com/a' },
+      triage_gist: gist,
+      now: NOW,
+    })
+    assert.equal(result.kind, 'written')
+    const snapshot = await scan(dir, NOW)
+    const c = snapshot.captures[0]!
+    assert.equal(c.schema_version, 2)
+    assert.equal(c.triage_gist, gist)
+    const view = inboxItems(snapshot, NOW)
+    assert.equal(view.items[0]?.gist, gist)
   } finally {
     await rm(dir, { recursive: true, force: true })
   }

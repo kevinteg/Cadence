@@ -183,6 +183,40 @@ Skipped silently when `gh` is unavailable or unauthed — no error, no flag.
 
 ---
 
+## Wiki / Meta-Project Checks
+
+### 9. Capstone Gap
+
+**Type:** `capstone_gap`
+**Severity:** `info`
+
+**Logic:**
+1. For each resolved project (status done|dropped) and each resolved pursuit (lifecycle archived|dropped), check the unit's research substrate ref (scanned from `<unit>/research/index.md` frontmatter).
+2. Flag when the substrate exists with `status: researching` AND the unit has no `narrative:` capstone pointer.
+3. Substrates the GC ritual already transitioned (`cleared` / `archived-raw`) never fire — the user made the disposition call at close-out. Open units never fire — capstoning is a closure activity.
+
+**Suggestion format:** "capstone gap: [unit] resolved with [N] researched sources and no capstone — /cadence:narrate capstone [unit] to crystallize."
+
+**Surfaces in:** `/status` (Health line), `/reconcile`, `/reflect` (Get Clear — the "research substrates with no capstone" finalization signal).
+
+### 10. Retrospective Due
+
+**Type:** `retrospective_due`
+**Severity:** `info`
+
+**Logic:**
+1. Read the set-watermark of the latest lessons narrative (`lessons-*.md` in `wiki/drafts/`, legacy `narratives/drafts/` fallback) — its `pursuits_consulted` list. Scanned into `snapshot.lessons_watermark`.
+2. Count resolved pursuits (archived + dropped) NOT in the consulted set.
+3. Flag when the count reaches `retrospective_due_threshold` (default 3).
+
+Reuses the exact set-watermark machinery `/narrate lessons` writes — running lessons resets the count to zero by construction.
+
+**Suggestion format:** "[N] pursuits resolved since the last retrospective — /cadence:narrate lessons to synthesize the arc."
+
+**Surfaces in:** `/status` (Health line), `/reconcile`, `/reflect` (Get Clear). This is the meta-project nudge from the wiki layer.
+
+---
+
 ## Thresholds
 
 All thresholds come from `cadence.yaml` under `defaults`:
@@ -194,6 +228,7 @@ All thresholds come from `cadence.yaml` under `defaults`:
 | `someday_review` | monthly | Someday cue surfacing |
 | `inbox_seed_stale_days` | 7 | Stale Inbox seed |
 | `inbox_seed_softcap` | 10 | Inbox overcap |
+| `retrospective_due_threshold` | 3 | Retrospective due (resolved pursuits since the last lessons run) |
 
 Dormant project threshold is fixed at 14 days. Aging seed threshold is
 14 days. Unpromoted idea threshold is 7 days. Long-running project

@@ -48,7 +48,11 @@ a one-line note: "Pursuits don't take --state — running closure ritual."
    - "[N] actions still open. Resolving as complete anyway?"
    - On confirmation: same `set-status` call as above; the user is
      declaring done by Intent dialogue, not by action sweep.
-5. Check the `--include-pursuit` response: if `allResolved: true`,
+5. **Research disposition.** If the project has a research substrate
+   (`pursuits/<pursuit>/projects/<id>/research/` exists), walk the GC
+   ritual — see "Research disposition (the GC ritual)" below. No
+   substrate → skip silently.
+6. Check the `--include-pursuit` response: if `allResolved: true`,
    prompt the upward-completion question:
    "All projects in [pursuit] resolved. `/resolve <pursuit>` to walk
    the closure ritual?"
@@ -62,7 +66,11 @@ a one-line note: "Pursuits don't take --state — running closure ritual."
    ```bash
    cadence set-status <project-id> --pursuit <pursuit-id> --status dropped --reason "<reason>"
    ```
-4. Same upward-completion check via `--include-pursuit`.
+4. **Research disposition.** Same as the complete path — a dropped
+   project's research is often the most valuable thing it produced.
+   The no-capstone encouragement applies with drop framing ("the
+   project didn't ship; the learning can still graduate").
+5. Same upward-completion check via `--include-pursuit`.
 
 ---
 
@@ -122,7 +130,14 @@ move (no ritual, no narrative).
    "These projects are still open. Drop them, or resolve them first?"
    For dropping inline: `cadence set-status <project-id> --pursuit <pursuit-id> --status dropped --reason "<reason>"`
 
-6. **Move the pursuit via the CLI** — to `archived` for completed,
+6. **Research disposition — pursuit sweep.** Before the directory
+   moves: walk the GC ritual (see "Research disposition (the GC
+   ritual)" below) for the pursuit-level substrate AND any
+   project-scoped substrates beneath it whose disposition was skipped
+   or kept earlier. This is the last natural moment — after the move,
+   the substrate travels into `_archived/`/`_dropped/` as-is.
+
+7. **Move the pursuit via the CLI** — to `archived` for completed,
    `dropped` for dropped:
    ```bash
    # completed (default)
@@ -133,7 +148,7 @@ move (no ritual, no narrative).
    The CLI moves the directory to `pursuits/_archived/` or
    `pursuits/_dropped/` and updates the pursuit's `status` frontmatter.
 
-7. **Surface a brain-tickler tip before generating the resolution narrative
+8. **Surface a brain-tickler tip before generating the resolution narrative
    (frequency-capped):**
    ```bash
    cadence tip-pick --triggers moment-long-agent-run --types quote \
@@ -143,8 +158,12 @@ move (no ritual, no narrative).
    accompany every ~3-5 resolutions, which is the right cadence for a
    ritual moment. If null, skip silently.
 
-8. Generate resolution narrative — summarize the Pursuit's arc via the
-   narrator subagent (`subagent_type: cadence:narrator`):
+9. Generate resolution narrative — summarize the Pursuit's arc via the
+   narrator subagent (`subagent_type: cadence:narrator`). When a
+   capstone exists for the pursuit (or its projects), brief the
+   narrator to reference it rather than retell it — the closure
+   narrative records the resolution event; the capstone is the
+   durable telling:
    - **Completed/archived**: framing emphasizes what shipped. "Generated
      [N] brainstorms — [X] crystallized into projects, [Y] archived."
    - **Dropped**: framing emphasizes what was learned. "[Pursuit]
@@ -155,12 +174,80 @@ move (no ritual, no narrative).
    without retrying.]` to the narrator. See runtime "Subagent budgets"
    principle.
 
-9. Save narrative to:
-   - `narratives/drafts/<pursuit-id>-closure.md` for completed/archived
-   - `narratives/drafts/<pursuit-id>-drop.md` for dropped
+10. Save narrative to:
+   - `wiki/drafts/<pursuit-id>-closure.md` for completed/archived
+   - `wiki/drafts/<pursuit-id>-drop.md` for dropped
    The filename suffix lets `/cadence:narrate lessons` distinguish "what
    shipped" from "what got learned without shipping" when synthesizing
    patterns across pursuits.
+
+---
+
+## Research disposition (the GC ritual)
+
+Runs whenever a unit with a research substrate resolves — project
+paths after the status mutation, pursuit path before the directory
+moves. **GC is prompted, never silent.** Close-out is the forcing
+function for crystallizing knowledge at the moment it's most complete;
+the disposition prompt IS the capstoning ritual.
+
+1. **Branch on capstone existence** — does `wiki/narratives/<unit-id>.md`
+   exist (equivalently: does the unit file carry a `narrative:`
+   pointer)?
+
+   **Capstone exists** — offer disposition, delete as default:
+   ```
+   Capstone exists at wiki/narratives/<unit-id>.md. The research
+   substrate (<N> raw sources) is safe to clear.
+     [D] Delete raw/ (default) — working tree cleaned; git history retains;
+         notes/, index.md, log.md stay; the capstone's stubs stand alone
+     [A] Archive — relocate raw/ to wiki/_archive/<unit-id>/raw/
+     [K] Keep — the substrate still feeds follow-on work
+   ```
+
+   **No capstone** — encourage capstoning; this is the moment:
+   ```
+   You pulled <N> sources into this and never crystallized them. This
+   is the moment to summarize the arc and link back to what you
+   learned, before the raw research is cleared.
+     [G] Generate a capstone now (recommended) — runs
+         /cadence:narrate capstone <unit>, then re-offers disposition
+     [C] Clear without capstone — provenance survives only in notes/ + git
+     [K] Keep raw — defer the decision
+   ```
+
+2. **Primer graduation offer.** If the substrate's `index.md` has a
+   non-empty `## Primer` section, offer once: "Graduate the primer to
+   `wiki/primers/<unit-id>-primer.md`?" On yes, copy the Primer +
+   Suggested learning content into a standalone artifact with wiki
+   frontmatter (`type: primer`, `unit`, `pursuit`, `created`,
+   `sources`, `status: published`, `tags`), add its line to
+   `wiki/index.md` (Primers section), and log the graduation in
+   `wiki/log.md`. A good primer is the fastest re-entry into a topic
+   months later — deleting it with the scaffolding wastes it.
+
+3. **Stub verification before any delete.** When a capstone exists,
+   check its Sources section lines are stub-complete (title + uri +
+   captured date). If the capstone predates some sources or lacks the
+   section, offer to regenerate it first — provenance must never
+   depend on `raw/` surviving.
+
+4. **ELI5 before delete.** Plain-language recap, then act:
+   - What clears: `raw/` only. What stays: `notes/`, `index.md`,
+     `log.md`, the capstone, any graduated primer, git history.
+   - Then `rm -rf <unit-path>/research/raw/`, set the index
+     frontmatter `status: cleared`, and append the log entry:
+     `## [YYYY-MM-DD] gc | raw cleared (<N> sources) — capstone wiki/narratives/<unit-id>.md`
+
+5. **Archive path** (non-default): `mkdir -p wiki/_archive/<unit-id>
+   && mv <unit-path>/research/raw wiki/_archive/<unit-id>/raw`
+   (`git mv` when tracked), set index `status: archived-raw`, append
+   the matching log entry.
+
+**What always survives GC:** the capstone narrative, any graduated
+primer, the distilled notes + index + log, and the citation stubs
+(title, url, capture date) embedded in the capstone — *"link back to
+the sources we pulled from"* holds even after `raw/` is gone.
 
 ---
 
@@ -179,3 +266,5 @@ If the user cancels mid-ritual ("actually, never mind"):
 - Closure narratives are generated from activity data. The user reviews but doesn't write.
 - Resolving a project as `complete` with unchecked actions requires explicit override (the agent surfaces the count and asks).
 - `--state` is a project-only argument. Surfacing it on a pursuit request gets a one-line note and falls through to closure.
+- **GC is prompted, never silent.** No research file is deleted or moved without the disposition prompt + ELI5 recap. Delete-by-default applies only once a capstone exists; "Keep" is always on the menu.
+- **Only `raw/` is GC-eligible.** Distilled notes, index, and log are durable working state; the wiki tier (capstones, primers) is never GC'd.

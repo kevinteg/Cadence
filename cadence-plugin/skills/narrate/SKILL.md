@@ -15,8 +15,9 @@ Generate narrative from activity data — committed changes to project files in 
 - `/narrate year` — this calendar year (cadence: annual)
 - `/narrate <pursuit>` — full arc of a pursuit (cadence: pursuit)
 - `/narrate lessons [--from completed|dropped|both]` — synthesize recurring patterns across multiple resolved pursuits (cadence: lessons)
+- `/narrate capstone <project|pursuit>` — the polished, source-grounded narrative of one unit, promoted to `wiki/narratives/` (cadence: capstone). The graduation path of the wiki layer — see "Capstone cadence" below.
 
-Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons` are reserved keywords; anything else resolves to a pursuit ID.
+Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons`, `capstone` are reserved keywords; anything else resolves to a pursuit ID.
 
 ## Steps
 
@@ -24,14 +25,21 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons` a
 
    | argument | cadence | target filename |
    |---|---|---|
-   | (none) or `today` | `daily` | `narratives/drafts/daily-YYYY-MM-DD.md` |
-   | `week` | `weekly` | `narratives/drafts/weekly-YYYY-WNN.md` (ISO week) |
-   | `month` | `monthly` | `narratives/drafts/monthly-YYYY-MM.md` |
-   | `year` | `annual` | `narratives/drafts/annual-YYYY.md` |
-   | `<pursuit-id>` | `pursuit` | `narratives/drafts/pursuit-<id>-YYYY-MM-DD.md` |
-   | `lessons` | `lessons` | `narratives/drafts/lessons-YYYY-MM-DD.md` |
+   | (none) or `today` | `daily` | `wiki/drafts/daily-YYYY-MM-DD.md` |
+   | `week` | `weekly` | `wiki/drafts/weekly-YYYY-WNN.md` (ISO week) |
+   | `month` | `monthly` | `wiki/drafts/monthly-YYYY-MM.md` |
+   | `year` | `annual` | `wiki/drafts/annual-YYYY.md` |
+   | `<pursuit-id>` | `pursuit` | `wiki/drafts/pursuit-<id>-YYYY-MM-DD.md` |
+   | `lessons` | `lessons` | `wiki/drafts/lessons-YYYY-MM-DD.md` |
+   | `capstone <unit>` | `capstone` | `wiki/narratives/<unit-id>.md` |
 
    For pursuit cadence, fuzzy-match the argument against `cadence pursuits --json`; ask if ambiguous.
+
+   For capstone cadence, the second token resolves to a project first,
+   then a pursuit (same precedence as `/start`). `<unit-id>` in the
+   filename is the project id (project capstone) or pursuit id
+   (pursuit capstone). Re-runs overwrite — the capstone is the
+   *current* durable telling, and prior versions live in git history.
 
    For lessons cadence, the source corpus is resolved pursuits in
    `pursuits/_archived/` and `pursuits/_dropped/`. The optional
@@ -48,6 +56,14 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons` a
    - lessons: the most recent `lessons-*.md` file by mtime.
 
    If a prior file exists, read its frontmatter `consumed_through_commit` (or `pursuits_consulted` for lessons cadence — see below). That's the resume point. Otherwise, no resume point — the CLI defaults the window per cadence.
+
+   **Legacy location:** repos that predate the wiki fold hold older
+   narratives in `narratives/drafts/`. When nothing matches under
+   `wiki/drafts/`, check the legacy path for the watermark (and for
+   the lessons corpus, read both). New writes always land in
+   `wiki/drafts/`. One-time migration: `git mv narratives/drafts
+   wiki/drafts` — offer it when the legacy path is hit, never run it
+   unprompted.
 
    For **lessons** cadence, the watermark is set-based, not commit-based: the prior narrative's frontmatter carries `pursuits_consulted: [<list of pursuit-ids>]` and `included_dropped: <bool>`. Re-runs read the current set of resolved pursuits (in `_archived/` and `_dropped/`) minus the consulted set, and synthesize patterns only from the new material. If no new pursuits have resolved since the prior run, return null and skip generation rather than re-running over the same corpus.
 
@@ -88,7 +104,7 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons` a
 
    Example prompt (lessons, multi-pursuit synthesis):
    ```
-   Generate a lessons narrative across resolved pursuits. Read pursuit.md files in pursuits/_archived/ and pursuits/_dropped/, plus their resolution narratives in narratives/drafts/<id>-closure.md and <id>-drop.md. Synthesize 3-5 RECURRING patterns that show up across multiple pursuits — what's the lesson that keeps repeating? Frame archived (shipped) and dropped (didn't ship) lessons distinctly. Skip pursuits already in the prior narrative's pursuits_consulted list. Return prose only — no frontmatter.
+   Generate a lessons narrative across resolved pursuits. Read pursuit.md files in pursuits/_archived/ and pursuits/_dropped/, plus their resolution narratives in wiki/drafts/<id>-closure.md and <id>-drop.md. Synthesize 3-5 RECURRING patterns that show up across multiple pursuits — what's the lesson that keeps repeating? Frame archived (shipped) and dropped (didn't ship) lessons distinctly. Skip pursuits already in the prior narrative's pursuits_consulted list. Return prose only — no frontmatter.
    [Budget: 8 tool calls. If exceeded, return what you have without retrying.]
    ```
 
@@ -133,6 +149,83 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons` a
 
    Mention the saved path so the user can find it.
 
+## Capstone cadence — the graduation path
+
+Capstone runs the same six steps with these deviations:
+
+1. **Scaffold `wiki/_style/` on first use.** If `wiki/_style/voice.md`
+   doesn't exist, copy the four defaults from the plugin:
+   ```bash
+   plugin_dir=$(cadence plugin-info --json | jq -r .plugin_dir)
+   mkdir -p wiki/_style wiki/narratives
+   cp "$plugin_dir"/styles/{voice,capstone,primer,diagrams}.md wiki/_style/
+   ```
+   Tell the user once: "Seeded `wiki/_style/` with Cadence defaults —
+   edit them and your voice wins from then on." Never overwrite
+   existing style files; the user's copies are theirs.
+
+2. **Gather the unit's context** (main thread, cheap):
+   - `cadence project <id> --pursuit <p> --json` (or `cadence pursuit
+     <id> --json`) — current state + `effective_domain`.
+   - Check for a research substrate at the unit's `research/index.md`
+     (project scope; for pursuit capstones also check the pursuit-level
+     substrate). Note `sources:` count when present.
+
+3. **Brief the narrator dual-source + style-aware.** Example prompt:
+   ```
+   Generate a capstone narrative. Scope capstone:build-cadence-v1/mcp-integration.
+   Unit path pursuits/build-cadence-v1/projects/mcp-integration.md;
+   research substrate at pursuits/build-cadence-v1/projects/mcp-integration/research/
+   (6 sources). effective_domain: digital. Read wiki/_style/voice.md,
+   wiki/_style/capstone.md, wiki/_style/diagrams.md first and follow them.
+   Activity: cadence project-activity --scope pursuit --pursuit build-cadence-v1
+   (use the project's slice). Compose per the capstone contract: orientation,
+   McAdams arc, How-it-works if diagrams clarify (Mermaid only), Sources
+   stub list from the notes' provenance frontmatter. Full markdown document,
+   no frontmatter.
+   [Budget: 8 tool calls. If exceeded, return what you have without retrying.]
+   ```
+   Omit the substrate line when none exists (activity-only capstone is
+   legal — the Sources section is then omitted).
+
+4. **Save with wiki frontmatter** — the queryable layer for Obsidian
+   Bases/Dataview plus the standard watermark:
+   ```yaml
+   ---
+   type: capstone
+   cadence: capstone
+   unit: <pursuit-id>[/<project-id>]
+   pursuit: <pursuit-id>
+   title: <human title>
+   created: <YYYY-MM-DD>
+   generated_at: <ISO timestamp>
+   status: published
+   sources: <N>                      # research sources consulted; 0 when no substrate
+   tags: []
+   consumed_from_commit: <hash>
+   consumed_through_commit: <hash>
+   projects_consulted: [...]
+   ---
+   ```
+
+5. **Write the pointer seam — reference, not containment.** After
+   saving, add one frontmatter line to the unit's file (project
+   `<id>.md` or `pursuit.md`) via the Edit tool:
+   ```yaml
+   narrative: wiki/narratives/<unit-id>.md
+   ```
+   The unit file stays clean; the wiki owns the artifact; the pointer
+   survives GC of the research substrate. If the line already exists,
+   leave it (the path doesn't change on re-runs).
+
+   Then maintain the discovery layer: add/refresh the artifact's line
+   in `wiki/index.md` (Narratives section; create the index from the
+   front-door format if missing) and append to `wiki/log.md`:
+   `## [YYYY-MM-DD] promote | capstone <unit-id>`.
+
+6. **Present** under `Capstone — <title>`, mention both the saved path
+   and the pointer that was written.
+
 ## Fallback (in-thread)
 
 If the narrator subagent invocation fails, run the data fetching and narrative composition inline:
@@ -151,3 +244,6 @@ Compose the McAdams narrative directly and write the file with the same watermar
 - **Narratives are views over data.** They are generated from project-file git history, ideas, and captures — not separate content to maintain.
 - **The narrative file IS the watermark.** Do not split watermark metadata into a separate pointer file. Subsequent runs read the latest narrative for the cadence and resume from its `consumed_through_commit`.
 - **Empty windows still get saved.** If no commits since the resume point, the narrator returns a short "quiet day" paragraph; save the file anyway with the new watermark so the next run resumes correctly.
+- **Capstones promote; they don't embed.** The artifact lands in `wiki/narratives/`; the unit file carries only the one-line `narrative:` pointer. Never inline narrative prose into project or pursuit files.
+- **Style files are the user's voice.** Read them every capstone run; never overwrite a user-edited `wiki/_style/` file with plugin defaults.
+- **Capstone diagrams are Mermaid-only** and gated on `effective_domain: digital | hybrid`.

@@ -44,7 +44,7 @@ deciding whether to auto-invoke the skill from non-explicit input.
 ### State-modifying verbs
 
 `capture`, `complete`, `cancel`, `waiting`, `promote`, `close`,
-`init` write to disk and change Cadence state. They MUST require
+`init`, `research` write to disk and change Cadence state. They MUST require
 explicit invocation. Their descriptions take the form:
 
 > TRIGGER ONLY when the user explicitly invokes `/cadence:<verb>` (or
@@ -206,7 +206,8 @@ collision. A pursuit or project named `inbox` is unreachable via
   `closing_in_on_resolution` flag is active (≥1 project resolved + 1-2
   unresolved remaining), the upward prompt surfaces the finalization
   question: "[pursuit] is closing in — what would need to be true for
-  it to close? Common finalizing work: audit, narrative, demo,
+  it to close? Common finalizing work: audit, narrative, capstone
+  (crystallize research into a durable wiki narrative), demo,
   validation review. Add finalizing projects, or close enough to
   /resolve?" Suggestion, not block.
 - If `/resolve` fires next and all pursuit projects are resolved, the
@@ -247,6 +248,18 @@ No judgment on the decision in either direction.
 - Triggers upward-completion check on project resolution: if pursuit
   has all projects resolved, prompts "All projects in [pursuit]
   resolved. `/resolve <pursuit>` to walk the closure ritual?"
+- **Research disposition (the GC ritual):** when the resolving unit
+  has a research substrate, the ritual walks raw-disposition after the
+  status change (project paths) / before the directory move (pursuit
+  path, sweeping project substrates too). Capstone exists → **Delete
+  `raw/` is the default** (git history retains; distilled notes +
+  citation stubs survive); Archive (`wiki/_archive/<unit>/raw/`) and
+  Keep stay on the menu. No capstone → encourage `/narrate capstone
+  <unit>` at the moment the knowledge is freshest, with
+  clear-without-capstone and keep as explicit alternatives. A
+  non-empty Primer graduates to `wiki/primers/` on offer. Prompted,
+  never silent; ELI5 recap before any delete; only `raw/` is
+  GC-eligible.
 - **Origin-sync side effect:** if the project carries an `origin`
   frontmatter field (currently only `kind: github_issue` is wired),
   resolving to `done` or `dropped` automatically reconciles the
@@ -272,7 +285,7 @@ entity type, lists active candidates.
 
 **Exit:** Project resolution: "[project] resolved as [state]. [N/M
 projects in pursuit done.]" Pursuit closure: "[pursuit] archived.
-Closure narrative saved to `narratives/drafts/<id>-closure.md`."
+Closure narrative saved to `wiki/drafts/<id>-closure.md`."
 
 ---
 
@@ -293,6 +306,15 @@ Informational, not praise-based.
 - Each generated narrative carries a frontmatter watermark
   (cadence, consumed_through_commit) — the next run resumes from there
 
+- **Capstone cadence** (`/narrate capstone <unit>`): the graduation
+  path of the wiki layer. Dual-source — git activity AND the unit's
+  research substrate; style-aware — reads `wiki/_style/` first (user
+  edits win over plugin defaults); diagram-eligible — Mermaid only,
+  gated on `effective_domain: digital | hybrid`; promotes to
+  `wiki/narratives/<unit-id>.md` and writes the one-line `narrative:`
+  pointer back onto the unit file (reference, not containment).
+  Sources render as citation stubs that outlive the substrate's `raw/`.
+
 **No-argument entry:** Generate today's activity narrative. Show available
 scopes: "Today, this week, or a specific pursuit?"
 
@@ -300,6 +322,7 @@ scopes: "Today, this week, or a specific pursuit?"
 - No target → today's activity
 - Pursuit → full arc of the Pursuit
 - `week` → weekly narrative
+- `capstone <unit>` → polished unit narrative, promoted to `wiki/narratives/`
 
 **Guardrails:**
 - No evaluative praise ("great job", "well done"). Feedback is specific
@@ -309,7 +332,7 @@ scopes: "Today, this week, or a specific pursuit?"
 - Redemption-aware: acknowledge difficulty honestly, don't paper over it.
 - Narratives are views over activity data, not separate content to maintain.
 
-**Exit:** Present the narrative. Offer to save to `narratives/drafts/`.
+**Exit:** Present the narrative. Offer to save to `wiki/drafts/`.
 
 ---
 
@@ -600,6 +623,62 @@ Pulled <N> resources from <server>:
   - <E> errors
 ```
 Then the verb-hint block + teaching footer per the universal exit convention.
+
+---
+
+## Research
+
+*Hidden verb — not on the visible 12-verb surface; explicit-invocation only; agent-suggested when chat language signals research intent. Promotes to the visible catalogue when the wiki layer ships (pursuit-level decision).*
+
+**Purpose:** Build and use the **research substrate** — the working tier of sources and distilled atomic notes that accumulates under a unit of work (project or pursuit) at `<unit>/research/`. Three operations: ingest a source (raw copy + distilled note via subagent), ask a question over the substrate (index-first, cited), generate a primer (orientation + suggested learning order). Formats: `cadence-reference.md` → "Research Substrate".
+
+**Tone:** Librarian-terse. Ingest confirms what landed and what it connects to. Ask answers only what the notes support and names gaps plainly. Primer is written for re-entry months later, not for the moment of writing.
+
+**Behavior:**
+- Scope resolves to the project most recently in scope (same rule as `/complete`); `--pursuit` escalates; explicit `--project <id>` / `--pursuit <id>` win; nothing in scope → ask, never guess.
+- First ingest scaffolds `index.md` (the research template) + `log.md`. `raw/` and `notes/` appear on the subagent's first writes.
+- Ingest dispatches the `research-ingest` subagent (budget 6) — bulk payloads stay in its context; the skill integrates the return: Sources line, `sources:` bump, Open-questions merge, log entry, bidirectional `[[wikilink]]` back-links.
+- Ask is index-first: main thread for substrates ≤10 sources (read index → ≤4 notes → cite), subagent ask mode (budget 6) for larger. Every load-bearing claim cites its note. A synthesis worth keeping is offered back into the substrate as a `source.kind: synthesis` note — offered once, never auto-filed.
+- Primer dispatches the subagent (budget 8); output replaces the index's `## Primer` and `## Suggested learning` sections; prior versions live in git history. Soft-confirms below 3 sources.
+- Dedup is index-driven by source uri / content hash; `skipped_existing` is reported, not retried.
+
+**Discovery (suggest-don't-run):**
+- Hidden from `/cadence:help`'s primary catalogue.
+- Agent suggests the verb when chat language signals research intent ("I've been reading about X for this", "save this paper somewhere I'll find it", a source shared while working a project) via `cadence tip-pick --triggers intent-research-signal --types skill-teaching`. Never auto-fires — a pasted link is not an instruction.
+
+**Guardrails:**
+- Bulk sources never enter the main thread during ingest — subagent isolation is the point.
+- `raw/` is immutable; the skill never writes it. Skill-owned writes: `index.md`, `log.md`, back-link appends. Nothing outside the unit's `research/`.
+- MCP sources only on explicit user direction (external-tool discipline unchanged).
+- Research is not capture: stray thoughts go to the Inbox via `/capture`; deliberately studied sources go to the substrate. Don't cross the streams in either direction.
+- No fabricated synthesis, no evaluative commentary. Gaps are named as candidate Open questions.
+- View-only on work state: never checks actions, never changes statuses.
+
+**Exit:** Ingest: `Ingested into <unit> research (<N> sources): <id> — <summary>`. Ask: the cited answer. Primer: the rendered primer. Then the verb-hint block + teaching footer per the universal exit convention.
+
+---
+
+## Wiki
+
+*Hidden verb — not on the visible 12-verb surface; explicit-invocation plus by-name requests ("check the wiki for X"); agent-suggested when chat language signals corpus-lookup intent. Promotes to the visible catalogue when the wiki layer ships (pursuit-level decision, alongside `research`).*
+
+**Purpose:** Query and curate the durable corpus at root-level `wiki/` — capstone narratives, primers, the meta-project. Five operations: front door (render `wiki/index.md`), ask (index-first Q&A with citations), open (by slug), related (link-graph neighbors), lint (budgeted `wiki-lint` subagent health scan — dangling pointers, evaporated provenance, orphans, stale index entries, draft pile-up, contradictions; findings only, never auto-fix). Layout and formats: `cadence-reference.md` → "Wiki — Durable Narrative Layer".
+
+**Tone:** Reference-librarian. Answers cite; gaps get named with the unit that would have to produce the missing artifact; no padding beyond what the corpus holds.
+
+**Behavior:**
+- **Index-first navigation** beats embedding search at personal scale: read `wiki/index.md`, drill into at most 4 artifacts, synthesize with inline citations. Stale index → rebuild from artifact frontmatter (the index is the shared front door for human and agent; never let them diverge).
+- **Compounding path:** a synthesis worth keeping is offered back — once — as a draft primer (`status: draft`, `(draft)` index marker, `file-back` log entry). Karpathy's insight: explorations compound rather than evaporate. The draft marker clears only by explicit user promotion.
+- **Related** = outbound `[[wikilinks]]` + inbound references + frontmatter kinship (same `pursuit`, shared `tags`). No semantic scoring until a semantic layer is added deliberately (Obsidian Smart Connections is the upgrade path).
+- Large corpus (>~10 artifacts) → ask runs through the `research-ingest` subagent's ask mode pointed at `wiki/` so bulk reads stay isolated.
+- Every ask/file-back appends to `wiki/log.md`.
+
+**Guardrails:**
+- Read-only except the compounding write and index/log maintenance. Capstone regeneration belongs to `/narrate capstone`; the wiki tier is never GC'd.
+- Citations mandatory in ask answers.
+- Does not read research substrates — `/research ask` owns the working tier.
+
+**Exit:** Front door / artifact / cited answer / neighbor list, then the verb-hint block + teaching footer per the universal exit convention.
 
 ---
 
