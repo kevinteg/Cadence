@@ -188,7 +188,7 @@ Capstone runs the same six steps with these deviations:
    Omit the substrate line when none exists (activity-only capstone is
    legal — the Sources section is then omitted).
 
-4. **Save with wiki frontmatter** — the queryable layer for Obsidian
+4. **Save with wiki frontmatter** — the queryable layer for Markdown readers like Obsidian
    Bases/Dataview plus the standard watermark:
    ```yaml
    ---

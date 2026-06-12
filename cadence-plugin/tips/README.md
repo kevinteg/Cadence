@@ -7,7 +7,7 @@ explanations), and **verb-hints** (contextual next-steps).
 **Canonical schema reference:** `cadence-plugin/cadence-reference.md`,
 "Tip Library" section.
 
-**Source material:** `docs/teaching-tips-research.md` (the 227-entry
+**Source material:** `wiki/research/teaching-tips.md` (the 227-entry
 curated library from real reading: Allen, Newport, Doerr, Brooks,
 Karpathy, Willison, and others). The research doc is the design
 rationale; this YAML is the operational content.
@@ -51,7 +51,7 @@ Skills can register new tags freely — the schema doesn't validate.
 
 This library currently holds a **seed of example entries** that exercise
 the schema. Full content migration from
-`docs/teaching-tips-research.md` is tracked under project
+`wiki/research/teaching-tips.md` is tracked under project
 `add-tip-and-teaching-surfaces` action 3.
 
 ## Testing changes

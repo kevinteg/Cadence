@@ -254,7 +254,7 @@ Hidden verbs (not on the visible 12-verb surface; explicit-invocation only): `/r
 - **Drift.** Stalled waiting-fors, near-completion pursuits, Inbox above its soft cap.
 - **Cleanliness.** Open brainstorms on closing-in pursuits, dormant Projects, active projects with no open actions.
 
-Full research foundations and citations: `docs/research-references.md`.
+Full research foundations and citations: `wiki/research/research-foundations.md`.
 
 ---
 

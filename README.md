@@ -48,13 +48,13 @@ Fresh-Mac install (Node + Claude Code + `gh` from scratch) and the **10-minute w
 
 ## Why Cadence
 
-- **Hold your commitments alongside the work.** Pursuits (`be a present father`, `stand up CI for the team`, `get the garage cleaned out`) aren't a separate system; they're the parent of every project and action. → [`docs/vision.md`](docs/vision.md)
+- **Hold your commitments alongside the work.** Pursuits (`be a present father`, `stand up CI for the team`, `get the garage cleaned out`) aren't a separate system; they're the parent of every project and action. → [`wiki/concepts/vision.md`](wiki/concepts/vision.md)
 
-- **Protect flow state.** `/cadence:capture "..."` saves a thought silently — no agent response, no acknowledgment, no elaboration. The system never interrupts mid-flow; everything else surfaces at breakpoints. → [`docs/architecture.md`](docs/architecture.md)
+- **Protect flow state.** `/cadence:capture "..."` saves a thought silently — no agent response, no acknowledgment, no elaboration. The system never interrupts mid-flow; everything else surfaces at breakpoints. → [`wiki/concepts/architecture.md`](wiki/concepts/architecture.md)
 
-- **Diverge before you converge.** `/cadence:brainstorm` opens a workspace with a phase machine (`diverging → converging → crystallized | archived`). Quantity-first ideation, then PPCo / criteria / pre-mortems, then a `--crystallize` flag that materializes the chosen solution as a Pursuit or Project. → [`docs/architecture.md`](docs/architecture.md)
+- **Diverge before you converge.** `/cadence:brainstorm` opens a workspace with a phase machine (`diverging → converging → crystallized | archived`). Quantity-first ideation, then PPCo / criteria / pre-mortems, then a `--crystallize` flag that materializes the chosen solution as a Pursuit or Project. → [`wiki/concepts/architecture.md`](wiki/concepts/architecture.md)
 
-- **See the story.** Generated narratives — daily, weekly, per-pursuit, multi-pursuit-lessons — pull from git history of your project files. The narrative IS the watermark; each run resumes from the last. → [`docs/vision.md`](docs/vision.md)
+- **See the story.** Generated narratives — daily, weekly, per-pursuit, multi-pursuit-lessons — pull from git history of your project files. The narrative IS the watermark; each run resumes from the last. → [`wiki/concepts/vision.md`](wiki/concepts/vision.md)
 
 The 12 user-facing verbs (`brainstorm`, `start`, `complete`, `resolve`, `waiting`, `capture`, `reflect`, `narrate`, `status`, `find`, `help`, `init`) are documented in [`cadence-plugin/README.md`](cadence-plugin/README.md) and the full per-verb contracts live in [`cadence-plugin/workflows/verb-contracts.md`](cadence-plugin/workflows/verb-contracts.md).
 
@@ -83,10 +83,10 @@ docs/                        Vision, architecture, getting started, research, te
 ## Documentation
 
 - **[`docs/getting-started.md`](docs/getting-started.md)** — install + the 10-minute walkthrough. Start here.
-- **[`docs/vision.md`](docs/vision.md)** — what Cadence is and why. TL;DR plus the deep dive.
-- **[`docs/architecture.md`](docs/architecture.md)** — design rationale. Why the model is shaped this way, what tradeoffs got made.
-- **[`docs/research-references.md`](docs/research-references.md)** — research foundations mapped to design patterns.
-- **[`docs/teaching-tips-research.md`](docs/teaching-tips-research.md)** — the curated content library that powers the in-product tip surfaces.
+- **[`wiki/concepts/vision.md`](wiki/concepts/vision.md)** — what Cadence is and why. TL;DR plus the deep dive.
+- **[`wiki/concepts/architecture.md`](wiki/concepts/architecture.md)** — design rationale. Why the model is shaped this way, what tradeoffs got made.
+- **[`wiki/research/research-foundations.md`](wiki/research/research-foundations.md)** — research foundations mapped to design patterns.
+- **[`wiki/research/teaching-tips.md`](wiki/research/teaching-tips.md)** — the curated content library that powers the in-product tip surfaces.
 - **[`docs/marimo-console-design.md`](docs/marimo-console-design.md)** — forward-looking design notes for Cadence Console (Marimo notebook view). Not yet shipped.
 
 Operational truth lives inside the plugin: [`cadence-plugin/cadence-runtime.md`](cadence-plugin/cadence-runtime.md) (always-loaded), [`cadence-plugin/cadence-reference.md`](cadence-plugin/cadence-reference.md) (on-demand), [`cadence-plugin/workflows/verb-contracts.md`](cadence-plugin/workflows/verb-contracts.md), and the per-verb [`cadence-plugin/skills/<verb>/SKILL.md`](cadence-plugin/skills/) files.

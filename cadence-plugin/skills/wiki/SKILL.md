@@ -37,7 +37,7 @@ add-on (Obsidian Smart Connections), not a dependency.
    reference). Curation beats completeness — one line per artifact,
    newest first within each section.
 3. Render the index body (not its frontmatter). The same file is the
-   human front door in Obsidian — never let the rendered and on-disk
+   human front door in any Markdown reader — never let the rendered and on-disk
    versions diverge.
 
 ## Steps — ask

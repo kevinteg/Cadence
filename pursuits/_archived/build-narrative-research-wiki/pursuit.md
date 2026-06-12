@@ -1,8 +1,9 @@
 ---
 id: build-narrative-research-wiki
 type: finite
-status: active
+status: archived
 created: 2026-06-11
+narrative: wiki/narratives/build-narrative-research-wiki.md
 why: 'Narrative today is generated views over git activity; finished work leaves no durable artifact, and research evaporates when working files are cleared. Adopt the LLM-wiki pattern scoped to the Cadence hierarchy: research substrates under units of work, capstone narratives that graduate to a root-level wiki/ at closure, GC as the capstoning ritual, Obsidian as a first-class viewer. This answers the vision problem directly — finishing weeks feeling like you worked hard but cannot articulate what moved forward. Design: docs/narrative-wiki-architecture.md.'
 ---
 

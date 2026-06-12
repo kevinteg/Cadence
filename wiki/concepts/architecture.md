@@ -2,7 +2,7 @@
 
 *Design decisions and the rationale behind them. Operational mechanics (file formats, CLI catalog, lifecycle states, directory structure) live in `cadence-plugin/cadence-runtime.md` and `cadence-plugin/cadence-reference.md` and are not duplicated here.*
 
-This document answers the **why**: why the model is shaped the way it is, what tradeoffs got made, what we deliberately chose not to do. The vision (`docs/vision.md`) covers what Cadence is and what it does. The research foundations are in `docs/research-references.md`.
+This document answers the **why**: why the model is shaped the way it is, what tradeoffs got made, what we deliberately chose not to do. The vision (`wiki/concepts/vision.md`) covers what Cadence is and what it does. The research foundations are in `wiki/research/research-foundations.md`.
 
 ---
 
@@ -32,7 +32,7 @@ Pursuit ──► Project ──► Action
 
 The agent is a single voice, not a roster of named personas. The active **verb** determines the agent's tone, behavior, and guardrails. Brainstorm is non-judgmental during `diverging` and structured-critical during `converging`; start is silent-during-flow; narrate is reflective-not-evaluative; reflect is structured-and-forward-looking.
 
-**Why one voice and not multiple agents?** Two reasons. First, the user's mental model is "I'm using Cadence" — they don't think about which sub-agent is in the chair. Naming personas adds vocabulary the user has to learn. Second, the verb is already a deliberate choice the user is making; tying the register to the verb is automatic and visible. It also matches the user's cognitive mode to the tool's behavior, which the DMN/ECN switching research (`docs/research-references.md` §1) says is the load-bearing capacity for creative work.
+**Why one voice and not multiple agents?** Two reasons. First, the user's mental model is "I'm using Cadence" — they don't think about which sub-agent is in the chair. Naming personas adds vocabulary the user has to learn. Second, the verb is already a deliberate choice the user is making; tying the register to the verb is automatic and visible. It also matches the user's cognitive mode to the tool's behavior, which the DMN/ECN switching research (`wiki/research/research-foundations.md` §1) says is the load-bearing capacity for creative work.
 
 **Why verb-defined and not mode-declared?** A declared mode requires the user to remember to set it. The verb the user invokes IS the mode. No declaration step, no mismatch between declared and actual.
 
@@ -48,7 +48,7 @@ brainstorm <topic> ─────┘    diverging → converging               
                                                                   Project + Actions ──► start → complete → resolve
 ```
 
-The diverge process feeds candidate commitments. The converge process executes the work. They are deliberately separated because the research is unambiguous that mixing them degrades both (`docs/research-references.md` §1).
+The diverge process feeds candidate commitments. The converge process executes the work. They are deliberately separated because the research is unambiguous that mixing them degrades both (`wiki/research/research-foundations.md` §1).
 
 **Why explicit verbs for divergent work and not just "use brainstorm and capture"?** Without a named divergent surface, ideation collapses into capture (which is convergent — a queue to be processed). The brainstorm verb is the named container that protects divergent thinking from premature evaluation.
 
@@ -93,11 +93,11 @@ Project closure uses **override-with-reason** rather than absolute block — fri
 
 ## Persistence: Markdown Is the Source of Truth
 
-All Cadence state lives as markdown files in the user's repo: `pursuits/<id>/pursuit.md`, `pursuits/<id>/projects/<id>.md`, `brainstorms/<slug>/`, `thoughts/unprocessed/`, `thoughts/_raw/`, `reflections/`, `narratives/drafts/`, `narratives/session-log.md`, `validations/pending.md`, etc. There is no database; the deterministic CLI scans markdown directly and returns in well under a second on this repo.
+All Cadence state lives as markdown files in the user's repo: `pursuits/<id>/pursuit.md`, `pursuits/<id>/projects/<id>.md`, `brainstorms/<slug>/`, `thoughts/unprocessed/`, `thoughts/_raw/`, `reflections/`, `wiki/drafts/`, `narratives/session-log.md`, `validations/pending.md`, etc. There is no database; the deterministic CLI scans markdown directly and returns in well under a second on this repo.
 
 **Why markdown and not a database?** Three reasons. First, markdown survives any tool — the user owns their data forever, even if Cadence dies. Second, git history of project files is itself the activity stream the narrate verb reads from; the file IS the watermark. Third, the GTD/Zettelkasten/BASB literature converges on durable, portable, plain-text storage as the precondition for trust in a productivity system.
 
-**Why no SQLite hybrid?** The original architecture promised one as an index for cross-cutting queries. The deterministic CLI handles current scale fine. SQLite (or, more likely, an embedding index) is on the Future Work list (`docs/vision.md`). When performance hurts or semantic recall becomes load-bearing, the index ships. Until then it would be a maintenance tax with no benefit.
+**Why no SQLite hybrid?** The original architecture promised one as an index for cross-cutting queries. The deterministic CLI handles current scale fine. SQLite (or, more likely, an embedding index) is on the Future Work list (`wiki/concepts/vision.md`). When performance hurts or semantic recall becomes load-bearing, the index ships. Until then it would be a maintenance tax with no benefit.
 
 **Why git-history-as-activity-stream rather than a separate event log?** Git already stores every change with a timestamp, author, and diff. A separate event log would duplicate this and risk drift. The narrate verb's watermark-resume pattern reads the project-file git log directly: each generated narrative carries `consumed_through_commit` in its frontmatter, and the next narrative for the same cadence resumes from there. The narrative file IS the read pointer. No separate state.
 

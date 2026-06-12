@@ -65,7 +65,7 @@ Inside Claude Code, run:
 
 Init is a conversational SKILL — it walks you through:
 
-- Creating the directory structure (`pursuits/`, `brainstorms/`, `thoughts/`, `reflections/`, `narratives/`, `validations/`)
+- Creating the directory structure (`pursuits/`, `brainstorms/`, `thoughts/`, `reflections/`, `wiki/drafts/`, `validations/`)
 - Generating `cadence.yaml` with sensible defaults
 - Creating your first pursuit (it asks you for a **Why** — the values or role-anchor; never something the agent invents)
 - Adding the first project under that pursuit (an **Intent** narrative + at least one Action)
@@ -242,7 +242,7 @@ You name it; the agent helps you pressure-test the shape (proof at next Friday's
 /cadence:narrate week
 ```
 
-The agent reads the week's project-file commits (via `cadence project-activity --scope weekly`), composes a 3-5 paragraph narrative in **McAdams structure** (what happened / what it meant / what shifted / what's next), and saves it to `narratives/drafts/weekly-YYYY-Www.md` with a watermark in the frontmatter. The next weekly run resumes from the last consumed commit.
+The agent reads the week's project-file commits (via `cadence project-activity --scope weekly`), composes a 3-5 paragraph narrative in **McAdams structure** (what happened / what it meant / what shifted / what's next), and saves it to `wiki/drafts/weekly-YYYY-Www.md` with a watermark in the frontmatter. The next weekly run resumes from the last consumed commit.
 
 The output reads like:
 
@@ -281,8 +281,8 @@ That's the full loop. The same loop works for any pursuit — physical (this one
 
 ## What to read next
 
-- **[`docs/vision.md`](vision.md)** — the conceptual model. What a Pursuit is, what a Project is, why Cadence separates divergent and convergent modes, what we deliberately don't measure.
-- **[`docs/architecture.md`](architecture.md)** — design rationale. The tradeoffs behind the model.
+- **[`wiki/concepts/vision.md`](../wiki/concepts/vision.md)** — the conceptual model. What a Pursuit is, what a Project is, why Cadence separates divergent and convergent modes, what we deliberately don't measure.
+- **[`wiki/concepts/architecture.md`](../wiki/concepts/architecture.md)** — design rationale. The tradeoffs behind the model.
 - **[`cadence-plugin/README.md`](../cadence-plugin/README.md)** — the verb surface with examples.
 - **[`cadence-plugin/workflows/verb-contracts.md`](../cadence-plugin/workflows/verb-contracts.md)** — the per-verb behavioral contracts. The agent's register changes by verb; this doc says how.
 

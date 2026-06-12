@@ -2,7 +2,7 @@
 
 *Research foundations mapped to design patterns. Each entry answers: what does Cadence do, what research supports it, and how the research shaped the design.*
 
-This document is the design rationale for the patterns described in `docs/vision.md`. The vision doc keeps citations terse (load-bearing references inline only — McAdams for narrative structure, Gollwitzer for if-then plans, Zeigarnik/Masicampo–Baumeister for closure, Eurich/Trapnell for "what" not "why"). The full literature lives here.
+This document is the design rationale for the patterns described in `wiki/concepts/vision.md`. The vision doc keeps citations terse (load-bearing references inline only — McAdams for narrative structure, Gollwitzer for if-then plans, Zeigarnik/Masicampo–Baumeister for closure, Eurich/Trapnell for "what" not "why"). The full literature lives here.
 
 For the broader design synthesis — the four convergence claims, the diverge-vs-converge tension, prescriptive integration rules — see the **Cross-cutting convergences** and **Resolving the divergent-vs-GTD tension** sections at the end.
 

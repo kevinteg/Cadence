@@ -1,6 +1,6 @@
 ---
-cadence: pursuit
-pursuit: make-cadence-public
+cadence: pursuit-closure
+pursuit_id: make-cadence-public
 status: archived
 consumed_through_commit: 913604c
 pursuits_consulted:

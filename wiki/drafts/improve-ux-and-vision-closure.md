@@ -1,5 +1,5 @@
 ---
-cadence: pursuit
+cadence: pursuit-closure
 pursuit_id: improve-ux-and-vision
 generated_at: 2026-05-26T19:22:26Z
 consumed_through_commit: 0f494727ec1d4cb238bd42dbea29a5b17ceea446
