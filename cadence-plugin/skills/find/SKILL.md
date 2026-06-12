@@ -6,8 +6,9 @@ description: Search projects, brainstorms, captures, pursuits, and the wiki corp
 
 Surface entities matching a substring across all of Cadence's content
 — project IDs, intent prose, action texts, brainstorm workspaces +
-solutions, capture bodies, and pursuit metadata. Results are grouped
-by entity kind with snippets and per-group verb hints.
+solutions, living docs (slug, title, anchors, body), capture bodies,
+and pursuit metadata. Results are grouped by entity kind with
+snippets and per-group verb hints.
 
 ## Usage
 
@@ -20,12 +21,15 @@ by entity kind with snippets and per-group verb hints.
    cadence find "<query>"
    ```
    The CLI scans the snapshot, ranks by entity-kind priority
-   (Project > Capture > Pursuit) with recency as a tiebreaker, and
-   returns results grouped by kind with one snippet per result and a
-   per-group verb hint line.
+   (Project > Brainstorm > Living doc > Capture > Pursuit) with
+   recency as a tiebreaker, and returns results grouped by kind with
+   one snippet per result and a per-group verb hint line. Living docs
+   (`wiki/living/*.md`) are indexed natively — slug, title, anchors,
+   and body all match.
 
-2. **Extend across the wiki corpus.** When `wiki/` exists, grep it
-   (`grep -ril "<query>" wiki/ --include="*.md"`, excluding `_style/`).
+2. **Extend across the rest of the wiki corpus.** When `wiki/` exists,
+   grep it (`grep -ril "<query>" wiki/ --include="*.md"`, excluding
+   `_style/` and `living/` — the CLI already covered living docs).
    For each hit, pull the artifact's `title:` (or H1) plus one
    matching line as the snippet. Render as an additional **Wiki**
    group after the CLI groups:

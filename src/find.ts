@@ -1,11 +1,12 @@
 import type { Snapshot } from './types.js'
 
-export type FindKind = 'project' | 'brainstorm' | 'capture' | 'pursuit'
+export type FindKind = 'project' | 'brainstorm' | 'doc' | 'capture' | 'pursuit'
 
 export type FindResult = {
   kind: FindKind
   id: string
-  // Project: parent pursuit id. Brainstorm: phase. Capture/pursuit: omitted.
+  // Project: parent pursuit id. Brainstorm: phase. Doc: kind (log |
+  // phase-doc | live-notes). Capture/pursuit: omitted.
   context?: string
   matched_fields: string[]
   snippet: string
@@ -16,8 +17,9 @@ export type FindResult = {
 const KIND_PRIORITY: Record<FindKind, number> = {
   project: 1,
   brainstorm: 2,
-  capture: 3,
-  pursuit: 4,
+  doc: 3,
+  capture: 4,
+  pursuit: 5,
 }
 
 export function findEntities(
@@ -67,6 +69,26 @@ export function findEntities(
         matched_fields: matched.map((m) => m.name),
         snippet: extractSnippet(matched[0]!.text, q),
         timestamp: b.last_touched,
+      })
+    }
+  }
+
+  for (const d of snapshot.livingDocs) {
+    const fields = [
+      { name: 'slug', text: d.slug },
+      { name: 'title', text: d.title },
+      { name: 'anchors', text: d.anchors.join(' ') },
+      { name: 'body', text: d.body },
+    ]
+    const matched = fields.filter((f) => f.text.toLowerCase().includes(q))
+    if (matched.length > 0) {
+      results.push({
+        kind: 'doc',
+        id: d.slug,
+        context: d.kind,
+        matched_fields: matched.map((m) => m.name),
+        snippet: extractSnippet(matched[0]!.text, q),
+        timestamp: d.created ?? '',
       })
     }
   }

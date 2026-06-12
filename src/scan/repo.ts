@@ -6,6 +6,7 @@ import { scanBrainstorms } from './brainstorms.js'
 import { scanCaptures } from './captures.js'
 import { lastActivityMap, parseProjectPath } from './git-activity.js'
 import { scanLessonsWatermark } from './lessons.js'
+import { scanLivingDocs } from './living.js'
 import { scanProjects } from './projects.js'
 import { scanPursuits } from './pursuits.js'
 import { scanReflections } from './reflections.js'
@@ -22,6 +23,7 @@ export async function scan(
     captures,
     reflections,
     lessonsWatermark,
+    livingDocs,
   ] = await Promise.all([
     loadConfig(repoRoot),
     scanPursuits(repoRoot),
@@ -30,6 +32,7 @@ export async function scan(
     scanCaptures(repoRoot),
     scanReflections(repoRoot),
     scanLessonsWatermark(repoRoot),
+    scanLivingDocs(repoRoot),
   ])
 
   const activityMap = await lastActivityMap(repoRoot)
@@ -46,6 +49,7 @@ export async function scan(
     brainstorms,
     captures,
     reflections,
+    livingDocs,
     generatedAt: now.toISOString(),
     repoRoot,
     lastTouch,

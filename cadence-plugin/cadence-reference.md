@@ -1016,6 +1016,9 @@ artifacts: <N>
 ## Primers
 - [[<unit-id>-primer]] — <title> · <created> — <one-line summary>   (draft)
 
+## Living docs
+- [[<slug>]] — <title> · <kind> · <anchor summary> — updated <YYYY-MM-DD>   (frozen)
+
 ## Threads
 <!-- optional hand-curated cross-links: recurring topics across artifacts -->
 ```

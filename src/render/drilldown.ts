@@ -1,8 +1,13 @@
 import type {
+  LivingDoc,
   Project,
   Pursuit,
   Snapshot,
 } from '../types.js'
+import {
+  docsAnchoredToProject,
+  docsAnchoredToPursuit,
+} from '../scan/living.js'
 
 export function renderPursuits(snapshot: Snapshot): string {
   const out: string[] = []
@@ -78,6 +83,12 @@ export function renderPursuit(snapshot: Snapshot, pursuitId: string): string {
   if (done.length > 0) {
     out.push(`[${done.length} done projects hidden]`)
   }
+  const shelf = docsAnchoredToPursuit(snapshot.livingDocs, pursuit.id)
+  if (shelf.length > 0) {
+    out.push('')
+    out.push('Anchored docs:')
+    for (const d of shelf) out.push(formatDocLine(d))
+  }
   out.push('')
   out.push('Available actions:')
   for (const line of pursuitMenu(pursuit.id)) out.push('  ' + line)
@@ -133,6 +144,16 @@ export function renderProject(
     }
     out.push('')
   }
+  const shelf = docsAnchoredToProject(
+    snapshot.livingDocs,
+    project.pursuit,
+    project.id,
+  )
+  if (shelf.length > 0) {
+    out.push('Anchored docs:')
+    for (const d of shelf) out.push(formatDocLine(d))
+    out.push('')
+  }
   out.push('Available actions:')
   for (const line of projectMenu(project.id, project.status)) {
     out.push('  ' + line)
@@ -159,6 +180,11 @@ function formatProjectLine(idx: number, p: Project): string {
 function firstLine(text: string): string {
   const line = text.split('\n')[0]?.trim() ?? ''
   return line.length > 120 ? line.slice(0, 117) + '...' : line
+}
+
+function formatDocLine(d: LivingDoc): string {
+  const frozen = d.status === 'frozen' ? ' (frozen)' : ''
+  return `  - ${d.slug} [${d.kind}] — ${d.title}${frozen}`
 }
 
 // keep Pursuit referenced for future drill-downs that need pursuit-level fields

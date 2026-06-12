@@ -5,11 +5,12 @@ description: Query and curate the durable wiki corpus — front door (wiki/index
 # /wiki
 
 `/cadence:wiki` is the Query surface over the **durable corpus** —
-the promoted artifacts in `wiki/` (capstone narratives, primers, the
-meta-project). It does not read research substrates (that's
+the artifacts in `wiki/` (capstone narratives, primers, living docs,
+the meta-project). It does not read research substrates (that's
 `/research ask`) and it does not generate narratives (that's
 `/narrate capstone`). Layout and artifact formats live in
-`cadence-reference.md` → "Wiki — Durable Narrative Layer".
+`cadence-reference.md` → "Wiki — Durable Narrative Layer" (living
+docs: the "Living docs tier" subsection).
 
 The retrieval discipline is **index-first navigation**: read
 `wiki/index.md` (the catalog), drill into the relevant artifacts,
@@ -32,10 +33,13 @@ add-on (Obsidian Smart Connections), not a dependency.
    artifacts arrive when work closes. `/narrate capstone <unit>`
    promotes the first one." Exit.
 2. If `wiki/index.md` is missing or stale (artifacts exist that it
-   doesn't list), rebuild it: scan `wiki/narratives/` and
-   `wiki/primers/` frontmatter and write the front-door format (see
-   reference). Curation beats completeness — one line per artifact,
-   newest first within each section.
+   doesn't list), rebuild it: scan `wiki/narratives/`, `wiki/primers/`,
+   and `wiki/living/` frontmatter and write the front-door format (see
+   reference). Living docs render under a `## Living docs` section —
+   `- [[<slug>]] — <title> · <kind> · <anchor summary> — updated
+   <date>`, with `(frozen)` marking `status: frozen`. Curation beats
+   completeness — one line per artifact, newest first within each
+   section.
 3. Render the index body (not its frontmatter). The same file is the
    human front door in any Markdown reader — never let the rendered and on-disk
    versions diverge.
@@ -43,10 +47,13 @@ add-on (Obsidian Smart Connections), not a dependency.
 ## Steps — ask
 
 1. Read `wiki/index.md` first. Pick the most relevant artifacts from
-   the one-line summaries — at most 4. Read those files (never the
-   whole corpus blind).
+   the one-line summaries — at most 4, across all sections: living
+   docs are first-class ask sources alongside narratives and primers
+   ("where did I write about X?" often resolves to a log or phase
+   doc). Read those files (never the whole corpus blind).
 2. Synthesize the answer from what the artifacts actually say. Every
-   load-bearing claim cites inline: `[<slug>](wiki/narratives/<slug>.md)`.
+   load-bearing claim cites inline: `[<slug>](wiki/narratives/<slug>.md)`
+   (living docs: `[<slug>](wiki/living/<slug>.md)`).
    If the corpus can't answer, say so plainly — name which pursuit or
    substrate would have to produce the missing artifact.
 3. Append to `wiki/log.md`: `## [YYYY-MM-DD] ask | <question>` +
@@ -63,8 +70,8 @@ add-on (Obsidian Smart Connections), not a dependency.
 5. For a corpus past ~10 artifacts (or a question spanning many), run
    the read-and-synthesize step through the `research-ingest` subagent
    in ask mode pointed at the wiki (`unit_path=wiki`; artifacts in
-   `narratives/` + `primers/`) so bulk reads stay out of the main
-   thread.
+   `narratives/` + `primers/` + `living/`) so bulk reads stay out of
+   the main thread.
 
 ## Steps — open (`/wiki <slug>`)
 

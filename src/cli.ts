@@ -16,6 +16,11 @@ import { renderSnapshot, renderReport } from './render/snapshot.js'
 import { findEntities } from './find.js'
 import { renderFindResults } from './render/find.js'
 import {
+  docsAnchoredToProject,
+  docsAnchoredToPursuit,
+} from './scan/living.js'
+import type { LivingDoc } from './types.js'
+import {
   renderProject,
   renderPursuit,
   renderPursuits,
@@ -233,8 +238,15 @@ cli
     }
     const projects = snapshot.projects.filter((p) => p.pursuit === id)
     if (opts.json) {
+      const anchoredDocs = docsAnchoredToPursuit(snapshot.livingDocs, id).map(
+        docSummary,
+      )
       process.stdout.write(
-        JSON.stringify({ pursuit, projects }, null, 2) + '\n',
+        JSON.stringify(
+          { pursuit, projects, anchored_docs: anchoredDocs },
+          null,
+          2,
+        ) + '\n',
       )
     } else {
       process.stdout.write(renderPursuit(snapshot, id) + '\n')
@@ -262,7 +274,18 @@ cli
         process.exit(2)
       }
       if (opts.json) {
-        process.stdout.write(JSON.stringify(project, null, 2) + '\n')
+        const anchoredDocs = docsAnchoredToProject(
+          snapshot.livingDocs,
+          project.pursuit,
+          project.id,
+        ).map(docSummary)
+        process.stdout.write(
+          JSON.stringify(
+            { ...project, anchored_docs: anchoredDocs },
+            null,
+            2,
+          ) + '\n',
+        )
       } else {
         process.stdout.write(
           renderProject(snapshot, id, opts.pursuit) + '\n',
@@ -296,7 +319,7 @@ cli
 cli
   .command(
     'find <query>',
-    'Search projects, captures, and pursuits by case-insensitive substring',
+    'Search projects, brainstorms, living docs, captures, and pursuits by case-insensitive substring',
   )
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--json', 'Emit results as JSON')
@@ -1430,6 +1453,17 @@ function parseOriginIssue(
     repo,
     number,
     url: `https://github.com/${repo}/issues/${number}`,
+  }
+}
+
+function docSummary(d: LivingDoc) {
+  return {
+    slug: d.slug,
+    kind: d.kind,
+    title: d.title,
+    status: d.status,
+    anchors: d.anchors,
+    path: d.path,
   }
 }
 

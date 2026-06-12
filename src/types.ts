@@ -256,6 +256,27 @@ export type Capture = CaptureFrontmatter & {
   path: string
 }
 
+export const LivingDocFrontmatterSchema = z.object({
+  type: z.literal('living-doc'),
+  kind: z.enum(['log', 'phase-doc', 'live-notes']),
+  title: z.string(),
+  created: z.string().optional(),
+  status: z.enum(['living', 'frozen']).optional().default('living'),
+  /** Plain anchor strings: pursuit:<id>, project:<pursuit>/<id>, person:<slug>. */
+  anchors: z.array(z.string()).optional().default([]),
+  sources: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  consumed_through_commit: z.string().optional(),
+})
+export type LivingDocFrontmatter = z.infer<typeof LivingDocFrontmatterSchema>
+
+export type LivingDoc = LivingDocFrontmatter & {
+  /** Basename without .md — the wikilink namespace. */
+  slug: string
+  body: string
+  path: string
+}
+
 export const ReflectionFrontmatterSchema = z.object({
   date: z.string(),
   status: z.enum(['draft', 'in_progress', 'complete']),
@@ -358,6 +379,7 @@ export type Snapshot = {
   brainstorms: Brainstorm[]
   captures: Capture[]
   reflections: Reflection[]
+  livingDocs: LivingDoc[]
   generatedAt: string
   repoRoot: string
   lastTouch?: LastTouch | null

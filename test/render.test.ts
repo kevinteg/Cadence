@@ -56,6 +56,7 @@ function makeSnapshot(overrides: Partial<Snapshot> = {}): Snapshot {
     projects: [],
     brainstorms: [],
     captures: [],
+    livingDocs: [],
     reflections: [],
     generatedAt: NOW,
     repoRoot: '/tmp/fake',

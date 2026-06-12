@@ -50,6 +50,7 @@ function makeSnapshot(overrides: Partial<Snapshot> = {}): Snapshot {
     projects: [],
     ideas: [],
     captures: [],
+    livingDocs: [],
     reflections: [],
     generatedAt: '2026-04-30T12:00:00.000Z', // Thursday, ISO week 18
     repoRoot: '/tmp/none',

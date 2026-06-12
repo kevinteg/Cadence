@@ -3,11 +3,18 @@ import type { FindKind, FindResult } from '../find.js'
 const KIND_LABELS: Record<FindKind, string> = {
   project: 'Projects',
   brainstorm: 'Brainstorms',
+  doc: 'Living docs',
   capture: 'Captures',
   pursuit: 'Pursuits',
 }
 
-const KIND_ORDER: FindKind[] = ['project', 'brainstorm', 'capture', 'pursuit']
+const KIND_ORDER: FindKind[] = [
+  'project',
+  'brainstorm',
+  'doc',
+  'capture',
+  'pursuit',
+]
 
 // Per-entity-type verb hints. Inline at the end of each result group
 // so users see what's actionable for that specific kind.
@@ -23,6 +30,7 @@ const KIND_VERBS: Record<FindKind, string[]> = {
     '/cadence:brainstorm --crystallize',
     '/cadence:brainstorm --archive',
   ],
+  doc: ['/cadence:wiki <slug>', '/cadence:wiki ask "<question>"'],
   capture: ['/cadence:reflect (Get Clear) to triage'],
   pursuit: [
     '/cadence:status <id>',
@@ -73,7 +81,7 @@ function formatHeader(r: FindResult): string {
   if (r.kind === 'project') {
     return r.context ? `${r.id} (in ${r.context})` : r.id
   }
-  if (r.kind === 'brainstorm') {
+  if (r.kind === 'brainstorm' || r.kind === 'doc') {
     return r.context ? `${r.id} [${r.context}]` : r.id
   }
   if (r.kind === 'capture') {

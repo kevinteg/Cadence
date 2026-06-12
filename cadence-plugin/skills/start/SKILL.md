@@ -137,6 +137,9 @@ When a token could plausibly match both a pursuit and a project (e.g. fuzzy coll
    ## Active brainstorms tied here (if any)
    - `<slug>` [converging] — last touched <ago>
 
+   ## Doc shelf (if any)
+   - `<slug>` [<kind>] — <title> (frozen)
+
    ## Inbox slice (if any)
    <N> untriaged items reference this pursuit:
    - <one-line summary of the capture body or brainstorm topic> (<age>)
@@ -146,6 +149,8 @@ When a token could plausibly match both a pursuit and a project (e.g. fuzzy coll
    - `/cadence:brainstorm <slug>` — resume a brainstorm
    - `/cadence:start inbox` — triage the pursuit's slice (or all)
    ```
+
+   **Doc shelf.** The `anchored_docs` array in `cadence pursuit <id> --json` — living docs (`wiki/living/`) anchored to this pursuit or any of its projects. Omit the section when empty. `/cadence:wiki <slug>` opens one.
 
    **Inbox slice attribution heuristic.** A capture belongs to this pursuit if its `verb_context` references the pursuit ID (e.g. `seed:<pursuit-id>`, `note:<pursuit-id>`) OR its body contains the pursuit ID as a substring. A brainstorm belongs here if its `source_thoughts` array overlaps with captures attributed to this pursuit OR its slug contains a substantial pursuit-ID token. Conservative on purpose — false attribution is more confusing than no attribution.
 
@@ -165,6 +170,8 @@ When a token could plausibly match both a pursuit and a project (e.g. fuzzy coll
    `<pursuit>` / `<project>` — <N/M actions>
 
    **Intent**: <first sentence or two of intent>
+
+   **Docs**: `<slug>` [<kind>], `<slug>` [<kind>]     (from `anchored_docs`; omit when empty)
 
    **Next**: <first unchecked action text>
    ```
