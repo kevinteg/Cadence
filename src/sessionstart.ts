@@ -1,36 +1,6 @@
-import { createHash } from 'node:crypto'
 import type { Snapshot } from './types.js'
 import { inboxItems } from './inbox.js'
 import { readPendingValidations } from './validation/queue.js'
-
-/**
- * Computes a stable hash of the snapshot state that ambient surfaces
- * care about. Consumed by the Stop hook to decide whether anything
- * material has changed since the last logged stop (so the session-log
- * stays an audit trail, not a heartbeat).
- */
-export function computeStateHash(snapshot: Snapshot): string {
-  const view = inboxItems(snapshot)
-  const parts = {
-    pursuits: snapshot.pursuits
-      .map((p) => `${p.id}:${p.lifecycle}`)
-      .sort(),
-    projects: snapshot.projects
-      .map((p) => `${p.id}:${p.status}:${p.actionProgress.done}/${p.actionProgress.total}`)
-      .sort(),
-    inbox_count: view.counts.total,
-    brainstorms: snapshot.brainstorms
-      .map((b) => `${b.slug}:${b.phase}`)
-      .sort(),
-    validations: readPendingValidations(snapshot.repoRoot)
-      .map((v) => v.description)
-      .sort(),
-  }
-  return createHash('sha256')
-    .update(JSON.stringify(parts))
-    .digest('hex')
-    .slice(0, 16)
-}
 
 /**
  * Is this an empty repo? All of: zero pursuits, Inbox empty (no

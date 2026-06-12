@@ -499,6 +499,13 @@ cadence create-project <slug> --pursuit <pursuit-id> \
   --action "<first action>" --action "<second action>"
 ```
 
+New projects default to `status: on_hold` — active means "progress
+has happened," and the first checked action promotes automatically.
+Never pass `--status active` at creation unless work has demonstrably
+already begun (e.g., crystallizing a brainstorm where actions are
+already underway). Defining work is not starting it; creation-time
+`active` inflates the WIP count before any engagement.
+
 `--action` is repeatable — pass several at once when the user names
 multiple first moves. To add more actions after creation, prefer the
 bulk variant:
@@ -924,6 +931,7 @@ wiki/
     log.md              wiki-level event log
     narratives/         capstone narratives — promoted by /narrate capstone
     primers/            evergreen primers graduated from research substrates
+    living/             hand-authored living docs — logs, phase docs, live notes (never GC'd)
     _style/             house voice + user style overrides (seeded from plugin defaults)
     _meta/              retrospectives + cross-pursuit synthesis (never GC'd)
     drafts/             working-tier narratives (the old wiki/drafts/ home)
@@ -1054,13 +1062,91 @@ copies before generating, and the plugin never overwrites an existing
 file. Voice lives in version-controlled markdown, not in code —
 same externalization pattern as the tip library and coaching strings.
 
-## Ambient Surfaces — Inbox, SessionStart, Stop hook
+### Living docs tier (`wiki/living/`)
+
+Hand-authored documents that **accumulate during work and outlive any
+single project** — running relationship/session logs (a 1-1 log per
+person), rolling phase docs spanning several projects, free-form live
+notes. Distinct from both neighbors: the research substrate holds
+*deliberately studied sources* (unit-scoped, `raw/` GC-eligible); the
+graduated tier (`narratives/`, `primers/`) holds *finished* artifacts.
+Living docs are working-tier in spirit but durable by contract —
+**never GC'd**, no disposition ever deletes them.
+
+`wiki/living/` is the canonical home. A doc becomes living by living
+here with the frontmatter below — location plus schema, not schema
+alone. Existing hand-authored docs elsewhere (e.g., a legacy
+`narratives/` folder) adopt via `git mv` into `wiki/living/` plus a
+frontmatter block; git preserves history across the move.
+
+One schema, two producers: the user hand-writes body content;
+`/narrate --into <doc>` appends generated, dated sections (see
+below). Frontmatter extends the wiki artifact shape:
+
+```yaml
+---
+type: living-doc
+kind: log | phase-doc | live-notes
+title: <human title>
+created: <YYYY-MM-DD>
+status: living | frozen
+anchors:
+  - pursuit:<pursuit-id>
+  - project:<pursuit-id>/<project-id>
+  - person:<slug>
+sources: []                       # optional citation-stub lines, same shape as capstone Sources
+tags: []
+consumed_through_commit: <hash>   # present only once narrate --into has run
+---
+```
+
+**Anchors are the pointer seam generalized.** The existing seam points
+unit → artifact (`narrative: wiki/narratives/<id>.md`); anchors point
+artifact → units, as plain frontmatter strings parsed at read time —
+no backlink graph, no database. Entity views derive a doc shelf by
+scanning `wiki/living/*.md` frontmatter for matching anchors.
+`person:<slug>` anchors have no entity behind them yet (the People
+feature is future work) — they are valid, render on the index and in
+ask citations, and simply match no entity view.
+
+**Index + ask coverage.** `wiki/index.md` gains a `## Living docs`
+section — `- [[<slug>]] — <title> · <kind> · <anchor summary> —
+updated <YYYY-MM-DD>` — maintained incrementally like the other
+sections and rebuilt from frontmatter when stale. `/wiki ask` reads
+living docs through the same index-first path and cites them like any
+artifact; `cadence find` indexes them (a `doc` result kind) so
+"where did I write about X?" reaches the logs from both surfaces.
+
+**`/narrate --into <doc>` (append mechanic).** Generates a dated
+section from project-file activity since the doc's own watermark and
+appends it: `## [YYYY-MM-DD] <scope>` + prose, then advances the
+doc's `consumed_through_commit`. Generated sections are append-only —
+hand-authored content is never rewritten. This is the capstone
+watermark machinery applied per-doc instead of per-artifact.
+
+**Disposition at `/resolve` (never deletion).** When a unit resolves,
+each living doc anchored to it gets a prompt alongside the research
+GC ritual:
+- **Freeze** — set `status: frozen`; the doc is complete as written
+- **Re-anchor** — point the anchor at a successor unit; the doc keeps living
+- **Keep living** — other anchors still feed it; no change
+Frozen docs stay in `wiki/living/`, stay indexed, stay askable —
+freezing is a state change, not a move.
+
+**Event log + lint.** `wiki/log.md` ops extend with
+`living-add | living-freeze | living-reanchor`, same H2 shape.
+`/wiki lint` checks living docs for dangling anchors (anchor names a
+unit that doesn't exist), missing index lines, and docs with
+`status: living` whose anchored units have all resolved (a quiet
+"this doc may want freezing or re-anchoring" finding).
+
+## Ambient Surfaces — Inbox, SessionStart
 
 The v1.1 ambient surfaces share one mental model: **render state
 where the user already is, rather than asking them to navigate to
-it.** Three pieces — the Inbox view, the SessionStart splash, and
-the Stop-hook session log — are described here as a set because they
-share data structures, suppression mechanics, and canonical copy.
+it.** Two pieces — the Inbox view and the SessionStart splash — are
+described here as a set because they share data structures,
+suppression mechanics, and canonical copy.
 
 ### Inbox view
 
@@ -1159,31 +1245,13 @@ whether it had actually run. The dashboard reappears on every new
 conversation; the tip category cool-down in `pickDashboardTip` keeps
 the marginalia from feeling repetitive.
 
-### Stop hook + session log
-
-The `Stop` event in `hooks.json` invokes `cadence stop-hook` when
-Claude Code finishes a turn naturally. The hook:
-
-1. Computes the same state hash as the SessionStart splash.
-2. Reads `.cadence/last_session_log.json` (the hash + timestamp of
-   the last logged stop). If the hash is unchanged, emits an empty
-   envelope and exits — no log line.
-3. If the hash has changed, appends a one-line summary to
-   `narratives/session-log.md`:
-   ```
-   2026-05-21T14:23:45Z — pursuits:3 projects:5 (12/24 actions) inbox:4 brainstorms:1
-   ```
-   Counts come from the snapshot — no narrative claim, no editorial.
-4. Updates `.cadence/last_session_log.json` with the new hash so
-   the next unchanged stop is a no-op.
-
-Stop-hook failures are swallowed silently — a session-log issue
-must never break the user's session. `narratives/` is lazy-created
-on first append; pre-existing repos don't need a migration.
-
-The SubagentStop and PreCompact hooks are NOT wired. SubagentStop is
-too chatty (fires per subagent invocation); PreCompact fires after
-the user has already lost the thread.
+The Stop, SubagentStop, and PreCompact hooks are NOT wired. A Stop
+hook that appended a one-line counters log to
+`narratives/session-log.md` shipped in v1.1 and was removed in v1.2 —
+nothing consumed the log, and it kept a root-level `narratives/`
+directory alive after the wiki fold retired it. SubagentStop is too
+chatty (fires per subagent invocation); PreCompact fires after the
+user has already lost the thread.
 
 ## Maintainer Labels (Upstream Cadence Repo)
 

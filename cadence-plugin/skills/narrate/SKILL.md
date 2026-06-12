@@ -57,14 +57,6 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons`, 
 
    If a prior file exists, read its frontmatter `consumed_through_commit` (or `pursuits_consulted` for lessons cadence — see below). That's the resume point. Otherwise, no resume point — the CLI defaults the window per cadence.
 
-   **Legacy location:** repos that predate the wiki fold hold older
-   narratives in `narratives/drafts/`. When nothing matches under
-   `wiki/drafts/`, check the legacy path for the watermark (and for
-   the lessons corpus, read both). New writes always land in
-   `wiki/drafts/`. One-time migration: `git mv narratives/drafts
-   wiki/drafts` — offer it when the legacy path is hit, never run it
-   unprompted.
-
    For **lessons** cadence, the watermark is set-based, not commit-based: the prior narrative's frontmatter carries `pursuits_consulted: [<list of pursuit-ids>]` and `included_dropped: <bool>`. Re-runs read the current set of resolved pursuits (in `_archived/` and `_dropped/`) minus the consulted set, and synthesize patterns only from the new material. If no new pursuits have resolved since the prior run, return null and skip generation rather than re-running over the same corpus.
 
 3. **Surface a brain-tickler tip (optional, frequency-capped).** Before calling the narrator subagent — which can run for tens of seconds — call:

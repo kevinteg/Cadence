@@ -11,7 +11,6 @@ import {
   isEmptyRepo,
   renderEmptyRepoCoaching,
 } from './sessionstart.js'
-import { runStopHook } from './stophook.js'
 import { computeSuggestionSignals } from './render/signals.js'
 import { renderSnapshot, renderReport } from './render/snapshot.js'
 import { findEntities } from './find.js'
@@ -190,26 +189,6 @@ cli
   )
 
 cli
-  .command(
-    'stop-hook',
-    "Stop-hook handler. When state has changed since the last logged stop, appends a one-line session-log entry to narratives/session-log.md and updates .cadence/last_session_log.json. Otherwise no-op. Emits empty stdout — Claude Code's hook schema rejects hookSpecificOutput for Stop, and empty output naturally surfaces nothing.",
-  )
-  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .action(async (opts: { root?: string }) => {
-    const repoRoot = await resolveRepoRoot(opts.root)
-    // Silent no-op for uninitialized repos — the Stop hook fires on
-    // every turn regardless of whether Cadence is active here.
-    if (!isCadenceRepo(repoRoot)) return
-    try {
-      const snapshot = await scan(repoRoot)
-      await runStopHook(repoRoot, snapshot)
-    } catch {
-      // Stop hooks must never break a session. Swallow failures —
-      // worst case is a missed log line.
-    }
-  })
-
-cli
   .command('flags', 'Print reconciler flags only')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--json', 'Emit flags as JSON')
@@ -386,7 +365,7 @@ cli
   .command('create-project <id>', 'Create a new project')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--pursuit <id>', 'Pursuit id (required)')
-  .option('--status <status>', 'active | on_hold | done | dropped')
+  .option('--status <status>', 'active | on_hold | done | dropped (default: on_hold)')
   .option('--title <text>', 'H1 title')
   .option('--description <text>', 'Intro paragraph (no header)')
   .option('--intent <text>', 'Intent narrative — motivation, scope, felt-sense of done')
@@ -529,10 +508,10 @@ cli
 cli
   .command(
     'archive-brainstorm <slug>',
-    'Close out a brainstorm workspace. --keep moves it to narratives/brainstorms/<slug>/; --delete removes it.',
+    'Close out a brainstorm workspace. --keep moves it to wiki/_archive/brainstorms/<slug>/; --delete removes it.',
   )
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
-  .option('--keep', 'Move to narratives/brainstorms/<slug>/ (default)')
+  .option('--keep', 'Move to wiki/_archive/brainstorms/<slug>/ (default)')
   .option('--delete', 'Delete the workspace outright')
   .action(
     async (

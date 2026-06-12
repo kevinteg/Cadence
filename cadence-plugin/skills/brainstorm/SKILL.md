@@ -17,7 +17,7 @@ Reference `workflows/verb-contracts.md` for the brainstorm register.
 - `/cadence:brainstorm <slug>` — start or resume the workspace at `brainstorms/<slug>/`
 - `/cadence:brainstorm` — no-arg: list active workspaces (phase diverging or converging), offer to open one
 - `/cadence:brainstorm --crystallize` — in a converging workspace: materialize a pursuit from the selected solution
-- `/cadence:brainstorm --archive` — close out the workspace (keep in narratives/ by default; --delete to remove)
+- `/cadence:brainstorm --archive` — close out the workspace (keep in wiki/_archive/brainstorms/ by default; --delete to remove)
 
 Arguments resolve via fuzzy match against existing workspace slugs.
 
@@ -144,7 +144,7 @@ cadence archive-brainstorm <slug> --delete   # remove outright
 ```
 
 Default keeps the workspace as a narrative artifact at
-`narratives/brainstorms/<slug>/`. Delete is for actual mistakes.
+`wiki/_archive/brainstorms/<slug>/`. Delete is for actual mistakes.
 
 ## Guardrails
 

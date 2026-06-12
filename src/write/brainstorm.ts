@@ -175,7 +175,7 @@ export async function archiveBrainstorm(
   meta.phase = 'archived'
   meta.last_touched = isoTimestamp(opts.now ?? new Date())
   await writeMeta(dir, meta)
-  const target = path.join(repoRoot, 'narratives', 'brainstorms', opts.slug)
+  const target = path.join(repoRoot, 'wiki', '_archive', 'brainstorms', opts.slug)
   await mkdir(path.dirname(target), { recursive: true })
   await rename(dir, target)
   return {

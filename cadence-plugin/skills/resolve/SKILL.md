@@ -122,7 +122,7 @@ move (no ritual, no narrative).
    ```
 
 4. Walk each unresolved brainstorm. For each:
-   - **Archive** — close the workspace via `/cadence:brainstorm --archive` (keep in narratives/ or delete)
+   - **Archive** — close the workspace via `/cadence:brainstorm --archive` (keep in wiki/_archive/brainstorms/ or delete)
    - **Crystallize** — materialize one of its solutions as a new pursuit via `/cadence:brainstorm --crystallize`
 
 5. Once all brainstorms are resolved, check that all Projects are done or

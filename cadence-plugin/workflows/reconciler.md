@@ -205,7 +205,7 @@ Skipped silently when `gh` is unavailable or unauthed — no error, no flag.
 **Severity:** `info`
 
 **Logic:**
-1. Read the set-watermark of the latest lessons narrative (`lessons-*.md` in `wiki/drafts/`, legacy `narratives/drafts/` fallback) — its `pursuits_consulted` list. Scanned into `snapshot.lessons_watermark`.
+1. Read the set-watermark of the latest lessons narrative (`lessons-*.md` in `wiki/drafts/`) — its `pursuits_consulted` list. Scanned into `snapshot.lessons_watermark`.
 2. Count resolved pursuits (archived + dropped) NOT in the consulted set.
 3. Flag when the count reaches `retrospective_due_threshold` (default 3).
 

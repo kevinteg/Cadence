@@ -1926,7 +1926,7 @@ tips:
     type: verb-hint
     content: |
       One project closer to closing the pursuit. `/cadence:status
-      <pursuit>` to see what's left, or `/cadence:close <pursuit>` if
+      <pursuit>` to see what's left, or `/cadence:resolve <pursuit>` if
       you're ready.
     triggers: [verb-resolve, state-pursuit-near-completion]
     tone: directive

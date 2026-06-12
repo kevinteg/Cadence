@@ -6,18 +6,17 @@ import type { LessonsWatermark } from '../types.js'
 
 /**
  * Finds the most recent lessons narrative (`lessons-YYYY-MM-DD.md`) and
- * returns its set-watermark. Checks the wiki tier first and the legacy
- * `narratives/drafts/` location for repos that predate the wiki fold.
- * Latest wins by the date embedded in the filename (lexicographic on
- * the basename works for ISO dates).
+ * returns its set-watermark. Latest wins by the date embedded in the
+ * filename (lexicographic on the basename works for ISO dates).
  */
 export async function scanLessonsWatermark(
   repoRoot: string,
 ): Promise<LessonsWatermark | null> {
-  const files = await fg(
-    ['wiki/drafts/lessons-*.md', 'narratives/drafts/lessons-*.md'],
-    { cwd: repoRoot, absolute: true, onlyFiles: true },
-  )
+  const files = await fg(['wiki/drafts/lessons-*.md'], {
+    cwd: repoRoot,
+    absolute: true,
+    onlyFiles: true,
+  })
   if (files.length === 0) return null
   const latest = files
     .map((f) => ({ file: f, base: path.basename(f) }))
