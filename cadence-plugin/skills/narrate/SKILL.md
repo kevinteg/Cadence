@@ -16,8 +16,9 @@ Generate narrative from activity data — committed changes to project files in 
 - `/narrate <pursuit>` — full arc of a pursuit (cadence: pursuit)
 - `/narrate lessons [--from completed|dropped|both]` — synthesize recurring patterns across multiple resolved pursuits (cadence: lessons)
 - `/narrate capstone <project|pursuit>` — the polished, source-grounded narrative of one unit, promoted to `wiki/narratives/` (cadence: capstone). The graduation path of the wiki layer — see "Capstone cadence" below.
+- `/narrate --into <doc-slug>` — append a generated, dated section to a living doc (`wiki/living/<slug>.md`), advancing the doc's own watermark (cadence: into). See "Into cadence" below.
 
-Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons`, `capstone` are reserved keywords; anything else resolves to a pursuit ID.
+Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons`, `capstone` are reserved keywords; anything else resolves to a pursuit ID. `--into` takes a living-doc slug, resolved against `wiki/living/*.md`.
 
 ## Steps
 
@@ -32,6 +33,7 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons`, 
    | `<pursuit-id>` | `pursuit` | `wiki/drafts/pursuit-<id>-YYYY-MM-DD.md` |
    | `lessons` | `lessons` | `wiki/drafts/lessons-YYYY-MM-DD.md` |
    | `capstone <unit>` | `capstone` | `wiki/narratives/<unit-id>.md` |
+   | `--into <doc-slug>` | `into` | `wiki/living/<slug>.md` (append, never overwrite) |
 
    For pursuit cadence, fuzzy-match the argument against `cadence pursuits --json`; ask if ambiguous.
 
@@ -218,6 +220,63 @@ Capstone runs the same six steps with these deviations:
 6. **Present** under `Capstone — <title>`, mention both the saved path
    and the pointer that was written.
 
+## Into cadence — the living-doc append path
+
+`--into` runs the same six steps with these deviations:
+
+1. **Resolve the doc.** Match the slug against `wiki/living/*.md`
+   (fuzzy OK; ambiguous → list candidates). The file must carry
+   `type: living-doc` frontmatter. If `status: frozen`, refuse:
+   "`<slug>` is frozen — it's complete as written. Set `status: living`
+   (or re-anchor it) before appending." If the slug doesn't resolve:
+   "No living doc matches '<slug>'. `/cadence:wiki` lists the corpus."
+
+2. **Scope comes from the anchors.** Map each anchor to an activity
+   slice: `project:<pursuit>/<id>` → `--scope pursuit --pursuit
+   <pursuit> --project <id>`; `pursuit:<id>` → `--scope pursuit
+   --pursuit <id>`. `person:` anchors have no activity stream — skip
+   them. A doc with no unit anchors can't be narrated into: refuse
+   with "add a `pursuit:` or `project:` anchor first."
+
+3. **The doc is its own watermark.** Resume point is the doc's
+   frontmatter `consumed_through_commit`; absent (first `--into` run)
+   → no `--since-commit`, the scope default window applies. As with
+   other cadences, run `cadence project-activity --json` once in the
+   main thread for the watermark hashes before delegating.
+
+4. **Brief the narrator** with scope `into:<slug>`, the anchored
+   units, and the resume hint. `[Budget: 5 tool calls.]` The agent
+   returns 1-3 paragraphs of log-register prose — no H1, no heading,
+   no frontmatter — or the literal sentinel `EMPTY_WINDOW` when
+   nothing happened since the watermark.
+
+5. **Append, never rewrite.** On prose: append to the end of the doc
+   body:
+
+   ```markdown
+   ## [YYYY-MM-DD] <scope label>
+
+   <prose>
+   ```
+
+   (`<scope label>` names the anchored unit(s), e.g.
+   `marathon-2026/build-base-mileage`.) Then update the frontmatter
+   `consumed_through_commit` to the new hash via Edit. Hand-authored
+   content is never modified — the only legal edits are the appended
+   section and the watermark line.
+
+   On `EMPTY_WINDOW`: append nothing. Advance the watermark anyway
+   and tell the user: "No activity in `<units>` since the last
+   append — watermark advanced, nothing written." (A living doc
+   accumulates signal, not heartbeats — the empty-window-still-saves
+   guardrail applies to the watermark only, not to noise sections.)
+
+6. **Maintain the discovery layer.** Refresh the doc's `wiki/index.md`
+   line (`updated <YYYY-MM-DD>`) and append to `wiki/log.md`:
+   `## [YYYY-MM-DD] into | <slug> — <scope label>`.
+
+Present under `<doc title> — appended [YYYY-MM-DD]`, mention the path.
+
 ## Fallback (in-thread)
 
 If the narrator subagent invocation fails, run the data fetching and narrative composition inline:
@@ -235,7 +294,8 @@ Compose the McAdams narrative directly and write the file with the same watermar
 - **Redemption-aware.** A hard week gets an honest narrative, not sugarcoating.
 - **Narratives are views over data.** They are generated from project-file git history, ideas, and captures — not separate content to maintain.
 - **The narrative file IS the watermark.** Do not split watermark metadata into a separate pointer file. Subsequent runs read the latest narrative for the cadence and resume from its `consumed_through_commit`.
-- **Empty windows still get saved.** If no commits since the resume point, the narrator returns a short "quiet day" paragraph; save the file anyway with the new watermark so the next run resumes correctly.
+- **Empty windows still get saved.** If no commits since the resume point, the narrator returns a short "quiet day" paragraph; save the file anyway with the new watermark so the next run resumes correctly. (Into cadence excepted: the watermark advances but no section is appended — see "Into cadence" step 5.)
+- **Into is append-only.** `--into` never modifies existing doc content; the only legal edits are the new dated section and the `consumed_through_commit` frontmatter line. Frozen docs refuse the append.
 - **Capstones promote; they don't embed.** The artifact lands in `wiki/narratives/`; the unit file carries only the one-line `narrative:` pointer. Never inline narrative prose into project or pursuit files.
 - **Style files are the user's voice.** Read them every capstone run; never overwrite a user-edited `wiki/_style/` file with plugin defaults.
 - **Capstone diagrams are Mermaid-only** and gated on `effective_domain: digital | hybrid`.

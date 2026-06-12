@@ -12,8 +12,9 @@ the /narrate skill passes you.
 
 Operate with a tool-call budget proportional to the cadence:
 
-- **daily / weekly / monthly / annual** — ~5 tool calls. One
-  `cadence project-activity` fetch + composition is the healthy path.
+- **daily / weekly / monthly / annual / into** — ~5 tool calls. One
+  `cadence project-activity` fetch + composition is the healthy path
+  (into: one fetch per anchored unit, rarely more than two).
 - **pursuit (full arc, closure, lessons)** — ~8 tool calls.
   Multi-pursuit synthesis legitimately needs more reads.
 - **capstone** — ~8 tool calls. Dual-source: activity fetch + style
@@ -33,6 +34,12 @@ skill will surface your partial output unchanged.
 - **capstone** → polished, source-grounded wiki artifact for one unit
   (project or pursuit). Dual-source, style-aware, diagram-eligible —
   see the capstone cadence contract below.
+- **into** → a short dated section for a living doc (`wiki/living/`):
+  1-3 paragraphs covering activity in the anchored units since the
+  doc's watermark. Log-entry register — concrete, present-focused, no
+  arc ceremony. No H1, no frontmatter, no section heading (the skill
+  supplies the `## [date]` header). If the activity window is empty,
+  return exactly `EMPTY_WINDOW` and nothing else.
 - **lessons** → cross-pursuit synthesis. NOT a single-pursuit arc — your
   job is to surface 3-5 *recurring patterns* that show up across multiple
   resolved pursuits. Frame archived (shipped) and dropped (didn't ship)
@@ -46,9 +53,7 @@ skill will surface your partial output unchanged.
 For lessons cadence specifically: the source corpus is `pursuits/_archived/`
 and (optionally) `pursuits/_dropped/`. Read each pursuit's `pursuit.md`
 plus its resolution narrative at `wiki/drafts/<id>-closure.md`
-(archived) or `wiki/drafts/<id>-drop.md` (dropped) — falling back to
-the legacy `narratives/drafts/` location for repos that predate the
-wiki fold. The `--from`
+(archived) or `wiki/drafts/<id>-drop.md` (dropped). The `--from`
 filter and the prior narrative's `pursuits_consulted` set determine
 which pursuits are in scope — skip the ones already consulted.
 
@@ -58,8 +63,10 @@ Default to McAdams only when the cadence is monthly, annual, or pursuit.
 
 A scope, plus an optional resume point:
 
-- `daily`, `weekly`, `monthly`, `annual`, `pursuit:<id>`, or
-  `capstone:<pursuit-id>[/<project-id>]`
+- `daily`, `weekly`, `monthly`, `annual`, `pursuit:<id>`,
+  `capstone:<pursuit-id>[/<project-id>]`, or `into:<doc-slug>` (with
+  the doc's anchored units listed — run one `cadence project-activity
+  --scope pursuit --pursuit <id> [--project <id>]` fetch per unit)
 - optional `--since-commit <hash>` — read forward from this commit; the
   /narrate skill computes it from the most recent prior narrative for
   the same cadence (the narrative IS the watermark)

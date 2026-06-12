@@ -37,6 +37,6 @@ Felt-sense of done: a hand-authored living log anchored to a pursuit/project/per
 - [x] Design the living-doc tier: home (wiki/ subdirectory vs indexed-in-place), frontmatter schema (kind/status/anchors/sources) as an extension of the wiki artifact shape; write it into cadence-reference.md.
 - [x] Wire living docs into the ask surface: wiki/index.md entries + /wiki ask coverage with citations; index them in cadence find.
 - [x] Surface anchored docs on entity views: /start <project>, cadence status <project>, and the pursuit workspace list their doc shelf.
-- [ ] Ship narrate --into <doc>: append a dated generated section, advance a per-doc consumed_through_commit watermark.
-- [ ] Extend /resolve disposition to anchored living docs: freeze / re-anchor / hand off prompt alongside the research GC ritual.
+- [x] Ship narrate --into <doc>: append a dated generated section, advance a per-doc consumed_through_commit watermark.
+- [x] Extend /resolve disposition to anchored living docs: freeze / re-anchor / hand off prompt alongside the research GC ritual.
 - [ ] Validate ask-coverage end to end (living log + verbatim-phrase query via /wiki ask and cadence find), then reply on #5 with what shipped vs what the substrate/wiki already covered.

@@ -1053,7 +1053,9 @@ cross-pursuit syntheses land here as they graduate. Never GC'd.
 Append-only, same H2 shape as research logs:
 `## [YYYY-MM-DD] <op> | <subject>` where `<op>` is
 `promote` (capstone landed), `graduate` (primer landed), `ask`,
-`file-back` (compounding write), or `lint` (health scan).
+`file-back` (compounding write), `lint` (health scan), or one of the
+living-doc ops (`living-add`, `living-freeze`, `living-reanchor`,
+`into` — see "Living docs tier").
 
 ### Style files (`wiki/_style/`)
 
@@ -1123,9 +1125,13 @@ artifact; `cadence find` indexes them (a `doc` result kind) so
 **`/narrate --into <doc>` (append mechanic).** Generates a dated
 section from project-file activity since the doc's own watermark and
 appends it: `## [YYYY-MM-DD] <scope>` + prose, then advances the
-doc's `consumed_through_commit`. Generated sections are append-only —
-hand-authored content is never rewritten. This is the capstone
-watermark machinery applied per-doc instead of per-artifact.
+doc's `consumed_through_commit`. Scope derives from the doc's
+`pursuit:`/`project:` anchors (`person:` anchors have no activity
+stream). Generated sections are append-only — hand-authored content
+is never rewritten; empty windows advance the watermark without
+appending a section. Frozen docs refuse the append (unfreeze or
+re-anchor first). This is the capstone watermark machinery applied
+per-doc instead of per-artifact.
 
 **Disposition at `/resolve` (never deletion).** When a unit resolves,
 each living doc anchored to it gets a prompt alongside the research
@@ -1137,7 +1143,8 @@ Frozen docs stay in `wiki/living/`, stay indexed, stay askable —
 freezing is a state change, not a move.
 
 **Event log + lint.** `wiki/log.md` ops extend with
-`living-add | living-freeze | living-reanchor`, same H2 shape.
+`living-add | living-freeze | living-reanchor | into` (the last
+logged per `/narrate --into` append), same H2 shape.
 `/wiki lint` checks living docs for dangling anchors (anchor names a
 unit that doesn't exist), missing index lines, and docs with
 `status: living` whose anchored units have all resolved (a quiet

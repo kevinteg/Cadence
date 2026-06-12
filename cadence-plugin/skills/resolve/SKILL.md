@@ -52,7 +52,11 @@ a one-line note: "Pursuits don't take --state — running closure ritual."
    (`pursuits/<pursuit>/projects/<id>/research/` exists), walk the GC
    ritual — see "Research disposition (the GC ritual)" below. No
    substrate → skip silently.
-6. Check the `--include-pursuit` response: if `allResolved: true`,
+6. **Living-doc disposition.** If the step-2 `--json` response carries
+   `anchored_docs` entries with `status: living`, walk the
+   freeze / re-anchor / keep prompt for each — see "Living-doc
+   disposition" below. None → skip silently.
+7. Check the `--include-pursuit` response: if `allResolved: true`,
    prompt the upward-completion question:
    "All projects in [pursuit] resolved. `/resolve <pursuit>` to walk
    the closure ritual?"
@@ -70,7 +74,10 @@ a one-line note: "Pursuits don't take --state — running closure ritual."
    project's research is often the most valuable thing it produced.
    The no-capstone encouragement applies with drop framing ("the
    project didn't ship; the learning can still graduate").
-5. Same upward-completion check via `--include-pursuit`.
+5. **Living-doc disposition.** Same as the complete path. A dropped
+   project's living docs often hold the why-it-didn't-ship story —
+   freezing preserves it; re-anchoring carries it into the successor.
+6. Same upward-completion check via `--include-pursuit`.
 
 ---
 
@@ -136,6 +143,15 @@ move (no ritual, no narrative).
    project-scoped substrates beneath it whose disposition was skipped
    or kept earlier. This is the last natural moment — after the move,
    the substrate travels into `_archived/`/`_dropped/` as-is.
+
+   **Living-doc sweep, same moment.** Walk the freeze / re-anchor /
+   keep prompt (see "Living-doc disposition" below) for every
+   `status: living` doc in the pursuit's `anchored_docs`
+   (`cadence pursuit <id> --json`) — that set covers docs anchored to
+   the pursuit directly and through any of its projects. Unlike the
+   substrate, the docs themselves don't move: `wiki/living/` is
+   outside the pursuit directory. The sweep exists because the
+   anchors are about to point at a resolved unit.
 
 7. **Move the pursuit via the CLI** — to `archived` for completed,
    `dropped` for dropped:
@@ -251,6 +267,44 @@ the sources we pulled from"* holds even after `raw/` is gone.
 
 ---
 
+## Living-doc disposition (freeze / re-anchor / keep)
+
+Runs whenever a unit with anchored living docs resolves — project
+paths after the status mutation, pursuit path alongside the research
+sweep. **Never deletion** — living docs are durable by contract; the
+ritual decides what their anchors mean now that the unit is closing,
+not whether they survive.
+
+For each `status: living` doc in the resolving unit's `anchored_docs`:
+
+```
+`<slug>` [<kind>] — <title> is anchored to this <project|pursuit>.
+  [F] Freeze — the doc is complete as written; it stays indexed and
+      askable, but /narrate --into refuses further appends
+  [R] Re-anchor — point it at a successor unit; the doc keeps living
+  [K] Keep living (default when other anchors still feed it) — no change
+```
+
+Apply the choice:
+
+- **Freeze** — set frontmatter `status: frozen` via Edit. Refresh the
+  doc's `wiki/index.md` line with the `(frozen)` marker. Append to
+  `wiki/log.md`: `## [YYYY-MM-DD] living-freeze | <slug>`.
+- **Re-anchor** — ask for the successor unit (fuzzy-resolve against
+  open pursuits/projects). Replace the resolving unit's anchor in the
+  doc's `anchors:` array via Edit; leave unrelated anchors untouched.
+  Refresh the index line's anchor summary. Append:
+  `## [YYYY-MM-DD] living-reanchor | <slug> — <old-anchor> → <new-anchor>`.
+- **Keep living** — no file change. Legal both when other anchors
+  still feed the doc and as an explicit defer; the wiki-lint
+  "living doc whose anchored units have all resolved" finding will
+  resurface it later if it goes stale.
+
+When the same doc is anchored to several resolving units (pursuit
+sweep), prompt once — not once per anchor.
+
+---
+
 ## Cancellation mid-ritual
 
 If the user cancels mid-ritual ("actually, never mind"):
@@ -267,4 +321,5 @@ If the user cancels mid-ritual ("actually, never mind"):
 - Resolving a project as `complete` with unchecked actions requires explicit override (the agent surfaces the count and asks).
 - `--state` is a project-only argument. Surfacing it on a pursuit request gets a one-line note and falls through to closure.
 - **GC is prompted, never silent.** No research file is deleted or moved without the disposition prompt + ELI5 recap. Delete-by-default applies only once a capstone exists; "Keep" is always on the menu.
-- **Only `raw/` is GC-eligible.** Distilled notes, index, and log are durable working state; the wiki tier (capstones, primers) is never GC'd.
+- **Only `raw/` is GC-eligible.** Distilled notes, index, and log are durable working state; the wiki tier (capstones, primers, living docs) is never GC'd.
+- **Living-doc disposition never deletes.** Freeze, re-anchor, and keep are the only outcomes; a frozen doc stays in `wiki/living/`, indexed and askable. Frozen is a state change, not a move.
