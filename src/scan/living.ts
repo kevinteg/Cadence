@@ -5,10 +5,13 @@ import { parseFrontmatter } from '../parse/frontmatter.js'
 import { type LivingDoc, LivingDocFrontmatterSchema } from '../types.js'
 
 /**
- * Scans the wiki living-docs tier (`wiki/living/*.md`). Tolerant by
- * design: files without `type: living-doc` or with malformed
- * frontmatter are skipped silently — a hand-authored doc mid-edit
- * must never break the snapshot.
+ * Scans the wiki living-docs tier under `wiki/living/` recursively, so
+ * nested shelves like `living/1-1s/` are seen (not just the tier root).
+ * Tolerant by design: files without `type: living-doc` or with
+ * malformed frontmatter are skipped silently — a hand-authored doc
+ * mid-edit must never break the snapshot. This typed view feeds the
+ * anchoring features (doc shelves, narrate --into, resolve disposition);
+ * the broader `scanWikiArtifacts` corpus feeds the query surface.
  */
 /** Docs anchored to a specific project (`project:<pursuit>/<id>`). */
 export function docsAnchoredToProject(
@@ -36,7 +39,7 @@ export function docsAnchoredToPursuit(
 }
 
 export async function scanLivingDocs(repoRoot: string): Promise<LivingDoc[]> {
-  const files = await fg('wiki/living/*.md', {
+  const files = await fg('wiki/living/**/*.md', {
     cwd: repoRoot,
     absolute: true,
     onlyFiles: true,

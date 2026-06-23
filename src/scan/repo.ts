@@ -10,6 +10,7 @@ import { scanLivingDocs } from './living.js'
 import { scanProjects } from './projects.js'
 import { scanPursuits } from './pursuits.js'
 import { scanReflections } from './reflections.js'
+import { scanWikiArtifacts } from './wiki.js'
 
 export async function scan(
   repoRoot: string,
@@ -24,6 +25,7 @@ export async function scan(
     reflections,
     lessonsWatermark,
     livingDocs,
+    wikiArtifacts,
   ] = await Promise.all([
     loadConfig(repoRoot),
     scanPursuits(repoRoot),
@@ -33,6 +35,7 @@ export async function scan(
     scanReflections(repoRoot),
     scanLessonsWatermark(repoRoot),
     scanLivingDocs(repoRoot),
+    scanWikiArtifacts(repoRoot),
   ])
 
   const activityMap = await lastActivityMap(repoRoot)
@@ -50,6 +53,7 @@ export async function scan(
     captures,
     reflections,
     livingDocs,
+    wikiArtifacts,
     generatedAt: now.toISOString(),
     repoRoot,
     lastTouch,

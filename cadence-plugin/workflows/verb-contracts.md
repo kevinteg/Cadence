@@ -682,6 +682,54 @@ Then the verb-hint block + teaching footer per the universal exit convention.
 
 ---
 
+## Publish
+
+*Hidden verb — not on the visible 12-verb surface; explicit-invocation only; agent-suggested when chat language signals publish intent. The promotion path that complements the built-in `wiki/` path: that one lands curated work in *your* corpus; this one lands it in *someone else's* authoritative repo.*
+
+**Purpose:** Contribute curated content from the Cadence workshop (a wiki narrative/primer, a project's Intent + notes, a research primer) into an **external destination repo** — a separate team/shared repo of markdown with its own authoritative content. Design rationale (why mode B, why the issue's three forks dissolved, why surface-and-warn) lives in the archived brainstorm at `wiki/_archive/brainstorms/first-class-publish/`.
+
+**Tone:** Functional, smart-colleague. Surfaces decisions; never editorializes; no cheer.
+
+**The shape — mode B:**
+- **Edit the destination in place.** Contribution happens by editing the destination's markdown *in its own checkout*, committing there. No target-shaped staging mirror inside Cadence. Because edits land in the real repo, **git owns merge, conflict, auth, and idempotency** — re-publish is just another commit, no manifest.
+- **Identity = the git URL** (in `cadence.yaml` → `publish_targets`); the **local checkout is discovered per-machine**, never path-bound, so a target survives machine moves.
+- **Conform to the destination's conventions, re-read every publish** — the destination is authoritative and moving; learn its house-style fresh each run, never cached.
+- **Privacy = surface-and-warn** — Cadence can't enforce judgment while you hand-edit another repo; it makes the boundary impossible to miss. One hard rule: back-links/paths to the Cadence repo never cross. Provenance stays cadence-side.
+
+**CLI primitives (deterministic core):**
+- `cadence publish-targets [--json]` — list configured targets (`name → git_url`).
+- `cadence publish-resolve <target> [--path <dir>] [--search <dir>] [--json]` — resolve a target's git URL to a local checkout: scans `--path`/`--search` dirs, then `discovery_hints`, then the cadence repo's siblings; matches normalized git remotes; returns `checkout: null` (with the dirs it searched) when nothing matches, leaving the prompt-the-user fallback to the skill. Config + discovery engine: `src/types.ts` (`PublishTargetSchema`), `src/publish.ts` (`normalizeGitUrl`, `discoverCheckout`).
+
+**Behavior (skill-orchestrated):**
+- Resolve the target (or coach to add one if none configured). Locate the checkout via `publish-resolve`; on a miss, prompt for the path and **verify** the answer's remote matches before accepting. Warn on a dirty destination tree.
+- Identify the cadence-side source (via `cadence find` / `cadence wiki`). Surface the destination's current state to draft against — **suggest** `pull`/`fetch`, never auto-mutate the user's repo.
+- Read the destination's conventions fresh (bounded ~10-file read — the one sanctioned cross-repo read, since the user directed the publish); present a correctable house-style profile.
+- Privacy scan the source: auto-strip back-links home (hard rule); flag raw notes / names / internal IDs / secrets for the user's decision.
+- Edit the destination in place conforming to its conventions; show the planned file set + an ELI5 recap before writing.
+- Preview the change (`git diff`; suggest the destination's reader — Obsidian vault / Pages serve — don't auto-open).
+- Hand off the commit: surface the git commands; **never auto-commit/push** unless explicitly directed (the destination is authoritative, possibly behind a PR gate).
+- Record provenance cadence-side only (a `published_to:` stamp on the source artifact); write nothing home-pointing into the destination.
+
+**No-argument entry:** lists configured targets and asks which (or how to add one).
+
+**With-argument entry:** `/publish <target>` or `/publish --to <target>`; optional `<source>` names the artifact up front.
+
+**Discovery (suggest-don't-run):**
+- Hidden from `/cadence:help`'s primary catalogue.
+- Agent SUGGESTS the verb — never auto-fires — when chat language signals publish intent ("publish this to the team wiki", "push this to `<repo>`", "contribute this upstream"). Frequency-capped via `cadence tip-pick --triggers intent-publish-signal --types skill-teaching`. Skip when the user already named the verb.
+
+**Guardrails:**
+- Mode B only — no staging mirror, no merge engine; git is the merge.
+- Identity is the URL; never persist a discovered path.
+- The named destination checkout is the only sanctioned cross-repo read/write — never widen to other repos.
+- Surface-and-warn, with the one hard back-link rule; never silently carry or silently strip private content.
+- Never auto-commit/push/pull the destination.
+- Conventions re-read every publish — no cached profile.
+
+**Exit:** the change summary + git hand-off commands, then the verb-hint block + teaching footer per the universal exit convention.
+
+---
+
 ## Exit Conventions
 
 Every verb's natural exit point ends with two standardized surfaces.

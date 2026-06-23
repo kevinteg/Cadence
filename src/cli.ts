@@ -14,6 +14,8 @@ import {
 import { computeSuggestionSignals } from './render/signals.js'
 import { renderSnapshot, renderReport } from './render/snapshot.js'
 import { findEntities } from './find.js'
+import { loadConfig } from './config.js'
+import { discoverCheckout } from './publish.js'
 import { renderFindResults } from './render/find.js'
 import {
   docsAnchoredToProject,
@@ -1377,6 +1379,92 @@ cli
       )
     }
   })
+
+cli
+  .command(
+    'publish-targets',
+    'List configured publish targets (cadence.yaml → publish_targets)',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--json', 'Emit as JSON')
+  .action(async (opts: { root?: string; json?: boolean }) => {
+    const repoRoot = await resolveRepoRoot(opts.root)
+    const config = await loadConfig(repoRoot)
+    const targets = config.publish_targets
+    if (opts.json) {
+      process.stdout.write(JSON.stringify({ targets }) + '\n')
+      return
+    }
+    if (targets.length === 0) {
+      process.stdout.write(
+        'No publish targets configured. Add them under `publish_targets:` in cadence.yaml.\n',
+      )
+      return
+    }
+    for (const t of targets) {
+      const sub = t.subpath ? `  (subpath: ${t.subpath})` : ''
+      process.stdout.write(`${t.name}\t${t.git_url}${sub}\n`)
+    }
+  })
+
+cli
+  .command(
+    'publish-resolve <target>',
+    'Resolve a publish target to a local checkout (peer-dir scan → git-remote match → prompt fallback). Never path-binds.',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option(
+    '--path <dir>',
+    'Candidate checkout path to prefer/verify — e.g. the path the user supplies when auto-discovery missed',
+  )
+  .option('--search <dir>', 'Extra directory to scan for the checkout (repeatable)', {
+    type: [String],
+  })
+  .option('--json', 'Emit as JSON')
+  .action(
+    async (
+      target: string,
+      opts: { root?: string; path?: string; search?: string[]; json?: boolean },
+    ) => {
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const config = await loadConfig(repoRoot)
+      const t = config.publish_targets.find((x) => x.name === target)
+      if (!t) {
+        const names =
+          config.publish_targets.map((x) => x.name).join(', ') || '(none configured)'
+        throw new Error(
+          `unknown publish target: ${target}. Configured targets: ${names}`,
+        )
+      }
+      const extra = multistring(opts.search) ?? []
+      if (opts.path) extra.unshift(opts.path) // explicit answer takes precedence
+      const resolution = discoverCheckout(repoRoot, t, extra)
+      if (opts.json) {
+        process.stdout.write(JSON.stringify(resolution) + '\n')
+        return
+      }
+      const lines = [
+        `target:  ${resolution.target}`,
+        `git_url: ${resolution.git_url}`,
+      ]
+      if (resolution.checkout) {
+        const clean =
+          resolution.clean === undefined
+            ? ''
+            : resolution.clean
+              ? '  (clean)'
+              : '  (uncommitted changes)'
+        lines.push(`checkout: ${resolution.checkout}${clean}`)
+      } else {
+        lines.push('checkout: NOT FOUND')
+        lines.push(`searched: ${resolution.searched.join(', ') || '(nothing on disk)'}`)
+        lines.push(
+          '→ prompt the user for the local checkout path, then re-run with --path <dir>',
+        )
+      }
+      process.stdout.write(lines.join('\n') + '\n')
+    },
+  )
 
 cli.help()
 cli.version('0.1.0')

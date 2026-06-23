@@ -237,9 +237,18 @@ list.
 
 `scan`, `report`, `status`, `flags`, `pursuits`, `pursuit <id>`,
 `project <id>`, `ideas`, `captures`, `find <query>`,
-`project-activity`. All accept `--json` for structured output. Skills
-consume `--json` and reason over the typed result; the human-readable
-default is for the user invoking the CLI directly during an AI outage.
+`project-activity`, `publish-targets`, `publish-resolve <target>`. All
+accept `--json` for structured output. Skills consume `--json` and
+reason over the typed result; the human-readable default is for the user
+invoking the CLI directly during an AI outage.
+
+`publish-targets` lists the `publish_targets` registry from
+`cadence.yaml`; `publish-resolve <target>` discovers the target's local
+checkout by matching normalized git remotes across the cadence repo's
+siblings + `discovery_hints` + any `--path`/`--search` dirs, returning
+`checkout: null` when none match (the `/publish` skill then prompts).
+Both are read-only — `publish-resolve` only inspects git state, never
+mutates. See the `/publish` register in `workflows/verb-contracts.md`.
 
 `project-activity` is the stream `/narrate` consumes — git log of
 `pursuits/**/projects/*.md` rendered as a per-project event list.

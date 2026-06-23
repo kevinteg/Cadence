@@ -26,8 +26,9 @@ the source of truth, the skill just presents them.
      `capture`, `reflect`, `narrate`, `status`, `find`, `help`,
      `init`) — case-insensitive, optional leading `/cadence:` or `/`
      stripped → render verb view (step 4). The hidden verbs
-     (`report`, `incoming`, `mcp-pull`) also resolve for explicit
-     `/help <verb>` lookups but aren't in the catalogue overview.
+     (`report`, `incoming`, `mcp-pull`, `research`, `wiki`, `publish`)
+     also resolve for explicit `/help <verb>` lookups but aren't in the
+     catalogue overview.
    - Otherwise: "No verb or group matches '[arg]'. Try `/help` for
      the catalogue."
 

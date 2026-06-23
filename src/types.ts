@@ -277,6 +277,33 @@ export type LivingDoc = LivingDocFrontmatter & {
   path: string
 }
 
+/**
+ * Any curated artifact in the durable wiki corpus, discovered
+ * recursively under `wiki/**` and keyed on wiki-shaped frontmatter (a
+ * `title`) rather than a hardcoded tier list — so user-created shelves
+ * (`wiki/code-deep-dives/`) and nested files (`wiki/living/1-1s/`) are
+ * first-class to the query surface. Tolerant: files without a `title`
+ * (index.md, log.md, frontmatter-less notes) are skipped, as is the
+ * `_archive/` provenance tier. A superset of LivingDoc — a living doc
+ * is also a wiki artifact; the typed LivingDoc view stays for the
+ * anchoring features (doc shelves, narrate --into, resolve disposition).
+ */
+export type WikiArtifact = {
+  /** Basename without .md. */
+  slug: string
+  /** Top-level folder under wiki/ (narratives | primers | living | <user-shelf> | ''). */
+  tier: string
+  /** Frontmatter `type`, or 'doc' when absent. */
+  type: string
+  title: string
+  tags: string[]
+  /** Plain anchor strings when present (living docs carry these). */
+  anchors: string[]
+  created?: string
+  body: string
+  path: string
+}
+
 export const ReflectionFrontmatterSchema = z.object({
   date: z.string(),
   status: z.enum(['draft', 'in_progress', 'complete']),
@@ -290,8 +317,25 @@ export type Reflection = ReflectionFrontmatter & {
   path: string
 }
 
+/**
+ * A named external destination for `cadence publish`. Identity is the
+ * git URL (portable across machines); the local checkout is discovered
+ * at runtime (src/publish.ts) rather than stored, so a target survives
+ * sessions and machine moves. `discovery_hints` are extra directories
+ * to scan beyond the cadence repo's siblings; `subpath` roots this
+ * target's content inside a subdirectory of the destination repo.
+ */
+export const PublishTargetSchema = z.object({
+  name: z.string(),
+  git_url: z.string(),
+  discovery_hints: z.array(z.string()).optional().default([]),
+  subpath: z.string().optional(),
+})
+export type PublishTarget = z.infer<typeof PublishTargetSchema>
+
 export const ConfigSchema = z.object({
   version: z.number().optional().default(1),
+  publish_targets: z.array(PublishTargetSchema).optional().default([]),
   win_cycles: z
     .object({
       current: z.string().optional(),
@@ -336,6 +380,7 @@ export type Config = {
   incoming_queue_cache_ttl_minutes: number
   inbox_soft_threshold: number
   retrospective_due_threshold: number
+  publish_targets: PublishTarget[]
   win_cycle_current?: string
   win_cycle_start?: string
   win_cycle_end?: string
@@ -353,6 +398,7 @@ export const CONFIG_DEFAULTS: Config = {
   incoming_queue_cache_ttl_minutes: 15,
   inbox_soft_threshold: 10,
   retrospective_due_threshold: 3,
+  publish_targets: [],
 }
 
 export type LastTouch = {
@@ -380,6 +426,7 @@ export type Snapshot = {
   captures: Capture[]
   reflections: Reflection[]
   livingDocs: LivingDoc[]
+  wikiArtifacts: WikiArtifact[]
   generatedAt: string
   repoRoot: string
   lastTouch?: LastTouch | null

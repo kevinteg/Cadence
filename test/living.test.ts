@@ -146,7 +146,9 @@ test('findEntities matches living docs by body, title, slug, and anchors', async
     assert.equal(byBody.length, 1)
     assert.equal(byBody[0]!.kind, 'doc')
     assert.equal(byBody[0]!.id, 'coach-sam')
-    assert.equal(byBody[0]!.context, 'log')
+    // find now reads the unified wiki-artifact corpus; context is the
+    // artifact `type` (was the living-doc sub-kind 'log' pre-#8).
+    assert.equal(byBody[0]!.context, 'living-doc')
     assert.ok(byBody[0]!.snippet.includes('tempo-run cadence'))
 
     // Anchor match.

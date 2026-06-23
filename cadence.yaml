@@ -22,3 +22,14 @@ wip_limits:
 reflect:
   day: sunday                   # preferred day for weekly Reflect
   duration_minutes: 30
+
+# Named destinations for `cadence publish` (contribute curated content into an
+# external repo). Identity is the git URL — portable across machines; the local
+# checkout is discovered at runtime (sibling dirs → discovery_hints → prompt),
+# never path-bound. Uncomment and edit:
+# publish_targets:
+#   - name: team-wiki
+#     git_url: git@github.com:my-org/team-wiki.git
+#     discovery_hints:          # extra dirs to scan beyond the cadence repo's siblings
+#       - ~/work
+#     subpath: docs             # optional: root this target's content under a subdir

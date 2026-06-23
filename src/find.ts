@@ -5,8 +5,9 @@ export type FindKind = 'project' | 'brainstorm' | 'doc' | 'capture' | 'pursuit'
 export type FindResult = {
   kind: FindKind
   id: string
-  // Project: parent pursuit id. Brainstorm: phase. Doc: kind (log |
-  // phase-doc | live-notes). Capture/pursuit: omitted.
+  // Project: parent pursuit id. Brainstorm: phase. Doc: wiki artifact
+  // type (capstone | primer | living-doc | doc) or tier. Capture/pursuit:
+  // omitted.
   context?: string
   matched_fields: string[]
   snippet: string
@@ -73,10 +74,15 @@ export function findEntities(
     }
   }
 
-  for (const d of snapshot.livingDocs) {
+  // The wiki corpus — recursively discovered, frontmatter-keyed (see
+  // scanWikiArtifacts), so arbitrary shelves (wiki/code-deep-dives/),
+  // nested files (wiki/living/1-1s/), and every tier are searchable,
+  // not just the flat wiki/living/ glob this used to read.
+  for (const d of snapshot.wikiArtifacts) {
     const fields = [
       { name: 'slug', text: d.slug },
       { name: 'title', text: d.title },
+      { name: 'tags', text: d.tags.join(' ') },
       { name: 'anchors', text: d.anchors.join(' ') },
       { name: 'body', text: d.body },
     ]
@@ -85,7 +91,9 @@ export function findEntities(
       results.push({
         kind: 'doc',
         id: d.slug,
-        context: d.kind,
+        // Surface the artifact type (capstone | primer | living-doc |
+        // doc), falling back to the tier for untyped shelf pages.
+        context: d.type || d.tier || undefined,
         matched_fields: matched.map((m) => m.name),
         snippet: extractSnippet(matched[0]!.text, q),
         timestamp: d.created ?? '',

@@ -45,10 +45,16 @@ Code owns transport + OAuth, Cadence owns the file write through
 `cadence write-capture --mcp-*`), **research** (builds and
 queries a unit-scoped research substrate — sources distilled into
 atomic notes under the unit's `research/` directory via the
-`research-ingest` subagent; operations: ingest / ask / primer), and
+`research-ingest` subagent; operations: ingest / ask / primer),
 **wiki** (queries and curates the durable corpus at root-level
 `wiki/` — front door, index-first ask with citations, open by slug,
-link-graph related). All five follow the suggest-don't-run pattern
+link-graph related), and **publish** (contributes curated content from
+the workshop into an external destination repo — identity is the git
+URL, the checkout is discovered per-machine via `cadence
+publish-resolve`, edits land in the destination in place (mode B, so
+git owns merge/auth/idempotency), conventions are re-read every
+publish, and the personal→public boundary is surface-and-warn with a
+hard no-back-link rule). All six follow the suggest-don't-run pattern
 below — agent SUGGESTS via chat-language signals but never
 auto-fires. The reconciler runs as system behavior (SessionStart hook
 + during `/reflect` Get Clear) and is not a verb.

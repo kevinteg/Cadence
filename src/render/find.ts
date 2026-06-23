@@ -3,7 +3,7 @@ import type { FindKind, FindResult } from '../find.js'
 const KIND_LABELS: Record<FindKind, string> = {
   project: 'Projects',
   brainstorm: 'Brainstorms',
-  doc: 'Living docs',
+  doc: 'Wiki',
   capture: 'Captures',
   pursuit: 'Pursuits',
 }

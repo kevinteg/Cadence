@@ -50,6 +50,7 @@ function mergeDefaults(raw: RawConfig): Config {
     retrospective_due_threshold:
       d.retrospective_due_threshold ??
       CONFIG_DEFAULTS.retrospective_due_threshold,
+    publish_targets: raw.publish_targets ?? CONFIG_DEFAULTS.publish_targets,
     win_cycle_current: wc.current,
     win_cycle_start: wc.start,
     win_cycle_end: wc.end,

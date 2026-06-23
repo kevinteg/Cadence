@@ -49,6 +49,7 @@ function makeSnapshot(overrides: Partial<Snapshot> = {}): Snapshot {
     brainstorms: [],
     captures: [],
     livingDocs: [],
+    wikiArtifacts: [],
     reflections: [],
     generatedAt: NOW.toISOString(),
     repoRoot: '/tmp/fake',
