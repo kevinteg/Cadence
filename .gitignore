@@ -19,3 +19,6 @@ Thumbs.db
 
 # Markdown reader config (user-local, e.g. Obsidian)
 .obsidian/
+
+# MkDocs build output (wiki → GitHub Pages)
+/site/

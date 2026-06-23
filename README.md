@@ -56,6 +56,8 @@ Fresh-Mac install (Node + Claude Code + `gh` from scratch) and the **10-minute w
 
 - **See the story.** Generated narratives — daily, weekly, per-pursuit, multi-pursuit-lessons — pull from git history of your project files. The narrative IS the watermark; each run resumes from the last. → [`wiki/concepts/vision.md`](wiki/concepts/vision.md)
 
+- **Author and publish a quality wiki.** The `wiki/` is a durable, Obsidian-shaped corpus — capstones, primers, living docs, and any shelf you invent. `cadence find` and `/cadence:wiki ask` discover it **recursively** (organize into your own folders, no fixed tier list); `/cadence:publish` contributes curated work into an external team repo (you edit the destination in place, private content flagged before it crosses); and the corpus renders straight to a **GitHub Pages** site. → [`docs/narrative-wiki-architecture.md`](docs/narrative-wiki-architecture.md)
+
 The 12 user-facing verbs (`brainstorm`, `start`, `complete`, `resolve`, `waiting`, `capture`, `reflect`, `narrate`, `status`, `find`, `help`, `init`) are documented in [`cadence-plugin/README.md`](cadence-plugin/README.md) and the full per-verb contracts live in [`cadence-plugin/workflows/verb-contracts.md`](cadence-plugin/workflows/verb-contracts.md).
 
 ## What's in this repo
@@ -85,6 +87,7 @@ docs/                        Vision, architecture, getting started, research, te
 - **[`docs/getting-started.md`](docs/getting-started.md)** — install + the 10-minute walkthrough. Start here.
 - **[`wiki/concepts/vision.md`](wiki/concepts/vision.md)** — what Cadence is and why. TL;DR plus the deep dive.
 - **[`wiki/concepts/architecture.md`](wiki/concepts/architecture.md)** — design rationale. Why the model is shaped this way, what tradeoffs got made.
+- **[`docs/narrative-wiki-architecture.md`](docs/narrative-wiki-architecture.md)** — the narrative & research wiki: the two-layer research→capstone architecture, and how you author, organize (recursive discovery), and publish (`/publish`, GitHub Pages) a quality wiki.
 - **[`wiki/research/research-foundations.md`](wiki/research/research-foundations.md)** — research foundations mapped to design patterns.
 - **[`wiki/research/teaching-tips.md`](wiki/research/teaching-tips.md)** — the curated content library that powers the in-product tip surfaces.
 - **[`docs/marimo-console-design.md`](docs/marimo-console-design.md)** — forward-looking design notes for Cadence Console (Marimo notebook view). Not yet shipped.

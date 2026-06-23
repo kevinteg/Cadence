@@ -1,0 +1,63 @@
+site_name: Cadence Wiki
+site_description: The durable knowledge corpus of the Cadence repo — capstones, primers, living docs, and research.
+site_url: https://kevinteg.github.io/Cadence/
+repo_url: https://github.com/kevinteg/Cadence
+repo_name: kevinteg/Cadence
+edit_uri: edit/main/wiki/
+
+# The wiki/ folder is the source of truth — no file moves. Working tiers
+# (drafts, archived brainstorms) and internal files stay out of the site.
+docs_dir: wiki
+exclude_docs: |
+  _archive/
+  drafts/
+  _style/
+  log.md
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+plugins:
+  - search
+  # Resolves Obsidian-style [[wikilinks]] (and [[link|alias]]) to relative
+  # markdown links so the corpus renders with working cross-links.
+  - roamlinks
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format

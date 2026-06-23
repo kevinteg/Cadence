@@ -2,7 +2,7 @@
 
 *A self-documenting narrative companion to the planning and brainstorming workflow.*
 
-**Status:** design draft for chat iteration → implementation. Composes with the existing 12-verb surface, runtime, reference, and skill conventions. Does not replace `/narrate`; it extends the narrative system from "views over git activity" into "a curated, durable library of finished artifacts grounded in researched sources."
+**Status:** shipped (2026-06). The two-layer research→wiki architecture, the `/research`, `/wiki`, and `/narrate capstone` verbs, the living-docs tier, and the close-out GC/disposition rituals are all live. Composes with the existing 12-verb surface, runtime, reference, and skill conventions; does not replace `/narrate` — it extends the narrative system from "views over git activity" into "a curated, durable library of finished artifacts grounded in researched sources." Two capabilities have since extended the *authoring* story — **recursive, frontmatter-keyed discovery** (organize the corpus into your own shelves) and **first-class publishing** (`/publish` to an external repo; GitHub Pages for this repo's own wiki). See **§14**.
 
 ---
 
@@ -320,7 +320,7 @@ Cadence writes the markdown; Obsidian reads and renders it; the agent navigates 
 | **`/reflect`** | Get Clear can surface "research substrates with no capstone" as a gentle finalization signal; retrospective-due nudges surface here. |
 | **`/status`** | Inbox gists; optionally a "wiki freshness" line (substrates awaiting capstone). |
 | **`reconciler`** (system) | Gains: retrospective-due check (meta-project), capstone-gap flag (resolved units missing a narrative), `/wiki lint` scheduling. |
-| **`/find`** | Extends to search the wiki corpus, not just work items. |
+| **`/find`** | Searches the wiki corpus, not just work items — shipped, and now **recursive + frontmatter-keyed** so arbitrary shelves and nested folders are found, not a fixed tier list (§14). |
 
 ---
 
@@ -368,3 +368,33 @@ Per `CLAUDE.md`'s "feature work goes through Cadence" rule, this is substantial 
 7. **Style files** — ship defaults with step 2; user-override wiring can follow.
 
 Each step is independently shippable and independently validates. Step 1 + 2 + 3 is the minimum coherent feature (research → capstone → GC); 4–7 are the discovery and maintenance enrichments.
+
+---
+
+## 14. Authoring quality wikis: organize, discover, publish
+
+Three capabilities turn the wiki from "a place capstones land" into a corpus you actively **author**, **organize**, and **ship**. The first two graduated from field-review issues (#8, #9) after the core layer landed; the third is this repo eating its own dog food.
+
+### Organize into your own shelves — recursive, frontmatter-keyed discovery
+
+The query surface (`cadence find`, `/wiki ask`) originally scanned a fixed tier list (`narratives/`, `primers/`, `living/`) with a *flat* glob. A hand-made shelf like `wiki/code-deep-dives/` — properly frontmattered, linked from `index.md` — was invisible to search, and nested folders like `living/1-1s/` were silently missed.
+
+Discovery is now **recursive and keyed on wiki-shaped frontmatter** (a `title`), not a hardcoded tier list. Drop a frontmattered markdown file in *any* subfolder under `wiki/` and it's first-class to `cadence find` and `/wiki ask` — no tier registration, no glob to maintain. You organize the corpus the way the topic wants (a `code-deep-dives/` shelf distinct from one-sitting `primers/`; a `1-1s/` subfolder under `living/`) and the tooling keeps up. Navigation/log files (no `title`) and the `_archive/` provenance tier are skipped; everything you'd actually search for is found.
+
+> Implementation: `scanWikiArtifacts` walks `wiki/**`, includes any file carrying a `title`, and feeds the unified corpus to `find`. The typed living-doc view stays alongside it for the anchoring features (doc shelves, `narrate --into`, resolve disposition). The signal is the `title`, so the way to make generated drafts findable is to give them one — not to loosen the key.
+
+### Publish into an external repo — `/publish`
+
+`/wiki` and `/narrate capstone` land curated work in *your* `wiki/`. The next step — contributing that work into **someone else's authoritative repo** (a team or shared wiki) — is `/publish`. The model that cohered (see the archived `first-class-publish` brainstorm):
+
+- **Identity is the git URL**; the local checkout is **discovered per-machine** (sibling dirs → git-remote match → prompt), never path-bound, so a target travels across laptops.
+- **You edit the destination in place** (mode B): `/publish` locates the checkout, reads *its* conventions fresh each time (where references live, how pages cite), and helps you write conforming content directly in the destination repo. Git owns merge, auth, conflict, and idempotency — re-publishing is just another commit, no manifest.
+- **The personal→public boundary is surface-and-warn**: private-looking content is flagged before it crosses, and a hard rule strips any link pointing back into the private Cadence repo. Provenance stays cadence-side — which also lets your repo remember where it contributes, so you can always draft against the destination's current state.
+
+> Configured under `publish_targets:` in `cadence.yaml`; CLI primitives `cadence publish-targets` / `cadence publish-resolve`; full register in `cadence-plugin/workflows/verb-contracts.md`.
+
+### Publish your own wiki as a site — GitHub Pages
+
+Because the wiki is plain, Obsidian-shaped markdown, it renders directly to a static site. This repo's `wiki/` builds to **GitHub Pages via MkDocs Material** — a `[[wikilinks]]`-aware build — so the curated corpus is browsable as a website, not just in an editor. The working tiers (`drafts/`, `_archive/`) stay out of the published site. The same source of truth now has **three coherent views** — Obsidian, the agent's index navigation, and a public Pages site — with no sync step and no lock-in.
+
+> Build config: `mkdocs.yml` at the repo root; deploy workflow at `.github/workflows/pages.yml`. `wiki/` is the source — no file moves.
