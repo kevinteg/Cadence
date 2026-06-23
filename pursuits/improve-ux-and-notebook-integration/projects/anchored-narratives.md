@@ -1,7 +1,7 @@
 ---
 id: anchored-narratives
 pursuit: improve-ux-and-notebook-integration
-status: active
+status: done
 created: 2026-06-11
 origin:
   kind: github_issue
