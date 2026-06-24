@@ -166,7 +166,7 @@ test('scan returns a populated Snapshot for a synthetic repo', async () => {
 test('scan against this repo matches expected counts', async () => {
   const repoRoot = path.resolve(import.meta.dirname, '..')
   const snapshot = await scan(repoRoot, new Date('2026-04-27T12:00:00Z'))
-  // Active pursuits: improve-ux-and-notebook-integration, run-cadence-on-auggie
+  // Active pursuits: improve-ux-and-authoring (renamed from …-notebook-integration), run-cadence-on-auggie
   // (inbox pursuit retired in v1.1 — Inbox is now a view, not a directory)
   // (improve-ux-and-vision archived after the v1.1 reshape shipped)
   // (make-cadence-public archived after the OSS release shipped)

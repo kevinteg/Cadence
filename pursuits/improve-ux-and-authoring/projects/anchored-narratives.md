@@ -1,6 +1,6 @@
 ---
 id: anchored-narratives
-pursuit: improve-ux-and-notebook-integration
+pursuit: improve-ux-and-authoring
 status: done
 created: 2026-06-11
 origin:

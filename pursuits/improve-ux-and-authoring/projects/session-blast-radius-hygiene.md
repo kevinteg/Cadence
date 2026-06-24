@@ -1,6 +1,6 @@
 ---
 id: session-blast-radius-hygiene
-pursuit: improve-ux-and-notebook-integration
+pursuit: improve-ux-and-authoring
 status: on_hold
 created: 2026-06-11
 origin:

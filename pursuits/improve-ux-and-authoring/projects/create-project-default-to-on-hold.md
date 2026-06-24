@@ -1,6 +1,6 @@
 ---
 id: create-project-default-to-on-hold
-pursuit: improve-ux-and-notebook-integration
+pursuit: improve-ux-and-authoring
 status: done
 created: 2026-06-05
 origin:

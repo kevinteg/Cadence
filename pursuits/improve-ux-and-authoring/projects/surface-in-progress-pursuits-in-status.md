@@ -1,6 +1,6 @@
 ---
 id: surface-in-progress-pursuits-in-status
-pursuit: improve-ux-and-notebook-integration
+pursuit: improve-ux-and-authoring
 status: active
 created: 2026-05-26
 ---

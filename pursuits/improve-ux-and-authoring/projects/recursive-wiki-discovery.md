@@ -1,6 +1,6 @@
 ---
 id: recursive-wiki-discovery
-pursuit: improve-ux-and-notebook-integration
+pursuit: improve-ux-and-authoring
 status: done
 created: 2026-06-22
 origin:

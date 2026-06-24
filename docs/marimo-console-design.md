@@ -1,5 +1,7 @@
 # Cadence Console — design notes
 
+> **Status: deferred (2026-06).** Originally scoped as the first new surface in the `improve-ux-and-authoring` pursuit (then `…-notebook-integration`). With the wiki authoring/publishing layer shipped, the notebook is less central than first thought; if it returns it's likely an **out-of-band tool that calls into Cadence** (via the `claude -p` CLI surface below) rather than a surface built inside the pursuit. These notes are preserved as the reference for that eventual work.
+
 A live dashboard view over a Cadence repo, rendered in a [Marimo](https://marimo.io) notebook. Forward-looking work; not yet shipped. This document distills the architectural decisions from the v1.1 design pass so the eventual implementation has a single reference to consult.
 
 The Console is the answer to one question: *"What if my repo had a live face — not the dashboard the SessionStart hook prints, but a real visual surface I could glance at while working?"* The agent writes content into the repo; Marimo cells watch the files and re-render.

@@ -1,6 +1,6 @@
 ---
 id: first-class-publish
-pursuit: improve-ux-and-notebook-integration
+pursuit: improve-ux-and-authoring
 status: done
 created: 2026-06-23
 origin:

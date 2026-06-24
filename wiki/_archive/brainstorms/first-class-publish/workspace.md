@@ -3,7 +3,7 @@
 > **Topic**: First-class `publish` — promote target-shaped drafts to named
 > destinations (local wiki or external repo). From issue
 > [#9](https://github.com/kevinteg/Cadence/issues/9), project
-> `improve-ux-and-notebook-integration/first-class-publish`.
+> `improve-ux-and-authoring/first-class-publish`.
 
 ## The canvas (from the issue — starting context, not yet ideas)
 
@@ -166,7 +166,7 @@ _Edit freely; the agent appends as ideation flows._
 
 ---
 
-## Landed → project `improve-ux-and-notebook-integration/first-class-publish`
+## Landed → project `improve-ux-and-authoring/first-class-publish`
 Folded into the existing project (created from issue #9 via `/incoming`), **not**
 crystallized — crystallize would have minted a duplicate. The project Intent was
 rewritten to the mode-B spine above; the still-open mechanics became its action
