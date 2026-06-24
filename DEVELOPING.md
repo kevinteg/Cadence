@@ -125,6 +125,36 @@ cadence pending-validation-clear --match "<text>"
 
 Don't add "validate in fresh session" actions to project files — they pile up at N-1 of N and block project closure indefinitely. The queue is decoupled from project completion on purpose.
 
+## The Auggie fallback build
+
+Cadence also runs on [Auggie](https://docs.augmentcode.com/cli/overview) as a
+fallback when Claude Code is unavailable. The Claude Code plugin
+(`cadence-plugin/`) is the **single source of truth**; the Auggie build at
+`auggie-plugin/` is **generated** by a transpiler and committed so the fallback
+is ready to run without a build step.
+
+- **Generate:** `cadence build-auggie` (reads `cadence-plugin/`, writes `auggie-plugin/`).
+- **Check drift:** `cadence build-auggie --check` (exits non-zero if `auggie-plugin/` is stale). CI runs this on every PR.
+- **Never hand-edit `auggie-plugin/`.** Edit the source plugin (and `src/` for the CLI), then regenerate.
+
+Transpiler internals live in `src/auggie/`:
+
+| File | Role |
+|---|---|
+| `transform.ts` | Orchestrator — builds the output as an in-memory file map (manifest, commands, agents, runtime rule, AGENTS.md, reference docs, settings.json, CLI binary, README). |
+| `rewrite.ts` | The single shared token-rewrite surface. Neutralizes host terms: `/cadence:` → `/cadence-`, "Agent tool" → "subagent dispatcher", "Claude Code" → "the agent host", ToolSearch → tool discovery. |
+| `model-map.ts` | Subagent model aliases → Auggie tiers (`haiku→haiku4.5`, `sonnet→sonnet4.5`), overridable. |
+| `manifest.ts` | `.claude-plugin/plugin.json` → `.augment-plugin/plugin.json`. |
+| `frontmatter.ts` | Tolerant reader for SKILL/agent frontmatter (their `description` values contain unescaped colons that strict YAML rejects). |
+| `overrides.ts` + `overrides.yaml` | Hand-maintained adapter layered on top of generated output (model ids, argument hints, subagent colors, the SessionStart command). |
+
+The shared `cadence` CLI prints verb hints with the Claude Code namespace by
+default. Setting `CADENCE_VERB_PREFIX=/cadence-` swaps them to Auggie's flat form
+in human output (never `--json`); see `src/verb-prefix.ts`. The generated
+SessionStart hook sets this inline.
+
+End-user install + usage lives in [`docs/running-on-auggie.md`](docs/running-on-auggie.md).
+
 ## Releasing
 
 There's no published release process yet. The plugin is distributed by `git clone + --plugin-dir`. The bundled CLI is committed alongside the source so end-users don't need a build step.

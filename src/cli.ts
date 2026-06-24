@@ -1,6 +1,13 @@
 import { cac } from 'cac'
 import { existsSync } from 'node:fs'
-import { readFile } from 'node:fs/promises'
+import {
+  readFile,
+  readdir as readdirAsync,
+  mkdir,
+  writeFile,
+  chmod,
+  rm,
+} from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scan } from './scan/repo.js'
@@ -82,6 +89,14 @@ import {
   clearPendingValidations,
   readPendingValidations,
 } from './validation/queue.js'
+import { transpile, type OutputMap } from './auggie/transform.js'
+import { loadOverrides } from './auggie/overrides.js'
+import { installVerbPrefixFilter } from './verb-prefix.js'
+
+// Opt-in: under a non-default host (e.g. Auggie sets CADENCE_VERB_PREFIX), swap
+// the verb namespace in human output. No-op for the Claude Code default.
+installVerbPrefixFilter(process.argv)
+
 const cli = cac('cadence')
 
 cli
@@ -1466,6 +1481,71 @@ cli
     },
   )
 
+cli
+  .command(
+    'build-auggie',
+    'Transpile the Claude Code plugin into the Auggie fallback build (auggie-plugin/)',
+  )
+  .option('--plugin-dir <path>', 'Source plugin dir (default: auto-detected cadence-plugin)')
+  .option('--out <path>', 'Output dir (default: <repo>/auggie-plugin)')
+  .option(
+    '--overrides <path>',
+    'Overrides YAML (default: <repo>/src/auggie/overrides.yaml)',
+  )
+  .option(
+    '--check',
+    'Verify the committed output matches a fresh transpile; exit 1 on drift (writes nothing)',
+  )
+  .action(
+    async (opts: {
+      pluginDir?: string
+      out?: string
+      overrides?: string
+      check?: boolean
+    }) => {
+      const pluginDir = opts.pluginDir
+        ? path.resolve(opts.pluginDir)
+        : findPluginDir()
+      if (!pluginDir) {
+        throw new Error(
+          'Could not locate the source plugin dir. Pass --plugin-dir <path>.',
+        )
+      }
+      const repoRoot = path.dirname(pluginDir)
+      const outDir = opts.out
+        ? path.resolve(opts.out)
+        : path.join(repoRoot, 'auggie-plugin')
+      const overridesPath = opts.overrides
+        ? path.resolve(opts.overrides)
+        : path.join(repoRoot, 'src', 'auggie', 'overrides.yaml')
+
+      const overrides = await loadOverrides(overridesPath)
+      const map = await transpile({ pluginDir, overrides })
+
+      if (opts.check) {
+        const drift = await checkOutputMap(outDir, map)
+        if (drift.length === 0) {
+          process.stdout.write(
+            `auggie-plugin/ is in sync (${map.size} files).\n`,
+          )
+          return
+        }
+        process.stderr.write(
+          'auggie-plugin/ is OUT OF SYNC with the source plugin.\n' +
+            'Run `cadence build-auggie` and commit the result.\n\n' +
+            drift.map((d) => `  ${d}`).join('\n') +
+            '\n',
+        )
+        process.exit(1)
+      }
+
+      await writeOutputMap(outDir, map)
+      process.stdout.write(
+        `Wrote ${map.size} files to ${path.relative(repoRoot, outDir) || outDir}/\n`,
+      )
+    },
+  )
+
 cli.help()
 cli.version('0.1.0')
 
@@ -1638,6 +1718,63 @@ function findPluginDir(): string | null {
     dir = parent
   }
   return null
+}
+
+function toBuffer(content: string | Buffer): Buffer {
+  return Buffer.isBuffer(content) ? content : Buffer.from(content, 'utf-8')
+}
+
+/** Clear the output dir and write every file in the transpile map. */
+async function writeOutputMap(outDir: string, map: OutputMap): Promise<void> {
+  await rm(outDir, { recursive: true, force: true })
+  for (const [rel, file] of map) {
+    const abs = path.join(outDir, rel)
+    await mkdir(path.dirname(abs), { recursive: true })
+    await writeFile(abs, toBuffer(file.content))
+    if (file.mode !== undefined) await chmod(abs, file.mode)
+  }
+}
+
+/** Recursively list files under a dir as repo-relative POSIX paths. */
+async function listFilesRel(dir: string, base = dir): Promise<string[]> {
+  if (!existsSync(dir)) return []
+  const entries = await readdirAsync(dir, { withFileTypes: true })
+  const files: string[] = []
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      files.push(...(await listFilesRel(full, base)))
+    } else {
+      files.push(path.relative(base, full).split(path.sep).join('/'))
+    }
+  }
+  return files
+}
+
+/**
+ * Compare the committed output dir against a freshly transpiled map. Returns a
+ * list of human-readable drift descriptions (empty array → in sync).
+ */
+async function checkOutputMap(
+  outDir: string,
+  map: OutputMap,
+): Promise<string[]> {
+  const drift: string[] = []
+  const actual = new Set(await listFilesRel(outDir))
+  for (const [rel, file] of map) {
+    if (!actual.has(rel)) {
+      drift.push(`missing: ${rel}`)
+      continue
+    }
+    const onDisk = await readFile(path.join(outDir, rel))
+    if (Buffer.compare(onDisk, toBuffer(file.content)) !== 0) {
+      drift.push(`differs: ${rel}`)
+    }
+  }
+  for (const rel of actual) {
+    if (!map.has(rel)) drift.push(`extra (not generated): ${rel}`)
+  }
+  return drift.sort()
 }
 
 function parseOwnerRepo(url: string | null): string | null {
