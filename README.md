@@ -46,6 +46,8 @@ Then in Claude Code: `/cadence:init` walks the bootstrap and your first pursuit.
 
 Fresh-Mac install (Node + Claude Code + `gh` from scratch) and the **10-minute walkthrough** with a working example: [`docs/getting-started.md`](docs/getting-started.md).
 
+> <sub>Out of Claude Code credits? Cadence has a generated **fallback build for [Auggie](https://www.augmentcode.com/product/CLI)** — secondary to the Claude Code experience above. See [`docs/running-on-auggie.md`](docs/running-on-auggie.md).</sub>
+
 ## Why Cadence
 
 - **Hold your commitments alongside the work.** Pursuits (`be a present father`, `stand up CI for the team`, `get the garage cleaned out`) aren't a separate system; they're the parent of every project and action. → [`wiki/concepts/vision.md`](wiki/concepts/vision.md)

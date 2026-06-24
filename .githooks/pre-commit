@@ -1,17 +1,39 @@
 #!/usr/bin/env bash
-# Rebundle cadence-plugin/bin/cadence when src/ changes are staged.
-# The bundled binary is checked in for plugin distribution — commits
-# that touch src/ without rebundling leave the plugin running stale code.
+# Keep generated artifacts in sync with their sources when staging a commit:
+#   1. cadence-plugin/bin/cadence  — rebundled when src/ changes (running stale
+#      code in the distributed plugin is a silent footgun).
+#   2. auggie-plugin/              — regenerated when the source plugin or the
+#      transpiler/overrides change (the Auggie fallback build is committed and a
+#      CI drift check fails if it is out of sync).
 set -euo pipefail
 
-if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '^src/.*\.ts$'; then
+staged() { git diff --cached --name-only --diff-filter=ACMR; }
+
+src_changed=false
+plugin_changed=false
+staged | grep -qE '^src/.*\.ts$' && src_changed=true
+staged | grep -qE '^(cadence-plugin/|src/auggie/)' && plugin_changed=true
+
+if [ "$src_changed" != true ] && [ "$plugin_changed" != true ]; then
   exit 0
 fi
 
-echo "[pre-commit] src/ changed — running npm run bundle..."
-npm run bundle >/dev/null
+if [ "$src_changed" = true ]; then
+  echo "[pre-commit] src/ changed — running npm run bundle..."
+  npm run bundle >/dev/null
+  if ! git diff --quiet -- cadence-plugin/bin/cadence; then
+    echo "[pre-commit] re-staging cadence-plugin/bin/cadence"
+    git add cadence-plugin/bin/cadence
+  fi
+  # Bundling src/ may change the copied bin in the Auggie build too.
+  plugin_changed=true
+fi
 
-if ! git diff --quiet -- cadence-plugin/bin/cadence; then
-  echo "[pre-commit] re-staging cadence-plugin/bin/cadence"
-  git add cadence-plugin/bin/cadence
+if [ "$plugin_changed" = true ]; then
+  echo "[pre-commit] plugin source changed — regenerating auggie-plugin/..."
+  ./cadence-plugin/bin/cadence build-auggie >/dev/null
+  if ! git diff --quiet -- auggie-plugin; then
+    echo "[pre-commit] re-staging auggie-plugin/"
+    git add auggie-plugin
+  fi
 fi

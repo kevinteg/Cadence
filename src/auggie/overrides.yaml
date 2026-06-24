@@ -1,0 +1,54 @@
+# Auggie transpiler overrides — hand-maintained adapter layer.
+#
+# This file layers ON TOP of the mechanical transpile (generated first, then
+# these overrides). It captures the things that cannot be derived from the
+# Claude Code source: concrete Auggie model ids, per-command argument hints,
+# subagent colors, the SessionStart hook command, and any prose fixups found
+# during validation. Schema: src/auggie/overrides.ts (OverridesSchema).
+
+# Claude Code model alias -> Auggie model id. Merged over DEFAULT_MODEL_MAP
+# (haiku->haiku4.5, sonnet->sonnet4.5). Override here once validation confirms
+# the exact identifiers Auggie exposes.
+models: {}
+
+# SessionStart hook command. Auggie injects this command's stdout as session
+# context (the faithful analogue of Claude Code's --hook-output envelope).
+# NO_COLOR keeps the dashboard plain. Requires the bundled bin/cadence on PATH;
+# if Auggie does not put plugin bin/ on PATH, switch this to an absolute path
+# or an Auggie plugin-root variable (validation item).
+sessionStartCommand: "NO_COLOR=1 CADENCE_VERB_PREFIX=/cadence- cadence status"
+
+# Per-command tweaks, keyed by source verb. argumentHint -> Auggie
+# `argument-hint` frontmatter. takesArguments defaults to true (a $ARGUMENTS
+# preamble is injected); set false only for verbs that take no argument.
+commands:
+  start: { argumentHint: "[pursuit|project|brainstorm|inbox]" }
+  complete: { argumentHint: "[project|action]" }
+  resolve: { argumentHint: "[project|pursuit] [--state ...]" }
+  waiting: { argumentHint: "[project] --who --what --expected" }
+  capture: { argumentHint: "\"<thought>\" | --from <path> --source <name>" }
+  status: { argumentHint: "[pursuits|<pursuit>|<project>|<number>]" }
+  find: { argumentHint: "<query>" }
+  help: { argumentHint: "[group|verb]" }
+  narrate: { argumentHint: "[today|week|month|year|<pursuit>|lessons|capstone <unit>]" }
+  brainstorm: { argumentHint: "[slug]" }
+  research: { argumentHint: "ingest|primer|ask" }
+  wiki: { argumentHint: "front-door|ask <q>|open <slug>|related <slug>" }
+  publish: { argumentHint: "<target>" }
+  mcp-pull: { argumentHint: "[server [filter]]" }
+  reflect: { takesArguments: false }
+  reconcile: { takesArguments: false }
+  init: { takesArguments: false }
+
+# Per-subagent tweaks, keyed by source agent name. color -> Auggie `color`
+# frontmatter; model -> hard override that skips the model map.
+agents:
+  reconciler: { color: cyan }
+  narrator: { color: purple }
+  capture-ingest: { color: green }
+  research-ingest: { color: blue }
+  wiki-lint: { color: yellow }
+
+# Extra rewrite rules appended after the defaults (src/auggie/rewrite.ts).
+rewrite:
+  extraRules: []
