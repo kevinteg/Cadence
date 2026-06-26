@@ -11,7 +11,7 @@ Maintainer-side triage of open issues on the upstream Cadence repo.
 Hidden verb — not on the visible 12-verb surface; explicit-invocation
 only. Agent-suggested when chat language signals maintainer-mode.
 
-Reference `workflows/verb-contracts.md` for the incoming register.
+Reference `.augment/workflows/verb-contracts.md` for the incoming register.
 
 ## Usage
 

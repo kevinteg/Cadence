@@ -12,7 +12,7 @@ argument-hint: ingest|primer|ask
 tier of sources and distilled notes that accumulates *under* a unit of
 work (a project or a pursuit). Substrate formats, directory layout,
 the index/note/log shapes, and the id + dedup conventions live in
-`cadence-reference.md` → "Research Substrate"; this skill follows them
+`.augment/cadence-reference.md` → "Research Substrate"; this skill follows them
 exactly.
 
 Three operations:

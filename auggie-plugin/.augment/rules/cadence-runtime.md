@@ -11,7 +11,7 @@ narrative across pursuits.
 
 Reference content (file formats, full CLI catalog, lifecycle mechanics,
 project recipes, Intent-and-Actions discipline, idea-lifecycle policy)
-lives in `cadence-reference.md` — load on demand.
+lives in `.augment/cadence-reference.md` — load on demand.
 
 ## Vocabulary
 
@@ -20,12 +20,12 @@ lives in `cadence-reference.md` — load on demand.
 - **Action**: An atomic, concrete task. A checkbox in a project's Actions section. Every project requires at least one at creation.
 - **Inbox**: A *view*, not a directory or pursuit. The Inbox is the union of (a) captures in `thoughts/unprocessed/` whose status is untriaged (all v1 captures count; v2 captures with `status: untriaged`) and (b) brainstorms in `phase: diverging`. Cadence surfaces it as a single "Inbox: N items" line across status / SessionStart hook / capture-exit menu / `/start inbox` triage. Triage means moving an item out into a real outcome — an action on a pursuit, a new project, a brainstorm crystallized into one, or `closed` with a reason — so the Inbox shrinks back toward empty. A growing Inbox is a triage debt signal; the reconciler emits `inbox_pressure` above `inbox_soft_threshold` (default 10). No `pursuits/inbox/` pursuit exists in v1.1 onward — the term refers to the cross-repo view, not a folder. **The exact phrasing of the Inbox line, the active-brainstorms line, the empty-repo coaching block, and related ambient strings is canonical in `cadence-plugin/workflows/coaching-strings.md`** — surfaces quote from there rather than re-inventing wording. Function (this runtime entry) and form (that doc) stay split so consistency is enforced by source.
 - **Capture**: A raw thought saved to `thoughts/unprocessed/`. Flow-safe — no agent response at capture time.
-- **Research substrate**: The working tier of deliberately studied sources under a unit of work — `<unit>/research/` with `raw/` (immutable sources), `notes/` (distilled atomic notes), `index.md` (catalog + primer), `log.md` (append-only event log). Managed by the hidden verb `/research` (ingest / ask / primer). Distinct from Capture: captures park stray thoughts in the Inbox; the substrate holds sources studied for a unit, kept next to that work. `raw/` is GC-eligible at closure via `/resolve`'s disposition ritual; everything else is durable. Formats: `cadence-reference.md` → "Research Substrate".
-- **Wiki**: The durable, curated corpus at root-level `wiki/` — capstone narratives (promoted by `/narrate capstone`), graduated primers, the living-docs tier (`living/` — hand-authored logs and phase docs anchored to units, never GC'd), the meta-project (`_meta/`), style files (`_style/`), and the working narrative tier (`drafts/`, the old `narratives/drafts/` home). Outlives the research substrates that produced it; never GC'd. Browsed via the hidden verb `/wiki` (front door / ask / open / related); reads as a plain Markdown folder in any reader (Obsidian works well). Formats: `cadence-reference.md` → "Wiki — Durable Narrative Layer".
+- **Research substrate**: The working tier of deliberately studied sources under a unit of work — `<unit>/research/` with `raw/` (immutable sources), `notes/` (distilled atomic notes), `index.md` (catalog + primer), `log.md` (append-only event log). Managed by the hidden verb `/research` (ingest / ask / primer). Distinct from Capture: captures park stray thoughts in the Inbox; the substrate holds sources studied for a unit, kept next to that work. `raw/` is GC-eligible at closure via `/resolve`'s disposition ritual; everything else is durable. Formats: `.augment/cadence-reference.md` → "Research Substrate".
+- **Wiki**: The durable, curated corpus at root-level `wiki/` — capstone narratives (promoted by `/narrate capstone`), graduated primers, the living-docs tier (`living/` — hand-authored logs and phase docs anchored to units, never GC'd), the meta-project (`_meta/`), style files (`_style/`), and the working narrative tier (`drafts/`, the old `narratives/drafts/` home). Outlives the research substrates that produced it; never GC'd. Browsed via the hidden verb `/wiki` (front door / ask / open / related); reads as a plain Markdown folder in any reader (Obsidian works well). Formats: `.augment/cadence-reference.md` → "Wiki — Durable Narrative Layer".
 - **Reflection**: A weekly ritual artifact in `reflections/<YYYY-MM-DD>.md`.
 - **Narrative**: Generated writing from activity data. McAdams structure: what happened / what it meant / what shifted / what's next. Each generated narrative carries a watermark in its frontmatter (cadence, consumed_through_commit) — the narrative IS the pointer into the project-file activity stream.
 - **Leveraged Priority**: The ONE thing that defines next week's win. Set during Reflect.
-- **Intent**: A project's narrative section — motivation, scope, felt-sense of what "done" looks like. Co-edited with the agent as actions land and the work focuses. See `cadence-reference.md` for "Intent and Actions".
+- **Intent**: A project's narrative section — motivation, scope, felt-sense of what "done" looks like. Co-edited with the agent as actions land and the work focuses. See `.augment/cadence-reference.md` for "Intent and Actions".
 - **Reconciler**: Background process that flags overdue waiting-for items, dormant projects, Inbox pressure (untriaged material above the soft cap), closing-in pursuits, structural inconsistencies (active projects with no open actions), inbound issues piling up on the upstream Cadence repo, capstone gaps (resolved units whose research never crystallized into a narrative), and retrospectives coming due (resolved pursuits accumulating past `retrospective_due_threshold` since the last `/narrate lessons` run).
 - **2-Minute Item**: An action completable in under two minutes. Surfaced immediately when identified, cleared first during Reflect.
 
@@ -34,7 +34,7 @@ lives in `cadence-reference.md` — load on demand.
 You are one voice. The verb the user invokes sets your register — your
 tone, behavior, and guardrails change to match the cognitive mode required.
 
-Read `workflows/verb-contracts.md` for the full contract of each verb.
+Read `.augment/workflows/verb-contracts.md` for the full contract of each verb.
 
 The user-facing verbs are: **brainstorm**, **start**, **complete**,
 **resolve**, **waiting**, **capture**, **reflect**, **narrate**.
@@ -148,7 +148,7 @@ Code's plugin loader. Skills invoke it directly as `cadence <subcommand>
 [--json]`. Without `--json`, output is a tabular summary for humans;
 with `--json`, it emits structured data for skills to reason over.
 
-Full subcommand catalog in `cadence-reference.md`.
+Full subcommand catalog in `.augment/cadence-reference.md`.
 
 ## Engagement and Alignment
 
@@ -267,7 +267,7 @@ parameter-side and remove the prompt redundancy.
 
 **Surface tips from the curated library at appropriate breakpoints.**
 Cadence ships a tip library at `cadence-plugin/tips/library.yaml`
-(schema: see `cadence-reference.md` "Tip Library" section). Three
+(schema: see `.augment/cadence-reference.md` "Tip Library" section). Three
 content types coexist: brain-tickler **quotes** (Allen, Newport, Doerr,
 Brooks, Karpathy, Willison, etc. — non-sappy, smart-colleague tone),
 **skill-teaching** tooltips ("Running `/cadence-resolve` — this marks

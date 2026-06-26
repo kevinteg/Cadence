@@ -22,7 +22,7 @@ content (a 20-page PDF, a long article, a stack of notes) lives in
 your context window and never reaches the main session. The main
 session only sees the structured result you return.
 
-Substrate format reference: `cadence-reference.md` → "Research
+Substrate format reference: `.augment/cadence-reference.md` → "Research
 Substrate" (in this plugin directory). Follow it exactly — the index
 line shape, the note frontmatter, and the `## Related` wikilink
 convention are parsed by the parent skill.

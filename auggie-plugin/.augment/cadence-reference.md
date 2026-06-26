@@ -248,7 +248,7 @@ checkout by matching normalized git remotes across the cadence repo's
 siblings + `discovery_hints` + any `--path`/`--search` dirs, returning
 `checkout: null` when none match (the `/publish` skill then prompts).
 Both are read-only — `publish-resolve` only inspects git state, never
-mutates. See the `/publish` register in `workflows/verb-contracts.md`.
+mutates. See the `/publish` register in `.augment/workflows/verb-contracts.md`.
 
 `project-activity` is the stream `/narrate` consumes — git log of
 `pursuits/**/projects/*.md` rendered as a per-project event list.
@@ -1235,7 +1235,7 @@ language per surface.
 
 Each section collapses when its input is empty. The "This week" line takes the first sentence of the LP (lower-cased, trailing punctuation stripped) plus the most recently active project's relative-time label. The "Likely next moves" block is computed by `curateNextMoves()` in `src/render/curation.ts` — priority order: LP alignment → recency → structural urgency → parking-lot pressure → routine surfaces, capped at 3 entries.
 
-The optional tip footer surfaces via `pickDashboardTip()` in `src/tip/picker.ts` — a `type: quote` tip from the library matched on the `verb-status` or `idle` trigger tags, gated by the `status-marginalia` category cool-down (default 1 day; per-tip `cool_down_days` in `library.yaml` keep individual tip variety high). The empty-repo branch suppresses it. See `workflows/coaching-strings.md` "Tip footer" section for the canonical rendering.
+The optional tip footer surfaces via `pickDashboardTip()` in `src/tip/picker.ts` — a `type: quote` tip from the library matched on the `verb-status` or `idle` trigger tags, gated by the `status-marginalia` category cool-down (default 1 day; per-tip `cool_down_days` in `library.yaml` keep individual tip variety high). The empty-repo branch suppresses it. See `.augment/workflows/coaching-strings.md` "Tip footer" section for the canonical rendering.
 
 Color is opt-in. The bare-CLI status enables ANSI escape codes when stdout is a TTY (with `NO_COLOR` / `FORCE_COLOR` env overrides). The hook-output path always emits plain markdown — ANSI codes would corrupt the agent host's table rendering.
 

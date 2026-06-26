@@ -11,7 +11,7 @@ argument-hint: '[pursuit|project|brainstorm|inbox]'
 Open a workspace for work. `/start` is the universal entry point — one
 verb for every "I want to begin doing something" intent. Argument
 shape determines what gets opened. Reference
-`workflows/verb-contracts.md` for the start register.
+`.augment/workflows/verb-contracts.md` for the start register.
 
 `/start` is **view-only**: it doesn't mark sessions, doesn't write
 pointers, doesn't load markers. It surfaces the entity's current

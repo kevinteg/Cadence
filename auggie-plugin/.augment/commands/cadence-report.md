@@ -12,7 +12,7 @@ feedback against the upstream Cadence repo. Hidden verb — not on the
 visible 12-verb surface; agent-suggested when friction, bug, or
 feature-wish language appears in chat.
 
-Reference `workflows/verb-contracts.md` for the report register.
+Reference `.augment/workflows/verb-contracts.md` for the report register.
 
 ## Usage
 
@@ -137,5 +137,5 @@ Valid `kind` values (GitHub default labels): `bug`, `enhancement`, `documentatio
 - **Never read files outside the plugin directory** and the explicitly-confirmed attachment paths from step 6. No glob, no scan, no implicit attachment.
 - **No state writes outside the success path.** Drafts only land on disk when `gh` was attempted and failed mid-flight. The `gh not installed` and `gh not authed` paths produce a terminal dump only — no draft persisted.
 - **Mid-flow cancel is graceful.** If the user responds `N` at step 7, drop the in-memory body without saving. Privacy default extends to abandoned drafts.
-- **Hidden verb status.** Do not surface in `/cadence-help`'s primary verb catalogue. Discovery happens via the natural-language suggestion path defined in `workflows/verb-contracts.md`.
+- **Hidden verb status.** Do not surface in `/cadence-help`'s primary verb catalogue. Discovery happens via the natural-language suggestion path defined in `.augment/workflows/verb-contracts.md`.
 - **Smart-colleague tone.** Same editorial guide as the tip library — no cheery, no apologetic, no streak-flavor. The welcome line at step 3 is the only flavor; everything else is functional.

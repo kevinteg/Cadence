@@ -9,8 +9,8 @@ argument-hint: '[group|verb]'
 # /help
 
 Browse the Cadence verb surface inline. Renders from
-`cadence-reference.md` (Verb Catalogue) and
-`workflows/verb-contracts.md` (per-verb contracts) — those files are
+`.augment/cadence-reference.md` (Verb Catalogue) and
+`.augment/workflows/verb-contracts.md` (per-verb contracts) — those files are
 the source of truth, the skill just presents them.
 
 ## Usage

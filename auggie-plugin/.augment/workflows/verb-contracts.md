@@ -269,7 +269,7 @@ No judgment on the decision in either direction.
   closed → no duplicate comment) and gh-gated (silent skip on missing
   gh — never fails the underlying state mutation). The sync result is
   returned in the CLI response (`origin_sync.kind`); surface it in
-  the resolve exit when non-null. See `cadence-reference.md`
+  the resolve exit when non-null. See `.augment/cadence-reference.md`
   "Maintainer Labels" for label semantics.
 
 **No-argument entry:** Asks which project or pursuit. If unclear about
@@ -468,7 +468,7 @@ Otherwise show a short list of active projects: "Which project is this for?"
 
 **Non-interactive sources writing to the same primitive:** the CLI
 subcommand `cadence mcp-pull --server <name>` reads resources from a
-configured MCP server (see `cadence-reference.md` → "MCP Integration")
+configured MCP server (see `.augment/cadence-reference.md` → "MCP Integration")
 and writes each as a capture under `thoughts/unprocessed/` with an
 `mcp:` frontmatter block. These captures appear in the standard
 triage queue alongside hand-written ones; `/reflect` Get Clear treats
@@ -630,7 +630,7 @@ Then the verb-hint block + teaching footer per the universal exit convention.
 
 *Hidden verb — not on the visible 12-verb surface; explicit-invocation only; agent-suggested when chat language signals research intent. Promotes to the visible catalogue when the wiki layer ships (pursuit-level decision).*
 
-**Purpose:** Build and use the **research substrate** — the working tier of sources and distilled atomic notes that accumulates under a unit of work (project or pursuit) at `<unit>/research/`. Three operations: ingest a source (raw copy + distilled note via subagent), ask a question over the substrate (index-first, cited), generate a primer (orientation + suggested learning order). Formats: `cadence-reference.md` → "Research Substrate".
+**Purpose:** Build and use the **research substrate** — the working tier of sources and distilled atomic notes that accumulates under a unit of work (project or pursuit) at `<unit>/research/`. Three operations: ingest a source (raw copy + distilled note via subagent), ask a question over the substrate (index-first, cited), generate a primer (orientation + suggested learning order). Formats: `.augment/cadence-reference.md` → "Research Substrate".
 
 **Tone:** Librarian-terse. Ingest confirms what landed and what it connects to. Ask answers only what the notes support and names gaps plainly. Primer is written for re-entry months later, not for the moment of writing.
 
@@ -662,7 +662,7 @@ Then the verb-hint block + teaching footer per the universal exit convention.
 
 *Hidden verb — not on the visible 12-verb surface; explicit-invocation plus by-name requests ("check the wiki for X"); agent-suggested when chat language signals corpus-lookup intent. Promotes to the visible catalogue when the wiki layer ships (pursuit-level decision, alongside `research`).*
 
-**Purpose:** Query and curate the durable corpus at root-level `wiki/` — capstone narratives, primers, the meta-project. Five operations: front door (render `wiki/index.md`), ask (index-first Q&A with citations), open (by slug), related (link-graph neighbors), lint (budgeted `wiki-lint` subagent health scan — dangling pointers, evaporated provenance, orphans, stale index entries, draft pile-up, contradictions; findings only, never auto-fix). Layout and formats: `cadence-reference.md` → "Wiki — Durable Narrative Layer".
+**Purpose:** Query and curate the durable corpus at root-level `wiki/` — capstone narratives, primers, the meta-project. Five operations: front door (render `wiki/index.md`), ask (index-first Q&A with citations), open (by slug), related (link-graph neighbors), lint (budgeted `wiki-lint` subagent health scan — dangling pointers, evaporated provenance, orphans, stale index entries, draft pile-up, contradictions; findings only, never auto-fix). Layout and formats: `.augment/cadence-reference.md` → "Wiki — Durable Narrative Layer".
 
 **Tone:** Reference-librarian. Answers cite; gaps get named with the unit that would have to produce the missing artifact; no padding beyond what the corpus holds.
 

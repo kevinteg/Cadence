@@ -13,7 +13,7 @@ the artifacts in `wiki/` (capstone narratives, primers, living docs,
 the meta-project). It does not read research substrates (that's
 `/research ask`) and it does not generate narratives (that's
 `/narrate capstone`). Layout and artifact formats live in
-`cadence-reference.md` → "Wiki — Durable Narrative Layer" (living
+`.augment/cadence-reference.md` → "Wiki — Durable Narrative Layer" (living
 docs: the "Living docs tier" subsection).
 
 The retrieval discipline is **index-first navigation**: read
@@ -112,7 +112,7 @@ add-on (Obsidian Smart Connections), not a dependency.
 4. Append to `wiki/log.md`: `## [YYYY-MM-DD] lint | <N> findings`.
 
 Lint is also reconciler-adjacent: the `capstone_gap` and
-`retrospective_due` flags (see `workflows/reconciler.md` §9-10) cover
+`retrospective_due` flags (see `.augment/workflows/reconciler.md` §9-10) cover
 the always-on checks; `/wiki lint` is the deeper, on-demand pass. Run
 it after a GC ritual clears a substrate, or when `/reflect` Get Clear
 suggests the corpus has drifted.

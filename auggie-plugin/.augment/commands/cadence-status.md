@@ -25,7 +25,7 @@ argument resolution and number-shortcut tracking.
 Active brainstorms (workspaces with `phase: diverging | converging`)
 are first-class entries in the dashboard and pursuit drill-down —
 they surface alongside on_hold/active projects so the user can resume
-ideation without hunting. See `cadence-reference.md` "Brainstorm
+ideation without hunting. See `.augment/cadence-reference.md` "Brainstorm
 Workspaces" for the underlying shape. The full Next:-block reshape
 that surfaces them in priority order lands in
 `reshape-status-output-for-navigation`.
@@ -109,7 +109,7 @@ When no argument is provided:
      surfaces (reflect-due, narrate-week, narrate-today).
    - **Idle-time prompt** — appended below `Likely next moves` when
      activity is stale (>7 days). Wording is the canonical string from
-     `workflows/coaching-strings.md`.
+     `.augment/workflows/coaching-strings.md`.
 
 2. Present the CLI output verbatim. Do not paraphrase or annotate.
    The "Likely next moves" block is computed deterministically by
@@ -127,7 +127,7 @@ When no argument is provided:
 When the repo state is empty — zero pursuits AND Inbox empty AND
 `validations/pending.md` empty — the SessionStart hook emits the
 canonical empty-repo coaching block (from
-`workflows/coaching-strings.md`) in place of the dashboard. The bare
+`.augment/workflows/coaching-strings.md`) in place of the dashboard. The bare
 CLI (`cadence status`) does NOT branch this way: an explicit `/status`
 call on an empty repo still renders the dashboard so the user can
 verify state. The branch is hook-only — the implicit ambient surface
@@ -170,7 +170,7 @@ back to manual scanning:
   frontmatter, count Action checkboxes
 - For activity recency, fall back to fs.stat mtime on each project file
 - Read `cadence.yaml` for thresholds
-- Apply `workflows/reconciler.md` checks for flags
+- Apply `.augment/workflows/reconciler.md` checks for flags
 
 The CLI is preferred — it's deterministic and faster. Only fall back
 when the bin is verifiably absent.

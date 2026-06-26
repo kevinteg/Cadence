@@ -18,7 +18,7 @@ this one lands in *someone else's*.
 Hidden verb — not on the visible 12-verb surface; explicit-invocation
 only; agent-suggested when chat language signals publish intent.
 
-Reference `workflows/verb-contracts.md` for the publish register. The
+Reference `.augment/workflows/verb-contracts.md` for the publish register. The
 design rationale (why **mode B**, why the issue's three forks dissolved,
 why **surface-and-warn** over enforce) lives in the archived brainstorm
 at `wiki/_archive/brainstorms/first-class-publish/`.

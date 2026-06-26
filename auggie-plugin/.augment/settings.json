@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "NO_COLOR=1 CADENCE_VERB_PREFIX=/cadence- cadence status"
+            "command": "sh -c 'NO_COLOR=1 CADENCE_VERB_PREFIX=/cadence- cadence status'"
           }
         ]
       }

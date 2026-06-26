@@ -21034,6 +21034,23 @@ var DEFAULT_RULES = [
     name: "plugin-root-var",
     pattern: /\$\{CLAUDE_PLUGIN_ROOT\}/g,
     replacement: "the plugin root"
+  },
+  // 9. On-demand reference docs are emitted UNDER .augment/ (Auggie vendors only
+  //    .augment/ into the workspace), so re-point the bare relative references
+  //    in command/rule/AGENTS bodies to the deployed location. The negative
+  //    lookbehind `(?<![\w/.-])` skips paths that are already qualified —
+  //    source paths (`cadence-plugin/workflows/…`), CI paths
+  //    (`.github/workflows/…`), and already-prefixed (`.augment/workflows/…`) —
+  //    rewriting only the bare load-on-demand pointers. See issues #13/#14.
+  {
+    name: "ref-cadence-reference",
+    pattern: /(?<![\w/.-])cadence-reference\.md/g,
+    replacement: ".augment/cadence-reference.md"
+  },
+  {
+    name: "ref-workflows-dir",
+    pattern: /(?<![\w/.-])workflows\//g,
+    replacement: ".augment/workflows/"
   }
 ];
 function toGlobalRegex(pattern) {
@@ -21137,6 +21154,7 @@ async function loadOverrides(filePath) {
 // src/auggie/transform.ts
 var REFERENCE_FILES = ["cadence-reference.md"];
 var REFERENCE_DIRS = ["workflows", "styles", "tips", "deck"];
+var REFERENCE_DEST_PREFIX = ".augment";
 var TEXT_EXT = /* @__PURE__ */ new Set([".md", ".yaml", ".yml", ".json", ".txt"]);
 function yamlFrontmatter(data) {
   const dumped = jsYaml.dump(data, { schema: jsYaml.CORE_SCHEMA, lineWidth: -1 });
@@ -21146,6 +21164,10 @@ ${dumped}---
 }
 function rewriteText(text, rules) {
   return applyRewrites(text, rules);
+}
+function shellWrapHook(inner) {
+  const escaped = inner.replace(/'/g, `'\\''`);
+  return `sh -c '${escaped}'`;
 }
 function toToolList(tools) {
   if (Array.isArray(tools)) return tools.map(String);
@@ -21267,7 +21289,9 @@ async function emitReferenceDocs(pluginDir, rules, out) {
   for (const file of REFERENCE_FILES) {
     const p = path26.join(pluginDir, file);
     if (existsSync17(p)) {
-      out.set(file, { content: rewriteText(await readFile17(p, "utf-8"), rules) });
+      out.set(`${REFERENCE_DEST_PREFIX}/${file}`, {
+        content: rewriteText(await readFile17(p, "utf-8"), rules)
+      });
     }
   }
   for (const dir of REFERENCE_DIRS) {
@@ -21280,7 +21304,7 @@ async function walkCopy(abs, pluginDir, rules, out) {
   const entries = await readdir4(abs, { withFileTypes: true });
   for (const entry of entries) {
     const full = path26.join(abs, entry.name);
-    const rel = path26.relative(pluginDir, full).split(path26.sep).join("/");
+    const rel = REFERENCE_DEST_PREFIX + "/" + path26.relative(pluginDir, full).split(path26.sep).join("/");
     if (entry.isDirectory()) {
       await walkCopy(full, pluginDir, rules, out);
     } else {
@@ -21296,7 +21320,8 @@ async function walkCopy(abs, pluginDir, rules, out) {
   }
 }
 async function emitSettings(pluginDir, overrides, out) {
-  const command = overrides.sessionStartCommand ?? "NO_COLOR=1 CADENCE_VERB_PREFIX=/cadence- cadence status";
+  const inner = overrides.sessionStartCommand ?? "NO_COLOR=1 CADENCE_VERB_PREFIX=/cadence- cadence status";
+  const command = shellWrapHook(inner);
   const settings = {
     hooks: {
       SessionStart: [

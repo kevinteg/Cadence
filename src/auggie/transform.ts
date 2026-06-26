@@ -38,9 +38,13 @@ export interface TranspileOptions {
 }
 
 /** Reference-doc directories/files copied verbatim (with rewrite) so command and
- *  rule bodies that reference them by relative path keep resolving. */
+ *  rule bodies that reference them by relative path keep resolving. Emitted under
+ *  `.augment/` (REFERENCE_DEST_PREFIX) so they travel with the vendored Auggie
+ *  install — which deploys only the .augment/ tree; the rewrite layer re-points
+ *  the bare references to match. See issues #13/#14. */
 const REFERENCE_FILES = ['cadence-reference.md']
 const REFERENCE_DIRS = ['workflows', 'styles', 'tips', 'deck']
+const REFERENCE_DEST_PREFIX = '.augment'
 
 const TEXT_EXT = new Set(['.md', '.yaml', '.yml', '.json', '.txt'])
 
@@ -51,6 +55,16 @@ function yamlFrontmatter(data: Record<string, unknown>): string {
 
 function rewriteText(text: string, rules: RewriteRule[]): string {
   return applyRewrites(text, rules)
+}
+
+/**
+ * Wrap a hook command so a non-shell hook runner (Auggie spawns directly,
+ * tokenizing on whitespace) still evaluates shell syntax like inline
+ * `VAR=value` env prefixes. Inner single quotes are POSIX-escaped (`'\''`).
+ */
+function shellWrapHook(inner: string): string {
+  const escaped = inner.replace(/'/g, `'\\''`)
+  return `sh -c '${escaped}'`
 }
 
 function toToolList(tools: unknown): string[] | undefined {
@@ -220,7 +234,9 @@ async function emitReferenceDocs(
   for (const file of REFERENCE_FILES) {
     const p = path.join(pluginDir, file)
     if (existsSync(p)) {
-      out.set(file, { content: rewriteText(await readFile(p, 'utf-8'), rules) })
+      out.set(`${REFERENCE_DEST_PREFIX}/${file}`, {
+        content: rewriteText(await readFile(p, 'utf-8'), rules),
+      })
     }
   }
   for (const dir of REFERENCE_DIRS) {
@@ -239,7 +255,10 @@ async function walkCopy(
   const entries = await readdir(abs, { withFileTypes: true })
   for (const entry of entries) {
     const full = path.join(abs, entry.name)
-    const rel = path.relative(pluginDir, full).split(path.sep).join('/')
+    const rel =
+      REFERENCE_DEST_PREFIX +
+      '/' +
+      path.relative(pluginDir, full).split(path.sep).join('/')
     if (entry.isDirectory()) {
       await walkCopy(full, pluginDir, rules, out)
     } else {
@@ -265,9 +284,17 @@ async function emitSettings(
   // (Auggie injects SessionStart stdout as context — the faithful analogue of
   // Claude Code's --hook-output envelope). Use a plain, no-color dashboard so
   // the injected context is clean markdown.
-  const command =
+  const inner =
     overrides.sessionStartCommand ??
     'NO_COLOR=1 CADENCE_VERB_PREFIX=/cadence- cadence status'
+  // Auggie spawns hook commands without a shell, so inline `VAR=value cmd`
+  // env-prefix syntax — which a shell would consume — makes `VAR=value` the
+  // argv[0] and fails with `spawn VAR=value ENOENT` every session start.
+  // Wrap in `sh -c '…'` so a real shell evaluates the env prefix. Claude Code's
+  // hook runner already uses a shell, so the source needs no wrapping — this is
+  // Auggie-specific. See issue #11. (sessionStartCommand overrides are the
+  // INNER command and get wrapped here too.)
+  const command = shellWrapHook(inner)
   const settings = {
     hooks: {
       SessionStart: [

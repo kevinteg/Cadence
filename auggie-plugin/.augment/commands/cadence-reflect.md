@@ -5,8 +5,8 @@ description: Start or resume the weekly Reflect ritual for review and prioritiza
 # /reflect
 
 Start or resume the weekly Reflect ritual. Reference
-`workflows/verb-contracts.md` for the reflect register and
-`workflows/reflect.md` for the full ritual specification.
+`.augment/workflows/verb-contracts.md` for the reflect register and
+`.augment/workflows/reflect.md` for the full ritual specification.
 
 ## Steps
 
@@ -110,7 +110,7 @@ payload; it does not walk items individually.
         `newSinceLast`, when present.
 
    b. Render the canonical awareness block from
-      `workflows/coaching-strings.md`:
+      `.augment/workflows/coaching-strings.md`:
 
       ```
       Inbox: <N> items (oldest <D>d)  ·  Dormant: <M> projects  ·  Closing-in: <K> pursuits  ·  WIP: <X>/<max>

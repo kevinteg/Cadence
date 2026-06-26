@@ -87,6 +87,23 @@ export const DEFAULT_RULES: RewriteRule[] = [
     pattern: /\$\{CLAUDE_PLUGIN_ROOT\}/g,
     replacement: 'the plugin root',
   },
+  // 9. On-demand reference docs are emitted UNDER .augment/ (Auggie vendors only
+  //    .augment/ into the workspace), so re-point the bare relative references
+  //    in command/rule/AGENTS bodies to the deployed location. The negative
+  //    lookbehind `(?<![\w/.-])` skips paths that are already qualified —
+  //    source paths (`cadence-plugin/workflows/…`), CI paths
+  //    (`.github/workflows/…`), and already-prefixed (`.augment/workflows/…`) —
+  //    rewriting only the bare load-on-demand pointers. See issues #13/#14.
+  {
+    name: 'ref-cadence-reference',
+    pattern: /(?<![\w/.-])cadence-reference\.md/g,
+    replacement: '.augment/cadence-reference.md',
+  },
+  {
+    name: 'ref-workflows-dir',
+    pattern: /(?<![\w/.-])workflows\//g,
+    replacement: '.augment/workflows/',
+  },
 ]
 
 function toGlobalRegex(pattern: RegExp | string): RegExp {

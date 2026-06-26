@@ -71,15 +71,45 @@ separator changes from `:` to `-`:
 
 You can also run a command non-interactively: `auggie command cadence-status`.
 
+## MCP servers (Glean and friends)
+
+Cadence consumes MCP servers (e.g. Glean enterprise search) through the **agent
+host's** tool surface — `/cadence-mcp-pull` and ad-hoc lookups call the host's
+`mcp__<server>__*` tools, and Cadence only ever writes the *results* to disk via
+`cadence write-capture`. Two things to know under Auggie:
+
+**Obtaining the OAuth token.** Auggie (0.30.0+) runs the full OAuth 2.1 flow for
+HTTP MCP servers — well-known discovery, authorization-code grant, and dynamic
+client registration — but only **interactively, via the `/mcp` command**. For a
+server that returns `401` with a `WWW-Authenticate: Bearer resource_metadata=…`
+header (Glean does):
+
+1. Register the server in Auggie's MCP config.
+2. Run `/mcp` in your Auggie session and complete the browser sign-in once.
+3. Auggie now holds the token and exposes the server's `mcp__<server>__*` tools;
+   `/cadence-mcp-pull` and ad-hoc lookups work from there.
+
+You do **not** configure OAuth in Cadence — the host owns transport and auth.
+
+**The standalone `cadence` CLI never performs its own MCP transport or OAuth.**
+This is the host-agnostic rule (older notes phrase it Claude-Code-first, but the
+gap is identical on every host): the bare `cadence` binary cannot reuse the token
+the agent host obtained — not Claude Code's, not Auggie's. MCP always flows **host
+tool call → result → `cadence write-capture`**. Running `cadence mcp-pull` outside
+an agent session has no token and no transport; that's by design, not a gap.
+
 ## Known limitations / validation status
 
 The transpile is faithful, but a few host details can only be confirmed against a
 live Auggie session and are tracked as validation items:
 
 - **CLI on PATH for the hook.** The SessionStart hook runs
-  `NO_COLOR=1 CADENCE_VERB_PREFIX=/cadence- cadence status`. If Auggie does not
+  `sh -c 'NO_COLOR=1 CADENCE_VERB_PREFIX=/cadence- cadence status'` — shell-wrapped
+  because Auggie spawns hooks directly (no shell), so a bare inline `VAR=value`
+  prefix fails with `spawn NO_COLOR=1 ENOENT` (issue #11). If Auggie does not
   expose the plugin's `bin/` on PATH, set an absolute path via
-  `sessionStartCommand` in `src/auggie/overrides.yaml` and regenerate.
+  `sessionStartCommand` in `src/auggie/overrides.yaml` (give the inner command —
+  it's shell-wrapped for you) and regenerate.
 - **Verb hints in agent-run CLI output.** The `CADENCE_VERB_PREFIX=/cadence-`
   env var makes the shared CLI print Auggie-correct hints. The hook sets it
   inline; for CLI calls the agent makes mid-session, set it in your Auggie

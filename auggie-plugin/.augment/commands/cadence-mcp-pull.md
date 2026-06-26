@@ -16,7 +16,7 @@ Drives MCP integration through the agent's normal tool-call surface
 so the agent host (the MCP host) owns the transport and OAuth; Cadence
 owns the file write.
 
-Reference `workflows/verb-contracts.md` for the mcp-pull register.
+Reference `.augment/workflows/verb-contracts.md` for the mcp-pull register.
 
 ## When to use `/mcp-pull` vs. `/cadence-capture --source`
 

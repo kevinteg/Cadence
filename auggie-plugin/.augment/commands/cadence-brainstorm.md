@@ -12,9 +12,9 @@ Workspace-shaped ideation verb. A brainstorm is a `brainstorms/<slug>/`
 directory carrying `workspace.md` (divergent notes), `meta.yaml` (phase
 machine + provenance), `solutions/<name>.md` (candidate solutions when
 converging), and `decision.md` (written on crystallize). See
-`cadence-reference.md` "Brainstorm Workspaces" for the file shapes.
+`.augment/cadence-reference.md` "Brainstorm Workspaces" for the file shapes.
 
-Reference `workflows/verb-contracts.md` for the brainstorm register.
+Reference `.augment/workflows/verb-contracts.md` for the brainstorm register.
 
 ## Usage
 

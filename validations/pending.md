@@ -26,3 +26,5 @@ verification in a fresh session.
 - 2026-06-24T15:12:17.111Z — Auggie: confirm subagent model ids (haiku4.5 / sonnet4.5) are valid Auggie models; correct overrides.yaml 'models' if not.
 - 2026-06-24T15:12:17.243Z — Auggie: confirm .augment-plugin/plugin.json manifest schema is accepted by the plugin loader; add any required keys via manifest.ts.
 - 2026-06-24T15:12:17.381Z — Auggie: confirm /cadence-mcp-pull works against an Auggie-registered MCP server (tool-surface discovery parity).
+- 2026-06-26T16:19:46.692Z — Auggie #11: in a live authed Auggie session, confirm the SessionStart hook renders the dashboard with NO 'spawn NO_COLOR=1 ENOENT' (shell-wrap fix).
+- 2026-06-26T16:19:46.762Z — Auggie #13: in a vendored .augment/ under a live Auggie session, confirm on-demand pointers (.augment/workflows/verb-contracts.md, .augment/cadence-reference.md) actually load — i.e. Auggie resolves them from workspace root. If it resolves rule-relative instead, adjust REFERENCE_DEST_PREFIX / the rewrite target.

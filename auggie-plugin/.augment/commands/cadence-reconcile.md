@@ -5,7 +5,7 @@ description: Quiet report of system health — overdue waiting-fors, dormant pro
 # /reconcile
 
 Standalone quiet report of system health. The full detection logic lives
-in `workflows/reconciler.md`.
+in `.augment/workflows/reconciler.md`.
 
 This is the on-demand version of the reconciler. The loud version lives
 inside /reflect (Get Clear phase). This produces a report without

@@ -22,7 +22,7 @@ Both paths land in the same Inbox. **`thoughts/unprocessed/` is the audit trail.
 - `/cadence-capture "<text>"` — inline, silent (the v1 contract; unchanged)
 - `/cadence-capture` (no input) — opens `$EDITOR` for a brain dump (acts like `--dump`)
 - `/cadence-capture --from <path-or-url> [--prompt "<distillation guidance>"]` — file or URL ingest, distilled
-- `/cadence-capture --source <named> [--prompt "..."]` — named MCP query from `ingest_sources:` (see `cadence-reference.md` → Capture Ingestion)
+- `/cadence-capture --source <named> [--prompt "..."]` — named MCP query from `ingest_sources:` (see `.augment/cadence-reference.md` → Capture Ingestion)
 - `/cadence-capture --dump [--prompt "..."]` — explicit `$EDITOR` brain dump
 
 The `--prompt` field is what the capture-ingest subagent uses to

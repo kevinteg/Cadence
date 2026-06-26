@@ -10,7 +10,7 @@ argument-hint: '[project] --who --what --expected'
 
 Track an external dependency. The reconciler flags items that go past
 their expected date so blockers don't silently rot. Reference
-`workflows/verb-contracts.md` for the waiting register.
+`.augment/workflows/verb-contracts.md` for the waiting register.
 
 ## Usage
 

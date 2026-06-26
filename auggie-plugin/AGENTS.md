@@ -7,9 +7,9 @@ generates narrative across pursuits.
 The always-on runtime lives in `.augment/rules/cadence-runtime.md` and is
 loaded automatically. On-demand reference content:
 
-- `cadence-reference.md` — file formats, full CLI catalog, lifecycle mechanics.
-- `workflows/verb-contracts.md` — per-verb tone + behavior + guardrails.
-- `workflows/coaching-strings.md` — canonical wording for ambient surfaces.
+- `.augment/cadence-reference.md` — file formats, full CLI catalog, lifecycle mechanics.
+- `.augment/workflows/verb-contracts.md` — per-verb tone + behavior + guardrails.
+- `.augment/workflows/coaching-strings.md` — canonical wording for ambient surfaces.
 
 Commands are exposed as `/cadence-<verb>` slash commands under
 `.augment/commands/`. The deterministic `cadence` CLI ships at `bin/cadence`.
