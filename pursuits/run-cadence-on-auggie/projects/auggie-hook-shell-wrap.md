@@ -1,7 +1,7 @@
 ---
 id: auggie-hook-shell-wrap
 pursuit: run-cadence-on-auggie
-status: active
+status: done
 created: 2026-06-26
 origin:
   kind: github_issue
