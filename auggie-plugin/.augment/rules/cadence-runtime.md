@@ -442,6 +442,41 @@ invoked sets the conversational register, not the tool gate.
 
 ## Scope
 
-All data lives within this repository. Do not read files outside the
-repo root — all pursuits, projects, ideas, captures, reflections, and
-configuration are local to this directory.
+Cadence **state** — pursuits, projects, captures, brainstorms,
+reflections, wiki, configuration — lives only in this repository.
+Never create Cadence structure outside it; only `/cadence-init` may
+create Cadence structure in a directory, ever. Sanctioned exceptions
+to the repo boundary, each narrow and explicit:
+
+- **Per-machine registry** (`~/.config/cadence/repos.yaml`): holds
+  machine-local *paths* to known Cadence repos — names, locations,
+  hub markers. Never content; never synced.
+- **Cross-repo reads** for delegation and fleet: `cadence delegates`
+  and `cadence fleet` scan other registered/delegated Cadence repos
+  read-only. A hub verb never writes into a delegate repo.
+- **/publish** edits its external destination checkout in place —
+  that is its contract (git owns merge/auth/idempotency).
+- **/report and /incoming** talk to GitHub via `gh`.
+- **/mcp-pull and user-directed lookups** reach MCP servers and the
+  web per External Tool Discipline above.
+
+Outside those surfaces, do not read or write beyond the repo root.
+
+## Hub and Spoke
+
+Repos can relate: a **hub** aggregates visibility; a **spoke**
+(delegate) owns execution for pursuits the hub delegated to it via
+`delegated_to` frontmatter. The split of authority is strict —
+prioritization on the hub (why, target, win_cycle, lifecycle moves),
+execution in the delegate (projects, actions, captures). Aggregation
+is read-only (`cadence delegates`, `cadence fleet`); creation verbs
+refuse against delegated pursuits and point at the delegate repo.
+
+**Guest sessions**: outside any Cadence repo, verbs do not scaffold
+state — the sanctioned guest surface is capture into a registered
+default repo (`--root <name>`), read-only status, and `/cadence-report`.
+With no registry on the machine, only `/cadence-report` remains (the
+work-machine boundary: bug reports flow out, no content crosses).
+`cadence context --json` orients the skill layer in one call.
+
+Full mechanics: `.augment/cadence-reference.md` → "Hub and Spoke".

@@ -92,7 +92,7 @@ Arguments resolve via fuzzy match. `today`, `week`, `month`, `year`, `lessons`, 
 
    Example prompt (pursuit-arc, larger budget):
    ```
-   Generate a pursuit-arc narrative for build-cadence-v1. Run `cadence project-activity --scope pursuit --pursuit build-cadence-v1` and read closure metadata as needed. Compose 5-8 paragraphs in McAdams structure: what was attempted, what shipped, what got dropped (with reasons), what brainstorms crystallized into projects, what was archived as decided-not-to-pursue.
+   Generate a pursuit-arc narrative for write-thesis. Run `cadence project-activity --scope pursuit --pursuit write-thesis` and read closure metadata as needed. Compose 5-8 paragraphs in McAdams structure: what was attempted, what shipped, what got dropped (with reasons), what brainstorms crystallized into projects, what was archived as decided-not-to-pursue.
    [Budget: 8 tool calls. If exceeded, return what you have without retrying.]
    ```
 
@@ -167,12 +167,12 @@ Capstone runs the same six steps with these deviations:
 
 3. **Brief the narrator dual-source + style-aware.** Example prompt:
    ```
-   Generate a capstone narrative. Scope capstone:build-cadence-v1/mcp-integration.
-   Unit path pursuits/build-cadence-v1/projects/mcp-integration.md;
-   research substrate at pursuits/build-cadence-v1/projects/mcp-integration/research/
+   Generate a capstone narrative. Scope capstone:write-thesis/literature-review.
+   Unit path pursuits/write-thesis/projects/literature-review.md;
+   research substrate at pursuits/write-thesis/projects/literature-review/research/
    (6 sources). effective_domain: digital. Read wiki/_style/voice.md,
    wiki/_style/capstone.md, wiki/_style/diagrams.md first and follow them.
-   Activity: cadence project-activity --scope pursuit --pursuit build-cadence-v1
+   Activity: cadence project-activity --scope pursuit --pursuit write-thesis
    (use the project's slice). Compose per the capstone contract: orientation,
    McAdams arc, How-it-works if diagrams clarify (Mermaid only), Sources
    stub list from the notes' provenance frontmatter. Full markdown document,

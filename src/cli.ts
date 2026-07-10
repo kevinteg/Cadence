@@ -22,7 +22,28 @@ import { computeSuggestionSignals } from './render/signals.js'
 import { renderSnapshot, renderReport } from './render/snapshot.js'
 import { findEntities } from './find.js'
 import { loadConfig } from './config.js'
-import { discoverCheckout } from './publish.js'
+import { discoverCheckout, expandHome } from './publish.js'
+import { findRepoRoot, isCadenceRepo } from './root.js'
+import {
+  renderDelegateSummaryLine,
+  resolveDelegate,
+  summarizeDelegateSnapshot,
+} from './delegation.js'
+import {
+  defaultEntry,
+  entryByName,
+  entryPath,
+  entryStatus,
+  loadRegistry,
+  registryPath,
+  saveRegistry,
+} from './registry.js'
+import {
+  collectFleet,
+  loadManifest,
+  manifestPath,
+  type Manifest,
+} from './manifest.js'
 import { renderFindResults } from './render/find.js'
 import {
   docsAnchoredToProject,
@@ -146,22 +167,44 @@ cli
   )
   .action(
     async (opts: { root?: string; json?: boolean; hookOutput?: boolean }) => {
-      const repoRoot = await resolveRepoRoot(opts.root)
-      if (!isCadenceRepo(repoRoot)) {
-        const text = `Cadence isn't initialized in ${repoRoot}.\nRun /cadence:init to set up.`
+      const repoRoot = resolveRepoRootLenient(opts.root)
+      if (repoRoot === null || !isCadenceRepo(repoRoot)) {
         if (opts.hookOutput) {
+          // Guest / uninitialized: never nag. With registered repos, a
+          // one-line context tells the model guest capture is possible
+          // (no systemMessage — the user sees nothing). With an empty
+          // registry, total silence: a globally-enabled plugin must not
+          // greet every unrelated project with an init pitch.
+          const registry = loadRegistry()
+          const fallback = defaultEntry(registry)
+          if (fallback) {
+            const context =
+              `Guest session — this directory is not a Cadence repo, and no ` +
+              `Cadence state may be created here. Registered Cadence repos: ` +
+              registry.repos.map((r) => r.name).join(', ') +
+              `. Captures and read-only status may route to '${fallback.name}' ` +
+              `via --root ${fallback.name}; other Cadence verbs need a session ` +
+              `in that repo.`
+            process.stdout.write(
+              JSON.stringify({
+                hookSpecificOutput: {
+                  hookEventName: 'SessionStart',
+                  additionalContext: context,
+                },
+              }) + '\n',
+            )
+          }
+          return
+        }
+        const where = repoRoot ?? process.cwd()
+        const text = `Cadence isn't initialized in ${where}.\nRun /cadence:init to set up.${registryHintLines()}`
+        if (opts.json) {
           process.stdout.write(
-            JSON.stringify({
-              systemMessage: text,
-              hookSpecificOutput: {
-                hookEventName: 'SessionStart',
-                additionalContext: text,
-              },
-            }) + '\n',
-          )
-        } else if (opts.json) {
-          process.stdout.write(
-            JSON.stringify({ initialized: false, repoRoot }, null, 2) + '\n',
+            JSON.stringify(
+              { initialized: false, repoRoot: where, guest: true },
+              null,
+              2,
+            ) + '\n',
           )
         } else {
           process.stdout.write(text + '\n')
@@ -1546,8 +1589,309 @@ cli
     },
   )
 
+cli
+  .command(
+    'delegates',
+    'List delegated pursuits with live read-only summaries from their delegate repos',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--json', 'Emit resolutions + summaries as JSON')
+  .action(async (opts: { root?: string; json?: boolean }) => {
+    const repoRoot = await resolveRepoRoot(opts.root)
+    const snapshot = await scan(repoRoot)
+    const delegated = snapshot.pursuits.filter(
+      (p) => p.delegated_to && p.lifecycle !== 'archived' && p.lifecycle !== 'dropped',
+    )
+    const rows: Array<Record<string, unknown>> = []
+    for (const pursuit of delegated) {
+      const resolution = resolveDelegate(
+        repoRoot,
+        pursuit.id,
+        pursuit.delegated_to as string,
+      )
+      let summary = null
+      if (resolution.checkout) {
+        // Read-only: scan() never mutates the delegate repo.
+        const delegateSnapshot = await scan(resolution.checkout)
+        summary = summarizeDelegateSnapshot(delegateSnapshot)
+      }
+      rows.push({ ...resolution, lifecycle: pursuit.lifecycle, summary })
+    }
+    if (opts.json) {
+      process.stdout.write(
+        JSON.stringify({ repoRoot, delegates: rows }, null, 2) + '\n',
+      )
+      return
+    }
+    if (rows.length === 0) {
+      process.stdout.write(
+        'No delegated pursuits. Delegate one by adding `delegated_to: <git-url or registered name>` to its pursuit.md frontmatter.\n',
+      )
+      return
+    }
+    for (const row of rows) {
+      const r = row as unknown as {
+        pursuit: string
+        delegated_to: string
+        checkout: string | null
+        registry_name?: string
+        summary: ReturnType<typeof summarizeDelegateSnapshot> | null
+      }
+      if (r.checkout && r.summary) {
+        const name = r.registry_name ? `${r.registry_name} — ` : ''
+        process.stdout.write(
+          `${r.pursuit} → ${name}${r.checkout}\n  ${renderDelegateSummaryLine(r.summary)}\n`,
+        )
+      } else {
+        process.stdout.write(
+          `${r.pursuit} → ${r.delegated_to}\n  no local checkout found — register it: cadence repos-add --name <name> --path <path> --git-url ${r.delegated_to}\n`,
+        )
+      }
+    }
+  })
+
+cli
+  .command(
+    'manifest',
+    'Read and validate this repo\'s cadence-manifest.yaml (advertised endpoints, data roots, services)',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--json', 'Emit {present, path, manifest} as JSON')
+  .action(async (opts: { root?: string; json?: boolean }) => {
+    const repoRoot = await resolveRepoRoot(opts.root)
+    const manifest = loadManifest(repoRoot) // malformed throws with the path
+    if (opts.json) {
+      process.stdout.write(
+        JSON.stringify(
+          { present: manifest !== null, path: manifestPath(repoRoot), manifest },
+          null,
+          2,
+        ) + '\n',
+      )
+      return
+    }
+    if (!manifest) {
+      process.stdout.write(
+        'No cadence-manifest.yaml — this repo advertises nothing. ' +
+          'Create one to declare endpoints / data roots / services for hub discovery.\n' +
+          'Example:\n' +
+          '  endpoints:\n' +
+          '    - { url: https://garden.example.com, kind: site, access: public }\n' +
+          '  data_roots:\n' +
+          '    - { path: beds/, role: content }\n',
+      )
+      return
+    }
+    const lines = manifestLines(manifest)
+    process.stdout.write(
+      `${manifest.repo} — valid manifest (${manifestPath(repoRoot)})\n` +
+        (manifest.hub ? `  hub: ${manifest.hub}\n` : '') +
+        (lines.length > 0
+          ? lines.join('\n') + '\n'
+          : '  (advertises nothing)\n'),
+    )
+  })
+
+cli
+  .command(
+    'fleet',
+    'Aggregate manifests across this repo, registered repos, and delegate checkouts',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option(
+    '--json',
+    'Emit the full FleetView as JSON (nav/landing sites generate from this)',
+  )
+  .action(async (opts: { root?: string; json?: boolean }) => {
+    const repoRoot = await resolveRepoRoot(opts.root)
+    const fleet = await collectFleet(repoRoot)
+    if (opts.json) {
+      process.stdout.write(JSON.stringify(fleet, null, 2) + '\n')
+      return
+    }
+    let endpoints = 0
+    let dataRoots = 0
+    const blocks: string[] = []
+    for (const member of fleet.members) {
+      endpoints += member.manifest?.endpoints?.length ?? 0
+      dataRoots += member.manifest?.data_roots?.length ?? 0
+      const header = `## ${member.name} (${member.path})${member.hub ? ' [hub]' : ''}`
+      if (!member.manifest) {
+        const why = member.manifest_error
+          ? `  (manifest error: ${member.manifest_error})`
+          : '  (no manifest)'
+        blocks.push(`${header}\n${why}`)
+        continue
+      }
+      const lines = manifestLines(member.manifest)
+      blocks.push(
+        lines.length > 0
+          ? `${header}\n${lines.join('\n')}`
+          : `${header}\n  (advertises nothing)`,
+      )
+    }
+    process.stdout.write(
+      blocks.join('\n\n') +
+        `\n\n${plural(fleet.members.length, 'repo')}, ${plural(endpoints, 'endpoint')}, ${plural(dataRoots, 'data root')}\n`,
+    )
+  })
+
+cli
+  .command(
+    'repos',
+    'List registered Cadence repos (per-machine registry at ~/.config/cadence/repos.yaml)',
+  )
+  .option('--json', 'Emit registry entries as JSON')
+  .action(async (opts: { json?: boolean }) => {
+    const registry = loadRegistry()
+    const fallback = defaultEntry(registry)
+    const rows = registry.repos.map((r) => {
+      const status = entryStatus(r)
+      return {
+        name: r.name,
+        path: r.path,
+        resolved_path: entryPath(r),
+        hub: r.hub ?? false,
+        git_url: r.git_url ?? null,
+        default: fallback?.name === r.name,
+        exists: status.exists,
+        initialized: status.initialized,
+      }
+    })
+    if (opts.json) {
+      process.stdout.write(
+        JSON.stringify(
+          { registry_path: registryPath(), default: fallback?.name ?? null, repos: rows },
+          null,
+          2,
+        ) + '\n',
+      )
+      return
+    }
+    if (rows.length === 0) {
+      process.stdout.write(
+        `No repos registered (${registryPath()}).\nAdd one: cadence repos-add --name <name> --path <path>\n`,
+      )
+      return
+    }
+    for (const r of rows) {
+      const marks = [
+        r.hub ? 'hub' : null,
+        r.default ? 'default' : null,
+        !r.exists ? 'MISSING' : !r.initialized ? 'NOT INITIALIZED' : null,
+      ]
+        .filter(Boolean)
+        .join(', ')
+      process.stdout.write(
+        `${r.name}  ${r.path}${marks ? `  [${marks}]` : ''}\n`,
+      )
+    }
+  })
+
+cli
+  .command('repos-add', 'Register (or update) a Cadence repo in the per-machine registry')
+  .option('--name <name>', 'Short unique name (usable as --root <name>)')
+  .option('--path <path>', 'Path to the local checkout (~ expands)')
+  .option('--hub', 'Mark as a hub (aggregates delegated pursuits)')
+  .option('--git-url <url>', 'Git URL identity (for delegation / fleet matching)')
+  .option('--default', 'Make this the default repo for guest-mode routing')
+  .action(
+    async (opts: {
+      name?: string
+      path?: string
+      hub?: boolean
+      gitUrl?: string
+      default?: boolean
+    }) => {
+      if (!opts.name || !opts.path) {
+        throw new Error('repos-add requires --name and --path')
+      }
+      const resolved = path.resolve(expandHome(opts.path))
+      if (!existsSync(resolved)) {
+        throw new Error(`Path does not exist: ${resolved}`)
+      }
+      if (!isCadenceRepo(resolved)) {
+        throw new Error(
+          `${resolved} is not a Cadence repo (no cadence.yaml). ` +
+            `Run /cadence:init there first — the registry only holds real Cadence repos.`,
+        )
+      }
+      const registry = loadRegistry()
+      const entry = {
+        name: opts.name,
+        path: opts.path,
+        ...(opts.hub ? { hub: true } : {}),
+        ...(opts.gitUrl ? { git_url: opts.gitUrl } : {}),
+      }
+      const existing = registry.repos.findIndex((r) => r.name === opts.name)
+      if (existing >= 0) registry.repos[existing] = entry
+      else registry.repos.push(entry)
+      if (opts.default || registry.repos.length === 1) {
+        registry.default = opts.name
+      }
+      const file = saveRegistry(registry)
+      process.stdout.write(
+        `${existing >= 0 ? 'Updated' : 'Registered'} '${opts.name}' → ${resolved} (${file})\n`,
+      )
+    },
+  )
+
+cli
+  .command('repos-remove <name>', 'Remove a repo from the per-machine registry')
+  .action(async (name: string) => {
+    const registry = loadRegistry()
+    const before = registry.repos.length
+    registry.repos = registry.repos.filter((r) => r.name !== name)
+    if (registry.repos.length === before) {
+      throw new Error(`No registered repo named '${name}'.` + registryHintLines())
+    }
+    if (registry.default === name) delete registry.default
+    saveRegistry(registry)
+    process.stdout.write(`Removed '${name}' from ${registryPath()}\n`)
+  })
+
+cli
+  .command(
+    'context',
+    'Show where cadence verbs would land: resolved root, guest state, registry',
+  )
+  .option('--root <path>', 'Repo root or registered name')
+  .option('--json', 'Emit as JSON')
+  .action(async (opts: { root?: string; json?: boolean }) => {
+    const repoRoot = resolveRepoRootLenient(opts.root)
+    const initialized = repoRoot !== null && isCadenceRepo(repoRoot)
+    const registry = loadRegistry()
+    const fallback = defaultEntry(registry)
+    const payload = {
+      cwd: process.cwd(),
+      repo_root: repoRoot,
+      initialized,
+      guest: !initialized,
+      registry: {
+        path: registryPath(),
+        default: fallback?.name ?? null,
+        repos: registry.repos.map((r) => ({
+          name: r.name,
+          path: entryPath(r),
+          hub: r.hub ?? false,
+          git_url: r.git_url ?? null,
+          ...entryStatus(r),
+        })),
+      },
+    }
+    if (opts.json) {
+      process.stdout.write(JSON.stringify(payload, null, 2) + '\n')
+      return
+    }
+    process.stdout.write(
+      initialized
+        ? `Cadence repo: ${repoRoot}\n`
+        : `Guest session — not inside a Cadence repo (cwd: ${payload.cwd}).${registryHintLines()}\n`,
+    )
+  })
+
 cli.help()
-cli.version('0.1.0')
+cli.version('0.2.0')
 
 cli.parse(process.argv, { run: false })
 
@@ -1560,28 +1904,96 @@ if (cli.matchedCommand) {
   cli.outputHelp()
 }
 
+/**
+ * Strict resolution: every repo-scoped command funnels through here.
+ * Resolves to a directory that IS a Cadence repo, or throws with
+ * guidance — there is no CWD fallback (see findRepoRoot in root.ts for
+ * why) and no silent operation against uninitialized directories.
+ *
+ * `explicit` accepts a filesystem path or a registered repo name from
+ * the per-machine registry (~/.config/cadence/repos.yaml).
+ */
 async function resolveRepoRoot(explicit?: string): Promise<string> {
-  if (explicit) return path.resolve(explicit)
+  if (explicit) {
+    const resolved = resolveExplicitRoot(explicit)
+    if (!isCadenceRepo(resolved)) {
+      throw new Error(
+        `--root ${resolved} is not a Cadence repo (no cadence.yaml). ` +
+          `Run /cadence:init there first.`,
+      )
+    }
+    return resolved
+  }
+  const root = findRepoRoot(process.cwd())
+  if (root === null) throw new Error(noRepoMessage())
+  return root
+}
+
+/**
+ * Lenient variant for commands with their own not-a-repo rendering
+ * (status, context): explicit paths resolve without the isCadenceRepo
+ * requirement; the walk-up returns null instead of throwing.
+ */
+function resolveRepoRootLenient(explicit?: string): string | null {
+  if (explicit) return resolveExplicitRoot(explicit)
   return findRepoRoot(process.cwd())
 }
 
-function findRepoRoot(start: string): string {
-  let dir = path.resolve(start)
-  for (;;) {
-    if (existsSync(path.join(dir, 'cadence.yaml'))) return dir
-    if (existsSync(path.join(dir, 'pursuits'))) return dir
-    const parent = path.dirname(dir)
-    if (parent === dir) break
-    dir = parent
+/** Path or registry name → absolute existing path (throws otherwise). */
+function resolveExplicitRoot(explicit: string): string {
+  const asPath = path.resolve(expandHome(explicit))
+  const pathLike =
+    explicit.includes(path.sep) ||
+    explicit.startsWith('~') ||
+    explicit.startsWith('.')
+  if (pathLike || existsSync(asPath)) {
+    if (!existsSync(asPath)) {
+      throw new Error(`--root path does not exist: ${asPath}`)
+    }
+    return asPath
   }
-  return path.resolve(start)
+  const registry = loadRegistry()
+  const entry = entryByName(registry, explicit)
+  if (entry) {
+    const p = entryPath(entry)
+    if (!existsSync(p)) {
+      throw new Error(
+        `Registered repo '${explicit}' points at a missing path: ${p}. ` +
+          `Fix it with: cadence repos-add --name ${explicit} --path <path>`,
+      )
+    }
+    return p
+  }
+  throw new Error(
+    `--root '${explicit}' is neither an existing path nor a registered repo name.` +
+      registryHintLines(),
+  )
 }
 
-function isCadenceRepo(root: string): boolean {
+function noRepoMessage(): string {
   return (
-    existsSync(path.join(root, 'cadence.yaml')) ||
-    existsSync(path.join(root, 'pursuits'))
+    `Not inside a Cadence repo — no cadence.yaml found walking up from ${process.cwd()}.\n` +
+    `  • pass --root <path or registered name>\n` +
+    `  • cd into a Cadence repo\n` +
+    `  • initialize one here: /cadence:init` +
+    registryHintLines()
   )
+}
+
+function registryHintLines(): string {
+  let registry: ReturnType<typeof loadRegistry>
+  try {
+    registry = loadRegistry()
+  } catch {
+    return ''
+  }
+  if (registry.repos.length === 0) {
+    return `\n  • no repos registered — add one: cadence repos-add --name <name> --path <path>`
+  }
+  const names = registry.repos
+    .map((r) => `${r.name} (${r.path}${r.hub ? ', hub' : ''})`)
+    .join(' · ')
+  return `\n  • registered: ${names}`
 }
 
 /**
@@ -1633,6 +2045,30 @@ function docSummary(d: LivingDoc) {
     anchors: d.anchors,
     path: d.path,
   }
+}
+
+/** Indented advertisement lines: endpoints, then data roots, then services. */
+function manifestLines(m: Manifest): string[] {
+  const lines: string[] = []
+  for (const e of m.endpoints ?? []) {
+    const head = [e.kind, e.url, e.access ? `[${e.access}]` : null]
+      .filter(Boolean)
+      .join(' ')
+    lines.push(`  ${head}${e.summary ? ` — ${e.summary}` : ''}`)
+  }
+  for (const d of m.data_roots ?? []) {
+    lines.push(
+      `  ${d.path}${d.role ? ` (${d.role})` : ''}${d.summary ? ` — ${d.summary}` : ''}`,
+    )
+  }
+  for (const s of m.services ?? []) {
+    lines.push(`  service: ${s}`)
+  }
+  return lines
+}
+
+function plural(n: number, word: string): string {
+  return `${n} ${word}${n === 1 ? '' : 's'}`
 }
 
 function firstLine(text: string): string {

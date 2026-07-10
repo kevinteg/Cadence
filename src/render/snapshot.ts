@@ -48,7 +48,6 @@ function renderSection(
 function configRows(snapshot: Snapshot): [string, string][] {
   const c = snapshot.config
   const rows: [string, string][] = [
-    ['marker_stale_days', String(c.marker_stale_days)],
     ['waiting_for_grace_days', String(c.waiting_for_grace_days)],
     ['dormant_days', String(c.dormant_days)],
     ['max_active_projects', String(c.max_active_projects)],
@@ -133,8 +132,11 @@ function flagTarget(flag: Flag): string {
       return `${flag.pursuitId}/${flag.projectId}`
     case 'closing_in_on_resolution':
       return flag.pursuitId
+    case 'capstone_gap':
+      return flag.unitId
     case 'wip_over_limit':
     case 'inbox_pressure':
+    case 'retrospective_due':
       return ''
     case 'inbound_issues_piling_up':
       return flag.ownerRepo
@@ -170,6 +172,12 @@ function flagDetail(flag: Flag): string {
       const breakdown = buckets.length ? ` (${buckets.join(', ')})` : ''
       return `${flag.count} items${breakdown}; /cadence:start inbox to triage`
     }
+    case 'capstone_gap': {
+      const sourceWord = flag.sources === 1 ? 'source' : 'sources'
+      return `${flag.sources} researched ${sourceWord}, no capstone; /cadence:narrate capstone to crystallize`
+    }
+    case 'retrospective_due':
+      return `${flag.newSinceLast} pursuits resolved since the last retrospective; /cadence:narrate lessons to synthesize`
   }
 }
 

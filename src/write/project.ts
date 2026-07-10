@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs'
 import type { Origin } from '../types.js'
 import { dateString, writeFrontmatterFile } from './util.js'
 import { resolvePursuitDir } from './paths.js'
+import { readDelegation } from '../delegation.js'
 
 export type CreateProjectOpts = {
   pursuit: string
@@ -37,6 +38,18 @@ export async function createProject(
   const pursuitDir = resolvePursuitDir(repoRoot, opts.pursuit)
   if (!pursuitDir) {
     throw new Error(`pursuit not found: ${opts.pursuit}`)
+  }
+  // Delegated stubs never grow local projects — execution belongs to
+  // the delegate repo. This guard covers create-project AND crystallize
+  // (which composes createProject).
+  const delegatedTo = readDelegation(repoRoot, opts.pursuit)
+  if (delegatedTo) {
+    throw new Error(
+      `Pursuit '${opts.pursuit}' is delegated to ${delegatedTo}. ` +
+        `Projects live in the delegate repo — open a session there ` +
+        `(or use --root against it). Run \`cadence delegates\` to see ` +
+        `where the checkout lives on this machine.`,
+    )
   }
   const filePath = path.join(pursuitDir, 'projects', `${opts.id}.md`)
   if (existsSync(filePath)) {

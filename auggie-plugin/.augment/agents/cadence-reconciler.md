@@ -49,10 +49,10 @@ If no flags exist, return exactly: `No flags. System is healthy.`
 ### Examples
 
 ```
-action_needed overdue_waiting_for build-cadence-v1/foo — alice re: review (5d overdue)
-warning dormant_project build-cadence-v1/bar — 17d since activity
-info structural_active_no_open_actions build-cadence-v1/baz — all actions checked, status still active
-info closing_in_on_resolution build-cadence-v1 — 1/3 done, 2 projects left
+action_needed overdue_waiting_for plan-kitchen-remodel/countertop-quote — alice re: quote (5d overdue)
+warning dormant_project train-for-10k/base-mileage — 17d since activity
+info structural_active_no_open_actions write-thesis/literature-review — all actions checked, status still active
+info closing_in_on_resolution plan-kitchen-remodel — 1/3 done, 2 projects left
 ```
 
 No prose, no commentary, no preamble. Just the flag lines (or the healthy message). The caller will format and present them.

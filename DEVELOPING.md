@@ -14,7 +14,6 @@ src/                        TypeScript source for the bundled CLI
   validation/               Pending-validation queue (validations/pending.md)
   inbox.ts                  The canonical Inbox view function (inboxItems)
   sessionstart.ts           SessionStart-hook suppression + render helpers
-  stophook.ts               Stop-hook session-log writer
   types.ts                  Zod schemas + inferred types (Pursuit, Project, Brainstorm, Capture, Flag, Snapshot, etc.)
 
 cadence-plugin/             The distributable Claude Code plugin
@@ -28,7 +27,9 @@ cadence-plugin/             The distributable Claude Code plugin
     reflect.md              Reflect ritual structure
   skills/<verb>/SKILL.md    Per-verb Claude Code skill definitions
   agents/<name>.md          Subagent definitions (capture-ingest, narrator, reconciler)
-  hooks/hooks.json          SessionStart + Stop hook registrations
+  hooks/hooks.json          SessionStart + PreToolUse hook registrations
+  hooks/bash-permission-gate.mjs
+                            PreToolUse gate that auto-allows plain `cadence <subcommand>` Bash calls
   deck/provocations.yaml    Divergent-thinking provocation deck for /brainstorm
   tips/library.yaml         Tip library (quotes, skill-teaching, verb-hints)
 
@@ -69,7 +70,7 @@ The **skills** under `cadence-plugin/skills/<verb>/SKILL.md` are what Claude Cod
 
 The **subagents** in `cadence-plugin/agents/<name>.md` carry per-agent system prompts, restricted tool surfaces, and default budgets. Skills dispatch them via the Agent tool to isolate bulk-payload work (narrative generation, capture ingestion, reconciler scans).
 
-The **hooks** in `cadence-plugin/hooks/hooks.json` wire `cadence status --hook-output` to SessionStart events (`startup` / `resume` / `clear`) and `cadence stop-hook` to Stop. The hook output is plain markdown (no ANSI codes; would break Claude Code's table rendering).
+The **hooks** in `cadence-plugin/hooks/hooks.json` wire `cadence status --hook-output` to SessionStart events (`startup` / `resume` / `clear`). The hook output is plain markdown (no ANSI codes; would break Claude Code's table rendering). A PreToolUse hook (`hooks/bash-permission-gate.mjs`) auto-allows a single plain `cadence <subcommand>` Bash invocation so skills don't prompt one command-shape at a time; any shell composition (chaining, pipes, substitution, redirection) falls through to the normal permission flow.
 
 ## Adding a new verb
 

@@ -89,7 +89,7 @@ Return a single JSON block (no prose, no preamble). Shape:
     {
       "title": "Email manager re: Day 1 1:1 scheduling",
       "outcome_kind": "two_minute_action",
-      "suggested_pursuit": "nexthop-onboarding",
+      "suggested_pursuit": "new-role-onboarding",
       "confidence": 0.90,
       "written_path": "thoughts/unprocessed/2026-05-26-1430-glean-onboarding-01.md",
       "status": "written"
@@ -97,7 +97,7 @@ Return a single JSON block (no prose, no preamble). Shape:
     {
       "title": "Read engineering handbook",
       "outcome_kind": "action",
-      "suggested_pursuit": "nexthop-onboarding",
+      "suggested_pursuit": "new-role-onboarding",
       "confidence": 0.85,
       "written_path": "thoughts/unprocessed/2026-05-26-1430-glean-onboarding-02.md",
       "status": "written"
@@ -105,7 +105,7 @@ Return a single JSON block (no prose, no preamble). Shape:
     {
       "title": "Build a personal onboarding tracker",
       "outcome_kind": "project",
-      "suggested_pursuit": "nexthop-onboarding",
+      "suggested_pursuit": "new-role-onboarding",
       "confidence": 0.60,
       "written_path": "thoughts/unprocessed/2026-05-26-1430-glean-onboarding-03.md",
       "status": "written"

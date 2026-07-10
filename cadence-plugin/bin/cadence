@@ -2738,9 +2738,9 @@ var require_path = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.convertPosixPathToPattern = exports2.convertWindowsPathToPattern = exports2.convertPathToPattern = exports2.escapePosixPath = exports2.escapeWindowsPath = exports2.escape = exports2.removeLeadingDotSegment = exports2.makeAbsolute = exports2.unixify = void 0;
-    var os3 = __require("os");
-    var path28 = __require("path");
-    var IS_WINDOWS_PLATFORM = os3.platform() === "win32";
+    var os4 = __require("os");
+    var path32 = __require("path");
+    var IS_WINDOWS_PLATFORM = os4.platform() === "win32";
     var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
     var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
     var WINDOWS_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()[\]{}]|^!|[!+@](?=\())/g;
@@ -2751,7 +2751,7 @@ var require_path = __commonJS({
     }
     exports2.unixify = unixify;
     function makeAbsolute(cwd, filepath) {
-      return path28.resolve(cwd, filepath);
+      return path32.resolve(cwd, filepath);
     }
     exports2.makeAbsolute = makeAbsolute;
     function removeLeadingDotSegment(entry) {
@@ -4048,7 +4048,7 @@ var require_braces = __commonJS({
 var require_constants2 = __commonJS({
   "node_modules/picomatch/lib/constants.js"(exports2, module2) {
     "use strict";
-    var path28 = __require("path");
+    var path32 = __require("path");
     var WIN_SLASH = "\\\\/";
     var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
     var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
@@ -4222,7 +4222,7 @@ var require_constants2 = __commonJS({
       /* | */
       CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
       /* \uFEFF */
-      SEP: path28.sep,
+      SEP: path32.sep,
       /**
        * Create EXTGLOB_CHARS
        */
@@ -4249,7 +4249,7 @@ var require_constants2 = __commonJS({
 var require_utils2 = __commonJS({
   "node_modules/picomatch/lib/utils.js"(exports2) {
     "use strict";
-    var path28 = __require("path");
+    var path32 = __require("path");
     var win32 = process.platform === "win32";
     var {
       REGEX_BACKSLASH,
@@ -4278,7 +4278,7 @@ var require_utils2 = __commonJS({
       if (options2 && typeof options2.windows === "boolean") {
         return options2.windows;
       }
-      return win32 === true || path28.sep === "\\";
+      return win32 === true || path32.sep === "\\";
     };
     exports2.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx);
@@ -5642,7 +5642,7 @@ var require_parse2 = __commonJS({
 var require_picomatch = __commonJS({
   "node_modules/picomatch/lib/picomatch.js"(exports2, module2) {
     "use strict";
-    var path28 = __require("path");
+    var path32 = __require("path");
     var scan2 = require_scan();
     var parse2 = require_parse2();
     var utils = require_utils2();
@@ -5727,7 +5727,7 @@ var require_picomatch = __commonJS({
     };
     picomatch.matchBase = (input, glob, options2, posix = utils.isWindows(options2)) => {
       const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options2);
-      return regex.test(path28.basename(input));
+      return regex.test(path32.basename(input));
     };
     picomatch.isMatch = (str3, patterns, options2) => picomatch(patterns, options2)(str3);
     picomatch.parse = (pattern, options2) => {
@@ -5954,7 +5954,7 @@ var require_pattern = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isAbsolute = exports2.partitionAbsoluteAndRelative = exports2.removeDuplicateSlashes = exports2.matchAny = exports2.convertPatternsToRe = exports2.makeRe = exports2.getPatternParts = exports2.expandBraceExpansion = exports2.expandPatternsWithBraceExpansion = exports2.isAffectDepthOfReadingPattern = exports2.endsWithSlashGlobStar = exports2.hasGlobStar = exports2.getBaseDirectory = exports2.isPatternRelatedToParentDirectory = exports2.getPatternsOutsideCurrentDirectory = exports2.getPatternsInsideCurrentDirectory = exports2.getPositivePatterns = exports2.getNegativePatterns = exports2.isPositivePattern = exports2.isNegativePattern = exports2.convertToNegativePattern = exports2.convertToPositivePattern = exports2.isDynamicPattern = exports2.isStaticPattern = void 0;
-    var path28 = __require("path");
+    var path32 = __require("path");
     var globParent = require_glob_parent();
     var micromatch = require_micromatch();
     var GLOBSTAR = "**";
@@ -6049,7 +6049,7 @@ var require_pattern = __commonJS({
     }
     exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
     function isAffectDepthOfReadingPattern(pattern) {
-      const basename = path28.basename(pattern);
+      const basename = path32.basename(pattern);
       return endsWithSlashGlobStar(pattern) || isStaticPattern(basename);
     }
     exports2.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
@@ -6107,7 +6107,7 @@ var require_pattern = __commonJS({
     }
     exports2.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative;
     function isAbsolute(pattern) {
-      return path28.isAbsolute(pattern);
+      return path32.isAbsolute(pattern);
     }
     exports2.isAbsolute = isAbsolute;
   }
@@ -6284,8 +6284,8 @@ var require_utils3 = __commonJS({
     exports2.errno = errno;
     var fs = require_fs();
     exports2.fs = fs;
-    var path28 = require_path();
-    exports2.path = path28;
+    var path32 = require_path();
+    exports2.path = path32;
     var pattern = require_pattern();
     exports2.pattern = pattern;
     var stream = require_stream();
@@ -6397,8 +6397,8 @@ var require_async = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path28, settings, callback) {
-      settings.fs.lstat(path28, (lstatError, lstat) => {
+    function read(path32, settings, callback) {
+      settings.fs.lstat(path32, (lstatError, lstat) => {
         if (lstatError !== null) {
           callFailureCallback(callback, lstatError);
           return;
@@ -6407,7 +6407,7 @@ var require_async = __commonJS({
           callSuccessCallback(callback, lstat);
           return;
         }
-        settings.fs.stat(path28, (statError, stat3) => {
+        settings.fs.stat(path32, (statError, stat3) => {
           if (statError !== null) {
             if (settings.throwErrorOnBrokenSymbolicLink) {
               callFailureCallback(callback, statError);
@@ -6439,13 +6439,13 @@ var require_sync = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path28, settings) {
-      const lstat = settings.fs.lstatSync(path28);
+    function read(path32, settings) {
+      const lstat = settings.fs.lstatSync(path32);
       if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) {
         return lstat;
       }
       try {
-        const stat3 = settings.fs.statSync(path28);
+        const stat3 = settings.fs.statSync(path32);
         if (settings.markSymbolicLink) {
           stat3.isSymbolicLink = () => true;
         }
@@ -6516,17 +6516,17 @@ var require_out = __commonJS({
     var sync = require_sync();
     var settings_1 = require_settings();
     exports2.Settings = settings_1.default;
-    function stat3(path28, optionsOrSettingsOrCallback, callback) {
+    function stat3(path32, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path28, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path32, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path28, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path32, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.stat = stat3;
-    function statSync2(path28, optionsOrSettings) {
+    function statSync2(path32, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path28, settings);
+      return sync.read(path32, settings);
     }
     exports2.statSync = statSync2;
     function getSettings(settingsOrOptions = {}) {
@@ -6742,16 +6742,16 @@ var require_async2 = __commonJS({
           return;
         }
         const tasks = names.map((name) => {
-          const path28 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+          const path32 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
           return (done) => {
-            fsStat.stat(path28, settings.fsStatSettings, (error, stats) => {
+            fsStat.stat(path32, settings.fsStatSettings, (error, stats) => {
               if (error !== null) {
                 done(error);
                 return;
               }
               const entry = {
                 name,
-                path: path28,
+                path: path32,
                 dirent: utils.fs.createDirentFromStats(name, stats)
               };
               if (settings.stats) {
@@ -6822,11 +6822,11 @@ var require_sync2 = __commonJS({
     function readdir5(directory, settings) {
       const names = settings.fs.readdirSync(directory);
       return names.map((name) => {
-        const entryPath = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
-        const stats = fsStat.statSync(entryPath, settings.fsStatSettings);
+        const entryPath2 = common2.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+        const stats = fsStat.statSync(entryPath2, settings.fsStatSettings);
         const entry = {
           name,
-          path: entryPath,
+          path: entryPath2,
           dirent: utils.fs.createDirentFromStats(name, stats)
         };
         if (settings.stats) {
@@ -6869,7 +6869,7 @@ var require_settings2 = __commonJS({
   "node_modules/@nodelib/fs.scandir/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path28 = __require("path");
+    var path32 = __require("path");
     var fsStat = require_out();
     var fs = require_fs4();
     var Settings = class {
@@ -6877,7 +6877,7 @@ var require_settings2 = __commonJS({
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
         this.fs = fs.createFileSystemAdapter(this._options.fs);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path28.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path32.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
         this.fsStatSettings = new fsStat.Settings({
@@ -6904,17 +6904,17 @@ var require_out2 = __commonJS({
     var sync = require_sync2();
     var settings_1 = require_settings2();
     exports2.Settings = settings_1.default;
-    function scandir(path28, optionsOrSettingsOrCallback, callback) {
+    function scandir(path32, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path28, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path32, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path28, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path32, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.scandir = scandir;
-    function scandirSync(path28, optionsOrSettings) {
+    function scandirSync(path32, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path28, settings);
+      return sync.read(path32, settings);
     }
     exports2.scandirSync = scandirSync;
     function getSettings(settingsOrOptions = {}) {
@@ -7561,7 +7561,7 @@ var require_settings3 = __commonJS({
   "node_modules/@nodelib/fs.walk/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path28 = __require("path");
+    var path32 = __require("path");
     var fsScandir = require_out2();
     var Settings = class {
       constructor(_options = {}) {
@@ -7571,7 +7571,7 @@ var require_settings3 = __commonJS({
         this.deepFilter = this._getValue(this._options.deepFilter, null);
         this.entryFilter = this._getValue(this._options.entryFilter, null);
         this.errorFilter = this._getValue(this._options.errorFilter, null);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path28.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path32.sep);
         this.fsScandirSettings = new fsScandir.Settings({
           followSymbolicLinks: this._options.followSymbolicLinks,
           fs: this._options.fs,
@@ -7633,7 +7633,7 @@ var require_reader2 = __commonJS({
   "node_modules/fast-glob/out/readers/reader.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path28 = __require("path");
+    var path32 = __require("path");
     var fsStat = require_out();
     var utils = require_utils3();
     var Reader = class {
@@ -7646,7 +7646,7 @@ var require_reader2 = __commonJS({
         });
       }
       _getFullEntryPath(filepath) {
-        return path28.resolve(this._settings.cwd, filepath);
+        return path32.resolve(this._settings.cwd, filepath);
       }
       _makeEntry(stats, pattern) {
         const entry = {
@@ -7888,14 +7888,14 @@ var require_deep = __commonJS({
         }
         return this._isSkippedByNegativePatterns(filepath, negativeRe);
       }
-      _isSkippedByDeep(basePath, entryPath) {
+      _isSkippedByDeep(basePath, entryPath2) {
         if (this._settings.deep === Infinity) {
           return false;
         }
-        return this._getEntryLevel(basePath, entryPath) >= this._settings.deep;
+        return this._getEntryLevel(basePath, entryPath2) >= this._settings.deep;
       }
-      _getEntryLevel(basePath, entryPath) {
-        const entryPathDepth = entryPath.split("/").length;
+      _getEntryLevel(basePath, entryPath2) {
+        const entryPathDepth = entryPath2.split("/").length;
         if (basePath === "") {
           return entryPathDepth;
         }
@@ -7905,11 +7905,11 @@ var require_deep = __commonJS({
       _isSkippedSymbolicLink(entry) {
         return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
       }
-      _isSkippedByPositivePatterns(entryPath, matcher) {
-        return !this._settings.baseNameMatch && !matcher.match(entryPath);
+      _isSkippedByPositivePatterns(entryPath2, matcher) {
+        return !this._settings.baseNameMatch && !matcher.match(entryPath2);
       }
-      _isSkippedByNegativePatterns(entryPath, patternsRe) {
-        return !utils.pattern.matchAny(entryPath, patternsRe);
+      _isSkippedByNegativePatterns(entryPath2, patternsRe) {
+        return !utils.pattern.matchAny(entryPath2, patternsRe);
       }
     };
     exports2.default = DeepFilter;
@@ -8062,7 +8062,7 @@ var require_provider = __commonJS({
   "node_modules/fast-glob/out/providers/provider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path28 = __require("path");
+    var path32 = __require("path");
     var deep_1 = require_deep();
     var entry_1 = require_entry();
     var error_1 = require_error();
@@ -8076,7 +8076,7 @@ var require_provider = __commonJS({
         this.entryTransformer = new entry_2.default(this._settings);
       }
       _getRootDirectory(task) {
-        return path28.resolve(this._settings.cwd, task.base);
+        return path32.resolve(this._settings.cwd, task.base);
       }
       _getReaderOptions(task) {
         const basePath = task.base === "." ? "" : task.base;
@@ -8258,8 +8258,8 @@ var require_settings4 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = void 0;
     var fs = __require("fs");
-    var os3 = __require("os");
-    var CPU_COUNT = Math.max(os3.cpus().length, 1);
+    var os4 = __require("os");
+    var CPU_COUNT = Math.max(os4.cpus().length, 1);
     exports2.DEFAULT_FILE_SYSTEM_ADAPTER = {
       lstat: fs.lstat,
       lstatSync: fs.lstatSync,
@@ -11970,18 +11970,18 @@ var init_color = __esm({
 });
 
 // src/tip/state.ts
-import { existsSync as existsSync14, readFileSync as readFileSync2, mkdirSync as mkdirSync3, writeFileSync as writeFileSync2 } from "node:fs";
-import path24 from "node:path";
+import { existsSync as existsSync17, readFileSync as readFileSync5, mkdirSync as mkdirSync4, writeFileSync as writeFileSync3 } from "node:fs";
+import path28 from "node:path";
 function statePath(repoRoot) {
-  return path24.join(repoRoot, ".cadence", STATE_FILENAME);
+  return path28.join(repoRoot, ".cadence", STATE_FILENAME);
 }
 function readTipState(repoRoot) {
   const filePath = statePath(repoRoot);
-  if (!existsSync14(filePath)) {
+  if (!existsSync17(filePath)) {
     return { version: 1, tips: {}, categories: {} };
   }
   try {
-    const raw = readFileSync2(filePath, "utf8");
+    const raw = readFileSync5(filePath, "utf8");
     const parsed = JSON.parse(raw);
     if (parsed.version !== 1 || typeof parsed.tips !== "object") {
       return { version: 1, tips: {}, categories: {} };
@@ -11993,11 +11993,11 @@ function readTipState(repoRoot) {
   }
 }
 function writeTipState(repoRoot, state) {
-  const dir = path24.join(repoRoot, ".cadence");
-  if (!existsSync14(dir)) {
-    mkdirSync3(dir, { recursive: true });
+  const dir = path28.join(repoRoot, ".cadence");
+  if (!existsSync17(dir)) {
+    mkdirSync4(dir, { recursive: true });
   }
-  writeFileSync2(statePath(repoRoot), JSON.stringify(state, null, 2) + "\n");
+  writeFileSync3(statePath(repoRoot), JSON.stringify(state, null, 2) + "\n");
 }
 function recordShow(repoRoot, tipId, now = /* @__PURE__ */ new Date()) {
   const state = readTipState(repoRoot);
@@ -12081,8 +12081,8 @@ var init_state = __esm({
 });
 
 // src/tip/library.ts
-import { existsSync as existsSync15, readFileSync as readFileSync3 } from "node:fs";
-import path25 from "node:path";
+import { existsSync as existsSync18, readFileSync as readFileSync6 } from "node:fs";
+import path29 from "node:path";
 import { fileURLToPath } from "node:url";
 function asStringArray(v) {
   if (!Array.isArray(v)) return [];
@@ -12098,14 +12098,14 @@ function asString(v) {
 }
 function libraryPath() {
   const here = fileURLToPath(import.meta.url);
-  return path25.resolve(path25.dirname(here), "..", "tips", "library.yaml");
+  return path29.resolve(path29.dirname(here), "..", "tips", "library.yaml");
 }
 function readLibrary(libPath) {
   const filePath = libPath ?? libraryPath();
-  if (!existsSync15(filePath)) {
+  if (!existsSync18(filePath)) {
     return { version: 1, tips: [] };
   }
-  const raw = readFileSync3(filePath, "utf8");
+  const raw = readFileSync6(filePath, "utf8");
   const doc = jsYaml.load(raw);
   if (!doc || typeof doc !== "object") {
     return { version: 1, tips: [] };
@@ -12834,7 +12834,7 @@ var CAC = class extends EventEmitter {
 var cac = (name = "") => new CAC(name);
 
 // src/cli.ts
-import { existsSync as existsSync18 } from "node:fs";
+import { existsSync as existsSync21 } from "node:fs";
 import {
   readFile as readFile18,
   readdir as readdirAsync,
@@ -12843,7 +12843,7 @@ import {
   chmod,
   rm as rm2
 } from "node:fs/promises";
-import path27 from "node:path";
+import path31 from "node:path";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
 
 // src/scan/repo.ts
@@ -13333,8 +13333,8 @@ function getErrorMap() {
 
 // node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path28, errorMaps, issueData } = params;
-  const fullPath = [...path28, ...issueData.path || []];
+  const { data, path: path32, errorMaps, issueData } = params;
+  const fullPath = [...path32, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -13450,11 +13450,11 @@ var errorUtil;
 
 // node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path28, key) {
+  constructor(parent, value, path32, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path28;
+    this._path = path32;
     this._key = key;
   }
   get path() {
@@ -16936,7 +16936,17 @@ var PursuitFrontmatterSchema = external_exports.object({
   win_cycle: external_exports.string().optional(),
   cue: PursuitCueSchema.optional(),
   /** Pointer to the promoted capstone at wiki/narratives/<id>.md — reference, not containment. */
-  narrative: external_exports.string().optional()
+  narrative: external_exports.string().optional(),
+  /**
+   * Hub-side delegation stub: this pursuit's execution lives in another
+   * Cadence repo. Value is a git URL (identity — resolved to a local
+   * checkout per-machine via the registry or sibling-dir discovery) or
+   * a registered repo name. Why/target/win_cycle stay on the hub (the
+   * hub owns prioritization); projects/actions/captures live only in
+   * the delegate repo (the delegate owns execution). Hub verbs never
+   * write into the delegate.
+   */
+  delegated_to: external_exports.string().optional()
 });
 var ProjectStatusSchema = external_exports.enum([
   "active",
@@ -17272,6 +17282,7 @@ async function projectActivity(repoRoot, opts) {
   const projects = [];
   for (const [key, events] of grouped) {
     const [pursuit, projectId] = key.split("/");
+    if (!pursuit || !projectId) continue;
     const current = snapshot.projects.find(
       (p) => p.pursuit === pursuit && p.id === projectId
     );
@@ -17335,11 +17346,12 @@ function parseLog(out) {
   const commits = [];
   let i = 0;
   while (i < lines.length) {
-    if (!lines[i].startsWith("COMMIT ")) {
+    const line = lines[i] ?? "";
+    if (!line.startsWith("COMMIT ")) {
       i++;
       continue;
     }
-    const hash = lines[i].slice("COMMIT ".length).trim();
+    const hash = line.slice("COMMIT ".length).trim();
     i++;
     const timestamp2 = (lines[i] ?? "").trim();
     i++;
@@ -17347,8 +17359,10 @@ function parseLog(out) {
     i++;
     if ((lines[i] ?? "").trim() === "") i++;
     const files = [];
-    while (i < lines.length && lines[i].trim() !== "" && !lines[i].startsWith("COMMIT ")) {
-      files.push(lines[i].trim());
+    while (i < lines.length) {
+      const fileLine = lines[i] ?? "";
+      if (fileLine.trim() === "" || fileLine.startsWith("COMMIT ")) break;
+      files.push(fileLine.trim());
       i++;
     }
     commits.push({ commit: hash, timestamp: timestamp2, subject, files });
@@ -18842,6 +18856,20 @@ function renderActivePursuits(snapshot, flags, color) {
     return a.id.localeCompare(b.id);
   });
   for (const pursuit of pursuitsSorted) {
+    if (pursuit.delegated_to) {
+      out.push("");
+      out.push(
+        bold(`### ${pursuit.id} \u2014 delegated \u2192 ${pursuit.delegated_to}`, color)
+      );
+      out.push("");
+      out.push(
+        dim(
+          "_worked in its own repo \u2014 `cadence delegates` for a live summary_",
+          color
+        )
+      );
+      continue;
+    }
     const allProjects = snapshot.projects.filter((p) => p.pursuit === pursuit.id);
     const done = allProjects.filter(
       (p) => p.status === "done" || p.status === "dropped"
@@ -19125,7 +19153,6 @@ function renderSection(title, table, emptyText = "None.") {
 function configRows(snapshot) {
   const c = snapshot.config;
   const rows = [
-    ["marker_stale_days", String(c.marker_stale_days)],
     ["waiting_for_grace_days", String(c.waiting_for_grace_days)],
     ["dormant_days", String(c.dormant_days)],
     ["max_active_projects", String(c.max_active_projects)],
@@ -19202,8 +19229,11 @@ function flagTarget(flag) {
       return `${flag.pursuitId}/${flag.projectId}`;
     case "closing_in_on_resolution":
       return flag.pursuitId;
+    case "capstone_gap":
+      return flag.unitId;
     case "wip_over_limit":
     case "inbox_pressure":
+    case "retrospective_due":
       return "";
     case "inbound_issues_piling_up":
       return flag.ownerRepo;
@@ -19236,6 +19266,12 @@ function flagDetail(flag) {
       const breakdown = buckets.length ? ` (${buckets.join(", ")})` : "";
       return `${flag.count} items${breakdown}; /cadence:start inbox to triage`;
     }
+    case "capstone_gap": {
+      const sourceWord = flag.sources === 1 ? "source" : "sources";
+      return `${flag.sources} researched ${sourceWord}, no capstone; /cadence:narrate capstone to crystallize`;
+    }
+    case "retrospective_due":
+      return `${flag.newSinceLast} pursuits resolved since the last retrospective; /cadence:narrate lessons to synthesize`;
   }
 }
 function tabulate(table) {
@@ -19495,6 +19531,358 @@ function discoverCheckout(repoRoot, target, extraSearchDirs = []) {
   };
 }
 
+// src/root.ts
+import { existsSync as existsSync6, readdirSync as readdirSync2 } from "node:fs";
+import path15 from "node:path";
+function pursuitsDirHasContent(root) {
+  const pursuits = path15.join(root, "pursuits");
+  let children;
+  try {
+    children = readdirSync2(pursuits);
+  } catch {
+    return false;
+  }
+  for (const child of children) {
+    if (existsSync6(path15.join(pursuits, child, "pursuit.md"))) return true;
+    if (child.startsWith("_")) {
+      let sub;
+      try {
+        sub = readdirSync2(path15.join(pursuits, child));
+      } catch {
+        continue;
+      }
+      for (const s of sub) {
+        if (existsSync6(path15.join(pursuits, child, s, "pursuit.md"))) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+function isCadenceRepo(root) {
+  return existsSync6(path15.join(root, "cadence.yaml")) || pursuitsDirHasContent(root);
+}
+function findRepoRoot(start) {
+  let dir = path15.resolve(start);
+  for (; ; ) {
+    if (isCadenceRepo(dir)) return dir;
+    const parent = path15.dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+}
+
+// src/delegation.ts
+import { readFileSync as readFileSync3 } from "node:fs";
+import path18 from "node:path";
+
+// src/registry.ts
+init_js_yaml();
+import { existsSync as existsSync7, mkdirSync as mkdirSync3, readFileSync as readFileSync2, writeFileSync as writeFileSync2 } from "node:fs";
+import os2 from "node:os";
+import path16 from "node:path";
+var RegistryEntrySchema = external_exports.object({
+  /** Short unique name, usable as `--root <name>`. */
+  name: external_exports.string(),
+  /** Path to the local checkout; `~` expands. */
+  path: external_exports.string(),
+  /** Hub repos aggregate delegated pursuits from spoke repos. */
+  hub: external_exports.boolean().optional(),
+  /** Git URL identity, for matching `delegated_to` / manifest `hub`. */
+  git_url: external_exports.string().optional()
+});
+var RegistrySchema = external_exports.object({
+  repos: external_exports.array(RegistryEntrySchema).optional().default([]),
+  /** Name of the repo guest-mode captures route to by default. */
+  default: external_exports.string().optional()
+});
+function registryPath() {
+  const override = process.env["CADENCE_REGISTRY_PATH"];
+  if (override) return path16.resolve(expandHome(override));
+  const xdg = process.env["XDG_CONFIG_HOME"];
+  const base = xdg && xdg.length > 0 ? path16.resolve(expandHome(xdg)) : path16.join(os2.homedir(), ".config");
+  return path16.join(base, "cadence", "repos.yaml");
+}
+function loadRegistry() {
+  const file = registryPath();
+  let text;
+  try {
+    text = readFileSync2(file, "utf8");
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      return { repos: [] };
+    }
+    throw err;
+  }
+  const parsed = jsYaml.load(text, { schema: jsYaml.CORE_SCHEMA }) ?? {};
+  try {
+    return RegistrySchema.parse(parsed);
+  } catch (err) {
+    throw new Error(`Malformed registry at ${file}: ${String(err)}`);
+  }
+}
+function saveRegistry(registry) {
+  const file = registryPath();
+  mkdirSync3(path16.dirname(file), { recursive: true });
+  writeFileSync2(file, jsYaml.dump(registry, { lineWidth: 100 }), "utf8");
+  return file;
+}
+function entryByName(registry, name) {
+  return registry.repos.find((r) => r.name === name);
+}
+function entryByGitUrl(registry, gitUrl) {
+  const wanted = normalizeGitUrl(gitUrl);
+  return registry.repos.find(
+    (r) => r.git_url && normalizeGitUrl(r.git_url) === wanted
+  );
+}
+function entryPath(entry) {
+  return path16.resolve(expandHome(entry.path));
+}
+function entryStatus(entry) {
+  const p = entryPath(entry);
+  const exists = existsSync7(p);
+  return { exists, initialized: exists && isCadenceRepo(p) };
+}
+function defaultEntry(registry) {
+  if (registry.default) {
+    return entryByName(registry, registry.default) ?? null;
+  }
+  if (registry.repos.length === 1) return registry.repos[0] ?? null;
+  const hubs = registry.repos.filter((r) => r.hub);
+  if (hubs.length === 1) return hubs[0] ?? null;
+  return null;
+}
+
+// src/write/paths.ts
+import { existsSync as existsSync8 } from "node:fs";
+import path17 from "node:path";
+function resolvePursuitDir(repoRoot, pursuitId) {
+  const candidates = [
+    path17.join(repoRoot, "pursuits", pursuitId),
+    path17.join(repoRoot, "pursuits/_someday", pursuitId),
+    path17.join(repoRoot, "pursuits/_archived", pursuitId),
+    path17.join(repoRoot, "pursuits/_dropped", pursuitId)
+  ];
+  for (const c of candidates) {
+    if (existsSync8(path17.join(c, "pursuit.md"))) return c;
+  }
+  return null;
+}
+function resolveProjectFile(repoRoot, pursuitId, projectId) {
+  const dir = resolvePursuitDir(repoRoot, pursuitId);
+  if (!dir) return null;
+  const file = path17.join(dir, "projects", `${projectId}.md`);
+  if (!existsSync8(file)) return null;
+  return file;
+}
+
+// src/delegation.ts
+function readDelegation(repoRoot, pursuitId) {
+  const dir = resolvePursuitDir(repoRoot, pursuitId);
+  if (!dir) return void 0;
+  let raw;
+  try {
+    raw = readFileSync3(path18.join(dir, "pursuit.md"), "utf8");
+  } catch {
+    return void 0;
+  }
+  const { data } = parseFrontmatter(raw);
+  const value = data["delegated_to"];
+  return typeof value === "string" && value.length > 0 ? value : void 0;
+}
+function resolveDelegate(repoRoot, pursuitId, delegatedTo, registry) {
+  const reg = registry ?? loadRegistry();
+  const base = { pursuit: pursuitId, delegated_to: delegatedTo };
+  const named = entryByName(reg, delegatedTo);
+  if (named) {
+    const p = entryPath(named);
+    if (isCadenceRepo(p) && p !== path18.resolve(repoRoot)) {
+      return {
+        ...base,
+        checkout: p,
+        via: "registry-name",
+        registry_name: named.name
+      };
+    }
+  }
+  const looksLikeGitUrl = delegatedTo.includes("/") || delegatedTo.includes(":");
+  if (!looksLikeGitUrl) {
+    return { ...base, checkout: null, via: null };
+  }
+  const byUrl = entryByGitUrl(reg, delegatedTo);
+  if (byUrl) {
+    const p = entryPath(byUrl);
+    if (isCadenceRepo(p) && p !== path18.resolve(repoRoot)) {
+      return {
+        ...base,
+        checkout: p,
+        via: "registry-git-url",
+        registry_name: byUrl.name
+      };
+    }
+  }
+  const discovered = discoverCheckout(repoRoot, {
+    name: pursuitId,
+    git_url: delegatedTo,
+    discovery_hints: []
+  });
+  if (discovered.checkout && isCadenceRepo(discovered.checkout)) {
+    return { ...base, checkout: discovered.checkout, via: "discovery" };
+  }
+  return {
+    ...base,
+    checkout: null,
+    via: null,
+    searched: discovered.searched
+  };
+}
+function summarizeDelegateSnapshot(snapshot) {
+  const open = snapshot.projects.filter(
+    (p) => p.status === "active" || p.status === "on_hold"
+  );
+  return {
+    active_projects: snapshot.projects.filter((p) => p.status === "active").length,
+    on_hold_projects: snapshot.projects.filter((p) => p.status === "on_hold").length,
+    done_projects: snapshot.projects.filter(
+      (p) => p.status === "done" || p.status === "dropped"
+    ).length,
+    open_actions: open.reduce(
+      (n, p) => n + p.actions.filter((a) => !a.checked).length,
+      0
+    ),
+    waiting_for: open.reduce((n, p) => n + p.waiting_for.length, 0),
+    inbox: inboxItems(snapshot).counts.total,
+    active_pursuits: snapshot.pursuits.filter((p) => p.lifecycle === "active").map((p) => p.id)
+  };
+}
+function renderDelegateSummaryLine(s) {
+  const parts = [
+    `${s.active_projects} active / ${s.on_hold_projects} on-hold projects`,
+    `${s.open_actions} open actions`
+  ];
+  if (s.waiting_for > 0) parts.push(`${s.waiting_for} waiting-for`);
+  if (s.inbox > 0) parts.push(`inbox ${s.inbox}`);
+  return parts.join(", ");
+}
+
+// src/manifest.ts
+init_js_yaml();
+import { existsSync as existsSync9, readFileSync as readFileSync4 } from "node:fs";
+import path19 from "node:path";
+var MANIFEST_FILENAME = "cadence-manifest.yaml";
+var EndpointSchema = external_exports.object({
+  /** Where the published thing lives — the only required field. */
+  url: external_exports.string(),
+  /** Free-form: 'site', 'feed', 'api', … — spoke vocabulary. */
+  kind: external_exports.string().optional(),
+  /** Free-form: 'public', 'gated', … */
+  access: external_exports.string().optional(),
+  summary: external_exports.string().optional()
+}).passthrough();
+var DataRootSchema = external_exports.object({
+  /** Repo-relative directory the content lives in. */
+  path: external_exports.string(),
+  /** Free-form: 'content', 'media', 'config', … */
+  role: external_exports.string().optional(),
+  summary: external_exports.string().optional()
+}).passthrough();
+var ManifestSchema = external_exports.object({
+  /** Display name; defaults to basename(repoRoot) at load. */
+  repo: external_exports.string().optional(),
+  /** Git URL of this repo's hub, when it has one. */
+  hub: external_exports.string().optional(),
+  endpoints: external_exports.array(EndpointSchema).optional(),
+  data_roots: external_exports.array(DataRootSchema).optional(),
+  /** Opaque pointers to files owned by other tooling. */
+  services: external_exports.array(external_exports.string()).optional()
+}).passthrough();
+function manifestPath(repoRoot) {
+  return path19.join(path19.resolve(repoRoot), MANIFEST_FILENAME);
+}
+function loadManifest(repoRoot) {
+  const file = manifestPath(repoRoot);
+  let text;
+  try {
+    text = readFileSync4(file, "utf8");
+  } catch (err) {
+    if (err.code === "ENOENT") return null;
+    throw err;
+  }
+  let manifest;
+  try {
+    const parsed = jsYaml.load(text, { schema: jsYaml.CORE_SCHEMA }) ?? {};
+    manifest = ManifestSchema.parse(parsed);
+  } catch (err) {
+    throw new Error(`Malformed manifest at ${file}: ${String(err)}`);
+  }
+  if (!manifest.repo) manifest.repo = path19.basename(path19.resolve(repoRoot));
+  return manifest;
+}
+async function collectFleet(repoRoot, registry) {
+  const reg = registry ?? loadRegistry();
+  const root = path19.resolve(repoRoot);
+  const candidates = /* @__PURE__ */ new Map();
+  candidates.set(root, {});
+  for (const entry of reg.repos) {
+    const p = entryPath(entry);
+    if (!existsSync9(p) || !isCadenceRepo(p)) continue;
+    if (!candidates.get(p)?.registry_name) {
+      candidates.set(p, { registry_name: entry.name });
+    }
+  }
+  const rootSnapshot = await scan(root);
+  for (const pursuit of rootSnapshot.pursuits) {
+    if (!pursuit.delegated_to || pursuit.lifecycle === "archived" || pursuit.lifecycle === "dropped") {
+      continue;
+    }
+    const resolution = resolveDelegate(
+      root,
+      pursuit.id,
+      pursuit.delegated_to,
+      reg
+    );
+    if (!resolution.checkout) continue;
+    const p = path19.resolve(resolution.checkout);
+    if (!candidates.has(p)) {
+      candidates.set(p, { registry_name: resolution.registry_name });
+    }
+  }
+  const members = [];
+  for (const [p, meta] of candidates) {
+    let manifest = null;
+    let manifestError;
+    try {
+      manifest = loadManifest(p);
+    } catch (err) {
+      manifestError = err instanceof Error ? err.message : String(err);
+    }
+    const snapshot = p === root ? rootSnapshot : await scan(p);
+    members.push({
+      name: meta.registry_name ?? manifest?.repo ?? path19.basename(p),
+      path: p,
+      hub: false,
+      // marked below once all manifests are in hand
+      manifest,
+      ...manifestError ? { manifest_error: manifestError } : {},
+      active_pursuits: snapshot.pursuits.filter((pu) => pu.lifecycle === "active").map((pu) => pu.id)
+    });
+  }
+  const hubPaths = /* @__PURE__ */ new Set();
+  for (const entry of reg.repos) {
+    if (entry.hub) hubPaths.add(entryPath(entry));
+  }
+  for (const member of members) {
+    const hubUrl = member.manifest?.hub;
+    if (!hubUrl) continue;
+    const entry = entryByGitUrl(reg, hubUrl);
+    if (entry) hubPaths.add(entryPath(entry));
+  }
+  for (const member of members) member.hub = hubPaths.has(member.path);
+  return { generated_from: root, members };
+}
+
 // src/render/find.ts
 var KIND_LABELS = {
   project: "Projects",
@@ -19616,6 +20004,16 @@ function renderPursuits(snapshot) {
 function renderPursuit(snapshot, pursuitId) {
   const pursuit = snapshot.pursuits.find((p) => p.id === pursuitId);
   if (!pursuit) return `pursuit not found: ${pursuitId}`;
+  if (pursuit.delegated_to) {
+    return [
+      `${pursuit.id} \u2014 delegated \u2192 ${pursuit.delegated_to}`,
+      "",
+      "Execution lives in the delegate repo; this stub holds only",
+      "prioritization (why / target / win_cycle). Read-only summary:",
+      "`cadence delegates`. To work it, open a session in the delegate",
+      "repo (or pass --root against it)."
+    ].join("\n");
+  }
   const projects = snapshot.projects.filter((p) => p.pursuit === pursuitId);
   const active = projects.filter((p) => p.status === "active");
   const onHold = projects.filter((p) => p.status === "on_hold");
@@ -19776,12 +20174,12 @@ function projectMenu(_projectId, status) {
 }
 
 // src/write/pursuit.ts
-import path16 from "node:path";
-import { existsSync as existsSync6 } from "node:fs";
+import path21 from "node:path";
+import { existsSync as existsSync10 } from "node:fs";
 
 // src/write/util.ts
 import { mkdir, readFile as readFile12, rename, writeFile as writeFile2 } from "node:fs/promises";
-import path15 from "node:path";
+import path20 from "node:path";
 
 // src/write/yaml.ts
 init_js_yaml();
@@ -19809,7 +20207,7 @@ async function ensureDir(dir) {
   await mkdir(dir, { recursive: true });
 }
 async function writeFrontmatterFile(filePath, data, body) {
-  await ensureDir(path15.dirname(filePath));
+  await ensureDir(path20.dirname(filePath));
   await writeFile2(filePath, formatFrontmatterFile(data, body), "utf8");
 }
 async function loadFrontmatterFile(filePath) {
@@ -19822,7 +20220,7 @@ async function mutateFrontmatter(filePath, mutate) {
   await writeFrontmatterFile(filePath, next.data, next.body);
 }
 async function moveDir(from, to) {
-  await ensureDir(path15.dirname(to));
+  await ensureDir(path20.dirname(to));
   await rename(from, to);
 }
 function timestampSlug(date) {
@@ -19843,12 +20241,12 @@ async function createPursuit(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const status = opts.status ?? (opts.type === "someday" ? "someday" : "active");
   const lifecycleDir = status === "someday" ? "pursuits/_someday" : status === "archived" ? "pursuits/_archived" : "pursuits";
-  const pursuitDir = path16.join(repoRoot, lifecycleDir, opts.id);
-  if (existsSync6(pursuitDir)) {
+  const pursuitDir = path21.join(repoRoot, lifecycleDir, opts.id);
+  if (existsSync10(pursuitDir)) {
     throw new Error(`pursuit already exists: ${opts.id}`);
   }
-  await ensureDir(path16.join(pursuitDir, "projects"));
-  await ensureDir(path16.join(pursuitDir, "ideas"));
+  await ensureDir(path21.join(pursuitDir, "projects"));
+  await ensureDir(path21.join(pursuitDir, "ideas"));
   const data = {
     id: opts.id,
     type: opts.type,
@@ -19862,42 +20260,17 @@ async function createPursuit(repoRoot, opts) {
   const body = `# ${title}` + (opts.description ? `
 
 ${opts.description}` : "");
-  const filePath = path16.join(pursuitDir, "pursuit.md");
+  const filePath = path21.join(pursuitDir, "pursuit.md");
   await writeFrontmatterFile(filePath, data, body);
-  return { path: path16.relative(repoRoot, filePath) };
+  return { path: path21.relative(repoRoot, filePath) };
 }
 function toTitleCase(id) {
   return id.split("-").map((w) => w[0] ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
 }
 
 // src/write/project.ts
-import path18 from "node:path";
-import { existsSync as existsSync8 } from "node:fs";
-
-// src/write/paths.ts
-import { existsSync as existsSync7 } from "node:fs";
-import path17 from "node:path";
-function resolvePursuitDir(repoRoot, pursuitId) {
-  const candidates = [
-    path17.join(repoRoot, "pursuits", pursuitId),
-    path17.join(repoRoot, "pursuits/_someday", pursuitId),
-    path17.join(repoRoot, "pursuits/_archived", pursuitId),
-    path17.join(repoRoot, "pursuits/_dropped", pursuitId)
-  ];
-  for (const c of candidates) {
-    if (existsSync7(path17.join(c, "pursuit.md"))) return c;
-  }
-  return null;
-}
-function resolveProjectFile(repoRoot, pursuitId, projectId) {
-  const dir = resolvePursuitDir(repoRoot, pursuitId);
-  if (!dir) return null;
-  const file = path17.join(dir, "projects", `${projectId}.md`);
-  if (!existsSync7(file)) return null;
-  return file;
-}
-
-// src/write/project.ts
+import path22 from "node:path";
+import { existsSync as existsSync11 } from "node:fs";
 var DEFAULT_FIRST_ACTION = "Brainstorm and add concrete actions for this project";
 async function createProject(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
@@ -19905,8 +20278,14 @@ async function createProject(repoRoot, opts) {
   if (!pursuitDir) {
     throw new Error(`pursuit not found: ${opts.pursuit}`);
   }
-  const filePath = path18.join(pursuitDir, "projects", `${opts.id}.md`);
-  if (existsSync8(filePath)) {
+  const delegatedTo = readDelegation(repoRoot, opts.pursuit);
+  if (delegatedTo) {
+    throw new Error(
+      `Pursuit '${opts.pursuit}' is delegated to ${delegatedTo}. Projects live in the delegate repo \u2014 open a session there (or use --root against it). Run \`cadence delegates\` to see where the checkout lives on this machine.`
+    );
+  }
+  const filePath = path22.join(pursuitDir, "projects", `${opts.id}.md`);
+  if (existsSync11(filePath)) {
     throw new Error(`project already exists: ${opts.pursuit}/${opts.id}`);
   }
   const cleanList = (xs) => Array.isArray(xs) ? xs.filter((x) => typeof x === "string" && x.length > 0) : [];
@@ -19957,7 +20336,7 @@ async function createProject(repoRoot, opts) {
   if (actionLines.length > 0) sections.push(actionLines.join("\n"));
   const body = sections.join("\n\n");
   await writeFrontmatterFile(filePath, data, body);
-  return { path: path18.relative(repoRoot, filePath) };
+  return { path: path22.relative(repoRoot, filePath) };
 }
 function toTitleCase2(id) {
   return id.split("-").map((w) => w[0] ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
@@ -19965,18 +20344,18 @@ function toTitleCase2(id) {
 
 // src/write/brainstorm.ts
 init_js_yaml();
-import path19 from "node:path";
-import { existsSync as existsSync9 } from "node:fs";
+import path23 from "node:path";
+import { existsSync as existsSync12 } from "node:fs";
 import { mkdir as mkdir2, readFile as readFile13, rename as rename2, rm, writeFile as writeFile3 } from "node:fs/promises";
 var BRAINSTORMS_ROOT = "brainstorms";
 async function createBrainstorm(repoRoot, opts) {
-  const root = path19.join(repoRoot, BRAINSTORMS_ROOT);
-  const dir = path19.join(root, opts.slug);
-  if (existsSync9(dir)) {
+  const root = path23.join(repoRoot, BRAINSTORMS_ROOT);
+  const dir = path23.join(root, opts.slug);
+  if (existsSync12(dir)) {
     throw new Error(`brainstorm already exists: ${opts.slug}`);
   }
-  await mkdir2(path19.join(dir, "refs"), { recursive: true });
-  await mkdir2(path19.join(dir, "solutions"), { recursive: true });
+  await mkdir2(path23.join(dir, "refs"), { recursive: true });
+  await mkdir2(path23.join(dir, "solutions"), { recursive: true });
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const ts = isoTimestamp(now);
   const meta = {
@@ -19991,33 +20370,33 @@ async function createBrainstorm(repoRoot, opts) {
   };
   await writeMeta(dir, meta);
   await writeFile3(
-    path19.join(dir, "workspace.md"),
+    path23.join(dir, "workspace.md"),
     `# ${opts.slug}
 
 _Divergent notes go here. Edit freely; the agent appends as ideation flows._
 `,
     "utf8"
   );
-  return { path: path19.relative(repoRoot, dir) };
+  return { path: path23.relative(repoRoot, dir) };
 }
 async function setBrainstormPhase(repoRoot, opts) {
-  const dir = path19.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
+  const dir = path23.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
   const meta = await readMeta(dir);
   meta.phase = opts.phase;
   meta.last_touched = isoTimestamp(opts.now ?? /* @__PURE__ */ new Date());
   await writeMeta(dir, meta);
-  return { path: path19.relative(repoRoot, dir), meta };
+  return { path: path23.relative(repoRoot, dir), meta };
 }
 async function crystallize(repoRoot, opts) {
-  const dir = path19.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
+  const dir = path23.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
   const meta = await readMeta(dir);
   if (meta.phase !== "converging") {
     throw new Error(
       `brainstorm ${opts.slug} must be in phase 'converging' to crystallize (currently '${meta.phase}')`
     );
   }
-  const solutionPath = path19.join(dir, "solutions", `${opts.solution}.md`);
-  if (!existsSync9(solutionPath)) {
+  const solutionPath = path23.join(dir, "solutions", `${opts.solution}.md`);
+  if (!existsSync12(solutionPath)) {
     throw new Error(
       `solution not found: ${opts.slug}/solutions/${opts.solution}.md`
     );
@@ -20045,42 +20424,42 @@ async function crystallize(repoRoot, opts) {
 
 ` : "") + `Crystallized at ${isoTimestamp(now)} \u2192 ${projectResult.path}
 `;
-  await writeFile3(path19.join(dir, "decision.md"), decisionBody, "utf8");
+  await writeFile3(path23.join(dir, "decision.md"), decisionBody, "utf8");
   meta.phase = "crystallized";
   meta.selected_solution = opts.solution;
   meta.target_pursuit = opts.pursuit;
   meta.last_touched = isoTimestamp(now);
   await writeMeta(dir, meta);
   return {
-    brainstorm_path: path19.relative(repoRoot, dir),
+    brainstorm_path: path23.relative(repoRoot, dir),
     project_path: projectResult.path
   };
 }
 async function archiveBrainstorm(repoRoot, opts) {
-  const dir = path19.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
-  if (!existsSync9(dir)) {
+  const dir = path23.join(repoRoot, BRAINSTORMS_ROOT, opts.slug);
+  if (!existsSync12(dir)) {
     throw new Error(`brainstorm not found: ${opts.slug}`);
   }
   if (opts.mode === "delete") {
     await rm(dir, { recursive: true, force: true });
-    return { kind: "deleted", from: path19.relative(repoRoot, dir) };
+    return { kind: "deleted", from: path23.relative(repoRoot, dir) };
   }
   const meta = await readMeta(dir);
   meta.phase = "archived";
   meta.last_touched = isoTimestamp(opts.now ?? /* @__PURE__ */ new Date());
   await writeMeta(dir, meta);
-  const target = path19.join(repoRoot, "wiki", "_archive", "brainstorms", opts.slug);
-  await mkdir2(path19.dirname(target), { recursive: true });
+  const target = path23.join(repoRoot, "wiki", "_archive", "brainstorms", opts.slug);
+  await mkdir2(path23.dirname(target), { recursive: true });
   await rename2(dir, target);
   return {
     kind: "kept",
-    from: path19.relative(repoRoot, dir),
-    to: path19.relative(repoRoot, target)
+    from: path23.relative(repoRoot, dir),
+    to: path23.relative(repoRoot, target)
   };
 }
 async function readMeta(dir) {
-  const metaPath = path19.join(dir, "meta.yaml");
-  if (!existsSync9(metaPath)) {
+  const metaPath = path23.join(dir, "meta.yaml");
+  if (!existsSync12(metaPath)) {
     throw new Error(`brainstorm meta.yaml not found at ${metaPath}`);
   }
   const raw = jsYaml.load(await readFile13(metaPath, "utf8"), {
@@ -20090,7 +20469,7 @@ async function readMeta(dir) {
 }
 async function writeMeta(dir, meta) {
   const yamlText = jsYaml.dump(meta, { lineWidth: -1 });
-  await writeFile3(path19.join(dir, "meta.yaml"), yamlText, "utf8");
+  await writeFile3(path23.join(dir, "meta.yaml"), yamlText, "utf8");
 }
 function parseSolution(text) {
   const lines = text.split("\n");
@@ -20130,18 +20509,18 @@ function parseSolution(text) {
 }
 
 // src/write/capture.ts
-import path20 from "node:path";
-import os2 from "node:os";
-import { existsSync as existsSync10 } from "node:fs";
+import path24 from "node:path";
+import os3 from "node:os";
+import { existsSync as existsSync13 } from "node:fs";
 import { readFile as readFile14, unlink, writeFile as writeFile4 } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 async function writeCapture(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
-  const dir = path20.join(repoRoot, "thoughts/unprocessed");
+  const dir = path24.join(repoRoot, "thoughts/unprocessed");
   await ensureDir(dir);
   if (opts.source?.raw_path) {
-    const rawDir = path20.dirname(path20.join(repoRoot, opts.source.raw_path));
+    const rawDir = path24.dirname(path24.join(repoRoot, opts.source.raw_path));
     await ensureDir(rawDir);
   }
   let mcp;
@@ -20204,7 +20583,7 @@ async function writeCapture(repoRoot, opts) {
   const baseSlug = opts.slug ?? timestampSlug(now);
   const filePath = uniqueCapturePath(dir, baseSlug);
   await writeFrontmatterFile(filePath, data, opts.body);
-  return { kind: "written", path: path20.relative(repoRoot, filePath) };
+  return { kind: "written", path: path24.relative(repoRoot, filePath) };
 }
 async function checkDedup(repoRoot, match) {
   const existing = await scanCaptures(repoRoot);
@@ -20231,10 +20610,10 @@ function sha256Hex(text) {
   return createHash("sha256").update(text, "utf8").digest("hex");
 }
 function uniqueCapturePath(dir, slug) {
-  let candidate = path20.join(dir, `${slug}.md`);
+  let candidate = path24.join(dir, `${slug}.md`);
   let n = 2;
-  while (existsSync10(candidate)) {
-    candidate = path20.join(dir, `${slug}-${n}.md`);
+  while (existsSync13(candidate)) {
+    candidate = path24.join(dir, `${slug}-${n}.md`);
     n += 1;
   }
   return candidate;
@@ -20259,15 +20638,15 @@ async function resolveBodyFromFlags(opts) {
       const body3 = await res.text();
       return { body: body3, sourceKindHint: "url" };
     }
-    const filePath = path20.resolve(opts.from);
-    if (!existsSync10(filePath)) {
+    const filePath = path24.resolve(opts.from);
+    if (!existsSync13(filePath)) {
       throw new Error(`--from file not found: ${filePath}`);
     }
     const body2 = await readFile14(filePath, "utf8");
     return { body: body2, sourceKindHint: "file" };
   }
   const editor = process.env["EDITOR"] || process.env["VISUAL"] || "nano";
-  const tmpPath = path20.join(os2.tmpdir(), `cadence-dump-${Date.now()}.md`);
+  const tmpPath = path24.join(os3.tmpdir(), `cadence-dump-${Date.now()}.md`);
   const header = opts.promptHint ? `# Brain dump \u2014 ${opts.promptHint}
 # Save and exit when done.
 
@@ -20290,15 +20669,15 @@ async function resolveBodyFromFlags(opts) {
 }
 
 // src/write/reflection.ts
-import path21 from "node:path";
-import { existsSync as existsSync11 } from "node:fs";
+import path25 from "node:path";
+import { existsSync as existsSync14 } from "node:fs";
 async function writeReflection(repoRoot, opts) {
   const now = opts.now ?? /* @__PURE__ */ new Date();
   const date = opts.date ?? dateString(now);
-  const dir = path21.join(repoRoot, "reflections");
+  const dir = path25.join(repoRoot, "reflections");
   await ensureDir(dir);
-  const filePath = path21.join(dir, `${date}.md`);
-  const existing = existsSync11(filePath) ? await loadFrontmatterFile(filePath) : null;
+  const filePath = path25.join(dir, `${date}.md`);
+  const existing = existsSync14(filePath) ? await loadFrontmatterFile(filePath) : null;
   const data = existing ? { ...existing.data } : {};
   data["date"] = date;
   data["status"] = opts.status;
@@ -20308,13 +20687,13 @@ async function writeReflection(repoRoot, opts) {
   }
   const body = opts.body ?? existing?.content ?? `# Reflection \u2014 ${date}`;
   await writeFrontmatterFile(filePath, data, body);
-  return { path: path21.relative(repoRoot, filePath) };
+  return { path: path25.relative(repoRoot, filePath) };
 }
 
 // src/write/edits.ts
-import path22 from "node:path";
+import path26 from "node:path";
 import { readdir as readdir3, readFile as readFile15 } from "node:fs/promises";
-import { existsSync as existsSync12 } from "node:fs";
+import { existsSync as existsSync15 } from "node:fs";
 
 // src/write/checklist.ts
 var ITEM_RE2 = /^(\s*-\s+\[)([ xX])(\]\s+)(.+?)(\s*)$/;
@@ -20599,7 +20978,7 @@ async function setProjectStatus(repoRoot, opts) {
     return { data, body };
   });
   const result = {
-    path: path22.relative(repoRoot, filePath)
+    path: path26.relative(repoRoot, filePath)
   };
   if (opts.include_pursuit) {
     result.pursuit = await summarizePursuit(repoRoot, filePath);
@@ -20637,7 +21016,7 @@ async function syncProjectOrigin(repoRoot, opts) {
   const parsedOrigin = OriginSchema.safeParse(data["origin"]);
   if (!parsedOrigin.success) {
     return {
-      path: path22.relative(repoRoot, filePath),
+      path: path26.relative(repoRoot, filePath),
       origin_sync: { kind: "no_origin" }
     };
   }
@@ -20653,17 +21032,17 @@ async function syncProjectOrigin(repoRoot, opts) {
     projectId: opts.id,
     pursuitId
   });
-  return { path: path22.relative(repoRoot, filePath), origin_sync };
+  return { path: path26.relative(repoRoot, filePath), origin_sync };
 }
 async function summarizePursuit(repoRoot, projectFilePath) {
-  const projectsDir = path22.dirname(projectFilePath);
-  const pursuitDir = path22.dirname(projectsDir);
-  const pursuitId = path22.basename(pursuitDir);
+  const projectsDir = path26.dirname(projectFilePath);
+  const pursuitDir = path26.dirname(projectsDir);
+  const pursuitId = path26.basename(pursuitDir);
   const projects = [];
-  if (existsSync12(projectsDir)) {
+  if (existsSync15(projectsDir)) {
     for (const entry of await readdir3(projectsDir, { withFileTypes: true })) {
       if (!entry.isFile() || !entry.name.endsWith(".md")) continue;
-      const file = path22.join(projectsDir, entry.name);
+      const file = path26.join(projectsDir, entry.name);
       const text = await readFile15(file, "utf8");
       const { data } = parseFrontmatter(text);
       const id = String(data["id"] ?? entry.name.replace(/\.md$/, ""));
@@ -20711,7 +21090,7 @@ async function checkItem(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   const result = {
-    path: path22.relative(repoRoot, filePath),
+    path: path26.relative(repoRoot, filePath),
     matched,
     ...promoted ? { promoted: true } : {},
     ...progress2
@@ -20753,7 +21132,7 @@ async function checkItems(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   const result = {
-    path: path22.relative(repoRoot, filePath),
+    path: path26.relative(repoRoot, filePath),
     matched,
     ...promoted ? { promoted: true } : {},
     ...progress2
@@ -20778,7 +21157,7 @@ async function addItem(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   return {
-    path: path22.relative(repoRoot, filePath),
+    path: path26.relative(repoRoot, filePath),
     ...progress2
   };
 }
@@ -20801,7 +21180,7 @@ async function addItems(repoRoot, opts) {
   });
   const progress2 = computeProjectProgress(finalBody);
   return {
-    path: path22.relative(repoRoot, filePath),
+    path: path26.relative(repoRoot, filePath),
     added: opts.texts.length,
     ...progress2
   };
@@ -20819,7 +21198,7 @@ async function addWaitingFor(repoRoot, opts) {
     data["waiting_for"] = list;
     return { data, body };
   });
-  return { path: path22.relative(repoRoot, filePath) };
+  return { path: path26.relative(repoRoot, filePath) };
 }
 async function flagWaitingFor(repoRoot, opts) {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
@@ -20851,7 +21230,7 @@ async function flagWaitingFor(repoRoot, opts) {
     data["waiting_for"] = list;
     return { data, body };
   });
-  return { path: path22.relative(repoRoot, filePath), matched };
+  return { path: path26.relative(repoRoot, filePath), matched };
 }
 async function locateProject(repoRoot, projectId, pursuitHint) {
   if (pursuitHint) {
@@ -20863,17 +21242,17 @@ async function locateProject(repoRoot, projectId, pursuitHint) {
   }
   const roots = ["pursuits", "pursuits/_someday", "pursuits/_archived"];
   for (const root of roots) {
-    const absRoot = path22.join(repoRoot, root);
-    if (!existsSync12(absRoot)) continue;
+    const absRoot = path26.join(repoRoot, root);
+    if (!existsSync15(absRoot)) continue;
     for (const pursuit of await readdir3(absRoot, { withFileTypes: true })) {
       if (!pursuit.isDirectory()) continue;
-      const candidate = path22.join(
+      const candidate = path26.join(
         absRoot,
         pursuit.name,
         "projects",
         `${projectId}.md`
       );
-      if (existsSync12(candidate)) return candidate;
+      if (existsSync15(candidate)) return candidate;
     }
   }
   throw new Error(
@@ -20905,30 +21284,30 @@ function escapeRe(s) {
 }
 
 // src/write/move.ts
-import path23 from "node:path";
-import { existsSync as existsSync13 } from "node:fs";
+import path27 from "node:path";
+import { existsSync as existsSync16 } from "node:fs";
 async function movePursuit(repoRoot, opts) {
   const from = resolvePursuitDir(repoRoot, opts.id);
   if (!from) throw new Error(`pursuit not found: ${opts.id}`);
-  const targetParent = opts.to === "active" ? path23.join(repoRoot, "pursuits") : opts.to === "someday" ? path23.join(repoRoot, "pursuits/_someday") : opts.to === "dropped" ? path23.join(repoRoot, "pursuits/_dropped") : path23.join(repoRoot, "pursuits/_archived");
-  const to = path23.join(targetParent, opts.id);
-  if (path23.resolve(from) === path23.resolve(to)) {
+  const targetParent = opts.to === "active" ? path27.join(repoRoot, "pursuits") : opts.to === "someday" ? path27.join(repoRoot, "pursuits/_someday") : opts.to === "dropped" ? path27.join(repoRoot, "pursuits/_dropped") : path27.join(repoRoot, "pursuits/_archived");
+  const to = path27.join(targetParent, opts.id);
+  if (path27.resolve(from) === path27.resolve(to)) {
     return {
-      from: path23.relative(repoRoot, from),
-      to: path23.relative(repoRoot, to)
+      from: path27.relative(repoRoot, from),
+      to: path27.relative(repoRoot, to)
     };
   }
-  if (existsSync13(to)) {
-    throw new Error(`destination already exists: ${path23.relative(repoRoot, to)}`);
+  if (existsSync16(to)) {
+    throw new Error(`destination already exists: ${path27.relative(repoRoot, to)}`);
   }
   await moveDir(from, to);
-  await mutateFrontmatter(path23.join(to, "pursuit.md"), (data, body) => {
+  await mutateFrontmatter(path27.join(to, "pursuit.md"), (data, body) => {
     data["status"] = opts.to;
     return { data, body };
   });
   return {
-    from: path23.relative(repoRoot, from),
-    to: path23.relative(repoRoot, to)
+    from: path27.relative(repoRoot, from),
+    to: path27.relative(repoRoot, to)
   };
 }
 
@@ -20939,8 +21318,8 @@ init_state();
 // src/auggie/transform.ts
 init_js_yaml();
 import { readFile as readFile17, readdir as readdir4, stat as stat2 } from "node:fs/promises";
-import { existsSync as existsSync17 } from "node:fs";
-import path26 from "node:path";
+import { existsSync as existsSync20 } from "node:fs";
+import path30 from "node:path";
 
 // src/auggie/frontmatter.ts
 var FENCE = /^---\s*$/;
@@ -21100,7 +21479,7 @@ function buildAugmentManifest(cc) {
 
 // src/auggie/overrides.ts
 init_js_yaml();
-import { existsSync as existsSync16 } from "node:fs";
+import { existsSync as existsSync19 } from "node:fs";
 import { readFile as readFile16 } from "node:fs/promises";
 var RewriteRuleSchema = external_exports.object({
   name: external_exports.string(),
@@ -21139,7 +21518,7 @@ var OverridesSchema = external_exports.object({
 });
 var EMPTY_OVERRIDES = {};
 async function loadOverrides(filePath) {
-  if (!existsSync16(filePath)) return EMPTY_OVERRIDES;
+  if (!existsSync19(filePath)) return EMPTY_OVERRIDES;
   const raw = await readFile16(filePath, "utf-8");
   const parsed = jsYaml.load(raw, { schema: jsYaml.CORE_SCHEMA }) ?? {};
   const result = OverridesSchema.safeParse(parsed);
@@ -21196,9 +21575,9 @@ async function transpile(opts) {
   return out;
 }
 async function emitManifest(pluginDir, out) {
-  const manifestPath = path26.join(pluginDir, ".claude-plugin", "plugin.json");
+  const manifestPath2 = path30.join(pluginDir, ".claude-plugin", "plugin.json");
   const cc = JSON.parse(
-    await readFile17(manifestPath, "utf-8")
+    await readFile17(manifestPath2, "utf-8")
   );
   const manifest = buildAugmentManifest(cc);
   out.set(
@@ -21207,12 +21586,12 @@ async function emitManifest(pluginDir, out) {
   );
 }
 async function emitCommands(pluginDir, overrides, rules, out) {
-  const skillsDir = path26.join(pluginDir, "skills");
-  if (!existsSync17(skillsDir)) return;
+  const skillsDir = path30.join(pluginDir, "skills");
+  if (!existsSync20(skillsDir)) return;
   const verbs = (await readdir4(skillsDir, { withFileTypes: true })).filter((d) => d.isDirectory()).map((d) => d.name).sort();
   for (const verb of verbs) {
-    const skillPath = path26.join(skillsDir, verb, "SKILL.md");
-    if (!existsSync17(skillPath)) continue;
+    const skillPath = path30.join(skillsDir, verb, "SKILL.md");
+    if (!existsSync20(skillPath)) continue;
     const raw = await readFile17(skillPath, "utf-8");
     const { data, content } = readPluginFrontmatter(raw);
     const ov = overrides.commands?.[verb] ?? {};
@@ -21230,12 +21609,12 @@ async function emitCommands(pluginDir, overrides, rules, out) {
   }
 }
 async function emitAgents(pluginDir, overrides, rules, out) {
-  const agentsDir = path26.join(pluginDir, "agents");
-  if (!existsSync17(agentsDir)) return;
+  const agentsDir = path30.join(pluginDir, "agents");
+  if (!existsSync20(agentsDir)) return;
   const files = (await readdir4(agentsDir)).filter((f) => f.endsWith(".md")).sort();
   for (const file of files) {
     const name = file.replace(/\.md$/, "");
-    const raw = await readFile17(path26.join(agentsDir, file), "utf-8");
+    const raw = await readFile17(path30.join(agentsDir, file), "utf-8");
     const { data, content } = readPluginFrontmatter(raw);
     const ov = overrides.agents?.[name] ?? {};
     const fm = {
@@ -21253,8 +21632,8 @@ async function emitAgents(pluginDir, overrides, rules, out) {
   }
 }
 async function emitRuntimeRule(pluginDir, rules, out) {
-  const runtimePath = path26.join(pluginDir, "cadence-runtime.md");
-  if (!existsSync17(runtimePath)) return;
+  const runtimePath = path30.join(pluginDir, "cadence-runtime.md");
+  if (!existsSync20(runtimePath)) return;
   const raw = await readFile17(runtimePath, "utf-8");
   const fm = {
     type: "always",
@@ -21287,28 +21666,28 @@ async function emitAgentsMd(pluginDir, rules, out) {
 }
 async function emitReferenceDocs(pluginDir, rules, out) {
   for (const file of REFERENCE_FILES) {
-    const p = path26.join(pluginDir, file);
-    if (existsSync17(p)) {
+    const p = path30.join(pluginDir, file);
+    if (existsSync20(p)) {
       out.set(`${REFERENCE_DEST_PREFIX}/${file}`, {
         content: rewriteText(await readFile17(p, "utf-8"), rules)
       });
     }
   }
   for (const dir of REFERENCE_DIRS) {
-    const abs = path26.join(pluginDir, dir);
-    if (!existsSync17(abs)) continue;
+    const abs = path30.join(pluginDir, dir);
+    if (!existsSync20(abs)) continue;
     await walkCopy(abs, pluginDir, rules, out);
   }
 }
 async function walkCopy(abs, pluginDir, rules, out) {
   const entries = await readdir4(abs, { withFileTypes: true });
   for (const entry of entries) {
-    const full = path26.join(abs, entry.name);
-    const rel = REFERENCE_DEST_PREFIX + "/" + path26.relative(pluginDir, full).split(path26.sep).join("/");
+    const full = path30.join(abs, entry.name);
+    const rel = REFERENCE_DEST_PREFIX + "/" + path30.relative(pluginDir, full).split(path30.sep).join("/");
     if (entry.isDirectory()) {
       await walkCopy(full, pluginDir, rules, out);
     } else {
-      const ext = path26.extname(entry.name).toLowerCase();
+      const ext = path30.extname(entry.name).toLowerCase();
       if (TEXT_EXT.has(ext)) {
         out.set(rel, {
           content: rewriteText(await readFile17(full, "utf-8"), rules)
@@ -21336,8 +21715,8 @@ async function emitSettings(pluginDir, overrides, out) {
   });
 }
 async function emitCliBinary(pluginDir, out) {
-  const binPath = path26.join(pluginDir, "bin", "cadence");
-  if (!existsSync17(binPath)) return;
+  const binPath = path30.join(pluginDir, "bin", "cadence");
+  if (!existsSync20(binPath)) return;
   const info = await stat2(binPath);
   out.set("bin/cadence", {
     content: await readFile17(binPath),
@@ -21416,23 +21795,34 @@ cli.command("status", "Show the system dashboard (human-readable)").option("--ro
   "Emit a SessionStart-hook JSON envelope (systemMessage for the user, additionalContext for the model)"
 ).action(
   async (opts) => {
-    const repoRoot = await resolveRepoRoot(opts.root);
-    if (!isCadenceRepo(repoRoot)) {
-      const text = `Cadence isn't initialized in ${repoRoot}.
-Run /cadence:init to set up.`;
+    const repoRoot = resolveRepoRootLenient(opts.root);
+    if (repoRoot === null || !isCadenceRepo(repoRoot)) {
       if (opts.hookOutput) {
+        const registry = loadRegistry();
+        const fallback = defaultEntry(registry);
+        if (fallback) {
+          const context = `Guest session \u2014 this directory is not a Cadence repo, and no Cadence state may be created here. Registered Cadence repos: ` + registry.repos.map((r) => r.name).join(", ") + `. Captures and read-only status may route to '${fallback.name}' via --root ${fallback.name}; other Cadence verbs need a session in that repo.`;
+          process.stdout.write(
+            JSON.stringify({
+              hookSpecificOutput: {
+                hookEventName: "SessionStart",
+                additionalContext: context
+              }
+            }) + "\n"
+          );
+        }
+        return;
+      }
+      const where = repoRoot ?? process.cwd();
+      const text = `Cadence isn't initialized in ${where}.
+Run /cadence:init to set up.${registryHintLines()}`;
+      if (opts.json) {
         process.stdout.write(
-          JSON.stringify({
-            systemMessage: text,
-            hookSpecificOutput: {
-              hookEventName: "SessionStart",
-              additionalContext: text
-            }
-          }) + "\n"
-        );
-      } else if (opts.json) {
-        process.stdout.write(
-          JSON.stringify({ initialized: false, repoRoot }, null, 2) + "\n"
+          JSON.stringify(
+            { initialized: false, repoRoot: where, guest: true },
+            null,
+            2
+          ) + "\n"
         );
       } else {
         process.stdout.write(text + "\n");
@@ -21732,7 +22122,7 @@ cli.command(
         ...opts.rawPath ? { raw_path: opts.rawPath } : {}
       };
       if (sourceKindHint === "file" && !source.name && opts.from) {
-        source.name = path27.basename(opts.from);
+        source.name = path31.basename(opts.from);
       }
     }
     let suggested_outcomes;
@@ -22262,15 +22652,15 @@ cli.command(
   "Verify the committed output matches a fresh transpile; exit 1 on drift (writes nothing)"
 ).action(
   async (opts) => {
-    const pluginDir = opts.pluginDir ? path27.resolve(opts.pluginDir) : findPluginDir();
+    const pluginDir = opts.pluginDir ? path31.resolve(opts.pluginDir) : findPluginDir();
     if (!pluginDir) {
       throw new Error(
         "Could not locate the source plugin dir. Pass --plugin-dir <path>."
       );
     }
-    const repoRoot = path27.dirname(pluginDir);
-    const outDir = opts.out ? path27.resolve(opts.out) : path27.join(repoRoot, "auggie-plugin");
-    const overridesPath = opts.overrides ? path27.resolve(opts.overrides) : path27.join(repoRoot, "src", "auggie", "overrides.yaml");
+    const repoRoot = path31.dirname(pluginDir);
+    const outDir = opts.out ? path31.resolve(opts.out) : path31.join(repoRoot, "auggie-plugin");
+    const overridesPath = opts.overrides ? path31.resolve(opts.overrides) : path31.join(repoRoot, "src", "auggie", "overrides.yaml");
     const overrides = await loadOverrides(overridesPath);
     const map2 = await transpile({ pluginDir, overrides });
     if (opts.check) {
@@ -22289,13 +22679,265 @@ cli.command(
     }
     await writeOutputMap(outDir, map2);
     process.stdout.write(
-      `Wrote ${map2.size} files to ${path27.relative(repoRoot, outDir) || outDir}/
+      `Wrote ${map2.size} files to ${path31.relative(repoRoot, outDir) || outDir}/
 `
     );
   }
 );
+cli.command(
+  "delegates",
+  "List delegated pursuits with live read-only summaries from their delegate repos"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--json", "Emit resolutions + summaries as JSON").action(async (opts) => {
+  const repoRoot = await resolveRepoRoot(opts.root);
+  const snapshot = await scan(repoRoot);
+  const delegated = snapshot.pursuits.filter(
+    (p) => p.delegated_to && p.lifecycle !== "archived" && p.lifecycle !== "dropped"
+  );
+  const rows = [];
+  for (const pursuit of delegated) {
+    const resolution = resolveDelegate(
+      repoRoot,
+      pursuit.id,
+      pursuit.delegated_to
+    );
+    let summary = null;
+    if (resolution.checkout) {
+      const delegateSnapshot = await scan(resolution.checkout);
+      summary = summarizeDelegateSnapshot(delegateSnapshot);
+    }
+    rows.push({ ...resolution, lifecycle: pursuit.lifecycle, summary });
+  }
+  if (opts.json) {
+    process.stdout.write(
+      JSON.stringify({ repoRoot, delegates: rows }, null, 2) + "\n"
+    );
+    return;
+  }
+  if (rows.length === 0) {
+    process.stdout.write(
+      "No delegated pursuits. Delegate one by adding `delegated_to: <git-url or registered name>` to its pursuit.md frontmatter.\n"
+    );
+    return;
+  }
+  for (const row of rows) {
+    const r = row;
+    if (r.checkout && r.summary) {
+      const name = r.registry_name ? `${r.registry_name} \u2014 ` : "";
+      process.stdout.write(
+        `${r.pursuit} \u2192 ${name}${r.checkout}
+  ${renderDelegateSummaryLine(r.summary)}
+`
+      );
+    } else {
+      process.stdout.write(
+        `${r.pursuit} \u2192 ${r.delegated_to}
+  no local checkout found \u2014 register it: cadence repos-add --name <name> --path <path> --git-url ${r.delegated_to}
+`
+      );
+    }
+  }
+});
+cli.command(
+  "manifest",
+  "Read and validate this repo's cadence-manifest.yaml (advertised endpoints, data roots, services)"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--json", "Emit {present, path, manifest} as JSON").action(async (opts) => {
+  const repoRoot = await resolveRepoRoot(opts.root);
+  const manifest = loadManifest(repoRoot);
+  if (opts.json) {
+    process.stdout.write(
+      JSON.stringify(
+        { present: manifest !== null, path: manifestPath(repoRoot), manifest },
+        null,
+        2
+      ) + "\n"
+    );
+    return;
+  }
+  if (!manifest) {
+    process.stdout.write(
+      "No cadence-manifest.yaml \u2014 this repo advertises nothing. Create one to declare endpoints / data roots / services for hub discovery.\nExample:\n  endpoints:\n    - { url: https://garden.example.com, kind: site, access: public }\n  data_roots:\n    - { path: beds/, role: content }\n"
+    );
+    return;
+  }
+  const lines = manifestLines(manifest);
+  process.stdout.write(
+    `${manifest.repo} \u2014 valid manifest (${manifestPath(repoRoot)})
+` + (manifest.hub ? `  hub: ${manifest.hub}
+` : "") + (lines.length > 0 ? lines.join("\n") + "\n" : "  (advertises nothing)\n")
+  );
+});
+cli.command(
+  "fleet",
+  "Aggregate manifests across this repo, registered repos, and delegate checkouts"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option(
+  "--json",
+  "Emit the full FleetView as JSON (nav/landing sites generate from this)"
+).action(async (opts) => {
+  const repoRoot = await resolveRepoRoot(opts.root);
+  const fleet = await collectFleet(repoRoot);
+  if (opts.json) {
+    process.stdout.write(JSON.stringify(fleet, null, 2) + "\n");
+    return;
+  }
+  let endpoints = 0;
+  let dataRoots = 0;
+  const blocks = [];
+  for (const member of fleet.members) {
+    endpoints += member.manifest?.endpoints?.length ?? 0;
+    dataRoots += member.manifest?.data_roots?.length ?? 0;
+    const header = `## ${member.name} (${member.path})${member.hub ? " [hub]" : ""}`;
+    if (!member.manifest) {
+      const why = member.manifest_error ? `  (manifest error: ${member.manifest_error})` : "  (no manifest)";
+      blocks.push(`${header}
+${why}`);
+      continue;
+    }
+    const lines = manifestLines(member.manifest);
+    blocks.push(
+      lines.length > 0 ? `${header}
+${lines.join("\n")}` : `${header}
+  (advertises nothing)`
+    );
+  }
+  process.stdout.write(
+    blocks.join("\n\n") + `
+
+${plural(fleet.members.length, "repo")}, ${plural(endpoints, "endpoint")}, ${plural(dataRoots, "data root")}
+`
+  );
+});
+cli.command(
+  "repos",
+  "List registered Cadence repos (per-machine registry at ~/.config/cadence/repos.yaml)"
+).option("--json", "Emit registry entries as JSON").action(async (opts) => {
+  const registry = loadRegistry();
+  const fallback = defaultEntry(registry);
+  const rows = registry.repos.map((r) => {
+    const status = entryStatus(r);
+    return {
+      name: r.name,
+      path: r.path,
+      resolved_path: entryPath(r),
+      hub: r.hub ?? false,
+      git_url: r.git_url ?? null,
+      default: fallback?.name === r.name,
+      exists: status.exists,
+      initialized: status.initialized
+    };
+  });
+  if (opts.json) {
+    process.stdout.write(
+      JSON.stringify(
+        { registry_path: registryPath(), default: fallback?.name ?? null, repos: rows },
+        null,
+        2
+      ) + "\n"
+    );
+    return;
+  }
+  if (rows.length === 0) {
+    process.stdout.write(
+      `No repos registered (${registryPath()}).
+Add one: cadence repos-add --name <name> --path <path>
+`
+    );
+    return;
+  }
+  for (const r of rows) {
+    const marks = [
+      r.hub ? "hub" : null,
+      r.default ? "default" : null,
+      !r.exists ? "MISSING" : !r.initialized ? "NOT INITIALIZED" : null
+    ].filter(Boolean).join(", ");
+    process.stdout.write(
+      `${r.name}  ${r.path}${marks ? `  [${marks}]` : ""}
+`
+    );
+  }
+});
+cli.command("repos-add", "Register (or update) a Cadence repo in the per-machine registry").option("--name <name>", "Short unique name (usable as --root <name>)").option("--path <path>", "Path to the local checkout (~ expands)").option("--hub", "Mark as a hub (aggregates delegated pursuits)").option("--git-url <url>", "Git URL identity (for delegation / fleet matching)").option("--default", "Make this the default repo for guest-mode routing").action(
+  async (opts) => {
+    if (!opts.name || !opts.path) {
+      throw new Error("repos-add requires --name and --path");
+    }
+    const resolved = path31.resolve(expandHome(opts.path));
+    if (!existsSync21(resolved)) {
+      throw new Error(`Path does not exist: ${resolved}`);
+    }
+    if (!isCadenceRepo(resolved)) {
+      throw new Error(
+        `${resolved} is not a Cadence repo (no cadence.yaml). Run /cadence:init there first \u2014 the registry only holds real Cadence repos.`
+      );
+    }
+    const registry = loadRegistry();
+    const entry = {
+      name: opts.name,
+      path: opts.path,
+      ...opts.hub ? { hub: true } : {},
+      ...opts.gitUrl ? { git_url: opts.gitUrl } : {}
+    };
+    const existing = registry.repos.findIndex((r) => r.name === opts.name);
+    if (existing >= 0) registry.repos[existing] = entry;
+    else registry.repos.push(entry);
+    if (opts.default || registry.repos.length === 1) {
+      registry.default = opts.name;
+    }
+    const file = saveRegistry(registry);
+    process.stdout.write(
+      `${existing >= 0 ? "Updated" : "Registered"} '${opts.name}' \u2192 ${resolved} (${file})
+`
+    );
+  }
+);
+cli.command("repos-remove <name>", "Remove a repo from the per-machine registry").action(async (name) => {
+  const registry = loadRegistry();
+  const before = registry.repos.length;
+  registry.repos = registry.repos.filter((r) => r.name !== name);
+  if (registry.repos.length === before) {
+    throw new Error(`No registered repo named '${name}'.` + registryHintLines());
+  }
+  if (registry.default === name) delete registry.default;
+  saveRegistry(registry);
+  process.stdout.write(`Removed '${name}' from ${registryPath()}
+`);
+});
+cli.command(
+  "context",
+  "Show where cadence verbs would land: resolved root, guest state, registry"
+).option("--root <path>", "Repo root or registered name").option("--json", "Emit as JSON").action(async (opts) => {
+  const repoRoot = resolveRepoRootLenient(opts.root);
+  const initialized = repoRoot !== null && isCadenceRepo(repoRoot);
+  const registry = loadRegistry();
+  const fallback = defaultEntry(registry);
+  const payload = {
+    cwd: process.cwd(),
+    repo_root: repoRoot,
+    initialized,
+    guest: !initialized,
+    registry: {
+      path: registryPath(),
+      default: fallback?.name ?? null,
+      repos: registry.repos.map((r) => ({
+        name: r.name,
+        path: entryPath(r),
+        hub: r.hub ?? false,
+        git_url: r.git_url ?? null,
+        ...entryStatus(r)
+      }))
+    }
+  };
+  if (opts.json) {
+    process.stdout.write(JSON.stringify(payload, null, 2) + "\n");
+    return;
+  }
+  process.stdout.write(
+    initialized ? `Cadence repo: ${repoRoot}
+` : `Guest session \u2014 not inside a Cadence repo (cwd: ${payload.cwd}).${registryHintLines()}
+`
+  );
+});
 cli.help();
-cli.version("0.1.0");
+cli.version("0.2.0");
 cli.parse(process.argv, { run: false });
 if (cli.matchedCommand) {
   cli.runMatchedCommand().catch((err) => {
@@ -22306,22 +22948,67 @@ if (cli.matchedCommand) {
   cli.outputHelp();
 }
 async function resolveRepoRoot(explicit) {
-  if (explicit) return path27.resolve(explicit);
+  if (explicit) {
+    const resolved = resolveExplicitRoot(explicit);
+    if (!isCadenceRepo(resolved)) {
+      throw new Error(
+        `--root ${resolved} is not a Cadence repo (no cadence.yaml). Run /cadence:init there first.`
+      );
+    }
+    return resolved;
+  }
+  const root = findRepoRoot(process.cwd());
+  if (root === null) throw new Error(noRepoMessage());
+  return root;
+}
+function resolveRepoRootLenient(explicit) {
+  if (explicit) return resolveExplicitRoot(explicit);
   return findRepoRoot(process.cwd());
 }
-function findRepoRoot(start) {
-  let dir = path27.resolve(start);
-  for (; ; ) {
-    if (existsSync18(path27.join(dir, "cadence.yaml"))) return dir;
-    if (existsSync18(path27.join(dir, "pursuits"))) return dir;
-    const parent = path27.dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
+function resolveExplicitRoot(explicit) {
+  const asPath = path31.resolve(expandHome(explicit));
+  const pathLike = explicit.includes(path31.sep) || explicit.startsWith("~") || explicit.startsWith(".");
+  if (pathLike || existsSync21(asPath)) {
+    if (!existsSync21(asPath)) {
+      throw new Error(`--root path does not exist: ${asPath}`);
+    }
+    return asPath;
   }
-  return path27.resolve(start);
+  const registry = loadRegistry();
+  const entry = entryByName(registry, explicit);
+  if (entry) {
+    const p = entryPath(entry);
+    if (!existsSync21(p)) {
+      throw new Error(
+        `Registered repo '${explicit}' points at a missing path: ${p}. Fix it with: cadence repos-add --name ${explicit} --path <path>`
+      );
+    }
+    return p;
+  }
+  throw new Error(
+    `--root '${explicit}' is neither an existing path nor a registered repo name.` + registryHintLines()
+  );
 }
-function isCadenceRepo(root) {
-  return existsSync18(path27.join(root, "cadence.yaml")) || existsSync18(path27.join(root, "pursuits"));
+function noRepoMessage() {
+  return `Not inside a Cadence repo \u2014 no cadence.yaml found walking up from ${process.cwd()}.
+  \u2022 pass --root <path or registered name>
+  \u2022 cd into a Cadence repo
+  \u2022 initialize one here: /cadence:init` + registryHintLines();
+}
+function registryHintLines() {
+  let registry;
+  try {
+    registry = loadRegistry();
+  } catch {
+    return "";
+  }
+  if (registry.repos.length === 0) {
+    return `
+  \u2022 no repos registered \u2014 add one: cadence repos-add --name <name> --path <path>`;
+  }
+  const names = registry.repos.map((r) => `${r.name} (${r.path}${r.hub ? ", hub" : ""})`).join(" \xB7 ");
+  return `
+  \u2022 registered: ${names}`;
 }
 function multistring(v) {
   if (!Array.isArray(v)) return void 0;
@@ -22356,6 +23043,25 @@ function docSummary(d) {
     anchors: d.anchors,
     path: d.path
   };
+}
+function manifestLines(m) {
+  const lines = [];
+  for (const e of m.endpoints ?? []) {
+    const head = [e.kind, e.url, e.access ? `[${e.access}]` : null].filter(Boolean).join(" ");
+    lines.push(`  ${head}${e.summary ? ` \u2014 ${e.summary}` : ""}`);
+  }
+  for (const d of m.data_roots ?? []) {
+    lines.push(
+      `  ${d.path}${d.role ? ` (${d.role})` : ""}${d.summary ? ` \u2014 ${d.summary}` : ""}`
+    );
+  }
+  for (const s of m.services ?? []) {
+    lines.push(`  service: ${s}`);
+  }
+  return lines;
+}
+function plural(n, word) {
+  return `${n} ${word}${n === 1 ? "" : "s"}`;
 }
 function firstLine3(text) {
   const line = text.split("\n")[0]?.trim() ?? "";
@@ -22395,8 +23101,8 @@ async function readPluginInfo() {
       "Could not locate plugin directory \u2014 no .claude-plugin/plugin.json found above the cadence binary."
     );
   }
-  const manifestPath = path27.join(pluginDir, ".claude-plugin", "plugin.json");
-  const raw = await readFile18(manifestPath, "utf-8");
+  const manifestPath2 = path31.join(pluginDir, ".claude-plugin", "plugin.json");
+  const raw = await readFile18(manifestPath2, "utf-8");
   const manifest = JSON.parse(raw);
   const repository = manifest.repository ?? manifest.homepage ?? null;
   return {
@@ -22408,16 +23114,16 @@ async function readPluginInfo() {
 }
 function findPluginDir() {
   const scriptPath = fileURLToPath2(import.meta.url);
-  let dir = path27.dirname(scriptPath);
+  let dir = path31.dirname(scriptPath);
   for (let i = 0; i < 6; i++) {
-    if (existsSync18(path27.join(dir, ".claude-plugin", "plugin.json"))) {
+    if (existsSync21(path31.join(dir, ".claude-plugin", "plugin.json"))) {
       return dir;
     }
-    const nested = path27.join(dir, "cadence-plugin", ".claude-plugin", "plugin.json");
-    if (existsSync18(nested)) {
-      return path27.join(dir, "cadence-plugin");
+    const nested = path31.join(dir, "cadence-plugin", ".claude-plugin", "plugin.json");
+    if (existsSync21(nested)) {
+      return path31.join(dir, "cadence-plugin");
     }
-    const parent = path27.dirname(dir);
+    const parent = path31.dirname(dir);
     if (parent === dir) break;
     dir = parent;
   }
@@ -22429,22 +23135,22 @@ function toBuffer(content) {
 async function writeOutputMap(outDir, map2) {
   await rm2(outDir, { recursive: true, force: true });
   for (const [rel, file] of map2) {
-    const abs = path27.join(outDir, rel);
-    await mkdir3(path27.dirname(abs), { recursive: true });
+    const abs = path31.join(outDir, rel);
+    await mkdir3(path31.dirname(abs), { recursive: true });
     await writeFile5(abs, toBuffer(file.content));
     if (file.mode !== void 0) await chmod(abs, file.mode);
   }
 }
 async function listFilesRel(dir, base = dir) {
-  if (!existsSync18(dir)) return [];
+  if (!existsSync21(dir)) return [];
   const entries = await readdirAsync(dir, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
-    const full = path27.join(dir, entry.name);
+    const full = path31.join(dir, entry.name);
     if (entry.isDirectory()) {
       files.push(...await listFilesRel(full, base));
     } else {
-      files.push(path27.relative(base, full).split(path27.sep).join("/"));
+      files.push(path31.relative(base, full).split(path31.sep).join("/"));
     }
   }
   return files;
@@ -22457,7 +23163,7 @@ async function checkOutputMap(outDir, map2) {
       drift.push(`missing: ${rel}`);
       continue;
     }
-    const onDisk = await readFile18(path27.join(outDir, rel));
+    const onDisk = await readFile18(path31.join(outDir, rel));
     if (Buffer.compare(onDisk, toBuffer(file.content)) !== 0) {
       drift.push(`differs: ${rel}`);
     }

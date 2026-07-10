@@ -132,7 +132,7 @@ frontmatter) still use Edit.
      This is a **suggestion, not a block** — the user can ignore it
      and continue working. The point is to surface finalization as a
      planned phase rather than a surprise discovery, so pursuits like
-     build-cadence-v1 don't need their audit/narrative/demo work
+     plan-kitchen-remodel don't need their audit/narrative/demo work
      inserted at the very end.
 
 5. **Physical-domain Notes capture.** If the project's

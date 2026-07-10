@@ -107,6 +107,7 @@ the instruction (potentially many items).
 - **Default-to-action for high-confidence items, but never force.** "Suggested: add as action on `<pursuit>` [Y/n]" is the framing (capital Y = default Yes). The user can always say no by typing `n` or naming a different outcome. Low-confidence items default to "keep in Inbox" — the menu surface stays the same, but the default flips.
 - **The audit trail always lands.** Even when the user routes everything immediately into outcomes, the underlying capture in `thoughts/unprocessed/` persists with `status: triaged, triaged_to: <ref>`. The captures are the record of what entered the Inbox; the outcomes are what left.
 - **Don't generate content the source doesn't justify.** This applies to the subagent, but also to the parent surface: don't pad the menu with phantom items, don't volunteer extra outcomes beyond what the subagent suggested.
+- **Guest sessions route, never scaffold.** When the CLI reports the session is outside a Cadence repo (root-resolution error, or `cadence context --json` → `guest: true`), capture to the default registered repo instead: `cadence write-capture --root <registry-name> ...`. If no repo is registered, say so once ("no Cadence repo here or registered — nothing captured") rather than creating `thoughts/` in a foreign directory. See `cadence-reference.md` → "Hub and Spoke" → "Guest mode".
 
 ## Exit conventions
 

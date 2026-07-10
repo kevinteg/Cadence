@@ -100,6 +100,7 @@ export async function projectActivity(
   const projects: ProjectActivity[] = []
   for (const [key, events] of grouped) {
     const [pursuit, projectId] = key.split('/')
+    if (!pursuit || !projectId) continue
     const current = snapshot.projects.find(
       (p) => p.pursuit === pursuit && p.id === projectId,
     )
@@ -179,11 +180,12 @@ function parseLog(out: string): RawCommit[] {
   const commits: RawCommit[] = []
   let i = 0
   while (i < lines.length) {
-    if (!lines[i].startsWith('COMMIT ')) {
+    const line = lines[i] ?? ''
+    if (!line.startsWith('COMMIT ')) {
       i++
       continue
     }
-    const hash = lines[i].slice('COMMIT '.length).trim()
+    const hash = line.slice('COMMIT '.length).trim()
     i++
     const timestamp = (lines[i] ?? '').trim()
     i++
@@ -191,12 +193,10 @@ function parseLog(out: string): RawCommit[] {
     i++
     if ((lines[i] ?? '').trim() === '') i++
     const files: string[] = []
-    while (
-      i < lines.length &&
-      lines[i].trim() !== '' &&
-      !lines[i].startsWith('COMMIT ')
-    ) {
-      files.push(lines[i].trim())
+    while (i < lines.length) {
+      const fileLine = lines[i] ?? ''
+      if (fileLine.trim() === '' || fileLine.startsWith('COMMIT ')) break
+      files.push(fileLine.trim())
       i++
     }
     commits.push({ commit: hash, timestamp, subject, files })

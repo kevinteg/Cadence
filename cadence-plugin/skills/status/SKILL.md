@@ -22,13 +22,11 @@ Active brainstorms (workspaces with `phase: diverging | converging`)
 are first-class entries in the dashboard and pursuit drill-down —
 they surface alongside on_hold/active projects so the user can resume
 ideation without hunting. See `cadence-reference.md` "Brainstorm
-Workspaces" for the underlying shape. The full Next:-block reshape
-that surfaces them in priority order lands in
-`reshape-status-output-for-navigation`.
+Workspaces" for the underlying shape.
 
 Arguments resolve via fuzzy match, partial match, or natural language.
-`/status build` matches `build-cadence-v1`. `/status the plugin project`
-matches `package-as-plugin`.
+`/status kitchen` matches `fix-kitchen-sink`. `/status the 10k plan`
+matches `train-for-10k`.
 
 ## CLI binding
 
@@ -156,6 +154,21 @@ work surface (start / complete / cancel / etc.).
 
 If the user wants to see the full verb surface across all groups,
 `/cadence:help` renders the catalogue inline.
+
+## Hub-and-spoke views
+
+- **Delegated pursuits** render as `### <pursuit> — delegated → <target>`
+  stubs on the dashboard (no local projects by design). For a live
+  read-only summary of what's moving in the delegate repo, run
+  `cadence delegates` and present its output. Never suggest creating
+  projects under a delegated pursuit — point at the delegate repo.
+- **`/status fleet`** (argument keyword): run `cadence fleet` and
+  present the aggregation — what every registered/delegated repo
+  advertises (endpoints, data roots, services). `cadence fleet --json`
+  is the exportable form when the user wants data rather than a view.
+- **Guest sessions**: when the CLI errors with "Not inside a Cadence
+  repo", offer `cadence status --root <registered-name>` for a
+  read-only dashboard of a registered repo instead of failing flat.
 
 ## Fallback
 

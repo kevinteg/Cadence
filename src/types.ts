@@ -47,6 +47,16 @@ export const PursuitFrontmatterSchema = z.object({
   cue: PursuitCueSchema.optional(),
   /** Pointer to the promoted capstone at wiki/narratives/<id>.md — reference, not containment. */
   narrative: z.string().optional(),
+  /**
+   * Hub-side delegation stub: this pursuit's execution lives in another
+   * Cadence repo. Value is a git URL (identity — resolved to a local
+   * checkout per-machine via the registry or sibling-dir discovery) or
+   * a registered repo name. Why/target/win_cycle stay on the hub (the
+   * hub owns prioritization); projects/actions/captures live only in
+   * the delegate repo (the delegate owns execution). Hub verbs never
+   * write into the delegate.
+   */
+  delegated_to: z.string().optional(),
 })
 export type PursuitFrontmatter = z.infer<typeof PursuitFrontmatterSchema>
 

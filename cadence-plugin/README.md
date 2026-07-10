@@ -23,6 +23,28 @@ claude --plugin-dir ~/code/cadence/cadence-plugin
 
 Inside Claude Code, run `/cadence:init` — the SKILL walks the bootstrap (directory structure, `cadence.yaml`, your first pursuit + project, `.gitignore` entries).
 
+## Permissions
+
+The plugin ships a PreToolUse gate (`hooks/bash-permission-gate.mjs`)
+that auto-allows Bash calls consisting of a single plain
+`cadence <subcommand>` invocation — the bundled CLI runs without
+permission prompts out of the box. Compound or piped commands still
+prompt, by design.
+
+The hidden verbs `/cadence:report` and `/cadence:incoming` shell out
+to the GitHub CLI. If you use them, pre-allow `gh issue` in your
+repo's `.claude/settings.json`:
+
+```json
+{
+  "permissions": {
+    "allow": ["Bash(gh issue:*)"]
+  }
+}
+```
+
+Nothing else needs a standing grant.
+
 ## Verbs
 
 The user-facing surface is **12 verbs**, grouped by cognitive mode.
@@ -115,7 +137,7 @@ verbs in one mode, or a single verb name to see its full contract.
 
 ```
 [session start: dashboard appears]
-/cadence:status improve-ux-and-vision  # see projects in your active pursuit
+/cadence:status <pursuit>              # see projects in your active pursuit
 /cadence:status <project>              # see Intent and actions
 /cadence:start <project>               # open the project view
 ... do work, check off actions via /cadence:complete ...

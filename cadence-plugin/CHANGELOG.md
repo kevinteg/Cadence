@@ -15,7 +15,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] — v1.1 in progress (improve-ux-and-vision pursuit)
+## [Unreleased]
+
+### Added
+
+- Per-machine repo registry — `cadence repos` / `repos-add` /
+  `repos-remove`, backed by `~/.config/cadence/repos.yaml` — plus
+  `cadence context`.
+- Guest mode — repo-root resolution no longer falls back to CWD;
+  commands run outside a Cadence repo error with guidance instead of
+  scaffolding state; the SessionStart hook is silent in non-Cadence
+  directories (one-line guest context when repos are registered).
+- Pursuit delegation — `delegated_to` frontmatter, `cadence delegates`
+  read-only aggregation, hub-side write guardrails.
+- Content manifest + fleet discovery — `cadence-manifest.yaml`,
+  `cadence manifest`, `cadence fleet`.
+- PreToolUse permission gate auto-allowing plain `cadence` CLI
+  invocations.
+
+### Changed
+
+- `pursuits/` alone no longer marks a repo root unless it contains
+  pursuit files; `--root` accepts a registered repo name.
+
+### Removed
+
+- Author's `cadence.yaml` from the plugin directory.
+
+## [0.2.0] — 2026-07-10
 
 ### Added: `/research` verb + research substrate (hidden verb)
 
@@ -138,8 +165,6 @@ git mv pursuits/wandering pursuits/inbox
 The CLI still resolves either name in legacy data, but new installs and
 new Ideas use `inbox`. The init skill has a legacy-detection note that
 surfaces the migration command if it sees `pursuits/wandering/`.
-
-## [Unreleased]
 
 ## [0.1.0] — 2026-04-27
 

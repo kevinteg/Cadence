@@ -33,7 +33,7 @@ export function normalizeGitUrl(url: string): string {
 }
 
 /** Expand a leading `~` / `~/` to the user's home directory. */
-function expandHome(p: string): string {
+export function expandHome(p: string): string {
   if (p === '~') return os.homedir()
   if (p.startsWith('~/') || p.startsWith('~\\')) {
     return path.join(os.homedir(), p.slice(2))

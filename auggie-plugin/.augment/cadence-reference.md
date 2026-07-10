@@ -144,7 +144,7 @@ markdown content. The key formats are:
   schema_version: 2
   status: untriaged                  # untriaged | triaged | discarded
   two_minute_eligible: false         # optional, defaults to absent
-  triaged_to: null                   # optional; e.g., "action:nexthop-onboarding/proj/0" or "project:foo" or "brainstorm:bar"
+  triaged_to: null                   # optional; e.g., "action:new-role-onboarding/proj/0" or "project:foo" or "brainstorm:bar"
   source:
     kind: mcp                        # inline | stdin | file | url | mcp | dump
     name: onboarding                 # optional — ingest_sources entry name, file basename, etc.
@@ -157,7 +157,7 @@ markdown content. The key formats are:
   prompt: "Pull action items I should own in my first 30 days"   # optional
   suggested_outcomes:                # optional — capture-ingest subagent's per-item recommendations
     - kind: action                   # two_minute_action | action | project | brainstorm_seed | note
-      suggested_pursuit: nexthop-onboarding
+      suggested_pursuit: new-role-onboarding
       confidence: 0.85
     - kind: note
       confidence: 0.30
@@ -237,7 +237,8 @@ list.
 
 `scan`, `report`, `status`, `flags`, `pursuits`, `pursuit <id>`,
 `project <id>`, `ideas`, `captures`, `find <query>`,
-`project-activity`, `publish-targets`, `publish-resolve <target>`. All
+`project-activity`, `publish-targets`, `publish-resolve <target>`,
+`context`, `repos`, `delegates`, `manifest`, `fleet`. All
 accept `--json` for structured output. Skills consume `--json` and
 reason over the typed result; the human-readable default is for the user
 invoking the CLI directly during an AI outage.
@@ -262,7 +263,9 @@ Supports `--scope` (daily/weekly/monthly/annual/pursuit) and
 `set-status <project-id>`, `set-idea-state <idea-id>`,
 `check <project-id>`, `add-item <project-id>`,
 `add-waiting-for <project-id>`, `flag-waiting-for <project-id>`,
-`move-pursuit <id>`, `sync-origin <project-id>`.
+`move-pursuit <id>`, `sync-origin <project-id>`,
+`repos-add`, `repos-remove <name>` (these two mutate the per-machine
+registry, not the repo — see "Hub and Spoke" below).
 Each performs one well-formed mutation and emits JSON describing what
 was written. Use these in preference to direct Edit/Write — they
 enforce schema, generate timestamps, and keep frontmatter formatting
@@ -287,6 +290,129 @@ after a transition.
 
 If the bin is missing, skills fall back to manual file scanning and
 direct Write per their internal fallback notes.
+
+## Hub and Spoke — Registry, Guest Mode, Delegation, Fleet
+
+Cadence stays per-repo and self-contained: every repo is fully
+functional standalone. The hub/spoke layer adds *visibility* and
+*refusal guardrails* on top — never sync, never cross-repo writes.
+Terminology: a **hub** aggregates; a **spoke** (delegate) owns
+execution for pursuits the hub has delegated to it. Any repo can be
+either; the roles are per-relationship, not global.
+
+### Per-machine registry (`~/.config/cadence/repos.yaml`)
+
+The registry maps names and git-URL identities to where checkouts
+live on THIS machine. It is a deliberate, narrow exception to the
+"all data lives in the repo" rule: machine-local paths only — never
+pursuit/project content, never synced between machines.
+`$XDG_CONFIG_HOME` is respected; `CADENCE_REGISTRY_PATH` overrides
+(tests).
+
+```yaml
+repos:
+  - name: family-hub          # short name, usable as --root family-hub
+    path: ~/code/family-hub   # ~ expands; validated at read time
+    hub: true                 # aggregates delegated pursuits
+    git_url: git@github.com:someone/family-hub.git   # identity (optional)
+  - name: garden
+    path: ~/code/garden
+default: family-hub           # guest-mode routing target
+```
+
+Manage with `cadence repos` / `repos-add --name <n> --path <p>
+[--hub] [--git-url <url>] [--default]` / `repos-remove <name>`.
+Entries are hints, not authority — consumers re-validate the path is
+a real Cadence repo before use, so stale entries fail safe.
+`repos-add` refuses paths that aren't initialized Cadence repos.
+
+### Guest mode (no CWD fallback)
+
+Repo-root resolution walks up from cwd looking for `cadence.yaml`
+(or a `pursuits/` dir that actually contains pursuit files). On a
+miss there is NO fallback to cwd — commands error with guidance
+instead of scaffolding partial Cadence structure into arbitrary
+directories. Consequences:
+
+- `--root <value>` accepts a path OR a registered repo name.
+- `cadence context --json` is the one-call orientation for skills:
+  `{cwd, repo_root, initialized, guest, registry: {default, repos}}`.
+- In a guest session (not inside a Cadence repo), the sanctioned verb
+  surface is: **capture** to the default registered repo
+  (`cadence write-capture --root <name> ...`), **read-only status**
+  (`cadence status --root <name>`), and **/cadence-report** (GitHub,
+  no filesystem writes). Everything else refuses with a pointer to
+  open a session in the target repo.
+- Foreign-repo hard mode falls out by construction: with no registry
+  on the machine, no personal repo is reachable at all — the only
+  legal flow is `/cadence-report` (e.g. filing Cadence bugs from a
+  work machine). The SessionStart hook is silent in non-Cadence
+  directories (one-line guest context when a registry default
+  exists; nothing otherwise).
+- Only `/cadence-init` may create Cadence structure in a directory.
+
+### Pursuit delegation (`delegated_to`)
+
+A hub pursuit becomes a stub by declaring, in `pursuit.md`
+frontmatter:
+
+```yaml
+delegated_to: git@github.com:someone/garden.git   # git URL (identity)
+# or a registered name:
+delegated_to: garden
+```
+
+Split of authority: **prioritization stays on the hub** (why,
+target, win_cycle, someday/archive moves); **execution lives in the
+delegate** (projects, actions, captures, brainstorms). Resolution to
+a local checkout is per-machine: registry name → registry git-URL →
+sibling-dir discovery (same mechanism as `publish-resolve`; never
+path-binds).
+
+- `cadence delegates [--json]` — read-only aggregation: resolves each
+  delegated pursuit and scans its repo for a summary (projects by
+  status, open actions, waiting-fors, inbox). No hub command ever
+  writes into a delegate.
+- Guardrails: `create-project` and `crystallize` refuse against a
+  delegated pursuit and point at the delegate repo. Delegated stubs
+  render as `delegated → <target>` in status/drill-downs instead of
+  a misleading 0/0, and are exempt from structural flags (they have
+  no local projects by design).
+- Skills follow the same split: `/start <delegated-pursuit>` shows
+  the stub view + live summary and offers to continue in the
+  delegate repo; capture triage must not route items INTO a
+  delegated pursuit's (non-existent) local projects.
+
+### Content manifest (`cadence-manifest.yaml`) and fleet
+
+The manifest is the *advertisement* direction (complement of
+`publish_targets`, which is outbound contribution): a repo declares
+what it hosts/owns so hubs can discover it. Top-level file beside
+`pursuits/`; Cadence owns the schema and aggregation, NOT the
+semantics — entries are opaque pointers other tooling consumes.
+Unknown keys are preserved.
+
+```yaml
+repo: garden                          # display name (default: dir name)
+hub: git@github.com:someone/family-hub.git   # optional back-pointer
+endpoints:
+  - url: https://garden.example.org
+    kind: site          # site | wiki | pages | api | ...
+    access: gated       # public | gated | internal | ...
+    summary: Garden planning and plant library
+data_roots:
+  - path: /volumes/shared/garden-photos
+    role: pristine      # free-form: pristine | installed | staged | ...
+services:
+  - ./service-definition.yaml         # opaque pointer; schema owned elsewhere
+```
+
+- `cadence manifest [--json]` — read/validate the local manifest.
+- `cadence fleet [--json]` — walk the union of registry repos +
+  delegated checkouts, collect manifests + light Cadence stats, and
+  render "what exists where". `--json` is the exportable aggregation
+  a nav/landing site can be generated from (instead of
+  hand-maintaining links).
 
 ## Intent and Actions
 
@@ -703,9 +829,9 @@ ingest_sources:
   jira_inbox:
     server: jira
     jql: "assignee = currentUser() AND status = 'To Do'"
-  cadence_issues:
+  my_repo_issues:
     server: github
-    query: "repo:kevinteg/cadence is:issue is:open label:capture-source"
+    query: "repo:<owner>/<repo> is:issue is:open label:capture-source"
 ```
 
 **User-scoped (`~/.cadence/sources.yaml`):**

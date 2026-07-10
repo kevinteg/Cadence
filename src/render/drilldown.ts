@@ -53,6 +53,16 @@ export function renderPursuits(snapshot: Snapshot): string {
 export function renderPursuit(snapshot: Snapshot, pursuitId: string): string {
   const pursuit = snapshot.pursuits.find((p) => p.id === pursuitId)
   if (!pursuit) return `pursuit not found: ${pursuitId}`
+  if (pursuit.delegated_to) {
+    return [
+      `${pursuit.id} — delegated → ${pursuit.delegated_to}`,
+      '',
+      'Execution lives in the delegate repo; this stub holds only',
+      'prioritization (why / target / win_cycle). Read-only summary:',
+      '`cadence delegates`. To work it, open a session in the delegate',
+      'repo (or pass --root against it).',
+    ].join('\n')
+  }
   const projects = snapshot.projects.filter((p) => p.pursuit === pursuitId)
   const active = projects.filter((p) => p.status === 'active')
   const onHold = projects.filter((p) => p.status === 'on_hold')

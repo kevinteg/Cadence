@@ -28,3 +28,7 @@ verification in a fresh session.
 - 2026-06-24T15:12:17.381Z — Auggie: confirm /cadence-mcp-pull works against an Auggie-registered MCP server (tool-surface discovery parity).
 - 2026-06-26T16:19:46.692Z — Auggie #11: in a live authed Auggie session, confirm the SessionStart hook renders the dashboard with NO 'spawn NO_COLOR=1 ENOENT' (shell-wrap fix).
 - 2026-06-26T16:19:46.762Z — Auggie #13: in a vendored .augment/ under a live Auggie session, confirm on-demand pointers (.augment/workflows/verb-contracts.md, .augment/cadence-reference.md) actually load — i.e. Auggie resolves them from workspace root. If it resolves rule-relative instead, adjust REFERENCE_DEST_PREFIX / the rewrite target.
+- 2026-07-10T14:10:53.637Z — Guest mode: any cadence command in a non-Cadence dir errors with guidance (no state scaffolded); SessionStart hook is silent there — or emits one-line guest context (no systemMessage) when a registry default exists
+- 2026-07-10T14:10:53.709Z — PreToolUse gate: a plain 'cadence <subcommand>' Bash call runs without a permission prompt; compound/piped commands still prompt
+- 2026-07-10T14:10:53.780Z — Delegation: a pursuit with delegated_to renders as a stub in /cadence:status; create-project against it refuses with a pointer; cadence delegates shows the live spoke summary
+- 2026-07-10T14:10:53.851Z — Fleet: cadence fleet aggregates cadence-manifest.yaml across registry + delegated repos; /cadence:status fleet presents it; --json preserves unknown manifest keys

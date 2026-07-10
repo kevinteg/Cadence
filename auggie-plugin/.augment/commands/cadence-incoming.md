@@ -86,7 +86,7 @@ Reference `.augment/workflows/verb-contracts.md` for the incoming register.
 
    ### p — promote-to-project
 
-   1. List active pursuits. Prompt: `Which pursuit? (1-N or pursuit-id, default: make-cadence-public)`
+   1. List active pursuits. Prompt: `Which pursuit? (1-N or pursuit-id)`
    2. Derive project ID from issue title (lowercase, dash-separated, strip non-alphanumerics; if ambiguous, prompt for an override).
    3. Create the project, passing `--origin-issue` so the issue can be auto-closed on resolve (see `/cadence-resolve` side effect via `origin: github_issue` frontmatter):
       ```bash

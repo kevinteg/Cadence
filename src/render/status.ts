@@ -198,6 +198,22 @@ function renderActivePursuits(
   })
 
   for (const pursuit of pursuitsSorted) {
+    // Delegated stubs carry no local projects — execution lives in the
+    // delegate repo. Render the pointer, not a misleading 0/0.
+    if (pursuit.delegated_to) {
+      out.push('')
+      out.push(
+        bold(`### ${pursuit.id} — delegated → ${pursuit.delegated_to}`, color),
+      )
+      out.push('')
+      out.push(
+        dim(
+          '_worked in its own repo — `cadence delegates` for a live summary_',
+          color,
+        ),
+      )
+      continue
+    }
     const allProjects = snapshot.projects.filter((p) => p.pursuit === pursuit.id)
     const done = allProjects.filter(
       (p) => p.status === 'done' || p.status === 'dropped',
