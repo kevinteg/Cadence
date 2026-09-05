@@ -1,0 +1,12 @@
+# respeak project layer (git-tracked). Layers: ~/code/claude-code-respeak/docs/config-layers.md
+version: 3
+
+narrative: { default_mode: technical, tech_level: 3 }
+gate:
+  enabled: true
+  include: ["**/*.md"]
+  exclude: ["pursuits/_archived/**", "auggie-plugin/**", "site/**"]
+  fail_on: error
+scopes:
+  - paths: ["wiki/drafts/"]
+    gate: { fail_on: none }
