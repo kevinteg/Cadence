@@ -147,7 +147,7 @@ in the awareness block). 122 tests pass (two new).
 
 The standing pursuit that holds unattached Ideas — formerly `wandering` —
 is now `inbox`. Domain-neutral familiar word; reduces cognitive tax for
-new users. The metaphor was load-bearing in the v1 vision but the
+new users. The metaphor did real work in the v1 vision but the
 audience cost outweighed the framing benefit.
 
 **Migration for existing repos with `pursuits/wandering/`:**

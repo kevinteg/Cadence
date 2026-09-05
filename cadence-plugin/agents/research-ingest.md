@@ -112,8 +112,8 @@ the unit, note which were skipped). Compose two artifacts grounded
 ONLY in what the notes actually say:
 
 - **Primer** — a short orientation to the material (2-4 paragraphs):
-  what this body of research covers, the load-bearing concepts, where
-  the open tensions are. Written for re-entry months later.
+  what this body of research covers, the concepts everything rests
+  on, where the open tensions are. Written for re-entry months later.
 - **Suggested learning** — a reading order over the sources, one line
   of rationale each: why this source, why at this position.
 

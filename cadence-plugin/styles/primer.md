@@ -11,8 +11,9 @@ re-enter a topic in minutes.
 ## Required shape
 
 1. **Orientation (2–4 paragraphs)** — what this material covers, the
-   load-bearing concepts in plain words, where the live tensions or
-   open debates are. No source-by-source summary; synthesize.
+   concepts everything rests on in plain words, where the live
+   tensions or open debates are. No source-by-source summary;
+   synthesize.
 2. **Suggested learning** — an ordered reading list over the sources,
    one line of rationale each:
    `1. [[<note-id>]] — <why this source, why at this position>`

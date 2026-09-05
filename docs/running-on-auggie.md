@@ -24,9 +24,9 @@ translation is mostly mechanical:
 | `.claude-plugin/plugin.json` | `.augment-plugin/plugin.json` |
 | `cadence` CLI on PATH | same binary, shipped at `auggie-plugin/bin/cadence` |
 
-The deterministic `cadence` CLI — the load-bearing piece — is platform-agnostic
-and ships unchanged. Only verb namespace (`/cadence:` → `/cadence-`) and a few
-host-internal terms are neutralized during the transpile.
+The deterministic `cadence` CLI — the piece everything depends on — is
+platform-agnostic and ships unchanged. Only verb namespace (`/cadence:` →
+`/cadence-`) and a few host-internal terms are neutralized during the transpile.
 
 ## Install
 

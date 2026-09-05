@@ -130,7 +130,7 @@ follow-up project"). Archived/dropped pursuits likewise.
    subagent instead (`ask. unit=..., unit_path=..., question=...
    [Budget: 6 tool calls.]`) so bulk note-reading stays isolated.
 
-3. **Answer with citations.** Every load-bearing claim cites its note
+3. **Answer with citations.** Every claim the answer rests on cites its note
    inline — `[<id>](.../notes/<id>.md)`. If the substrate can't answer,
    say so and offer the gap as an `## Open questions` entry (append on
    user confirmation). Never pad an answer beyond what the notes hold.
@@ -169,7 +169,7 @@ frontmatter plus an index line. Offer, never auto-file.
 
 ## Guardrails
 
-- **Subagent isolation is load-bearing.** Never fetch a bulk source
+- **Subagent isolation is not optional.** Never fetch a bulk source
   (file over ~200 lines, any URL, any MCP payload) in the main thread
   during ingest — that's the subagent's job. Small inline snippets the
   user pastes are still routed through the subagent for uniform raw/

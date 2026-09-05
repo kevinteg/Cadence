@@ -2,7 +2,7 @@
 
 *Research foundations mapped to design patterns. Each entry answers: what does Cadence do, what research supports it, and how the research shaped the design.*
 
-This document is the design rationale for the patterns described in `wiki/concepts/vision.md`. The vision doc keeps citations terse (load-bearing references inline only — McAdams for narrative structure, Gollwitzer for if-then plans, Zeigarnik/Masicampo–Baumeister for closure, Eurich/Trapnell for "what" not "why"). The full literature lives here.
+This document is the design rationale for the patterns described in `wiki/concepts/vision.md`. The vision doc keeps citations terse (only the references the design rests on appear inline — McAdams for narrative structure, Gollwitzer for if-then plans, Zeigarnik/Masicampo–Baumeister for closure, Eurich/Trapnell for "what" not "why"). The full literature lives here.
 
 For the broader design synthesis — the four convergence claims, the diverge-vs-converge tension, prescriptive integration rules — see the **Cross-cutting convergences** and **Resolving the divergent-vs-GTD tension** sections at the end.
 
@@ -314,7 +314,7 @@ The literature has gaps and contested findings. Cadence's marketing copy and onb
 - **No "limbic-vs-neocortex" Sinek neuroscience.** The Golden Circle is useful as a *framing tool* for purpose-articulation. The strict functional-localization claims are widely rejected by neuroscientists. Cadence uses Sinek's structure (Why → How → What) for Pursuit creation without the brain-anatomy story.
 - **No "21 days to form a habit."** Lally et al. (2010) gave the better estimate: median 66 days, range 18–254, high behavior-type variance. Cadence does not treat habit formation as a deterministic countdown.
 - **No Pomodoro empirics.** The 25/5 pattern is a convention, not optimized. Biwer et al. (2023) found structured breaks of any disciplined kind outperform unstructured work, without showing Pomodoro-specific superiority. Cadence's Breakpoint cadence is user-configurable in the 45–90 minute range.
-- **No flow-neurochemistry marketing.** Csikszentmihalyi's flow construct is robust; the dopamine/anandamide/endorphins cocktail and "500% productivity" figure are extrapolations from popular treatments, not measured. Cadence promises "clear goals, immediate feedback, protected blocks" — the load-bearing evidence.
+- **No flow-neurochemistry marketing.** Csikszentmihalyi's flow construct is robust; the dopamine/anandamide/endorphins cocktail and "500% productivity" figure are extrapolations from popular treatments, not measured. Cadence promises "clear goals, immediate feedback, protected blocks" — what the evidence actually supports.
 - **No decision-fatigue / ego-depletion claims.** The "hungry judges" study (Danziger et al., 2011) has been critiqued on serious confounds; ego depletion has replication problems. Cadence does not build features on these.
 - **No mindset-intervention promises.** See above.
 

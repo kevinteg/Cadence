@@ -110,7 +110,7 @@ The Ingest operation, scoped to the current unit of work.
 3. The skill updates `index.md` (append the new note + one-line summary) and `log.md` (append `## [YYYY-MM-DD] ingest | <title>`).
 4. A single source "might touch several notes" — the subagent suggests cross-references to existing notes; the skill writes the back-links.
 
-The subagent isolation is load-bearing for the same reason it is in capture: bulk source payloads never enter the main conversation; only distilled notes and summaries return.
+The subagent isolation matters here for the same reason it does in capture: bulk source payloads never enter the main conversation; only distilled notes and summaries return.
 
 ### `/wiki` — query + curate the durable corpus
 
@@ -290,7 +290,7 @@ Pursuit/project resolving.
 - Any graduated primer (in `wiki/primers/`).
 - The provenance: source titles, URLs, capture dates — embedded as citation stubs in the narrative's back-reference section, so *"link back to the sources we pulled from initially"* holds even after `raw/` is gone.
 
-The lifecycle reframing: **the chance to summarize and link back is the close-out prompt.** GC isn't cleanup that risks losing knowledge — it's the ritual that captures knowledge at the moment it's most complete, then clears the scaffolding.
+The lifecycle reframing: **the chance to summarize and link back is the close-out prompt.** Far from risking lost knowledge, GC is the ritual that captures knowledge at the moment it's most complete, then clears the scaffolding.
 
 ---
 

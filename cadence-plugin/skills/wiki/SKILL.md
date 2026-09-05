@@ -52,7 +52,7 @@ add-on (Obsidian Smart Connections), not a dependency.
    ("where did I write about X?" often resolves to a log or phase
    doc). Read those files (never the whole corpus blind).
 2. Synthesize the answer from what the artifacts actually say. Every
-   load-bearing claim cites inline: `[<slug>](wiki/narratives/<slug>.md)`
+   claim the answer rests on cites inline: `[<slug>](wiki/narratives/<slug>.md)`
    (living docs: `[<slug>](wiki/living/<slug>.md)`).
    If the corpus can't answer, say so plainly — name which pursuit or
    substrate would have to produce the missing artifact.

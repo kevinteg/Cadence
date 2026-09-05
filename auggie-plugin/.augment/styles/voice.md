@@ -31,6 +31,6 @@ not hype.
 ## Structure default
 
 Long-form artifacts follow the McAdams arc — what happened / what it
-meant / what shifted / what's next — loosely, as the spine rather
-than as mandatory headings. Artifact-specific structure lives in the
-sibling templates (`capstone.md`, `primer.md`).
+meant / what shifted / what's next — loosely, as the underlying
+order rather than as mandatory headings. Artifact-specific structure
+lives in the sibling templates (`capstone.md`, `primer.md`).

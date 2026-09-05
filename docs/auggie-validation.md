@@ -35,8 +35,9 @@ are queued in `validations/pending.md` and surface on every fresh session:
 ## Quality-delta assessment
 
 The translation is near-lossless: Auggie's plugin model is field-for-field
-compatible, and the load-bearing `cadence` CLI ships unchanged. The only behavioral
-seams are (1) verb namespace (`:` → `-`, fully rewritten), (2) host-internals
-teaching prose (neutralized), and (3) per-subagent model selection (mapped,
-overridable). No verb logic is duplicated or reimplemented, so the two builds
-cannot diverge in behavior — only in packaging, which the CI drift gate enforces.
+compatible, and the `cadence` CLI everything depends on ships unchanged. The
+only behavioral seams are (1) verb namespace (`:` → `-`, fully rewritten),
+(2) host-internals teaching prose (neutralized), and (3) per-subagent model
+selection (mapped, overridable). No verb logic is duplicated or reimplemented,
+so the two builds cannot diverge in behavior — only in packaging, which the CI
+drift gate enforces.

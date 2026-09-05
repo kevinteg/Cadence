@@ -6,8 +6,8 @@ from here rather than re-inventing language per surface.
 
 The point: a new user opens Cadence, sees "Inbox: 4 items," and
 understands the term from context — because every surface uses the
-same words. Consistency is the load-bearing UX; this doc is where
-it lives.
+same words. Consistency is what the UX depends on; this doc is
+where it lives.
 
 ## Why this exists
 
@@ -123,9 +123,9 @@ When `confidence >= 0.8` AND `suggested_pursuit` is present:
 "     → Suggested: add as action on <pursuit> [Y/n]"
 ```
 
-(Capital Y = default Yes.) The capital-Y framing is the load-bearing
-detail: it makes "act on it" the path of least resistance instead of
-"hoard it in the Inbox."
+(Capital Y = default Yes.) The capital-Y framing is the detail that
+does the work: it makes "act on it" the path of least resistance
+instead of "hoard it in the Inbox."
 
 Footer / prompt:
 

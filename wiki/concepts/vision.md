@@ -127,7 +127,7 @@ A Pursuit cannot close while it has unresolved exploration. **Absolute block.** 
 
 `/resolve <pursuit>` walks the cleaning ritual. For each open brainstorm: crystallize (it earned a Pursuit/Project), archive (decided not to pursue — what was learned?), or move (reattach to another pursuit if it belongs there). For each open project: resolve as complete or drop with a reason. Projects themselves use **override-with-reason** closure — friction-sensitive at their frequency.
 
-The closure ritual turns ending into meaning-making. A completed Pursuit's narrative reads like: *"Ran three brainstorms — `capture-redesign` crystallized into the v1.1 ingestion surface, `inbox-as-pursuit` archived once we saw Inbox should be a view, `outcome-menu-shapes` crystallized into the post-capture menu. Five projects shipped; one was dropped with the reason that the SQLite index wasn't yet load-bearing."* That is the Pursuit's story.
+The closure ritual turns ending into meaning-making. A completed Pursuit's narrative reads like: *"Ran three brainstorms — `capture-redesign` crystallized into the v1.1 ingestion surface, `inbox-as-pursuit` archived once we saw Inbox should be a view, `outcome-menu-shapes` crystallized into the post-capture menu. Five projects shipped; one was dropped with the reason that nothing yet depended on the SQLite index."* That is the Pursuit's story.
 
 ### The 2-Minute Rule
 
