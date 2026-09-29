@@ -33,6 +33,7 @@ function makeProject(o: Partial<Project> = {}): Project {
     status: 'active',
     created: '2026-01-01',
     waiting_for: [],
+    threads: [],
     intent: '',
     dod: [],
     actions: [{ text: 'act', checked: false }],
@@ -431,4 +432,52 @@ test('curateNextMoves ranks parking-lot pressure above narrate-week', () => {
   assert.ok(inboxIdx >= 0)
   assert.ok(weekIdx >= 0)
   assert.ok(inboxIdx < weekIdx)
+})
+
+// ---------------------------------------------------------------------
+// Open decisions (priority 0) — Needs-you outranks the LP
+// ---------------------------------------------------------------------
+
+test('curateNextMoves ranks an open decide thread above LP alignment', () => {
+  const lp: Reflection = {
+    date: '2026-05-20',
+    status: 'complete',
+    leveraged_priority: 'ship the fleet nav site',
+    body: '',
+    path: 'reflections/2026-05-20.md',
+  }
+  const snapshot = makeSnapshot({
+    pursuits: [makePursuit()],
+    reflections: [lp],
+    projects: [
+      makeProject({ id: 'fleet-nav-site' }),
+      makeProject({
+        id: 'guest-mode',
+        threads: [
+          { id: 't1', kind: 'decide', text: 'proxy scope?', opened: '2026-05-25T09:00:00', by: 'run:r1', status: 'open' },
+        ],
+      }),
+    ],
+  })
+  const moves = curateNextMoves(snapshot, [], NO_SIGNALS)
+  assert.equal(moves[0]?.verb, '/cadence:threads')
+  assert.match(moves[0]!.rationale, /1 decision is waiting on you/)
+  assert.match(moves[0]!.rationale, /guest-mode/)
+  assert.equal(moves[1]?.target, 'fleet-nav-site')
+})
+
+test('curateNextMoves ignores review and closed threads for the top slot', () => {
+  const snapshot = makeSnapshot({
+    pursuits: [makePursuit()],
+    projects: [
+      makeProject({
+        threads: [
+          { id: 't1', kind: 'review', text: 'look', opened: '2026-05-25T09:00:00', by: 'human', status: 'open' },
+          { id: 't2', kind: 'decide', text: 'done', opened: '2026-05-25T09:00:00', by: 'human', status: 'closed' },
+        ],
+      }),
+    ],
+  })
+  const moves = curateNextMoves(snapshot, [], NO_SIGNALS)
+  assert.notEqual(moves[0]?.verb, '/cadence:threads')
 })

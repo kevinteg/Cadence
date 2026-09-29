@@ -1,6 +1,7 @@
 import type { Flag, Project, Snapshot } from '../types.js'
 import { daysBetween } from '../util/dates.js'
 import { inboxItems } from '../inbox.js'
+import { needsYou } from '../needs-you.js'
 
 export function report(snapshot: Snapshot): { snapshot: Snapshot; flags: Flag[] } {
   const flags: Flag[] = []
@@ -14,7 +15,8 @@ export function report(snapshot: Snapshot): { snapshot: Snapshot; flags: Flag[] 
     (p) => p.status === 'active' && activePursuitIds.has(p.pursuit),
   )
 
-  flagOverdueWaitingFor(flags, snapshot, now)
+  flagThreadStale(flags, snapshot, now)
+  flagNeedsYouPressure(flags, snapshot, now)
   flagDormantProjects(flags, activeProjects, now, config)
   flagStructural(flags, activeProjects)
   flagWipOverLimit(flags, activeProjects, config)
@@ -115,27 +117,66 @@ function flagInboxPressure(
   })
 }
 
-function flagOverdueWaitingFor(
+/**
+ * An open thread has gone quiet. `waiting` threads keep the old
+ * overdue-waiting-for semantics (past `expected` by more than
+ * `waiting_for_grace_days`); every other kind fires once the thread is
+ * older than `thread_stale_days`. Only projects in active pursuits
+ * that are themselves open (active | on_hold) count.
+ */
+function flagThreadStale(
   flags: Flag[],
   snapshot: Snapshot,
   now: Date,
 ): void {
   const grace = snapshot.config.waiting_for_grace_days
+  const staleDays = snapshot.config.thread_stale_days
+  const activePursuitIds = new Set(
+    snapshot.pursuits.filter((p) => p.lifecycle === 'active').map((p) => p.id),
+  )
   for (const project of snapshot.projects) {
     if (project.status === 'done' || project.status === 'dropped') continue
-    for (const item of project.waiting_for) {
-      const daysOverdue = daysBetween(item.expected, now) - grace
-      if (daysOverdue > 0) {
+    if (!activePursuitIds.has(project.pursuit)) continue
+    for (const thread of project.threads) {
+      if (thread.status !== 'open') continue
+      const daysStale =
+        thread.kind === 'waiting' && thread.expected
+          ? daysBetween(thread.expected, now) - grace
+          : daysBetween(thread.opened, now) - staleDays
+      if (daysStale > 0) {
         flags.push({
-          kind: 'overdue_waiting_for',
+          kind: 'thread_stale',
           pursuitId: project.pursuit,
           projectId: project.id,
-          item,
-          daysOverdue,
+          thread,
+          daysStale,
         })
       }
     }
   }
+}
+
+/**
+ * Fires when the Needs-you view exceeds needs_you_soft_threshold. One
+ * flag total, carrying the per-kind breakdown so renderers can read
+ * "Needs you: 8 (3 decide, 2 review, 3 waiting)".
+ */
+function flagNeedsYouPressure(
+  flags: Flag[],
+  snapshot: Snapshot,
+  now: Date,
+): void {
+  const view = needsYou(snapshot, now)
+  if (view.counts.total <= snapshot.config.needs_you_soft_threshold) return
+  flags.push({
+    kind: 'needs_you_pressure',
+    count: view.counts.total,
+    threshold: snapshot.config.needs_you_soft_threshold,
+    decide: view.counts.decide,
+    review: view.counts.review,
+    unblock: view.counts.unblock,
+    waiting: view.counts.waiting,
+  })
 }
 
 function flagDormantProjects(

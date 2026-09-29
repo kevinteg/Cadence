@@ -19,6 +19,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Threads and the Needs-you view (`scale-to-orchestrated-work`, step
+  1 of `docs/orchestrated-work-design.md`): `threads:` on projects
+  (decide / review / unblock / waiting; legacy `waiting_for` maps to
+  waiting threads at scan time, no migration), `cadence threads` /
+  `thread-open` / `thread-close`, the `/threads` verb, a `## Needs
+  you` block leading the dashboard and splash, `thread_stale` and
+  `needs_you_pressure` reconciler flags, and an open `decide` thread
+  ranked first in curated next moves. Config: `thread_stale_days`,
+  `needs_you_soft_threshold`.
+
+### Changed
+
+- `overdue_waiting_for` flag replaced by `thread_stale` (same
+  semantics for the waiting kind).
+
 - Per-machine repo registry — `cadence repos` / `repos-add` /
   `repos-remove`, backed by `~/.config/cadence/repos.yaml` — plus
   `cadence context`.

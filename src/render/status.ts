@@ -11,6 +11,7 @@ import { computeSuggestionSignals } from './signals.js'
 import { renderIdleTimePrompt } from '../sessionstart.js'
 import { readPendingValidations } from '../validation/queue.js'
 import { inboxItems } from '../inbox.js'
+import { describeNeedsYouItem, needsYou } from '../needs-you.js'
 import { curateNextMoves, type NextMove } from './curation.js'
 import { bold, dim, gray, statusBadge } from './color.js'
 
@@ -65,6 +66,12 @@ export function renderStatus(
   const thisWeek = renderThisWeek(snapshot, color)
   if (thisWeek) {
     out.push(thisWeek)
+    out.push('')
+  }
+
+  const needsYouBlock = renderNeedsYou(snapshot, color)
+  if (needsYouBlock) {
+    out.push(needsYouBlock)
     out.push('')
   }
 
@@ -329,6 +336,28 @@ function renderOnHoldPursuits(
   return out.join('\n')
 }
 
+/**
+ * The Needs-you block — open threads across projects in active
+ * pursuits, capped at four lines (Cowan's chunk limit; the rest is
+ * behind /threads). Leads the dashboard, right after "This week":
+ * what needs the human comes before what the agent is doing. Omitted
+ * when nothing needs you.
+ */
+function renderNeedsYou(snapshot: Snapshot, color: boolean): string | null {
+  const view = needsYou(snapshot)
+  if (view.counts.total === 0) return null
+  const out: string[] = []
+  out.push(bold(`## Needs you — ${view.counts.total}`, color))
+  out.push('')
+  const head = view.items.slice(0, 4)
+  for (const item of head) out.push(`- ${describeNeedsYouItem(item)}`)
+  const rest = view.items.length - head.length
+  if (rest > 0) {
+    out.push(`- and ${rest} more — \`/cadence:threads\` to walk them.`)
+  }
+  return out.join('\n')
+}
+
 function renderHeadsUp(
   snapshot: Snapshot,
   flags: Flag[],
@@ -504,8 +533,12 @@ function summarizeFlags(flags: Flag[], snapshot: Snapshot): string | null {
 
 function describeFlagShort(flag: Flag, _snapshot: Snapshot): string {
   switch (flag.kind) {
-    case 'overdue_waiting_for':
-      return `${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`
+    case 'thread_stale':
+      return flag.thread.kind === 'waiting'
+        ? `${flag.thread.text} (${flag.daysStale}d overdue)`
+        : `${flag.thread.kind} thread on \`${flag.projectId}\` quiet ${flag.daysStale}d past the cap`
+    case 'needs_you_pressure':
+      return `${flag.count} threads need you — above soft cap (${flag.threshold})`
     case 'dormant_project':
       return flag.daysSinceActivity !== null
         ? `dormant project \`${flag.projectId}\` (${flag.daysSinceActivity}d)`
@@ -536,8 +569,18 @@ function describeFlagShort(flag: Flag, _snapshot: Snapshot): string {
 
 function describeFlag(flag: Flag, _snapshot: Snapshot): string {
   switch (flag.kind) {
-    case 'overdue_waiting_for':
-      return `overdue: ${flag.pursuitId}/${flag.projectId} — ${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`
+    case 'thread_stale':
+      return flag.thread.kind === 'waiting'
+        ? `overdue: ${flag.pursuitId}/${flag.projectId} — ${flag.thread.text} (${flag.daysStale}d overdue)`
+        : `stale thread: ${flag.pursuitId}/${flag.projectId} — [${flag.thread.kind}] ${flag.thread.text} (${flag.daysStale}d past the stale cap) — /cadence:threads to close it`
+    case 'needs_you_pressure': {
+      const parts: string[] = []
+      if (flag.decide > 0) parts.push(`${flag.decide} decide`)
+      if (flag.review > 0) parts.push(`${flag.review} review`)
+      if (flag.unblock > 0) parts.push(`${flag.unblock} unblock`)
+      if (flag.waiting > 0) parts.push(`${flag.waiting} waiting`)
+      return `Needs you: ${flag.count} (${parts.join(', ')}) — above soft cap (${flag.threshold}). Run /cadence:threads to walk them.`
+    }
     case 'dormant_project':
       return flag.daysSinceActivity !== null
         ? `dormant: ${flag.pursuitId}/${flag.projectId} (${flag.daysSinceActivity}d since last activity)`

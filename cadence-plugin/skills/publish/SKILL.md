@@ -1,5 +1,5 @@
 ---
-description: Contribute curated content from the Cadence workshop into an external destination repo — locate its local checkout (identity is the git URL, the checkout is discovered per-machine), conform to the destination's own conventions, flag private content before it crosses, and edit in place (mode B — git owns merge/auth/idempotency). Hidden verb — not on the visible 12-verb surface. TRIGGER ONLY when the user explicitly invokes /cadence:publish or /publish. SKIP all natural-language equivalents — never auto-fire from "publish this", "push it to the team wiki", "share this externally", or similar; instead surface the verb name as a suggestion when such language appears.
+description: Contribute curated content from the Cadence workshop into an external destination repo — locate its local checkout (identity is the git URL, the checkout is discovered per-machine), conform to the destination's own conventions, flag private content before it crosses, and edit in place (mode B — git owns merge/auth/idempotency). Hidden verb — not on the visible 13-verb surface. TRIGGER ONLY when the user explicitly invokes /cadence:publish or /publish. SKIP all natural-language equivalents — never auto-fire from "publish this", "push it to the team wiki", "share this externally", or similar; instead surface the verb name as a suggestion when such language appears.
 ---
 
 # /publish
@@ -11,7 +11,7 @@ that holds its own authoritative content. The promotion path that
 complements the built-in `wiki/` path: that one lands in *your* corpus;
 this one lands in *someone else's*.
 
-Hidden verb — not on the visible 12-verb surface; explicit-invocation
+Hidden verb — not on the visible 13-verb surface; explicit-invocation
 only; agent-suggested when chat language signals publish intent.
 
 Reference `workflows/verb-contracts.md` for the publish register. The

@@ -9,6 +9,8 @@ import {
 } from '../parse/sections.js'
 import {
   type Project,
+  type Thread,
+  type WaitingFor,
   ProjectFrontmatterSchema,
 } from '../types.js'
 import { detectDomain } from './domain.js'
@@ -36,6 +38,7 @@ export async function scanProjects(repoRoot: string): Promise<Project[]> {
     const research = await readResearchRef(file.slice(0, -'.md'.length))
     results.push({
       ...fm,
+      threads: resolveThreads(fm.threads, fm.waiting_for),
       intent,
       dod,
       actions,
@@ -56,4 +59,30 @@ function progress(items: { checked: boolean }[]) {
     done: items.filter((i) => i.checked).length,
     total: items.length,
   }
+}
+
+/**
+ * The resolved thread view: explicit `threads:` entries plus legacy
+ * `waiting_for` entries mapped to `kind: waiting`. Mapped threads get
+ * ids `w<index>` so `thread-close` can still target them; closing one
+ * removes the underlying waiting_for entry (src/write/edits.ts).
+ */
+export function resolveThreads(
+  explicit: Thread[],
+  waitingFor: WaitingFor[],
+): Thread[] {
+  const mapped: Thread[] = waitingFor.map((w, i) => ({
+    id: `w${i}`,
+    kind: 'waiting',
+    text: `${w.person} re: ${w.what}`,
+    // waiting_for carries no opened timestamp; the expected date is
+    // the only clock it has. Age-based checks use `expected` for the
+    // waiting kind anyway.
+    opened: w.expected,
+    by: 'human',
+    status: 'open',
+    person: w.person,
+    expected: w.expected,
+  }))
+  return [...explicit, ...mapped]
 }

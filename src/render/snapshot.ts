@@ -126,7 +126,7 @@ function flagTable(flags: Flag[]): Table {
 
 function flagTarget(flag: Flag): string {
   switch (flag.kind) {
-    case 'overdue_waiting_for':
+    case 'thread_stale':
     case 'dormant_project':
     case 'structural_active_no_open_actions':
       return `${flag.pursuitId}/${flag.projectId}`
@@ -136,6 +136,7 @@ function flagTarget(flag: Flag): string {
       return flag.unitId
     case 'wip_over_limit':
     case 'inbox_pressure':
+    case 'needs_you_pressure':
     case 'retrospective_due':
       return ''
     case 'inbound_issues_piling_up':
@@ -145,8 +146,12 @@ function flagTarget(flag: Flag): string {
 
 function flagDetail(flag: Flag): string {
   switch (flag.kind) {
-    case 'overdue_waiting_for':
-      return `${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`
+    case 'thread_stale':
+      return flag.thread.kind === 'waiting'
+        ? `${flag.thread.text} (${flag.daysStale}d overdue)`
+        : `[${flag.thread.kind}] ${flag.thread.text} (${flag.daysStale}d past the stale cap); /cadence:threads to close`
+    case 'needs_you_pressure':
+      return `${flag.count} threads need you (limit ${flag.threshold}); /cadence:threads to walk them`
     case 'dormant_project':
       return flag.daysSinceActivity !== null
         ? `${flag.daysSinceActivity}d since activity`

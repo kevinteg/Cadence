@@ -166,13 +166,14 @@ test('scan returns a populated Snapshot for a synthetic repo', async () => {
 test('scan against this repo matches expected counts', async () => {
   const repoRoot = path.resolve(import.meta.dirname, '..')
   const snapshot = await scan(repoRoot, new Date('2026-04-27T12:00:00Z'))
-  // Active pursuits: improve-ux-and-authoring (renamed from …-notebook-integration), run-cadence-on-auggie
+  // Active pursuits: improve-ux-and-authoring (renamed from …-notebook-integration), run-cadence-on-auggie,
+  // scale-to-orchestrated-work (opened 2026-09-29; blueprint docs/orchestrated-work-design.md)
   // (inbox pursuit retired in v1.1 — Inbox is now a view, not a directory)
   // (improve-ux-and-vision archived after the v1.1 reshape shipped)
   // (make-cadence-public archived after the OSS release shipped)
   // (build-narrative-research-wiki archived after the wiki layer shipped)
   const active = snapshot.pursuits.filter((p) => p.lifecycle === 'active')
-  assert.equal(active.length, 2, 'expected 2 active pursuits')
+  assert.equal(active.length, 3, 'expected 3 active pursuits')
   // Someday: expand-cadence-input-and-ingestion
   const someday = snapshot.pursuits.filter((p) => p.lifecycle === 'someday')
   assert.equal(someday.length, 1, 'expected 1 someday pursuit')

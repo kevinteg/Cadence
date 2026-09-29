@@ -30,6 +30,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     status: 'active',
     created: '2026-01-01',
     waiting_for: [],
+    threads: [],
     intent: '',
     dod: [],
     actions: [{ text: 'action', checked: false }],
@@ -57,51 +58,84 @@ function makeSnapshot(overrides: Partial<Snapshot> = {}): Snapshot {
   }
 }
 
-test('overdue waiting_for fires past expected + grace_days', () => {
+test('thread_stale fires for a legacy waiting_for past expected + grace_days', () => {
   const snapshot = makeSnapshot({
     projects: [
       makeProject({
         waiting_for: [
+          { person: 'alice', what: 'review', expected: '2026-04-20', flagged: false },
+        ],
+        threads: [
           {
-            person: 'alice',
-            what: 'review',
-            expected: '2026-04-20',
-            flagged: false,
+            id: 'w0', kind: 'waiting', text: 'alice re: review',
+            opened: '2026-04-20', by: 'human', status: 'open',
+            person: 'alice', expected: '2026-04-20',
           },
         ],
       }),
     ],
   })
   const { flags } = report(snapshot)
-  const flag = flags.find((f) => f.kind === 'overdue_waiting_for')
-  assert.ok(flag)
-  assert.equal(flag!.kind, 'overdue_waiting_for')
-  if (flag!.kind === 'overdue_waiting_for') {
+  const flag = flags.find((f) => f.kind === 'thread_stale')
+  assert.ok(flag, 'expected a thread_stale flag')
+  if (flag!.kind === 'thread_stale') {
     // expected 2026-04-20, grace 2 days, now 2026-04-27 → 5 days overdue
-    assert.equal(flag.daysOverdue, 5)
+    assert.equal(flag!.daysStale, 5)
+    assert.equal(flag!.thread.kind, 'waiting')
   }
 })
 
-test('overdue waiting_for does not fire within grace', () => {
+test('thread_stale does not fire for a waiting thread within grace', () => {
   const snapshot = makeSnapshot({
     projects: [
       makeProject({
-        waiting_for: [
+        threads: [
           {
-            person: 'a',
-            what: 'b',
-            expected: '2026-04-26',
-            flagged: false,
+            id: 'w0', kind: 'waiting', text: 'alice re: review',
+            opened: '2026-04-26', by: 'human', status: 'open',
+            person: 'alice', expected: '2026-04-26',
           },
         ],
       }),
     ],
   })
   const { flags } = report(snapshot)
-  assert.equal(
-    flags.filter((f) => f.kind === 'overdue_waiting_for').length,
-    0,
-  )
+  assert.equal(flags.filter((f) => f.kind === 'thread_stale').length, 0)
+})
+
+test('thread_stale fires for a decide thread older than thread_stale_days, not a fresh one', () => {
+  const snapshot = makeSnapshot({
+    projects: [
+      makeProject({
+        threads: [
+          { id: 't1', kind: 'decide', text: 'old', opened: '2026-04-10T09:00:00', by: 'run:r1', status: 'open' },
+          { id: 't2', kind: 'decide', text: 'new', opened: '2026-04-26T09:00:00', by: 'run:r1', status: 'open' },
+          { id: 't3', kind: 'decide', text: 'closed', opened: '2026-04-01T09:00:00', by: 'human', status: 'closed' },
+        ],
+      }),
+    ],
+  })
+  const { flags } = report(snapshot)
+  const stale = flags.filter((f) => f.kind === 'thread_stale')
+  assert.equal(stale.length, 1)
+  if (stale[0]!.kind === 'thread_stale') assert.equal(stale[0]!.thread.id, 't1')
+})
+
+test('needs_you_pressure fires above needs_you_soft_threshold with a per-kind breakdown', () => {
+  const threads = Array.from({ length: 7 }, (_, i) => ({
+    id: `t${i}`, kind: i < 4 ? ('decide' as const) : ('review' as const),
+    text: `t${i}`, opened: '2026-04-27T09:00:00', by: 'human', status: 'open' as const,
+  }))
+  const { flags } = report(makeSnapshot({ projects: [makeProject({ threads })] }))
+  const flag = flags.find((f) => f.kind === 'needs_you_pressure')
+  assert.ok(flag)
+  if (flag!.kind === 'needs_you_pressure') {
+    assert.equal(flag!.count, 7)
+    assert.equal(flag!.decide, 4)
+    assert.equal(flag!.review, 3)
+  }
+  const under = report(makeSnapshot({ projects: [makeProject({ threads: threads.slice(0, 6) })] }))
+  assert.equal(under.flags.filter((f) => f.kind === 'needs_you_pressure').length, 0)
 })
 
 test('dormant project flagged when last activity > dormant_days old', () => {

@@ -48,6 +48,29 @@ cap" tells the user the system noticed; "Run /cadence:start inbox" is
 the path forward. No deficit framing ("overdue for triage," "you're
 behind").
 
+## Needs-you line — SessionStart hook, `/cadence:status`, `/cadence:threads`, `/cadence:reflect` Get Clear
+
+The line that summarizes what needs the human (open threads across
+projects in active pursuits — see `src/needs-you.ts`):
+
+```
+empty:     (line omitted; `/cadence:threads` alone prints "Needs you: nothing ✓")
+non-empty: "Needs you: <N> (<n> decide, <n> review, <n> unblock, <n> waiting)"
+```
+
+Include only kinds with count > 0, in that fixed order. The
+dashboard renders the line as a section header — `## Needs you — <N>`
+— followed by at most four item lines (Cowan's chunk limit), then
+`and <R> more — /cadence:threads to walk them.` when more exist:
+
+```
+<kind> · `<project>` · <text> (<age>d · run:<id> | expected <date>)
+```
+
+Age is stated, never judged. The Needs-you block leads the dashboard
+(right after "This week"): what needs the human comes before what
+the agent is doing.
+
 ## Active-brainstorms line — SessionStart hook, `/cadence:status`
 
 ```
@@ -145,7 +168,8 @@ to shrink to a 2-3 line awareness block, then proceed to Get Focused.
 The canonical block:
 
 ```
-"Inbox: <N> items  ·  Dormant: <M> projects  ·  Closing-in: <K> pursuits  ·  WIP: <X>/<max>
+"Needs you: <N> (<n> decide, <n> review, …)
+Inbox: <N> items  ·  Dormant: <M> projects  ·  Closing-in: <K> pursuits  ·  WIP: <X>/<max>
 Capstone gaps: <G> resolved units with uncrystallized research  ·  Retrospective: <R> pursuits since the last lessons run
 
 Want to handle these now, or note them in the reflection and move on?

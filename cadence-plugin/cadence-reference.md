@@ -7,7 +7,7 @@ carries the rest.
 
 ## Verb Catalogue
 
-Cadence's user-facing surface is 12 verbs grouped by cognitive mode.
+Cadence's user-facing surface is 13 verbs grouped by cognitive mode.
 Use the group to find the right verb for what you're doing right now;
 consult each verb's `SKILL.md` or `/cadence:help <verb>` for its full
 contract.
@@ -26,7 +26,8 @@ contract.
 | `complete` | Mark an action done. First check promotes on_hold → active. Triggers upward completion prompts. |
 | `resolve` | Wrap up a project or pursuit. `resolve <project> --state complete` (default) walks the intent-feel-achieved dialogue; `--state dropped` requires a reason. `resolve <pursuit>` walks the closure ritual (absolute block on unresolved work — open projects + active brainstorms), then routes to `pursuits/_archived/` (completed) or `pursuits/_dropped/` (with reason). |
 | `capture` | Flow-safe parking lot. Get a thought out of your head, zero friction, no agent response. |
-| `waiting` | Record an external blocker so it's tracked, not forgotten. |
+| `waiting` | Record an external blocker so it's tracked, not forgotten. Opens a `waiting` thread. |
+| `threads` | The Needs-you view: walk and close the threads that need you — decide / review / unblock / waiting. Runs open threads; only the human closes decisions and reviews. |
 
 ### Reflect — see meaning, check state
 
@@ -83,7 +84,8 @@ markdown content. The key formats are:
 - **Pursuit** (`pursuit.md`): frontmatter with id, type, status, created,
   optional why
 - **Project** (`<id>.md`): frontmatter with id, pursuit, status, created,
-  optional waiting_for, optional `domain` (`physical` | `digital` |
+  optional waiting_for (legacy; read as `waiting` threads), optional
+  `threads` (see "Threads" below), optional `domain` (`physical` | `digital` |
   `hybrid` — overrides the keyword heuristic in `src/scan/domain.ts`,
   used by `/brainstorm` (crystallize) and `/complete` to adapt their prompts; leave
   unset to use detection), optional `origin` (see below); sections for
@@ -238,7 +240,7 @@ list.
 `scan`, `report`, `status`, `flags`, `pursuits`, `pursuit <id>`,
 `project <id>`, `ideas`, `captures`, `find <query>`,
 `project-activity`, `publish-targets`, `publish-resolve <target>`,
-`context`, `repos`, `delegates`, `manifest`, `fleet`. All
+`context`, `repos`, `delegates`, `manifest`, `fleet`, `threads`. All
 accept `--json` for structured output. Skills consume `--json` and
 reason over the typed result; the human-readable default is for the user
 invoking the CLI directly during an AI outage.
@@ -263,6 +265,7 @@ Supports `--scope` (daily/weekly/monthly/annual/pursuit) and
 `set-status <project-id>`, `set-idea-state <idea-id>`,
 `check <project-id>`, `add-item <project-id>`,
 `add-waiting-for <project-id>`, `flag-waiting-for <project-id>`,
+`thread-open <project-id>`, `thread-close <project-id>`,
 `move-pursuit <id>`, `sync-origin <project-id>`,
 `repos-add`, `repos-remove <name>` (these two mutate the per-machine
 registry, not the repo — see "Hub and Spoke" below).
@@ -697,7 +700,41 @@ waiting_for:
     flagged: false
 ```
 Add items via `/waiting`. The reconciler sets `flagged: true` when an
-item passes its expected date by `waiting_for_grace_days`.
+item passes its expected date by `waiting_for_grace_days`. At scan
+time every entry is also exposed as a `kind: waiting` thread (id
+`w<index>`) on `project.threads`, so `/threads` and the Needs-you
+view cover it; closing that thread removes the entry and keeps a
+closed waiting thread as the record.
+
+## Threads
+
+Anything that needs the human, kept on the project so the project
+file stays the single durable state:
+
+```yaml
+threads:
+  - id: t1                      # t<N>, stable across closes
+    kind: decide                # decide | review | unblock | waiting
+    text: Should the nav site expose gated endpoints at all?
+    opened: 2026-09-29T14:10:00
+    by: run:2026-09-29T14-10    # human (default) or run:<run-id>
+    status: open                # open | closed
+    person: sam                 # waiting kind only
+    expected: 2026-09-26        # waiting kind only (YYYY-MM-DD)
+    closed_with: "No — gated stays private."   # recorded on close
+    closed_at: 2026-09-30T09:02:00
+```
+
+Write via `cadence thread-open <project> --kind <kind> --text "<…>"
+[--by run:<id>] [--person <who> --expected <date>]` and
+`cadence thread-close <project> --match <id-or-text> --with "<answer>"`.
+Read via `cadence threads [--kind <kind>] [--json]` — the Needs-you
+view (`src/needs-you.ts`): open threads across projects with status
+active | on_hold in active pursuits, ordered decide → review →
+unblock → waiting, oldest first within a kind. The dashboard renders
+the first four under `## Needs you — N`; `/threads` walks them all.
+Config: `thread_stale_days` (default 7), `needs_you_soft_threshold`
+(default 6) under `defaults:` in `cadence.yaml`.
 
 ## Captures
 

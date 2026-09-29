@@ -1,5 +1,6 @@
 import type { Flag, Project, Reflection, Snapshot } from '../types.js'
 import { inboxItems } from '../inbox.js'
+import { needsYou } from '../needs-you.js'
 import type { SuggestionSignals } from './signals.js'
 
 /**
@@ -24,8 +25,8 @@ const MAX_MOVES = 3
 
 /**
  * Compute up to 3 priority-ranked next moves. Inputs (in priority
- * order): LP alignment → recency → structural urgency → parking-lot
- * pressure → routine surfaces.
+ * order): open decisions (Needs-you) → LP alignment → recency →
+ * structural urgency → parking-lot pressure → routine surfaces.
  *
  * Deterministic and pure — no LLM, no I/O. Used by the dashboard
  * renderer (which feeds both the bare CLI and the SessionStart hook),
@@ -53,6 +54,19 @@ export function curateNextMoves(
     activePursuitIds.has(p.pursuit),
   )
   const lp = extractLeveragedPriority(snapshot.reflections)
+
+  // 0. Open decisions — a `decide` thread is work the agent handed
+  //    back; until it is answered the project it belongs to is on
+  //    hold in the Goldratt sense (throughput lost). Outranks the LP.
+  const needs = needsYou(snapshot)
+  if (needs.counts.decide > 0) {
+    const first = needs.items.find((i) => i.thread.kind === 'decide')!
+    const word = needs.counts.decide === 1 ? 'decision is' : 'decisions are'
+    add({
+      verb: '/cadence:threads',
+      rationale: `${needs.counts.decide} ${word} waiting on you — first: \`${first.projectId}\`.`,
+    })
+  }
 
   // 1. LP alignment — which active project most plausibly moves the LP?
   if (lp) {

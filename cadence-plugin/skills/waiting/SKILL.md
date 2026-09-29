@@ -5,7 +5,11 @@ description: Record an external blocker — capture a waiting_for item with pers
 # /waiting
 
 Track an external dependency. The reconciler flags items that go past
-their expected date so blockers don't silently rot. Reference
+their expected date so blockers don't silently rot. Each item is a
+`waiting` **thread** — it appears in the Needs-you view alongside
+decisions, reviews, and unblocks, and `/cadence:threads` walks and
+closes it (`/threads` is the general verb; `/waiting` is the
+three-question shortcut for this one kind). Reference
 `workflows/verb-contracts.md` for the waiting register.
 
 ## Usage

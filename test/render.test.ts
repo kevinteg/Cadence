@@ -38,6 +38,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     status: 'active',
     created: '2026-01-01',
     waiting_for: [],
+    threads: [],
     intent: '',
     dod: [],
     actions: [{ text: 'act', checked: false }],
@@ -363,11 +364,15 @@ test('renderFindResults handles zero results', () => {
 test('renderReport tabulates each flag kind with target and detail', () => {
   const flags: Flag[] = [
     {
-      kind: 'overdue_waiting_for',
+      kind: 'thread_stale',
       pursuitId: 'p',
       projectId: 'proj',
-      item: { person: 'alice', what: 'review', expected: '2026-04-20', flagged: true },
-      daysOverdue: 5,
+      thread: {
+        id: 'w0', kind: 'waiting', text: 'alice re: review',
+        opened: '2026-04-20', by: 'human', status: 'open',
+        person: 'alice', expected: '2026-04-20',
+      },
+      daysStale: 5,
     },
     {
       kind: 'dormant_project',
@@ -379,7 +384,7 @@ test('renderReport tabulates each flag kind with target and detail', () => {
   ]
   const out = renderReport({ snapshot: makeSnapshot(), flags })
   assert.match(out, /Flags \(3\)/)
-  assert.match(out, /overdue_waiting_for\s+p\/proj\s+alice re: review \(5d overdue\)/)
+  assert.match(out, /thread_stale\s+p\/proj\s+alice re: review \(5d overdue\)/)
   assert.match(out, /dormant_project\s+p\/proj\s+30d since activity/)
   assert.match(out, /wip_over_limit\s+\s+6 in-progress \(limit 5\): a, b/)
 })

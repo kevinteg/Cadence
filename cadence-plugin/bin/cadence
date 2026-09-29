@@ -16907,6 +16907,25 @@ var WaitingForSchema = external_exports.object({
   expected: external_exports.string(),
   flagged: external_exports.boolean().optional().default(false)
 });
+var ThreadKindSchema = external_exports.enum(["decide", "review", "unblock", "waiting"]);
+var ThreadStatusSchema = external_exports.enum(["open", "closed"]);
+var ThreadSchema = external_exports.object({
+  id: external_exports.string(),
+  kind: ThreadKindSchema,
+  text: external_exports.string(),
+  /** ISO timestamp the thread was opened. */
+  opened: external_exports.string(),
+  /** `human` or `run:<run-id>`. */
+  by: external_exports.string().optional().default("human"),
+  status: ThreadStatusSchema.optional().default("open"),
+  /** waiting kind: who is being waited on. */
+  person: external_exports.string().optional(),
+  /** waiting kind: expected date (YYYY-MM-DD). */
+  expected: external_exports.string().optional(),
+  /** The answer, verdict, or note recorded when the thread closed. */
+  closed_with: external_exports.string().optional(),
+  closed_at: external_exports.string().optional()
+});
 var PursuitTypeSchema = external_exports.enum(["finite", "ongoing", "someday"]);
 var PursuitStatusSchema = external_exports.enum([
   "active",
@@ -16970,6 +16989,12 @@ var ProjectFrontmatterSchema = external_exports.object({
   status: ProjectStatusSchema,
   created: external_exports.string(),
   waiting_for: external_exports.array(WaitingForSchema).optional().default([]),
+  /**
+   * Explicit threads (decide / review / unblock / waiting). The
+   * resolved `Project.threads` view also carries legacy `waiting_for`
+   * entries mapped to `kind: waiting` — see src/scan/projects.ts.
+   */
+  threads: external_exports.array(ThreadSchema).optional().default([]),
   /**
    * Optional override for the heuristic in src/scan/domain.ts. When
    * set, this value takes precedence and `effective_domain` reports
@@ -17099,7 +17124,9 @@ var ConfigSchema = external_exports.object({
     incoming_queue_threshold: external_exports.number().optional(),
     incoming_queue_cache_ttl_minutes: external_exports.number().optional(),
     inbox_soft_threshold: external_exports.number().optional(),
-    retrospective_due_threshold: external_exports.number().optional()
+    retrospective_due_threshold: external_exports.number().optional(),
+    thread_stale_days: external_exports.number().optional(),
+    needs_you_soft_threshold: external_exports.number().optional()
   }).optional(),
   wip_limits: external_exports.object({
     max_active_projects: external_exports.number().optional()
@@ -17120,6 +17147,8 @@ var CONFIG_DEFAULTS = {
   incoming_queue_cache_ttl_minutes: 15,
   inbox_soft_threshold: 10,
   retrospective_due_threshold: 3,
+  thread_stale_days: 7,
+  needs_you_soft_threshold: 6,
   publish_targets: []
 };
 
@@ -17152,6 +17181,8 @@ function mergeDefaults(raw) {
     incoming_queue_cache_ttl_minutes: d.incoming_queue_cache_ttl_minutes ?? CONFIG_DEFAULTS.incoming_queue_cache_ttl_minutes,
     inbox_soft_threshold: d.inbox_soft_threshold ?? CONFIG_DEFAULTS.inbox_soft_threshold,
     retrospective_due_threshold: d.retrospective_due_threshold ?? CONFIG_DEFAULTS.retrospective_due_threshold,
+    thread_stale_days: d.thread_stale_days ?? CONFIG_DEFAULTS.thread_stale_days,
+    needs_you_soft_threshold: d.needs_you_soft_threshold ?? CONFIG_DEFAULTS.needs_you_soft_threshold,
     publish_targets: raw.publish_targets ?? CONFIG_DEFAULTS.publish_targets,
     win_cycle_current: wc.current,
     win_cycle_start: wc.start,
@@ -17851,6 +17882,7 @@ async function scanProjects(repoRoot) {
     const research = await readResearchRef(file.slice(0, -".md".length));
     results.push({
       ...fm,
+      threads: resolveThreads(fm.threads, fm.waiting_for),
       intent,
       dod,
       actions,
@@ -17870,6 +17902,22 @@ function progress(items) {
     done: items.filter((i) => i.checked).length,
     total: items.length
   };
+}
+function resolveThreads(explicit, waitingFor) {
+  const mapped = waitingFor.map((w, i) => ({
+    id: `w${i}`,
+    kind: "waiting",
+    text: `${w.person} re: ${w.what}`,
+    // waiting_for carries no opened timestamp; the expected date is
+    // the only clock it has. Age-based checks use `expected` for the
+    // waiting kind anyway.
+    opened: w.expected,
+    by: "human",
+    status: "open",
+    person: w.person,
+    expected: w.expected
+  }));
+  return [...explicit, ...mapped];
 }
 
 // src/scan/pursuits.ts
@@ -18052,6 +18100,74 @@ async function annotateLastActivity(project, repoRoot, activityMap) {
   }
 }
 
+// src/util/dates.ts
+function daysBetween(iso, now) {
+  const then = new Date(iso);
+  if (Number.isNaN(then.getTime())) return 0;
+  const ms = now.getTime() - then.getTime();
+  return Math.floor(ms / (1e3 * 60 * 60 * 24));
+}
+
+// src/needs-you.ts
+var NEEDS_YOU_KIND_ORDER = [
+  "decide",
+  "review",
+  "unblock",
+  "waiting"
+];
+function needsYou(snapshot, now = new Date(snapshot.generatedAt)) {
+  const activePursuitIds = new Set(
+    snapshot.pursuits.filter((p) => p.lifecycle === "active").map((p) => p.id)
+  );
+  const items = [];
+  for (const project of snapshot.projects) {
+    if (!activePursuitIds.has(project.pursuit)) continue;
+    if (project.status !== "active" && project.status !== "on_hold") continue;
+    for (const thread of project.threads) {
+      if (thread.status !== "open") continue;
+      items.push({
+        thread,
+        projectId: project.id,
+        pursuitId: project.pursuit,
+        age_days: Math.max(0, daysBetween(thread.opened, now)),
+        path: project.path
+      });
+    }
+  }
+  items.sort((a, b) => {
+    const ka = NEEDS_YOU_KIND_ORDER.indexOf(a.thread.kind);
+    const kb = NEEDS_YOU_KIND_ORDER.indexOf(b.thread.kind);
+    if (ka !== kb) return ka - kb;
+    return b.age_days - a.age_days;
+  });
+  const count = (k) => items.filter((i) => i.thread.kind === k).length;
+  return {
+    items,
+    counts: {
+      total: items.length,
+      decide: count("decide"),
+      review: count("review"),
+      unblock: count("unblock"),
+      waiting: count("waiting")
+    }
+  };
+}
+function renderNeedsYouLine(view) {
+  if (view.counts.total === 0) return null;
+  const parts = [];
+  for (const k of NEEDS_YOU_KIND_ORDER) {
+    const n = view.counts[k];
+    if (n > 0) parts.push(`${n} ${k}`);
+  }
+  return `Needs you: ${view.counts.total} (${parts.join(", ")})`;
+}
+function describeNeedsYouItem(item) {
+  const t = item.thread;
+  const when = t.kind === "waiting" && t.expected ? `expected ${t.expected}` : `${item.age_days}d`;
+  const by = t.by && t.by !== "human" ? ` \xB7 ${t.by}` : "";
+  return `${t.kind} \xB7 \`${item.projectId}\` \xB7 ${t.text} (${when}${by})`;
+}
+
 // src/scan/inbound.ts
 import { execFile as execFile2 } from "node:child_process";
 import { existsSync as existsSync2, mkdirSync } from "node:fs";
@@ -18120,14 +18236,6 @@ async function writeCache(repoRoot, data) {
 function isFresh(ts, ttlMinutes) {
   const age = Date.now() - new Date(ts).getTime();
   return age >= 0 && age < ttlMinutes * 6e4;
-}
-
-// src/util/dates.ts
-function daysBetween(iso, now) {
-  const then = new Date(iso);
-  if (Number.isNaN(then.getTime())) return 0;
-  const ms = now.getTime() - then.getTime();
-  return Math.floor(ms / (1e3 * 60 * 60 * 24));
 }
 
 // src/inbox.ts
@@ -18222,7 +18330,8 @@ function report(snapshot) {
   const activeProjects = snapshot.projects.filter(
     (p) => p.status === "active" && activePursuitIds.has(p.pursuit)
   );
-  flagOverdueWaitingFor(flags, snapshot, now);
+  flagThreadStale(flags, snapshot, now);
+  flagNeedsYouPressure(flags, snapshot, now);
   flagDormantProjects(flags, activeProjects, now, config);
   flagStructural(flags, activeProjects);
   flagWipOverLimit(flags, activeProjects, config);
@@ -18285,23 +18394,42 @@ function flagInboxPressure(flags, snapshot, now, config) {
     overdue: view.counts.overdue
   });
 }
-function flagOverdueWaitingFor(flags, snapshot, now) {
+function flagThreadStale(flags, snapshot, now) {
   const grace = snapshot.config.waiting_for_grace_days;
+  const staleDays = snapshot.config.thread_stale_days;
+  const activePursuitIds = new Set(
+    snapshot.pursuits.filter((p) => p.lifecycle === "active").map((p) => p.id)
+  );
   for (const project of snapshot.projects) {
     if (project.status === "done" || project.status === "dropped") continue;
-    for (const item of project.waiting_for) {
-      const daysOverdue = daysBetween(item.expected, now) - grace;
-      if (daysOverdue > 0) {
+    if (!activePursuitIds.has(project.pursuit)) continue;
+    for (const thread of project.threads) {
+      if (thread.status !== "open") continue;
+      const daysStale = thread.kind === "waiting" && thread.expected ? daysBetween(thread.expected, now) - grace : daysBetween(thread.opened, now) - staleDays;
+      if (daysStale > 0) {
         flags.push({
-          kind: "overdue_waiting_for",
+          kind: "thread_stale",
           pursuitId: project.pursuit,
           projectId: project.id,
-          item,
-          daysOverdue
+          thread,
+          daysStale
         });
       }
     }
   }
+}
+function flagNeedsYouPressure(flags, snapshot, now) {
+  const view = needsYou(snapshot, now);
+  if (view.counts.total <= snapshot.config.needs_you_soft_threshold) return;
+  flags.push({
+    kind: "needs_you_pressure",
+    count: view.counts.total,
+    threshold: snapshot.config.needs_you_soft_threshold,
+    decide: view.counts.decide,
+    review: view.counts.review,
+    unblock: view.counts.unblock,
+    waiting: view.counts.waiting
+  });
 }
 function flagDormantProjects(flags, activeProjects, now, config) {
   for (const project of activeProjects) {
@@ -18572,6 +18700,15 @@ function curateNextMoves(snapshot, flags, signals) {
     (p) => activePursuitIds.has(p.pursuit)
   );
   const lp = extractLeveragedPriority(snapshot.reflections);
+  const needs = needsYou(snapshot);
+  if (needs.counts.decide > 0) {
+    const first = needs.items.find((i) => i.thread.kind === "decide");
+    const word = needs.counts.decide === 1 ? "decision is" : "decisions are";
+    add({
+      verb: "/cadence:threads",
+      rationale: `${needs.counts.decide} ${word} waiting on you \u2014 first: \`${first.projectId}\`.`
+    });
+  }
   if (lp) {
     const aligned = findLpAlignedProject(lp, projectsInActive);
     if (aligned) {
@@ -18769,6 +18906,11 @@ function renderStatus(result, opts = {}) {
     out.push(thisWeek);
     out.push("");
   }
+  const needsYouBlock = renderNeedsYou(snapshot, color);
+  if (needsYouBlock) {
+    out.push(needsYouBlock);
+    out.push("");
+  }
   const activeBlock = renderActivePursuits(snapshot, flags, color);
   if (activeBlock) {
     out.push(activeBlock);
@@ -18950,6 +19092,20 @@ function renderOnHoldPursuits(snapshot, color) {
   }
   return out.join("\n");
 }
+function renderNeedsYou(snapshot, color) {
+  const view = needsYou(snapshot);
+  if (view.counts.total === 0) return null;
+  const out = [];
+  out.push(bold(`## Needs you \u2014 ${view.counts.total}`, color));
+  out.push("");
+  const head = view.items.slice(0, 4);
+  for (const item of head) out.push(`- ${describeNeedsYouItem(item)}`);
+  const rest = view.items.length - head.length;
+  if (rest > 0) {
+    out.push(`- and ${rest} more \u2014 \`/cadence:threads\` to walk them.`);
+  }
+  return out.join("\n");
+}
 function renderHeadsUp(snapshot, flags, color) {
   const bullets = [];
   const inboxView = inboxItems(snapshot);
@@ -19056,8 +19212,10 @@ function summarizeFlags(flags, snapshot) {
 }
 function describeFlagShort(flag, _snapshot) {
   switch (flag.kind) {
-    case "overdue_waiting_for":
-      return `${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`;
+    case "thread_stale":
+      return flag.thread.kind === "waiting" ? `${flag.thread.text} (${flag.daysStale}d overdue)` : `${flag.thread.kind} thread on \`${flag.projectId}\` quiet ${flag.daysStale}d past the cap`;
+    case "needs_you_pressure":
+      return `${flag.count} threads need you \u2014 above soft cap (${flag.threshold})`;
     case "dormant_project":
       return flag.daysSinceActivity !== null ? `dormant project \`${flag.projectId}\` (${flag.daysSinceActivity}d)` : `dormant project \`${flag.projectId}\``;
     case "structural_active_no_open_actions":
@@ -19080,8 +19238,16 @@ function describeFlagShort(flag, _snapshot) {
 }
 function describeFlag(flag, _snapshot) {
   switch (flag.kind) {
-    case "overdue_waiting_for":
-      return `overdue: ${flag.pursuitId}/${flag.projectId} \u2014 ${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`;
+    case "thread_stale":
+      return flag.thread.kind === "waiting" ? `overdue: ${flag.pursuitId}/${flag.projectId} \u2014 ${flag.thread.text} (${flag.daysStale}d overdue)` : `stale thread: ${flag.pursuitId}/${flag.projectId} \u2014 [${flag.thread.kind}] ${flag.thread.text} (${flag.daysStale}d past the stale cap) \u2014 /cadence:threads to close it`;
+    case "needs_you_pressure": {
+      const parts = [];
+      if (flag.decide > 0) parts.push(`${flag.decide} decide`);
+      if (flag.review > 0) parts.push(`${flag.review} review`);
+      if (flag.unblock > 0) parts.push(`${flag.unblock} unblock`);
+      if (flag.waiting > 0) parts.push(`${flag.waiting} waiting`);
+      return `Needs you: ${flag.count} (${parts.join(", ")}) \u2014 above soft cap (${flag.threshold}). Run /cadence:threads to walk them.`;
+    }
     case "dormant_project":
       return flag.daysSinceActivity !== null ? `dormant: ${flag.pursuitId}/${flag.projectId} (${flag.daysSinceActivity}d since last activity)` : `dormant: ${flag.pursuitId}/${flag.projectId} (no activity recorded; project created earlier)`;
     case "structural_active_no_open_actions":
@@ -19223,7 +19389,7 @@ function flagTable(flags) {
 }
 function flagTarget(flag) {
   switch (flag.kind) {
-    case "overdue_waiting_for":
+    case "thread_stale":
     case "dormant_project":
     case "structural_active_no_open_actions":
       return `${flag.pursuitId}/${flag.projectId}`;
@@ -19233,6 +19399,7 @@ function flagTarget(flag) {
       return flag.unitId;
     case "wip_over_limit":
     case "inbox_pressure":
+    case "needs_you_pressure":
     case "retrospective_due":
       return "";
     case "inbound_issues_piling_up":
@@ -19241,8 +19408,10 @@ function flagTarget(flag) {
 }
 function flagDetail(flag) {
   switch (flag.kind) {
-    case "overdue_waiting_for":
-      return `${flag.item.person} re: ${flag.item.what} (${flag.daysOverdue}d overdue)`;
+    case "thread_stale":
+      return flag.thread.kind === "waiting" ? `${flag.thread.text} (${flag.daysStale}d overdue)` : `[${flag.thread.kind}] ${flag.thread.text} (${flag.daysStale}d past the stale cap); /cadence:threads to close`;
+    case "needs_you_pressure":
+      return `${flag.count} threads need you (limit ${flag.threshold}); /cadence:threads to walk them`;
     case "dormant_project":
       return flag.daysSinceActivity !== null ? `${flag.daysSinceActivity}d since activity` : "no activity";
     case "structural_active_no_open_actions":
@@ -20088,11 +20257,13 @@ function renderProject(snapshot, projectId, pursuitHint) {
     }
     out.push("");
   }
-  if (project.waiting_for.length > 0) {
-    out.push("Waiting for:");
-    for (const w of project.waiting_for) {
-      const flag = w.flagged ? " [flagged]" : "";
-      out.push(`  - ${w.person} re: ${w.what} (expected ${w.expected})${flag}`);
+  const openThreads = project.threads.filter((t) => t.status === "open");
+  if (openThreads.length > 0) {
+    out.push("Threads (need you):");
+    for (const t of openThreads) {
+      const when = t.kind === "waiting" && t.expected ? `expected ${t.expected}` : `opened ${t.opened.slice(0, 10)}`;
+      const by = t.by && t.by !== "human" ? `, ${t.by}` : "";
+      out.push(`  - [${t.kind}] ${t.text} (${when}${by}) #${t.id}`);
     }
     out.push("");
   }
@@ -20168,6 +20339,7 @@ function projectMenu(_projectId, status) {
     `${pad("/cadence:complete <action>")}Mark an action done`,
     `${pad("/cadence:resolve <project>")}Wrap up (--state complete | dropped)`,
     `${pad("/cadence:waiting <project>")}Track an external blocker`,
+    `${pad("/cadence:threads <project>")}Walk what needs you (decide / review / unblock / waiting)`,
     `${pad("/cadence:narrate <project>")}Tell this project's story`,
     `${pad("/cadence:help")}Browse the full verb surface`
   ];
@@ -21200,6 +21372,105 @@ async function addWaitingFor(repoRoot, opts) {
   });
   return { path: path26.relative(repoRoot, filePath) };
 }
+async function openThread(repoRoot, opts) {
+  const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
+  const now = opts.now ?? /* @__PURE__ */ new Date();
+  if (opts.kind === "waiting" && (!opts.person || !opts.expected)) {
+    throw new Error("a waiting thread requires --person and --expected");
+  }
+  let thread = {};
+  await mutateFrontmatter(filePath, (data, body) => {
+    const list = Array.isArray(data["threads"]) ? [...data["threads"]] : [];
+    let max = 0;
+    for (const t of list) {
+      const m = /^t(\d+)$/.exec(String(t["id"] ?? ""));
+      if (m) max = Math.max(max, Number(m[1]));
+    }
+    thread = {
+      id: `t${max + 1}`,
+      kind: opts.kind,
+      text: opts.text,
+      opened: isoTimestamp(now),
+      by: opts.by ?? "human",
+      status: "open",
+      ...opts.person ? { person: opts.person } : {},
+      ...opts.expected ? { expected: opts.expected } : {}
+    };
+    list.push(thread);
+    data["threads"] = list;
+    return { data, body };
+  });
+  return { path: path26.relative(repoRoot, filePath), thread };
+}
+async function closeThread(repoRoot, opts) {
+  const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
+  const now = opts.now ?? /* @__PURE__ */ new Date();
+  let closed = {};
+  await mutateFrontmatter(filePath, (data, body) => {
+    const threads = Array.isArray(data["threads"]) ? [...data["threads"]] : [];
+    const waiting = Array.isArray(data["waiting_for"]) ? [...data["waiting_for"]] : [];
+    const lower = opts.match.toLowerCase();
+    const stamp = {
+      status: "closed",
+      closed_at: isoTimestamp(now),
+      ...opts.with ? { closed_with: opts.with } : {}
+    };
+    const wm = /^w(\d+)$/.exec(opts.match);
+    if (wm) {
+      const idx = Number(wm[1]);
+      const w = waiting[idx];
+      if (!w) throw new Error(`no waiting_for entry at index ${idx}`);
+      waiting.splice(idx, 1);
+      closed = migrateWaiting(w, opts.match, stamp);
+      threads.push(closed);
+      data["waiting_for"] = waiting;
+      data["threads"] = threads;
+      return { data, body };
+    }
+    let i = threads.findIndex(
+      (t) => String(t["id"] ?? "") === opts.match && t["status"] !== "closed"
+    );
+    if (i < 0) {
+      i = threads.findIndex(
+        (t) => t["status"] !== "closed" && String(t["text"] ?? "").toLowerCase().includes(lower)
+      );
+    }
+    if (i >= 0) {
+      closed = { ...threads[i], ...stamp };
+      threads[i] = closed;
+      data["threads"] = threads;
+      return { data, body };
+    }
+    const wi = waiting.findIndex((w) => {
+      const person = String(w["person"] ?? "").toLowerCase();
+      const what = String(w["what"] ?? "").toLowerCase();
+      return person.includes(lower) || what.includes(lower);
+    });
+    if (wi >= 0) {
+      const w = waiting[wi];
+      waiting.splice(wi, 1);
+      closed = migrateWaiting(w, `w${wi}`, stamp);
+      threads.push(closed);
+      data["waiting_for"] = waiting;
+      data["threads"] = threads;
+      return { data, body };
+    }
+    throw new Error(`no open thread matched "${opts.match}"`);
+  });
+  return { path: path26.relative(repoRoot, filePath), thread: closed };
+}
+function migrateWaiting(w, id, stamp) {
+  return {
+    id,
+    kind: "waiting",
+    text: `${String(w["person"] ?? "")} re: ${String(w["what"] ?? "")}`,
+    opened: String(w["expected"] ?? ""),
+    by: "human",
+    person: w["person"],
+    expected: w["expected"],
+    ...stamp
+  };
+}
 async function flagWaitingFor(repoRoot, opts) {
   const filePath = await locateProject(repoRoot, opts.project, opts.pursuit);
   const flagged = opts.flagged ?? true;
@@ -21904,7 +22175,7 @@ cli.command("pursuit <id>", "Show projects in a pursuit").option("--root <path>"
     process.stdout.write(renderPursuit(snapshot, id) + "\n");
   }
 });
-cli.command("project <id>", "Show Intent, Actions, and waiting_for for a project").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Disambiguate when project IDs collide").option("--json", "Emit as JSON").action(
+cli.command("project <id>", "Show Intent, Actions, and threads for a project").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Disambiguate when project IDs collide").option("--json", "Emit as JSON").action(
   async (id, opts) => {
     const repoRoot = await resolveRepoRoot(opts.root);
     const snapshot = await scan(repoRoot);
@@ -22314,6 +22585,65 @@ cli.command(
     process.stdout.write(JSON.stringify(result) + "\n");
   }
 );
+cli.command(
+  "thread-open <project-id>",
+  "Open a thread (decide | review | unblock | waiting) on a project \u2014 something that needs the human"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Disambiguate when project IDs collide").option("--kind <kind>", "decide | review | unblock | waiting (required)").option("--text <text>", "What needs the human (required)").option("--by <who>", "human (default) or run:<run-id>").option("--person <name>", "waiting kind: who is waited on").option("--expected <YYYY-MM-DD>", "waiting kind: expected date").action(
+  async (projectId, opts) => {
+    const kinds = ["decide", "review", "unblock", "waiting"];
+    if (!opts.kind || !kinds.includes(opts.kind)) {
+      throw new Error("--kind must be one of decide | review | unblock | waiting");
+    }
+    if (!opts.text) throw new Error("--text is required");
+    const repoRoot = await resolveRepoRoot(opts.root);
+    const result = await openThread(repoRoot, {
+      project: projectId,
+      kind: opts.kind,
+      text: opts.text,
+      ...opts.pursuit ? { pursuit: opts.pursuit } : {},
+      ...opts.by ? { by: opts.by } : {},
+      ...opts.person ? { person: opts.person } : {},
+      ...opts.expected ? { expected: opts.expected } : {}
+    });
+    process.stdout.write(JSON.stringify(result) + "\n");
+  }
+);
+cli.command(
+  "thread-close <project-id>",
+  "Close a thread, recording the answer or verdict in closed_with"
+).option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--pursuit <id>", "Disambiguate when project IDs collide").option("--match <id-or-text>", "Thread id (t3, or w0 for a legacy waiting_for entry) or a text substring (required)").option("--with <text>", "The answer, verdict, or note to record").action(
+  async (projectId, opts) => {
+    if (!opts.match) throw new Error("--match is required");
+    const repoRoot = await resolveRepoRoot(opts.root);
+    const result = await closeThread(repoRoot, {
+      project: projectId,
+      match: opts.match,
+      ...opts.pursuit ? { pursuit: opts.pursuit } : {},
+      ...opts.with ? { with: opts.with } : {}
+    });
+    process.stdout.write(JSON.stringify(result) + "\n");
+  }
+);
+cli.command("threads", "The Needs-you view: open threads across projects in active pursuits").option("--root <path>", "Repo root (default: cwd or auto-detect)").option("--kind <kind>", "Filter to one kind: decide | review | unblock | waiting").option("--json", "Emit as JSON").action(async (opts) => {
+  const repoRoot = await resolveRepoRoot(opts.root);
+  const snapshot = await scan(repoRoot);
+  const view = needsYou(snapshot);
+  const items = opts.kind ? view.items.filter((i) => i.thread.kind === opts.kind) : view.items;
+  if (opts.json) {
+    process.stdout.write(
+      JSON.stringify({ ...view, items }, null, 2) + "\n"
+    );
+    return;
+  }
+  const line = renderNeedsYouLine(view);
+  if (!line) {
+    process.stdout.write("Needs you: nothing \u2713\n");
+    return;
+  }
+  const out = [line, ""];
+  for (const i of items) out.push("- " + describeNeedsYouItem(i));
+  process.stdout.write(out.join("\n") + "\n");
+});
 cli.command(
   "move-pursuit <id>",
   "Move a pursuit between active / someday / archived / dropped"

@@ -113,6 +113,7 @@ payload; it does not walk items individually.
       `workflows/coaching-strings.md`:
 
       ```
+      Needs you: <N> (<n> decide, <n> review, …)          ← from `cadence threads --json`; omit when 0
       Inbox: <N> items (oldest <D>d)  ·  Dormant: <M> projects  ·  Closing-in: <K> pursuits  ·  WIP: <X>/<max>
       Capstone gaps: <G> resolved units with uncrystallized research  ·  Retrospective: <R> pursuits since the last lessons run
 

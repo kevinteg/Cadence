@@ -146,11 +146,15 @@ export function renderProject(
     }
     out.push('')
   }
-  if (project.waiting_for.length > 0) {
-    out.push('Waiting for:')
-    for (const w of project.waiting_for) {
-      const flag = w.flagged ? ' [flagged]' : ''
-      out.push(`  - ${w.person} re: ${w.what} (expected ${w.expected})${flag}`)
+  const openThreads = project.threads.filter((t) => t.status === 'open')
+  if (openThreads.length > 0) {
+    out.push('Threads (need you):')
+    for (const t of openThreads) {
+      const when = t.kind === 'waiting' && t.expected
+        ? `expected ${t.expected}`
+        : `opened ${t.opened.slice(0, 10)}`
+      const by = t.by && t.by !== 'human' ? `, ${t.by}` : ''
+      out.push(`  - [${t.kind}] ${t.text} (${when}${by}) #${t.id}`)
     }
     out.push('')
   }
@@ -245,6 +249,7 @@ function projectMenu(
     `${pad('/cadence:complete <action>')}Mark an action done`,
     `${pad('/cadence:resolve <project>')}Wrap up (--state complete | dropped)`,
     `${pad('/cadence:waiting <project>')}Track an external blocker`,
+    `${pad('/cadence:threads <project>')}Walk what needs you (decide / review / unblock / waiting)`,
     `${pad('/cadence:narrate <project>')}Tell this project's story`,
     `${pad('/cadence:help')}Browse the full verb surface`,
   ]

@@ -100,9 +100,10 @@ Workflows are at `cadence-plugin/workflows/`. The provocation deck is at
 `cadence-plugin/deck/provocations.yaml`. The tip library is at
 `cadence-plugin/tips/library.yaml`.
 
-The user-facing surface is **12 verbs** (slimmed from the original 16):
-`brainstorm`, `start`, `complete`, `resolve`, `waiting`, `capture`,
-`reflect`, `narrate`, `status`, `find`, `help`, `init`. `reconciler`
+The user-facing surface is **13 verbs** (slimmed from the original 16):
+`brainstorm`, `start`, `complete`, `resolve`, `waiting`, `threads`,
+`capture`, `reflect`, `narrate`, `status`, `find`, `help`, `init`.
+`reconciler`
 runs as **system behavior** (SessionStart hook + during `/reflect`
 Get Clear); the `cadence flags` CLI subcommand stays for power use.
 

@@ -43,8 +43,8 @@ deciding whether to auto-invoke the skill from non-explicit input.
 
 ### State-modifying verbs
 
-`capture`, `complete`, `cancel`, `waiting`, `promote`, `close`,
-`init`, `research` write to disk and change Cadence state. They MUST require
+`capture`, `complete`, `cancel`, `waiting`, `threads` (open/close),
+`promote`, `close`, `init`, `research` write to disk and change Cadence state. They MUST require
 explicit invocation. Their descriptions take the form:
 
 > TRIGGER ONLY when the user explicitly invokes `/cadence:<verb>` (or
@@ -446,6 +446,57 @@ Otherwise show a short list of active projects: "Which project is this for?"
 
 **Exit:** "Waiting: [person] re: [what] (expected [date])."
 
+`/waiting` opens a `waiting` **thread** (see Threads below); its
+three-question UX is unchanged. Legacy `waiting_for` entries render
+as waiting threads without migration.
+
+---
+
+## Threads
+
+**Purpose:** The Needs-you view. Walk and close the threads that need
+the human — `decide` (a question an unattended run handed back),
+`review` (something landed and wants eyes), `unblock` (only you can
+do it), `waiting` (a person, with an expected date). Threads are the
+human's open loops once the agent carries the actions; writing them
+where the human will look next is what releases the tension. Model:
+`docs/orchestrated-work-design.md` §3.
+
+**Tone:** Terse, informational. One line per thread. Age is stated,
+never judged.
+
+**Behavior:**
+- Reads `cadence threads --json` — one union across projects in
+  active pursuits (status active | on_hold), ordered decide → review
+  → unblock → waiting, oldest first within a kind.
+- Renders the canonical line from `coaching-strings.md`
+  (`Needs you: <N> (<n> decide, <n> review, …)`), then walks items
+  with answer / keep / open / quit.
+- Closing records the user's words in `closed_with` via
+  `cadence thread-close`; a closed `decide` answer is inherited by
+  the project's next brief.
+- `open` and `close` subforms write directly; `waiting` threads
+  require person + expected date.
+- The reconciler flags `thread_stale` (waiting: past expected by
+  `waiting_for_grace_days`; other kinds: older than
+  `thread_stale_days`) and `needs_you_pressure` (view above
+  `needs_you_soft_threshold`). Curation ranks an open `decide`
+  thread above the Leveraged Priority.
+
+**No-argument entry:** Render the view and walk it. Empty → "Needs
+you: nothing ✓".
+
+**Guardrails:**
+- Only the human closes `decide` and `review` threads. Runs open
+  them (`--by run:<id>`); they never answer their own questions.
+- Answers are recorded verbatim, never paraphrased.
+- Ambient surfaces (splash, `/start` menu) show at most four threads;
+  the full list lives in `/threads`.
+- Keep and quit write nothing. Nothing auto-closes.
+
+**Exit:** "Closed <C> threads … <R> still need you." Then the
+verb-hint block + teaching footer.
+
 ---
 
 ## Capture
@@ -479,7 +530,7 @@ write to the same parking lot — that's the integration contract.
 
 ## Report
 
-*Hidden verb — not on the visible 12-verb surface; explicit-invocation only; agent-suggested when chat language signals feedback intent.*
+*Hidden verb — not on the visible 13-verb surface; explicit-invocation only; agent-suggested when chat language signals feedback intent.*
 
 **Purpose:** File a GitHub issue against the upstream Cadence repo so coworkers, OSS adopters, and the primary user can flag bugs, request features, or share feedback without leaving Claude Code.
 
@@ -520,7 +571,7 @@ write to the same parking lot — that's the integration contract.
 
 ## Incoming
 
-*Hidden verb — not on the visible 12-verb surface; explicit-invocation only; agent-suggested when chat language signals maintainer-mode. Maintainer-side complement to `/report`.*
+*Hidden verb — not on the visible 13-verb surface; explicit-invocation only; agent-suggested when chat language signals maintainer-mode. Maintainer-side complement to `/report`.*
 
 **Purpose:** On-demand triage of open issues on the upstream Cadence repo. Each issue is walked end-to-end and routed into Cadence-shaped state (action / project / capture / close / defer) so the inbound queue never lives only in GitHub.
 
@@ -589,7 +640,7 @@ Then the verb-hint block + teaching footer per the universal exit convention.
 
 ## MCP-Pull
 
-*Hidden verb — not on the visible 12-verb surface; explicit-invocation only. Skill-driven, not CLI-driven.*
+*Hidden verb — not on the visible 13-verb surface; explicit-invocation only. Skill-driven, not CLI-driven.*
 
 **Purpose:** Pull resources from a Claude-Code-registered MCP server (Glean, time, custom) into `thoughts/unprocessed/` as captures. The agent does the network work via its `mcp__<server>__*` tool surface (Claude Code owns transport + OAuth); Cadence does the file write via `cadence write-capture --mcp-*`.
 
@@ -628,7 +679,7 @@ Then the verb-hint block + teaching footer per the universal exit convention.
 
 ## Research
 
-*Hidden verb — not on the visible 12-verb surface; explicit-invocation only; agent-suggested when chat language signals research intent. Promotes to the visible catalogue when the wiki layer ships (pursuit-level decision).*
+*Hidden verb — not on the visible 13-verb surface; explicit-invocation only; agent-suggested when chat language signals research intent. Promotes to the visible catalogue when the wiki layer ships (pursuit-level decision).*
 
 **Purpose:** Build and use the **research substrate** — the working tier of sources and distilled atomic notes that accumulates under a unit of work (project or pursuit) at `<unit>/research/`. Three operations: ingest a source (raw copy + distilled note via subagent), ask a question over the substrate (index-first, cited), generate a primer (orientation + suggested learning order). Formats: `cadence-reference.md` → "Research Substrate".
 
@@ -660,7 +711,7 @@ Then the verb-hint block + teaching footer per the universal exit convention.
 
 ## Wiki
 
-*Hidden verb — not on the visible 12-verb surface; explicit-invocation plus by-name requests ("check the wiki for X"); agent-suggested when chat language signals corpus-lookup intent. Promotes to the visible catalogue when the wiki layer ships (pursuit-level decision, alongside `research`).*
+*Hidden verb — not on the visible 13-verb surface; explicit-invocation plus by-name requests ("check the wiki for X"); agent-suggested when chat language signals corpus-lookup intent. Promotes to the visible catalogue when the wiki layer ships (pursuit-level decision, alongside `research`).*
 
 **Purpose:** Query and curate the durable corpus at root-level `wiki/` — capstone narratives, primers, the meta-project. Five operations: front door (render `wiki/index.md`), ask (index-first Q&A with citations), open (by slug), related (link-graph neighbors), lint (budgeted `wiki-lint` subagent health scan — dangling pointers, evaporated provenance, orphans, stale index entries, draft pile-up, contradictions; findings only, never auto-fix). Layout and formats: `cadence-reference.md` → "Wiki — Durable Narrative Layer".
 
@@ -684,7 +735,7 @@ Then the verb-hint block + teaching footer per the universal exit convention.
 
 ## Publish
 
-*Hidden verb — not on the visible 12-verb surface; explicit-invocation only; agent-suggested when chat language signals publish intent. The promotion path that complements the built-in `wiki/` path: that one lands curated work in *your* corpus; this one lands it in *someone else's* authoritative repo.*
+*Hidden verb — not on the visible 13-verb surface; explicit-invocation only; agent-suggested when chat language signals publish intent. The promotion path that complements the built-in `wiki/` path: that one lands curated work in *your* corpus; this one lands it in *someone else's* authoritative repo.*
 
 **Purpose:** Contribute curated content from the Cadence workshop (a wiki narrative/primer, a project's Intent + notes, a research primer) into an **external destination repo** — a separate team/shared repo of markdown with its own authoritative content. Design rationale (why mode B, why the issue's three forks dissolved, why surface-and-warn) lives in the archived brainstorm at `wiki/_archive/brainstorms/first-class-publish/`.
 

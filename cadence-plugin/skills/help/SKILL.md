@@ -21,10 +21,10 @@ the source of truth, the skill just presents them.
    - No argument → render the catalogue overview (step 2).
    - Argument matches a group name (`diverge`, `execute`, `reflect`,
      `setup`, `browse`) — case-insensitive → render group view (step 3).
-   - Argument matches a verb name (one of the 12 user-facing verbs:
+   - Argument matches a verb name (one of the 13 user-facing verbs:
      `brainstorm`, `start`, `complete`, `resolve`, `waiting`,
-     `capture`, `reflect`, `narrate`, `status`, `find`, `help`,
-     `init`) — case-insensitive, optional leading `/cadence:` or `/`
+     `threads`, `capture`, `reflect`, `narrate`, `status`, `find`,
+     `help`, `init`) — case-insensitive, optional leading `/cadence:` or `/`
      stripped → render verb view (step 4). The hidden verbs
      (`report`, `incoming`, `mcp-pull`, `research`, `wiki`, `publish`)
      also resolve for explicit `/help <verb>` lookups but aren't in the

@@ -22,12 +22,12 @@ It runs inside agentic coding tools like Claude Code, meeting you where you alre
 
 Divergent exploration happens in **brainstorm workspaces** that run a phase machine — `diverging → converging → crystallized | archived`. A crystallized brainstorm materializes into a Pursuit or Project; an archived brainstorm preserves the exploration as a decided-but-shelved artifact. Raw seeds and unsorted material live in the **Inbox** — a *view*, not a directory, that unions untriaged captures with brainstorms still in `diverging`.
 
-**The user-facing surface is 12 verbs**, grouped by cognitive mode:
+**The user-facing surface is 13 verbs**, grouped by cognitive mode:
 
 | Mode | Verbs |
 |---|---|
 | **Diverge** — find what to build | `brainstorm` (owns the phase machine; `--crystallize` materializes a Pursuit/Project) |
-| **Execute** — do the work | `start`, `complete`, `resolve`, `waiting`, `capture` |
+| **Execute** — do the work | `start`, `complete`, `resolve`, `waiting`, `threads`, `capture` |
 | **Reflect** — see meaning, check state | `reflect`, `narrate` |
 | **Setup** — one-off | `init` |
 | **Browse** — navigation | `status`, `find`, `help` |
@@ -233,7 +233,7 @@ cadence init                         # bootstrap a new repo
 
 Inside Claude Code these are invoked as `/cadence:<verb>` via the Cadence plugin.
 
-Hidden verbs (not on the visible 12-verb surface; explicit-invocation only): `/report` files an issue against the upstream Cadence repo, `/incoming` runs maintainer-side triage of inbound issues, `/mcp-pull` is the bulk-ingest path for pulling many MCP resources at once. The reconciler runs as system behavior. The CLI also exposes power-user subcommands (`cadence flags`, `cadence project-activity`, `cadence pending-validation-*`, `cadence tip-*`, `cadence stop-hook`, etc.) for direct use outside the slimmed verb surface.
+Hidden verbs (not on the visible 13-verb surface; explicit-invocation only): `/report` files an issue against the upstream Cadence repo, `/incoming` runs maintainer-side triage of inbound issues, `/mcp-pull` is the bulk-ingest path for pulling many MCP resources at once. The reconciler runs as system behavior. The CLI also exposes power-user subcommands (`cadence flags`, `cadence project-activity`, `cadence pending-validation-*`, `cadence tip-*`, `cadence stop-hook`, etc.) for direct use outside the slimmed verb surface.
 
 ---
 

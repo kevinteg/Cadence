@@ -14,6 +14,41 @@ export const WaitingForSchema = z.object({
 })
 export type WaitingFor = z.infer<typeof WaitingForSchema>
 
+/**
+ * A Thread is anything that needs the human: a decision the agent
+ * could not make alone, a review of something that landed, an
+ * unblock only the human can do, or a person being waited on. Threads
+ * live in project frontmatter (`threads:`) the way `waiting_for` does,
+ * so the project file stays the single durable state. Legacy
+ * `waiting_for` entries are mapped to `kind: waiting` threads at scan
+ * time — no file migrates.
+ *
+ * Design: docs/orchestrated-work-design.md §3 (Thread), §8 (formats).
+ */
+export const ThreadKindSchema = z.enum(['decide', 'review', 'unblock', 'waiting'])
+export type ThreadKind = z.infer<typeof ThreadKindSchema>
+
+export const ThreadStatusSchema = z.enum(['open', 'closed'])
+
+export const ThreadSchema = z.object({
+  id: z.string(),
+  kind: ThreadKindSchema,
+  text: z.string(),
+  /** ISO timestamp the thread was opened. */
+  opened: z.string(),
+  /** `human` or `run:<run-id>`. */
+  by: z.string().optional().default('human'),
+  status: ThreadStatusSchema.optional().default('open'),
+  /** waiting kind: who is being waited on. */
+  person: z.string().optional(),
+  /** waiting kind: expected date (YYYY-MM-DD). */
+  expected: z.string().optional(),
+  /** The answer, verdict, or note recorded when the thread closed. */
+  closed_with: z.string().optional(),
+  closed_at: z.string().optional(),
+})
+export type Thread = z.infer<typeof ThreadSchema>
+
 export const PursuitTypeSchema = z.enum(['finite', 'ongoing', 'someday'])
 export const PursuitStatusSchema = z.enum([
   'active',
@@ -113,6 +148,12 @@ export const ProjectFrontmatterSchema = z.object({
   status: ProjectStatusSchema,
   created: z.string(),
   waiting_for: z.array(WaitingForSchema).optional().default([]),
+  /**
+   * Explicit threads (decide / review / unblock / waiting). The
+   * resolved `Project.threads` view also carries legacy `waiting_for`
+   * entries mapped to `kind: waiting` — see src/scan/projects.ts.
+   */
+  threads: z.array(ThreadSchema).optional().default([]),
   /**
    * Optional override for the heuristic in src/scan/domain.ts. When
    * set, this value takes precedence and `effective_domain` reports
@@ -363,6 +404,8 @@ export const ConfigSchema = z.object({
       incoming_queue_cache_ttl_minutes: z.number().optional(),
       inbox_soft_threshold: z.number().optional(),
       retrospective_due_threshold: z.number().optional(),
+      thread_stale_days: z.number().optional(),
+      needs_you_soft_threshold: z.number().optional(),
     })
     .optional(),
   wip_limits: z
@@ -390,6 +433,10 @@ export type Config = {
   incoming_queue_cache_ttl_minutes: number
   inbox_soft_threshold: number
   retrospective_due_threshold: number
+  /** Open threads older than this (days) fire `thread_stale`. */
+  thread_stale_days: number
+  /** Needs-you view size above this fires `needs_you_pressure`. */
+  needs_you_soft_threshold: number
   publish_targets: PublishTarget[]
   win_cycle_current?: string
   win_cycle_start?: string
@@ -408,6 +455,8 @@ export const CONFIG_DEFAULTS: Config = {
   incoming_queue_cache_ttl_minutes: 15,
   inbox_soft_threshold: 10,
   retrospective_due_threshold: 3,
+  thread_stale_days: 7,
+  needs_you_soft_threshold: 6,
   publish_targets: [],
 }
 
@@ -445,11 +494,28 @@ export type Snapshot = {
 
 export type Flag =
   | {
-      kind: 'overdue_waiting_for'
+      // An open thread has gone quiet. For the `waiting` kind this is
+      // the old overdue-waiting-for check (past `expected` by more
+      // than `waiting_for_grace_days`); for every other kind it is an
+      // open thread older than `thread_stale_days`. `daysStale` is
+      // days past the threshold in both cases.
+      kind: 'thread_stale'
       pursuitId: string
       projectId: string
-      item: WaitingFor
-      daysOverdue: number
+      thread: Thread
+      daysStale: number
+    }
+  | {
+      // The Needs-you view (open threads across projects in active
+      // pursuits) has grown past needs_you_soft_threshold. One flag
+      // regardless of count; the per-thread story lives in /threads.
+      kind: 'needs_you_pressure'
+      count: number
+      threshold: number
+      decide: number
+      review: number
+      unblock: number
+      waiting: number
     }
   | {
       kind: 'dormant_project'

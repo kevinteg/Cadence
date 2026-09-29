@@ -11,6 +11,11 @@ import {
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { scan } from './scan/repo.js'
+import {
+  describeNeedsYouItem,
+  needsYou,
+  renderNeedsYouLine,
+} from './needs-you.js'
 import { getInboundCount } from './scan/inbound.js'
 import { report } from './report/reconciler.js'
 import { renderStatus, renderFlags } from './render/status.js'
@@ -82,6 +87,8 @@ import {
   checkItem,
   checkItems,
   flagWaitingFor,
+  openThread,
+  closeThread,
   setProjectStatus,
   syncProjectOrigin,
 } from './write/edits.js'
@@ -314,7 +321,7 @@ cli
   })
 
 cli
-  .command('project <id>', 'Show Intent, Actions, and waiting_for for a project')
+  .command('project <id>', 'Show Intent, Actions, and threads for a project')
   .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
   .option('--pursuit <id>', 'Disambiguate when project IDs collide')
   .option('--json', 'Emit as JSON')
@@ -1067,6 +1074,104 @@ cli
       process.stdout.write(JSON.stringify(result) + '\n')
     },
   )
+
+cli
+  .command(
+    'thread-open <project-id>',
+    'Open a thread (decide | review | unblock | waiting) on a project — something that needs the human',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--pursuit <id>', 'Disambiguate when project IDs collide')
+  .option('--kind <kind>', 'decide | review | unblock | waiting (required)')
+  .option('--text <text>', 'What needs the human (required)')
+  .option('--by <who>', 'human (default) or run:<run-id>')
+  .option('--person <name>', 'waiting kind: who is waited on')
+  .option('--expected <YYYY-MM-DD>', 'waiting kind: expected date')
+  .action(
+    async (
+      projectId: string,
+      opts: {
+        root?: string
+        pursuit?: string
+        kind?: string
+        text?: string
+        by?: string
+        person?: string
+        expected?: string
+      },
+    ) => {
+      const kinds = ['decide', 'review', 'unblock', 'waiting'] as const
+      if (!opts.kind || !(kinds as readonly string[]).includes(opts.kind)) {
+        throw new Error('--kind must be one of decide | review | unblock | waiting')
+      }
+      if (!opts.text) throw new Error('--text is required')
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const result = await openThread(repoRoot, {
+        project: projectId,
+        kind: opts.kind as (typeof kinds)[number],
+        text: opts.text,
+        ...(opts.pursuit ? { pursuit: opts.pursuit } : {}),
+        ...(opts.by ? { by: opts.by } : {}),
+        ...(opts.person ? { person: opts.person } : {}),
+        ...(opts.expected ? { expected: opts.expected } : {}),
+      })
+      process.stdout.write(JSON.stringify(result) + '\n')
+    },
+  )
+
+cli
+  .command(
+    'thread-close <project-id>',
+    'Close a thread, recording the answer or verdict in closed_with',
+  )
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--pursuit <id>', 'Disambiguate when project IDs collide')
+  .option('--match <id-or-text>', 'Thread id (t3, or w0 for a legacy waiting_for entry) or a text substring (required)')
+  .option('--with <text>', 'The answer, verdict, or note to record')
+  .action(
+    async (
+      projectId: string,
+      opts: { root?: string; pursuit?: string; match?: string; with?: string },
+    ) => {
+      if (!opts.match) throw new Error('--match is required')
+      const repoRoot = await resolveRepoRoot(opts.root)
+      const result = await closeThread(repoRoot, {
+        project: projectId,
+        match: opts.match,
+        ...(opts.pursuit ? { pursuit: opts.pursuit } : {}),
+        ...(opts.with ? { with: opts.with } : {}),
+      })
+      process.stdout.write(JSON.stringify(result) + '\n')
+    },
+  )
+
+cli
+  .command('threads', 'The Needs-you view: open threads across projects in active pursuits')
+  .option('--root <path>', 'Repo root (default: cwd or auto-detect)')
+  .option('--kind <kind>', 'Filter to one kind: decide | review | unblock | waiting')
+  .option('--json', 'Emit as JSON')
+  .action(async (opts: { root?: string; kind?: string; json?: boolean }) => {
+    const repoRoot = await resolveRepoRoot(opts.root)
+    const snapshot = await scan(repoRoot)
+    const view = needsYou(snapshot)
+    const items = opts.kind
+      ? view.items.filter((i) => i.thread.kind === opts.kind)
+      : view.items
+    if (opts.json) {
+      process.stdout.write(
+        JSON.stringify({ ...view, items }, null, 2) + '\n',
+      )
+      return
+    }
+    const line = renderNeedsYouLine(view)
+    if (!line) {
+      process.stdout.write('Needs you: nothing ✓\n')
+      return
+    }
+    const out = [line, '']
+    for (const i of items) out.push('- ' + describeNeedsYouItem(i))
+    process.stdout.write(out.join('\n') + '\n')
+  })
 
 cli
   .command(

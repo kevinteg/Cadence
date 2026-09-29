@@ -20,7 +20,7 @@ Each flag has four fields:
 
 | Field | Description |
 |-------|-------------|
-| **type** | Category: `overdue_waiting_for`, `dormant_project`, `stale_marker`, `structural`, `someday_cue` |
+| **type** | Category: `thread_stale`, `needs_you_pressure`, `dormant_project`, `stale_marker`, `structural`, `someday_cue` |
 | **severity** | `action_needed` (requires decision), `warning` (worth reviewing), `info` (awareness only) |
 | **entity** | The affected item: project ID, pursuit ID, or waiting_for description |
 | **suggestion** | A concrete next step the user can take |
@@ -49,20 +49,29 @@ Reconciler found [N] flags:
 
 ## Checks
 
-### 1. Overdue Waiting-For
+### 1. Stale Thread
 
-**Type:** `overdue_waiting_for`
+**Type:** `thread_stale`
 **Severity:** `action_needed`
 
 **Logic:**
-1. Scan all project files across active pursuits for `waiting_for` in frontmatter
-2. For each item, compare `expected` date against today
-3. Flag if today > expected + `waiting_for_grace_days` (from cadence.yaml, default: 2)
+1. Scan open projects (active | on_hold) across active pursuits for open threads (`threads:` plus legacy `waiting_for` mapped to `kind: waiting`)
+2. `waiting` kind: flag if today > expected + `waiting_for_grace_days` (default: 2) — the old overdue-waiting-for check
+3. Every other kind (decide / review / unblock): flag if today > opened + `thread_stale_days` (default: 7)
+4. `daysStale` is days past the threshold in both cases
 
-**Suggestion format:** "Follow up with [person] about [what] — [N days] overdue"
+**Suggestion format:** waiting — "Follow up with [person] about [what] — [N days] overdue"; others — "[kind] thread on [project] has been quiet [N days] past the cap — /cadence:threads to close it"
 
-**Side effect in /reflect:** If the user acts, update the project frontmatter:
-set `flagged: true` on the item, or remove it if resolved.
+**Side effect in /reflect:** If the user acts, hand off to `/cadence:threads`; closing records the answer via `cadence thread-close`.
+
+### 1b. Needs-you Pressure
+
+**Type:** `needs_you_pressure`
+**Severity:** `warning`
+
+**Logic:** the Needs-you view (`src/needs-you.ts`) counts open threads across open projects in active pursuits. Flag once when the total exceeds `needs_you_soft_threshold` (default: 6). The flag carries the per-kind breakdown.
+
+**Suggestion format:** "Needs you: [N] ([n] decide, [n] review, …) — above soft cap ([threshold]). Run /cadence:threads to walk them." Descriptive, never scolding.
 
 ### 2. Dormant Projects
 
@@ -223,7 +232,9 @@ All thresholds come from `cadence.yaml` under `defaults`:
 
 | Setting | Default | Used by |
 |---------|---------|---------|
-| `waiting_for_grace_days` | 2 | Overdue waiting-for |
+| `waiting_for_grace_days` | 2 | Stale thread (waiting kind) |
+| `thread_stale_days` | 7 | Stale thread (decide / review / unblock) |
+| `needs_you_soft_threshold` | 6 | Needs-you pressure |
 | `marker_stale_days` | 7 | Stale markers |
 | `someday_review` | monthly | Someday cue surfacing |
 | `inbox_seed_stale_days` | 7 | Stale Inbox seed |

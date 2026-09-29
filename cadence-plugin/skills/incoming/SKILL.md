@@ -5,7 +5,7 @@ description: Maintainer-side triage of open GitHub issues on the upstream Cadenc
 # /incoming
 
 Maintainer-side triage of open issues on the upstream Cadence repo.
-Hidden verb — not on the visible 12-verb surface; explicit-invocation
+Hidden verb — not on the visible 13-verb surface; explicit-invocation
 only. Agent-suggested when chat language signals maintainer-mode.
 
 Reference `workflows/verb-contracts.md` for the incoming register.

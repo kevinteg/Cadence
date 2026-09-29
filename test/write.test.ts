@@ -14,8 +14,11 @@ import {
   checkItem,
   checkItems,
   flagWaitingFor,
+  openThread,
+  closeThread,
   setProjectStatus,
 } from '../src/write/edits.ts'
+import { needsYou } from '../src/needs-you.ts'
 import { movePursuit } from '../src/write/move.ts'
 import { scan } from '../src/scan/repo.ts'
 import { inboxItems } from '../src/inbox.ts'
@@ -830,6 +833,70 @@ test('scan distinguishes archived (completed) from dropped (learned-from)', asyn
     assert.equal(dropped.length, 1, 'expected 1 dropped pursuit')
     assert.equal(archived[0]?.id, 'shipped')
     assert.equal(dropped[0]?.id, 'learned-from')
+  } finally {
+    await rm(dir, { recursive: true, force: true })
+  }
+})
+
+test('openThread + closeThread round-trip; legacy waiting_for maps to a waiting thread', async () => {
+  const dir = await tempRepo()
+  try {
+    await createPursuit(dir, { id: 'p', type: 'finite', now: NOW })
+    await createProject(dir, {
+      pursuit: 'p',
+      id: 'proj',
+      actions: ['kickoff'],
+      now: NOW,
+    })
+    await addWaitingFor(dir, {
+      project: 'proj',
+      person: 'alice',
+      what: 'review',
+      expected: '2026-05-01',
+    })
+    const opened = await openThread(dir, {
+      project: 'proj',
+      kind: 'decide',
+      text: 'Expose gated endpoints?',
+      by: 'run:2026-04-27T12-00',
+      now: NOW,
+    })
+    assert.equal(opened.thread['id'], 't1')
+
+    let snapshot = await scan(dir, NOW)
+    let proj = snapshot.projects[0]!
+    assert.equal(proj.threads.length, 2)
+    const waiting = proj.threads.find((t) => t.kind === 'waiting')!
+    assert.equal(waiting.id, 'w0')
+    assert.equal(waiting.text, 'alice re: review')
+    let view = needsYou(snapshot, NOW)
+    assert.equal(view.counts.total, 2)
+    assert.equal(view.items[0]!.thread.kind, 'decide', 'decide ranks before waiting')
+
+    const closed = await closeThread(dir, {
+      project: 'proj',
+      match: 't1',
+      with: 'No — gated stays private.',
+      now: NOW,
+    })
+    assert.equal(closed.thread['status'], 'closed')
+    assert.equal(closed.thread['closed_with'], 'No — gated stays private.')
+
+    // Closing a mapped waiting thread removes the waiting_for entry and
+    // keeps a closed waiting thread as the record.
+    await closeThread(dir, { project: 'proj', match: 'w0', with: 'delivered', now: NOW })
+    snapshot = await scan(dir, NOW)
+    proj = snapshot.projects[0]!
+    assert.equal(proj.waiting_for.length, 0)
+    assert.equal(proj.threads.filter((t) => t.status === 'closed').length, 2)
+    view = needsYou(snapshot, NOW)
+    assert.equal(view.counts.total, 0)
+
+    // Ids stay stable: next explicit thread is t2 even after t1 closed.
+    const next = await openThread(dir, { project: 'proj', kind: 'review', text: 'look', now: NOW })
+    assert.equal(next.thread['id'], 't2')
+    const raw = await readFile(path.join(dir, 'pursuits/p/projects/proj.md'), 'utf8')
+    assert.match(raw, /threads:/)
   } finally {
     await rm(dir, { recursive: true, force: true })
   }

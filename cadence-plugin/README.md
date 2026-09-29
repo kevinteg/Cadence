@@ -47,7 +47,7 @@ Nothing else needs a standing grant.
 
 ## Verbs
 
-The user-facing surface is **12 verbs**, grouped by cognitive mode.
+The user-facing surface is **13 verbs**, grouped by cognitive mode.
 One voice, verb-defined register. Per-verb tone, behavior, and
 guardrails are specified in
 [`workflows/verb-contracts.md`](workflows/verb-contracts.md).
@@ -65,7 +65,8 @@ guardrails are specified in
 | `/cadence:start` | Universal work-entry verb. No arg → curated menu. `<pursuit>` → pursuit workspace view. `<project>` → project view. `<brainstorm-slug>` → resume the workspace. `inbox` (reserved) → triage walk with outcome menu. View-only — no session ceremony. |
 | `/cadence:complete` | Mark an action done. First check promotes `on_hold` → `active`. Triggers upward completion prompt. |
 | `/cadence:resolve` | Wrap up a project or pursuit. `--state complete` (default) walks the intent-feel-achieved dialogue; `--state dropped` requires a reason. Pursuit-level invokes the closure ritual + archive. |
-| `/cadence:waiting` | Record an external blocker so it's tracked. |
+| `/cadence:waiting` | Record an external blocker so it's tracked (opens a `waiting` thread). |
+| `/cadence:threads` | The Needs-you view — walk and close what needs you: decisions a run handed back, reviews, unblocks, people you're waiting on. |
 | `/cadence:capture` | Flow-safe parking lot — inline `"..."` saves a thought silently. Extended ingest surface: `--from <path|url>`, `--source <name>` (named MCP queries), `--dump` (long-form in $EDITOR). Non-inline paths dispatch the `capture-ingest` subagent and surface a per-item outcome menu (`[Y/n]` defaults to a high-confidence suggested action). |
 
 ### Reflect — see meaning, check state
@@ -91,7 +92,7 @@ guardrails are specified in
 
 ### Hidden verbs (explicit invocation only)
 
-Not on the visible 12-verb catalogue. They're gated to explicit
+Not on the visible 13-verb catalogue. They're gated to explicit
 invocation because they write to state the user can't easily undo
 (e.g., filing a public GitHub issue). The agent **suggests** them at
 breakpoints when chat language signals intent, but never auto-fires.
@@ -106,7 +107,7 @@ breakpoints when chat language signals intent, but never auto-fires.
 
 ### System behavior (not a verb)
 
-- **`reconciler`** — runs automatically at SessionStart hook (every fresh session) and during `/reflect` Get Clear. Surfaces overdue waiting-for items, dormant projects, Inbox pressure, closing-in pursuits, and structural inconsistencies. The CLI subcommand `cadence flags` is available for power users who want to query on demand.
+- **`reconciler`** — runs automatically at SessionStart hook (every fresh session) and during `/reflect` Get Clear. Surfaces stale threads, Needs-you pressure, dormant projects, Inbox pressure, closing-in pursuits, and structural inconsistencies. The CLI subcommand `cadence flags` is available for power users who want to query on demand.
 
 ## Quick Navigation
 

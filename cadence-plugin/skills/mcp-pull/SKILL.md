@@ -1,10 +1,10 @@
 ---
-description: Bulk-pull resources from an MCP server into thoughts/unprocessed/ as captures for later triage. Uses the agent's MCP tool surface (Claude Code handles transport + OAuth) and stamps each capture with mcp: frontmatter via cadence write-capture. Hidden verb — not on the 12-verb surface. This is the dedicated bulk-ingestion path; ad-hoc MCP lookups during other verbs are also legal when the user explicitly directs them (see cadence-runtime.md "External Tool Discipline"). TRIGGER ONLY when the user explicitly invokes /cadence:mcp-pull. SKIP all natural-language equivalents — never auto-fire from "pull from glean", "ingest the corpus", or similar; surface the verb name as a suggestion when such language appears.
+description: Bulk-pull resources from an MCP server into thoughts/unprocessed/ as captures for later triage. Uses the agent's MCP tool surface (Claude Code handles transport + OAuth) and stamps each capture with mcp: frontmatter via cadence write-capture. Hidden verb — not on the 13-verb surface. This is the dedicated bulk-ingestion path; ad-hoc MCP lookups during other verbs are also legal when the user explicitly directs them (see cadence-runtime.md "External Tool Discipline"). TRIGGER ONLY when the user explicitly invokes /cadence:mcp-pull. SKIP all natural-language equivalents — never auto-fire from "pull from glean", "ingest the corpus", or similar; surface the verb name as a suggestion when such language appears.
 ---
 
 # /mcp-pull
 
-Hidden verb — not in the visible 12-verb catalogue; explicit
+Hidden verb — not in the visible 13-verb catalogue; explicit
 invocation only. The *bulk-ingestion* path for MCP resources →
 captures.
 

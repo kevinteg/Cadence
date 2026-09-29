@@ -6,7 +6,7 @@ description: File a GitHub issue against the upstream Cadence repo. Privacy-by-d
 
 File a bug report, feature request, documentation note, or general
 feedback against the upstream Cadence repo. Hidden verb — not on the
-visible 12-verb surface; agent-suggested when friction, bug, or
+visible 13-verb surface; agent-suggested when friction, bug, or
 feature-wish language appears in chat.
 
 Reference `workflows/verb-contracts.md` for the report register.

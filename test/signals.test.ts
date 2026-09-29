@@ -32,6 +32,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     status: 'active',
     created: '2026-01-01',
     waiting_for: [],
+    threads: [],
     intent: '',
     dod: [],
     actions: [{ text: 'act', checked: false }],

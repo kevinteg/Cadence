@@ -13,6 +13,8 @@ lives in `cadence-reference.md` — load on demand.
 - **Pursuit**: An intentional commitment tied to values or a role. Has a Why. Lifecycle: `active` → `someday` (set aside, may return) → `archived` (shipped — closed via the closure ritual) | `dropped` (didn't ship — closed via the drop ritual; what got learned without shipping). Archived and dropped are both terminal but distinct outcomes; the directory split (`pursuits/_archived/` vs `pursuits/_dropped/`) lets the lessons-extraction surface treat them as different signal.
 - **Project**: A scoped effort framed by an Intent narrative (motivation + felt-sense of done) and an Actions list. Status: active | on_hold | done | dropped. New projects start `on_hold`; promote to `active` on the first checked action.
 - **Action**: An atomic, concrete task. A checkbox in a project's Actions section. Every project requires at least one at creation.
+- **Thread**: Anything that needs the human, on a project: `decide` (a question an unattended run handed back), `review` (something landed and wants eyes), `unblock` (only the human can do it), `waiting` (a person, with an expected date — the old `waiting_for`, mapped in at scan time with no migration). Threads live in project frontmatter (`threads:`). Runs may open threads; only the human closes `decide` and `review`. Model: `docs/orchestrated-work-design.md` §3.
+- **Needs-you view**: A *view*, like the Inbox — the union of open threads across projects in active pursuits, ordered decide → review → unblock → waiting, oldest first. One canonical line, `Needs you: N (…)`, across the SessionStart splash / `/status` / `/threads` / `/reflect` Get Clear (wording in `coaching-strings.md`). The reconciler emits `needs_you_pressure` above `needs_you_soft_threshold` (default 6) and `thread_stale` for quiet threads.
 - **Inbox**: A *view*, not a directory or pursuit. The Inbox is the union of (a) captures in `thoughts/unprocessed/` whose status is untriaged (all v1 captures count; v2 captures with `status: untriaged`) and (b) brainstorms in `phase: diverging`. Cadence surfaces it as a single "Inbox: N items" line across status / SessionStart hook / capture-exit menu / `/start inbox` triage. Triage means moving an item out into a real outcome — an action on a pursuit, a new project, a brainstorm crystallized into one, or `closed` with a reason — so the Inbox shrinks back toward empty. A growing Inbox is a triage debt signal; the reconciler emits `inbox_pressure` above `inbox_soft_threshold` (default 10). No `pursuits/inbox/` pursuit exists in v1.1 onward — the term refers to the cross-repo view, not a folder. **The exact phrasing of the Inbox line, the active-brainstorms line, the empty-repo coaching block, and related ambient strings is canonical in `cadence-plugin/workflows/coaching-strings.md`** — surfaces quote from there rather than re-inventing wording. Function (this runtime entry) and form (that doc) stay split so consistency is enforced by source.
 - **Capture**: A raw thought saved to `thoughts/unprocessed/`. Flow-safe — no agent response at capture time.
 - **Research substrate**: The working tier of deliberately studied sources under a unit of work — `<unit>/research/` with `raw/` (immutable sources), `notes/` (distilled atomic notes), `index.md` (catalog + primer), `log.md` (append-only event log). Managed by the hidden verb `/research` (ingest / ask / primer). Distinct from Capture: captures park stray thoughts in the Inbox; the substrate holds sources studied for a unit, kept next to that work. `raw/` is GC-eligible at closure via `/resolve`'s disposition ritual; everything else is durable. Formats: `cadence-reference.md` → "Research Substrate".
@@ -21,7 +23,7 @@ lives in `cadence-reference.md` — load on demand.
 - **Narrative**: Generated writing from activity data. McAdams structure: what happened / what it meant / what shifted / what's next. Each generated narrative carries a watermark in its frontmatter (cadence, consumed_through_commit) — the narrative IS the pointer into the project-file activity stream.
 - **Leveraged Priority**: The ONE thing that defines next week's win. Set during Reflect.
 - **Intent**: A project's narrative section — motivation, scope, felt-sense of what "done" looks like. Co-edited with the agent as actions land and the work focuses. See `cadence-reference.md` for "Intent and Actions".
-- **Reconciler**: Background process that flags overdue waiting-for items, dormant projects, Inbox pressure (untriaged material above the soft cap), closing-in pursuits, structural inconsistencies (active projects with no open actions), inbound issues piling up on the upstream Cadence repo, capstone gaps (resolved units whose research never crystallized into a narrative), and retrospectives coming due (resolved pursuits accumulating past `retrospective_due_threshold` since the last `/narrate lessons` run).
+- **Reconciler**: Background process that flags stale threads (a waiting thread past its expected date, any other thread quiet past `thread_stale_days`), Needs-you pressure, dormant projects, Inbox pressure (untriaged material above the soft cap), closing-in pursuits, structural inconsistencies (active projects with no open actions), inbound issues piling up on the upstream Cadence repo, capstone gaps (resolved units whose research never crystallized into a narrative), and retrospectives coming due (resolved pursuits accumulating past `retrospective_due_threshold` since the last `/narrate lessons` run).
 - **2-Minute Item**: An action completable in under two minutes. Surfaced immediately when identified, cleared first during Reflect.
 
 ## One Voice
@@ -32,7 +34,8 @@ tone, behavior, and guardrails change to match the cognitive mode required.
 Read `workflows/verb-contracts.md` for the full contract of each verb.
 
 The user-facing verbs are: **brainstorm**, **start**, **complete**,
-**resolve**, **waiting**, **capture**, **reflect**, **narrate**.
+**resolve**, **waiting**, **threads**, **capture**, **reflect**,
+**narrate**.
 Hidden user-invoked verbs that don't appear on the visible catalogue:
 **report** (files a GitHub issue against the upstream Cadence repo;
 privacy-by-default — never auto-includes pursuit/project content),
@@ -96,8 +99,12 @@ state.
   ritual is the same. If a pursuit just needs setting aside for later,
   use `cadence move-pursuit --to someday` instead — that's a different
   move (no ritual, no narrative).
-- **`/waiting`** records an external blocker on a project's
-  `waiting_for` array.
+- **`/waiting`** records an external blocker as a `waiting` thread on
+  the project (three questions: person, what, expected date).
+- **`/threads`** walks the Needs-you view — every open thread across
+  active work — and closes them with the human's answer recorded.
+  An open `decide` thread outranks the Leveraged Priority in the
+  curated next moves: a paused run is throughput lost.
 
 Rules:
 - Mentioning other projects as background does NOT shift the project
@@ -191,7 +198,7 @@ teaching tooltip when eligible. The point is to make the verb surface
 self-teaching through usage rather than upfront docs.
 
 **Suggest-don't-run for hidden state-modifying verbs.** Some verbs
-(`/report`, others to come) are hidden from the visible 12-verb surface
+(`/report`, others to come) are hidden from the visible 13-verb surface
 and gated to explicit invocation only because they write to state the
 user can't easily undo (e.g., `/report` files a public GitHub issue).
 When the user's chat language signals intent for one of these verbs —

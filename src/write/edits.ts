@@ -442,6 +442,162 @@ export async function addWaitingFor(
   return { path: path.relative(repoRoot, filePath) }
 }
 
+export type OpenThreadOpts = {
+  pursuit?: string
+  project: string
+  kind: 'decide' | 'review' | 'unblock' | 'waiting'
+  text: string
+  by?: string
+  person?: string
+  expected?: string
+  now?: Date
+}
+
+/**
+ * Open a thread on a project. Ids are `t<N>` where N is one past the
+ * highest existing explicit id, so ids stay stable as threads close.
+ * The `waiting` kind requires person + expected (same three fields
+ * /waiting has always gathered).
+ */
+export async function openThread(
+  repoRoot: string,
+  opts: OpenThreadOpts,
+): Promise<{ path: string; thread: Record<string, unknown> }> {
+  const filePath = await locateProject(repoRoot, opts.project, opts.pursuit)
+  const now = opts.now ?? new Date()
+  if (opts.kind === 'waiting' && (!opts.person || !opts.expected)) {
+    throw new Error('a waiting thread requires --person and --expected')
+  }
+  let thread: Record<string, unknown> = {}
+  await mutateFrontmatter(filePath, (data, body) => {
+    const list = Array.isArray(data['threads'])
+      ? ([...(data['threads'] as unknown[])] as Array<Record<string, unknown>>)
+      : []
+    let max = 0
+    for (const t of list) {
+      const m = /^t(\d+)$/.exec(String(t['id'] ?? ''))
+      if (m) max = Math.max(max, Number(m[1]))
+    }
+    thread = {
+      id: `t${max + 1}`,
+      kind: opts.kind,
+      text: opts.text,
+      opened: isoTimestamp(now),
+      by: opts.by ?? 'human',
+      status: 'open',
+      ...(opts.person ? { person: opts.person } : {}),
+      ...(opts.expected ? { expected: opts.expected } : {}),
+    }
+    list.push(thread)
+    data['threads'] = list
+    return { data, body }
+  })
+  return { path: path.relative(repoRoot, filePath), thread }
+}
+
+export type CloseThreadOpts = {
+  pursuit?: string
+  project: string
+  /** Thread id (`t3`, or `w0` for a mapped waiting_for entry) or a text substring. */
+  match: string
+  with?: string
+  now?: Date
+}
+
+/**
+ * Close a thread, recording the answer / verdict in `closed_with`.
+ * A mapped waiting_for thread (`w<index>`) closes by removing the
+ * underlying waiting_for entry — the record of what was waited on
+ * moves into `threads:` as a closed waiting thread so nothing is
+ * lost.
+ */
+export async function closeThread(
+  repoRoot: string,
+  opts: CloseThreadOpts,
+): Promise<{ path: string; thread: Record<string, unknown> }> {
+  const filePath = await locateProject(repoRoot, opts.project, opts.pursuit)
+  const now = opts.now ?? new Date()
+  let closed: Record<string, unknown> = {}
+  await mutateFrontmatter(filePath, (data, body) => {
+    const threads = Array.isArray(data['threads'])
+      ? ([...(data['threads'] as unknown[])] as Array<Record<string, unknown>>)
+      : []
+    const waiting = Array.isArray(data['waiting_for'])
+      ? ([...(data['waiting_for'] as unknown[])] as Array<Record<string, unknown>>)
+      : []
+    const lower = opts.match.toLowerCase()
+    const stamp = {
+      status: 'closed',
+      closed_at: isoTimestamp(now),
+      ...(opts.with ? { closed_with: opts.with } : {}),
+    }
+    // 1. mapped waiting_for by id
+    const wm = /^w(\d+)$/.exec(opts.match)
+    if (wm) {
+      const idx = Number(wm[1])
+      const w = waiting[idx]
+      if (!w) throw new Error(`no waiting_for entry at index ${idx}`)
+      waiting.splice(idx, 1)
+      closed = migrateWaiting(w, opts.match, stamp)
+      threads.push(closed)
+      data['waiting_for'] = waiting
+      data['threads'] = threads
+      return { data, body }
+    }
+    // 2. explicit thread by id, then by substring
+    let i = threads.findIndex(
+      (t) => String(t['id'] ?? '') === opts.match && t['status'] !== 'closed',
+    )
+    if (i < 0) {
+      i = threads.findIndex(
+        (t) =>
+          t['status'] !== 'closed' &&
+          String(t['text'] ?? '').toLowerCase().includes(lower),
+      )
+    }
+    if (i >= 0) {
+      closed = { ...threads[i], ...stamp }
+      threads[i] = closed
+      data['threads'] = threads
+      return { data, body }
+    }
+    // 3. mapped waiting_for by substring
+    const wi = waiting.findIndex((w) => {
+      const person = String(w['person'] ?? '').toLowerCase()
+      const what = String(w['what'] ?? '').toLowerCase()
+      return person.includes(lower) || what.includes(lower)
+    })
+    if (wi >= 0) {
+      const w = waiting[wi]!
+      waiting.splice(wi, 1)
+      closed = migrateWaiting(w, `w${wi}`, stamp)
+      threads.push(closed)
+      data['waiting_for'] = waiting
+      data['threads'] = threads
+      return { data, body }
+    }
+    throw new Error(`no open thread matched "${opts.match}"`)
+  })
+  return { path: path.relative(repoRoot, filePath), thread: closed }
+}
+
+function migrateWaiting(
+  w: Record<string, unknown>,
+  id: string,
+  stamp: Record<string, unknown>,
+): Record<string, unknown> {
+  return {
+    id,
+    kind: 'waiting',
+    text: `${String(w['person'] ?? '')} re: ${String(w['what'] ?? '')}`,
+    opened: String(w['expected'] ?? ''),
+    by: 'human',
+    person: w['person'],
+    expected: w['expected'],
+    ...stamp,
+  }
+}
+
 export type FlagWaitingForOpts = {
   pursuit?: string
   project: string
