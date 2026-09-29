@@ -83,6 +83,7 @@ Doc lanes, read in order based on what you need:
 - `wiki/research/research-foundations.md` — research foundations mapped to design patterns. The full literature behind the design.
 - `wiki/research/teaching-tips.md` — the curated content library that powers in-product tip surfaces.
 - `docs/marimo-console-design.md` — forward-looking design notes for Cadence Console (Marimo notebook view). Not yet shipped.
+- `docs/orchestrated-work-design.md` — proposal for scaling Cadence to unattended agent runs: Runs, Threads, Artifacts, the `/brief` → `/debrief` loop, and the widened activity stream. Not yet shipped.
 
 Operational truth lives in the plugin (`cadence-plugin/cadence-runtime.md`, `cadence-reference.md`, `workflows/verb-contracts.md`, `skills/<verb>/SKILL.md`).
 
